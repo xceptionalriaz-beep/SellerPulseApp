@@ -9,7 +9,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import {
     ScanBarcode, PlusCircle, CheckSquare, Square, Trash2,
-    ArrowLeft, ArrowRight, RefreshCcw,
+    ArrowRight, RefreshCcw,
 } from 'lucide-react'
 import {
     BarcodeQueueItem,
@@ -331,31 +331,18 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
 
     return (
         <div
-            className="min-h-screen"
             style={{ backgroundColor: C.bg, fontFamily: 'DM Sans, sans-serif' }}
         >
-            {/* ── Header ────────────────────────────────────────────────────── */}
-            <div
-                className="sticky top-0 z-30 border-b px-4 sm:px-6 py-3 flex items-center gap-3"
-                style={{ backgroundColor: C.surface, borderColor: C.border }}
-            >
-                {onBack && (
-                    <button
-                        onClick={onBack}
-                        className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:opacity-70"
-                        style={{ backgroundColor: C.bg }}
-                        title="Back"
-                    >
-                        <ArrowLeft size={16} style={{ color: C.text }} />
-                    </button>
-                )}
+            {/* ── Body ──────────────────────────────────────────────────────── */}
+            <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5 space-y-4">
 
-                <div className="flex items-center gap-2 flex-1 min-w-0">
+                {/* ── Title ─────────────────────────────────────────────── */}
+                <div className="flex items-center gap-3 pt-2 pr-8">
                     <div
-                        className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                        className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
                         style={{ backgroundColor: C.primary }}
                     >
-                        <ScanBarcode size={16} color={C.accent} />
+                        <ScanBarcode size={17} color={C.accent} />
                     </div>
                     <div>
                         <h1
@@ -368,32 +355,27 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
                             Scan or type barcodes — AI builds eBay listings
                         </p>
                     </div>
+                    {/* Stats chips (inline, only when queue has items) */}
+                    {!isEmpty && (
+                        <div className="hidden sm:flex items-center gap-2 ml-auto">
+                            {stats.loading > 0 && (
+                                <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: C.primaryLight, color: C.primary }}>
+                                    {stats.loading} looking up
+                                </span>
+                            )}
+                            {stats.found > 0 && (
+                                <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: C.successLight, color: C.success }}>
+                                    {stats.found} found
+                                </span>
+                            )}
+                            {stats.failed > 0 && (
+                                <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: '#f3f4f6', color: C.muted }}>
+                                    {stats.failed} not found
+                                </span>
+                            )}
+                        </div>
+                    )}
                 </div>
-
-                {/* Stats chips */}
-                {!isEmpty && (
-                    <div className="hidden sm:flex items-center gap-2">
-                        {stats.loading > 0 && (
-                            <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: C.primaryLight, color: C.primary }}>
-                                {stats.loading} looking up
-                            </span>
-                        )}
-                        {stats.found > 0 && (
-                            <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: C.successLight, color: C.success }}>
-                                {stats.found} found
-                            </span>
-                        )}
-                        {stats.failed > 0 && (
-                            <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: '#f3f4f6', color: C.muted }}>
-                                {stats.failed} not found
-                            </span>
-                        )}
-                    </div>
-                )}
-            </div>
-
-            {/* ── Body ──────────────────────────────────────────────────────── */}
-            <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5 space-y-4">
 
                 {/* ── Restore session banner ───────────────────────────── */}
                 {restoreSession && (

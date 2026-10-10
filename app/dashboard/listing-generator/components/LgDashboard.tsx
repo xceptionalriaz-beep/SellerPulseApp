@@ -13,7 +13,6 @@
 // ─────────────────────────────────────────────────────────────
 
 import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import {
     Search, Upload, ChevronDown, LayoutList, LayoutGrid,
@@ -30,6 +29,7 @@ import ImageImport from '@/app/dashboard/listing-generator/components/ai-import/
 import ImageImportProcessing from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImportProcessing'
 import ImageImportPreview from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImportPreview'
 import ImageImportFailed from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImportFailed'
+import BarcodeImport from '@/app/dashboard/listing-generator/components/ai-import/barcode-import/BarcodeImport'
 import type { PlatformDetection, UrlImportResult, ImportedListingData } from '@/app/dashboard/listing-generator/types/url-import.types'
 import type { ImageImportData } from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImport'
 import type { ImageImportResult } from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImportProcessing'
@@ -237,7 +237,6 @@ function detectGtinType(value: string): { label: string; color: string; bg: stri
 // ── Main Dashboard Component ──────────────────────────────────
 export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraft, onBulkUpload: onBulkUploadProp }: Props) {
     const supabase = createClient()
-    const router = useRouter()
 
     // ── State ───────────────────────────────────────────────────
     const [listings, setListings] = useState<Listing[]>([])
@@ -276,6 +275,8 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
     const [imageVeroResult, setImageVeroResult] = useState<ImageImportResult | null>(null)
     const [showImageVeroWarning, setShowImageVeroWarning] = useState(false)
     const [imageFailedCode, setImageFailedCode] = useState<string | undefined>(undefined)
+    // Barcode import modal
+    const [showBarcodeImport, setShowBarcodeImport] = useState(false)
 
     // Listen for top bar button events
     useEffect(() => {
@@ -299,13 +300,14 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
             setImageVeroResult(null)
             setShowImageVeroWarning(false)
             setImageFailedCode(undefined)
+            setShowBarcodeImport(false)
 
             if (mode === 'ai_url') {
                 setShowUrlImport(true)
             } else if (mode === 'ai_image') {
                 setShowImageImport(true)
             } else if (mode === 'ai_barcode') {
-                router.push('/dashboard/listing-generator/barcode-import')
+                setShowBarcodeImport(true)
             } else {
                 onNewListingProp()
             }
@@ -1181,7 +1183,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                         setFailedErrorCode(undefined)
                         setImportUrl('')
                         setImportPlatform(null)
-                        router.push('/dashboard/listing-generator/barcode-import')
+                        setShowBarcodeImport(true)
                     }}
                     onCancel={() => {
                         setShowFailed(false)
@@ -1234,7 +1236,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                     }}
                     onSwitchToBarcode={() => {
                         setShowImageImport(false)
-                        router.push('/dashboard/listing-generator/barcode-import')
+                        setShowBarcodeImport(true)
                     }}
                 />
             )}
@@ -1330,6 +1332,36 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                 />
             )}
 
+            {/* ── Barcode Import Modal ───────────────────────────────── */}
+            {showBarcodeImport && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                    style={{ background: 'rgba(26,21,35,0.55)', backdropFilter: 'blur(4px)' }}
+                    onClick={e => { if (e.target === e.currentTarget) setShowBarcodeImport(false) }}
+                >
+                    <div
+                        className="relative w-full rounded-2xl overflow-y-auto"
+                        style={{
+                            maxWidth: 680,
+                            maxHeight: '92vh',
+                            backgroundColor: '#f8f7ff',
+                            boxShadow: '0 24px 80px rgba(117,48,251,0.22)',
+                        }}
+                    >
+                        {/* Close button */}
+                        <button
+                            onClick={() => setShowBarcodeImport(false)}
+                            className="absolute top-3 right-3 z-10 w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:opacity-70"
+                            style={{ backgroundColor: '#ede9fe' }}
+                            title="Close"
+                        >
+                            <X size={15} style={{ color: '#7530fb' }} />
+                        </button>
+                        <BarcodeImport onBack={() => setShowBarcodeImport(false)} />
+                    </div>
+                </div>
+            )}
+
             {/* ── Image Import Screen 4: Failed ─────────────────────── */}
             {showImageFailed && (
                 <ImageImportFailed
@@ -1350,7 +1382,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                         setShowImageFailed(false)
                         setImageFailedCode(undefined)
                         setImageImportData(null)
-                        window.dispatchEvent(new CustomEvent('lg:newListing', { detail: { mode: 'ai_barcode' } }))
+                        setShowBarcodeImport(true)
                     }}
                     onCancel={() => {
                         setShowImageFailed(false)
