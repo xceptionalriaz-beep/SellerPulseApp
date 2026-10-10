@@ -613,6 +613,9 @@ function normalizeApifyResponse(
 }
 
 // ── AI listing transformation ──────────────────────────────────────────────────
+// Gemini and Anthropic run IN PARALLEL with a 12s hard timeout each.
+// This ensures the total AI step never exceeds ~12 seconds regardless of
+// which providers are slow or unresponsive.
 async function transformWithAI(
     raw: RawProductData,
     platform: ImportPlatform,
@@ -655,10 +658,20 @@ Return ONLY valid JSON — no explanation, no markdown fences:
   "item_specifics": { "Brand": "...", "Condition": "New" }
 }`
 
-    // ── Try Gemini first (connected) ───────────────────────────────────────────
-    if (geminiKey) {
+    // Helper: parse JSON from AI response text
+    function parseAiJson(text: string): AiTransformResult | null {
         try {
-            const res = await fetch(
+            const clean = text.replace(/^```json?\n?/i, '').replace(/\n?```$/i, '').trim()
+            return JSON.parse(clean) as AiTransformResult
+        } catch { return null }
+    }
+
+    // ── Try Gemini ─────────────────────────────────────────────────────────────
+    async function tryGemini(): Promise<AiTransformResult | null> {
+        if (!geminiKey) return null
+        try {
+            const timeout = new Promise<null>(resolve => setTimeout(() => resolve(null), 12_000))
+            const req = fetch(
                 `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
                 {
                     method: 'POST',
@@ -667,28 +680,28 @@ Return ONLY valid JSON — no explanation, no markdown fences:
                         contents: [{ parts: [{ text: prompt }] }],
                         generationConfig: { maxOutputTokens: 2000, temperature: 0.3 },
                     }),
-                    signal: AbortSignal.timeout(20_000),
                 }
-            )
-            if (res.ok) {
-                const data = await res.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> }
-                const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? ''
-                if (text) {
-                    const clean = text.replace(/^```json?\n?/i, '').replace(/\n?```$/i, '').trim()
-                    const parsed = JSON.parse(clean) as AiTransformResult
-                    await trackUsage('gemini')
-                    return parsed
-                }
-            }
+            ).catch(() => null)
+            const res = await Promise.race([req, timeout])
+            if (!res || !res.ok) return null
+            const data = await res.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> }
+            const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? ''
+            if (!text) return null
+            const parsed = parseAiJson(text)
+            if (parsed) await trackUsage('gemini')
+            return parsed
         } catch (err) {
             console.warn('[url-import] Gemini AI transform failed:', err)
+            return null
         }
     }
 
-    // ── Fallback to Anthropic ──────────────────────────────────────────────────
-    if (anthropicKey) {
+    // ── Try Anthropic ──────────────────────────────────────────────────────────
+    async function tryAnthropic(): Promise<AiTransformResult | null> {
+        if (!anthropicKey) return null
         try {
-            const res = await fetch('https://api.anthropic.com/v1/messages', {
+            const timeout = new Promise<null>(resolve => setTimeout(() => resolve(null), 12_000))
+            const req = fetch('https://api.anthropic.com/v1/messages', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -700,24 +713,24 @@ Return ONLY valid JSON — no explanation, no markdown fences:
                     max_tokens: 2000,
                     messages: [{ role: 'user', content: prompt }],
                 }),
-                signal: AbortSignal.timeout(20_000),
-            })
-            if (res.ok) {
-                const data = await res.json() as { content?: Array<{ text?: string }> }
-                const text = data.content?.[0]?.text?.trim() ?? ''
-                if (text) {
-                    const clean = text.replace(/^```json?\n?/i, '').replace(/\n?```$/i, '').trim()
-                    const parsed = JSON.parse(clean) as AiTransformResult
-                    await trackUsage('anthropic')
-                    return parsed
-                }
-            }
+            }).catch(() => null)
+            const res = await Promise.race([req, timeout])
+            if (!res || !res.ok) return null
+            const data = await res.json() as { content?: Array<{ text?: string }> }
+            const text = data.content?.[0]?.text?.trim() ?? ''
+            if (!text) return null
+            const parsed = parseAiJson(text)
+            if (parsed) await trackUsage('anthropic')
+            return parsed
         } catch (err) {
             console.warn('[url-import] Anthropic AI transform failed:', err)
+            return null
         }
     }
 
-    return null
+    // ── Run both in parallel — take whichever responds first ───────────────────
+    const [geminiResult, anthropicResult] = await Promise.all([tryGemini(), tryAnthropic()])
+    return geminiResult ?? anthropicResult
 }
 
 // ── Margin calculation ─────────────────────────────────────────────────────────

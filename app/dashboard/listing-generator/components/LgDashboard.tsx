@@ -6,7 +6,7 @@
 //   ✓ 4 KPI metric cards (Active, Drafts, VeRO Alerts, Health Score)
 //   ✓ Search + filter toolbar
 //   ✓ Status tabs (All / Active / Drafts / Ended / Scheduled)
-//   ✓ Bulk action bar when rows selectedd
+//   ✓ Bulk action bar when rows selected
 //   ✓ Full data table with all listing details
 //   ✓ Pagination
 //   ✓ Mobile card view
@@ -1083,7 +1083,13 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                     result={importResult}
                     onConfirm={(_listing: ImportedListingData) => {
                         setShowPreview(false)
-                        onNewListingProp()
+                        // Open the saved draft in the wizard if we have its ID,
+                        // otherwise fall back to a new blank listing
+                        if (importResult.draft_id) {
+                            onEditDraft(importResult.draft_id)
+                        } else {
+                            onNewListingProp()
+                        }
                     }}
                     onBack={() => {
                         setShowPreview(false)
