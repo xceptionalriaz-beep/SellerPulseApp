@@ -13,6 +13,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import {
     Search, Upload, ChevronDown, LayoutList, LayoutGrid,
@@ -236,6 +237,7 @@ function detectGtinType(value: string): { label: string; color: string; bg: stri
 // ── Main Dashboard Component ──────────────────────────────────
 export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraft, onBulkUpload: onBulkUploadProp }: Props) {
     const supabase = createClient()
+    const router = useRouter()
 
     // ── State ───────────────────────────────────────────────────
     const [listings, setListings] = useState<Listing[]>([])
@@ -302,6 +304,8 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                 setShowUrlImport(true)
             } else if (mode === 'ai_image') {
                 setShowImageImport(true)
+            } else if (mode === 'ai_barcode') {
+                router.push('/dashboard/listing-generator/barcode-import')
             } else {
                 onNewListingProp()
             }
@@ -1177,8 +1181,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                         setFailedErrorCode(undefined)
                         setImportUrl('')
                         setImportPlatform(null)
-                        // TODO: trigger barcode mode when built
-                        onNewListingProp()
+                        router.push('/dashboard/listing-generator/barcode-import')
                     }}
                     onCancel={() => {
                         setShowFailed(false)
