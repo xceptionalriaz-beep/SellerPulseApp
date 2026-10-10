@@ -18,13 +18,18 @@ import { useSegments }    from '../hooks/useSegments'
 import { useColumnConfig } from '../hooks/useColumnConfig'
 import { SegmentSidebar } from './segments/SegmentSidebar'
 import { ColumnPanel }    from './columns/ColumnPanel'
+import { ColumnFilterPopover } from './filters/ColumnFilterPopover'
+import { FilterPanel }    from './filters/FilterPanel'
 import { applySegment }   from '../lib/segment-filter'
+import { applyColumnFilters } from '../lib/apply-column-filters'
+import type { ActiveFilter } from '../data/filter-definitions'
+import { FILTER_FIELD_DEFS } from '../data/filter-definitions'
 import {
     Search, Upload, ChevronDown, LayoutList, LayoutGrid,
     CheckCircle2, AlertTriangle, Pencil, ShieldCheck,
     Download, Trash2, ChevronLeft, ChevronRight,
     X, Package, TrendingUp, Circle, Zap, Copy, Check,
-    Columns,
+    Columns, SlidersHorizontal, Filter,
 } from 'lucide-react'
 import UrlImport from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImport'
 import UrlImportProcessing from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImportProcessing'
@@ -315,6 +320,30 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
 
     const [showColumnPanel, setShowColumnPanel] = useState(false)
 
+    // ── Column filters ──────────────────────────────────────────
+    const [columnFilters,   setColumnFilters]   = useState<ActiveFilter[]>([])
+    const [showFilterPanel, setShowFilterPanel] = useState(false)
+    const [openColFilter,   setOpenColFilter]   = useState<string | null>(null) // colId
+
+    function upsertFilter(partial: Omit<ActiveFilter, 'id'>) {
+        setColumnFilters(prev => {
+            const existing = prev.find(f => f.colId === partial.colId)
+            if (existing) {
+                return prev.map(f => f.colId === partial.colId ? { ...partial, id: f.id } : f)
+            }
+            return [...prev, { ...partial, id: `${partial.colId}_${Date.now()}` }]
+        })
+        setPage(1)
+    }
+
+    function clearFilter(colId: string) {
+        setColumnFilters(prev => prev.filter(f => f.colId !== colId))
+    }
+
+    function clearAllFilters() {
+        setColumnFilters([])
+    }
+
     // Listen for top bar button events
     useEffect(() => {
         function onNewListing(e: Event) {
@@ -471,9 +500,12 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
         return matchTab && matchSearch
     })
 
+    // 3. Apply column-level filters
+    const colFiltered = applyColumnFilters(filtered, columnFilters)
+
     const PER_PAGE = rowsPerPage
-    const totalPages = Math.ceil(filtered.length / PER_PAGE)
-    const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE)
+    const totalPages = Math.ceil(colFiltered.length / PER_PAGE)
+    const paginated = colFiltered.slice((page - 1) * PER_PAGE, page * PER_PAGE)
 
     // ── Selection ───────────────────────────────────────────────
     function toggleSelect(id: string) {
@@ -702,15 +734,30 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                             )}
                         </div>
 
-                        {/* Filter dropdowns */}
-                        {['Category', 'Health', 'Sort'].map(f => (
-                            <button key={f}
-                                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[12px] whitespace-nowrap"
-                                style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, color: C.body, fontFamily: 'DM Sans, sans-serif' }}>
-                                {f}
-                                <ChevronDown size={11} style={{ color: C.muted }} />
-                            </button>
-                        ))}
+                        {/* Filter button */}
+                        <button
+                            onClick={() => setShowFilterPanel(v => !v)}
+                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[12px] font-semibold transition-all"
+                            style={{
+                                backgroundColor: showFilterPanel || columnFilters.length > 0 ? C.primary : C.surface,
+                                border: `1px solid ${showFilterPanel || columnFilters.length > 0 ? C.primary : C.border}`,
+                                color: showFilterPanel || columnFilters.length > 0 ? '#fff' : C.body,
+                                fontFamily: 'DM Sans, sans-serif',
+                            }}
+                            title="Filter listings"
+                        >
+                            <Filter size={13} />
+                            Filter
+                            {columnFilters.length > 0 && (
+                                <span style={{
+                                    minWidth: 16, height: 16, borderRadius: 8, padding: '0 4px',
+                                    background: showFilterPanel ? 'rgba(255,255,255,0.3)' : '#fff',
+                                    color: showFilterPanel ? '#fff' : C.primary,
+                                    fontSize: 10, fontWeight: 800,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                }}>{columnFilters.length}</span>
+                            )}
+                        </button>
 
                         {/* View toggle */}
                         <div className="flex items-center gap-1">
@@ -773,15 +820,52 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                     <th style={{ width: 40, color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }} className="px-0 py-2 text-left text-[12px] font-bold uppercase tracking-widest"></th>
 
                                     {/* Dynamic columns */}
-                                    {visibleColumns.map(col => (
-                                        <th
-                                            key={col.id}
-                                            style={{ width: col.width, color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }}
-                                            className="px-3 py-2 text-left text-[12px] font-bold uppercase tracking-widest"
-                                        >
-                                            {col.label}
-                                        </th>
-                                    ))}
+                                    {visibleColumns.map(col => {
+                                        const hasFilter = columnFilters.some(f => f.colId === col.id)
+                                        const hasDef    = !!FILTER_FIELD_DEFS[col.id]
+                                        return (
+                                            <th
+                                                key={col.id}
+                                                style={{ width: col.width, color: '#6b7280', fontFamily: 'DM Sans, sans-serif', position: 'relative' }}
+                                                className="px-3 py-2 text-left text-[12px] font-bold uppercase tracking-widest"
+                                            >
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                    <span>{col.label}</span>
+                                                    {hasDef && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={e => { e.stopPropagation(); setOpenColFilter(openColFilter === col.id ? null : col.id) }}
+                                                            title={`Filter by ${col.label}`}
+                                                            style={{
+                                                                width:        16,
+                                                                height:       16,
+                                                                borderRadius: 4,
+                                                                border:       'none',
+                                                                background:   hasFilter ? C.primary : 'transparent',
+                                                                color:        hasFilter ? '#fff'    : C.muted,
+                                                                cursor:       'pointer',
+                                                                display:      'flex',
+                                                                alignItems:   'center',
+                                                                justifyContent: 'center',
+                                                                flexShrink:   0,
+                                                            }}
+                                                        >
+                                                            <Filter size={9} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                {openColFilter === col.id && (
+                                                    <ColumnFilterPopover
+                                                        colId={col.id}
+                                                        activeFilter={columnFilters.find(f => f.colId === col.id) ?? null}
+                                                        onApply={upsertFilter}
+                                                        onClear={() => clearFilter(col.id)}
+                                                        onClose={() => setOpenColFilter(null)}
+                                                    />
+                                                )}
+                                            </th>
+                                        )
+                                    })}
 
                                     {/* Fixed: actions */}
                                     <th style={{ width: 140, color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }} className="px-3 py-2 text-left text-[12px] font-bold uppercase tracking-widest"></th>
@@ -802,15 +886,29 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                                 <p className="text-[13px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
                                                     {debouncedSearch
                                                         ? `No results for "${debouncedSearch}" — try a different search or scope`
-                                                        : 'No listings in this status'}
+                                                        : columnFilters.length > 0
+                                                            ? 'No listings match the active filters'
+                                                            : 'No listings in this status'}
                                                 </p>
-                                                {debouncedSearch && (
-                                                    <button
-                                                        onClick={() => { setSearch(''); setDebouncedSearch('') }}
-                                                        className="px-3 py-1.5 rounded-xl text-[12px] font-semibold transition-all hover:opacity-80"
-                                                        style={{ backgroundColor: C.primaryLight, color: C.primary, fontFamily: 'DM Sans, sans-serif' }}>
-                                                        Clear Search
-                                                    </button>
+                                                {(debouncedSearch || columnFilters.length > 0) && (
+                                                    <div className="flex gap-2">
+                                                        {debouncedSearch && (
+                                                            <button
+                                                                onClick={() => { setSearch(''); setDebouncedSearch('') }}
+                                                                className="px-3 py-1.5 rounded-xl text-[12px] font-semibold transition-all hover:opacity-80"
+                                                                style={{ backgroundColor: C.primaryLight, color: C.primary, fontFamily: 'DM Sans, sans-serif' }}>
+                                                                Clear Search
+                                                            </button>
+                                                        )}
+                                                        {columnFilters.length > 0 && (
+                                                            <button
+                                                                onClick={clearAllFilters}
+                                                                className="px-3 py-1.5 rounded-xl text-[12px] font-semibold transition-all hover:opacity-80"
+                                                                style={{ backgroundColor: C.dangerBg, color: C.danger, fontFamily: 'DM Sans, sans-serif' }}>
+                                                                Clear Filters
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 )}
                                             </div>
                                         </td>
@@ -1597,6 +1695,16 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                 onToggle={toggleColumn}
                 onMove={moveColumn}
                 onReset={resetColumns}
+            />
+
+            {/* ── Filter Panel ───────────────────────────────────────── */}
+            <FilterPanel
+                open={showFilterPanel}
+                onClose={() => setShowFilterPanel(false)}
+                activeFilters={columnFilters}
+                onApply={upsertFilter}
+                onClear={clearFilter}
+                onClearAll={clearAllFilters}
             />
 
             {/* ── Image Import Screen 4: Failed ─────────────────────── */}
