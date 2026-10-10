@@ -62,6 +62,7 @@ export { dividerVariants, dividerBlockVariants, getDividerVariant, DIVIDER_THUMB
 export { numberedListVariants, numberedListBlockVariants, getNumberedListVariant, NUMBERED_LIST_THUMBNAILS, NUMBERED_LIST_STYLES } from './numbered_list.variants'
 export { quoteBlockVariants, getQuoteBlockVariant, quoteBlockThumbnails } from './quote_block.variants'
 export { warningBoxVariants, getWarningBoxVariant, warningBoxThumbnails, warningVariants, getWarningVariant } from './warning_box.variants'
+export { dataTableVariants, getDataTableVariant, dataTableThumbnails, DATA_TABLE_THUMBNAILS, tableVariants, getTableVariant } from './data_table.variants'
 
 
 // Imports for registry
