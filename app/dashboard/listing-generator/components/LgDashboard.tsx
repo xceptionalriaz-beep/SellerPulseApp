@@ -511,7 +511,23 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
     }
 
     return (
-        <div className="flex flex-col h-full" style={{ backgroundColor: C.bg }}>
+        <div className="flex h-full" style={{ backgroundColor: C.bg }}>
+
+            {/* SEGMENT SIDEBAR — full height, left edge */}
+            <SegmentSidebar
+                segments={segments}
+                customSegments={customSegments}
+                activeSegmentId={activeSegmentId}
+                listings={listings}
+                loading={segLoading}
+                onSelect={id => { setActiveSegmentId(id); setPage(1); clearSelection() }}
+                onCreateSegment={async (payload) => { await createSegment(payload) }}
+                onUpdateSegment={async (id, payload) => { await updateSegment(id, payload) }}
+                onDeleteSegment={async (id) => { await deleteSegment(id) }}
+            />
+
+            {/* MAIN COLUMN — metric cards + toolbar + table */}
+            <div className="flex-1 flex flex-col h-full min-w-0">
 
             {/* METRIC CARDS - fixed */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 px-6 pt-4 shrink-0">
@@ -600,22 +616,6 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                 </div>
 
             </div>
-
-            {/* CONTENT AREA — sidebar + toolbar + table */}
-            <div className="flex-1 flex min-h-0">
-
-            {/* SEGMENT SIDEBAR */}
-            <SegmentSidebar
-                segments={segments}
-                customSegments={customSegments}
-                activeSegmentId={activeSegmentId}
-                listings={listings}
-                loading={segLoading}
-                onSelect={id => { setActiveSegmentId(id); setPage(1); clearSelection() }}
-                onCreateSegment={async (payload) => { await createSegment(payload) }}
-                onUpdateSegment={async (id, payload) => { await updateSegment(id, payload) }}
-                onDeleteSegment={async (id) => { await deleteSegment(id) }}
-            />
 
             {/* TOOLBAR + TABLE — flex col, only tbody scrolls */}
             <div className="flex-1 flex flex-col min-h-0 px-6 pb-6 pt-4">
@@ -1193,7 +1193,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                 </div>
 
             </div>{/* end toolbar+table */}
-            </div>{/* end content area */}
+            </div>{/* end main column */}
 
             {/* ── Screen 1: URL paste modal ────────────────────────── */}
             {showUrlImport && (
