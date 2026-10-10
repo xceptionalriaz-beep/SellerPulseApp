@@ -1,28 +1,22 @@
 'use client'
-// app/dashboard/listing-generator/components/ai-import/UrlImportPreview.tsx
+// app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImportPreview.tsx
 // ─────────────────────────────────────────────────────────────
 // Riazify — Listing Studio
-// Screen 3 of the URL → Listing import flow.
-// Full-screen 2-column preview:
-//   Left  → product image gallery
-//   Right → all extracted listing data, key fields editable
-// User reviews, adjusts title/price, then hits "Create Listing"
+// Screen 3 of the Image → Listing import flow.
+// Shows AI-extracted listing data for review before creating.
+// User can edit title / price, then hits "Create Listing".
 // ─────────────────────────────────────────────────────────────
 
 import { useState, type ReactNode } from 'react'
 import {
-    X, ChevronLeft, ChevronRight, ArrowLeft,
+    X, ArrowLeft,
     CheckCircle2, AlertTriangle, ShieldCheck,
-    Tag, DollarSign, Package, Zap, ExternalLink,
-    Sparkles, ChevronDown, ChevronUp, Edit3,
+    Package, Zap, Info,
+    Sparkles, ChevronDown, ChevronUp, Camera,
 } from 'lucide-react'
-import {
-    ImportedListingData,
-    ImportedImage,
-    UrlImportResult,
-} from '@/app/dashboard/listing-generator/types/url-import.types'
+import type { ImageImportResult } from './ImageImportProcessing'
 
-// ── Design tokens — matches LgDashboard exactly ───────────────
+// ── Design tokens ─────────────────────────────────────────────
 const C = {
     bg: '#f8f7ff',
     surface: '#ffffff',
@@ -42,27 +36,9 @@ const C = {
     warningBg: '#fef3c7',
     danger: '#ef4444',
     dangerBg: '#fee2e2',
-    info: '#0ea5e9',
-    infoBg: '#e0f2fe',
 }
 
-// ── Platform color map ────────────────────────────────────────
-const PLATFORM_COLORS: Record<string, string> = {
-    amazon: '#FF9900',
-    aliexpress: '#E62E04',
-    argos: '#CC0000',
-    wayfair: '#7B2FBE',
-    bq: '#FF6600',
-    ebay: '#E53238',
-    banggood: '#E8321A',
-    alibaba: '#FF6A00',
-    temu: '#FF4D00',
-    dhgate: '#C41E3A',
-    walmart: '#0071CE',
-    costco: '#005DAA',
-}
-
-// ── Cassini Score Ring ────────────────────────────────────────
+// ── Cassini Score chip ─────────────────────────────────────────
 function CassiniScore({ score }: { score: number }) {
     const color = score >= 80 ? C.success : score >= 60 ? C.warning : C.danger
     const bg = score >= 80 ? C.successBg : score >= 60 ? C.warningBg : C.dangerBg
@@ -88,7 +64,7 @@ function CassiniScore({ score }: { score: number }) {
     )
 }
 
-// ── VeRO Badge ────────────────────────────────────────────────
+// ── VeRO Badge ─────────────────────────────────────────────────
 function VeroBadge({ status, reason }: { status: string; reason: string | null }) {
     if (status === 'clear') return (
         <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ backgroundColor: C.successBg }}>
@@ -116,8 +92,16 @@ function VeroBadge({ status, reason }: { status: string; reason: string | null }
     )
 }
 
-// ── Image Gallery (left column) ───────────────────────────────
-function ImageGallery({ images, title }: { images: ImportedImage[]; title: string }) {
+// ── Image Gallery (left column) ────────────────────────────────
+// Images from the image-import API are URL strings (or empty if
+// not stored). We handle the empty case gracefully.
+function ImageGallery({
+    images,
+    photoCount,
+}: {
+    images: string[]
+    photoCount?: number
+}) {
     const [active, setActive] = useState(0)
 
     if (!images.length) {
@@ -126,15 +110,18 @@ function ImageGallery({ images, title }: { images: ImportedImage[]; title: strin
                 className="w-full aspect-square rounded-2xl flex flex-col items-center justify-center gap-3"
                 style={{ backgroundColor: C.bg, border: `2px dashed ${C.border}` }}
             >
-                <Package size={40} style={{ color: C.muted }} />
-                <p className="text-[13px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                    Images will load when API is live
+                <Camera size={36} style={{ color: C.muted }} />
+                <p className="text-[13px] text-center px-4" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                    {photoCount
+                        ? `${photoCount} photo${photoCount !== 1 ? 's' : ''} analysed`
+                        : 'Photos analysed by AI'}
+                </p>
+                <p className="text-[11px] text-center px-4" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                    Image preview coming soon
                 </p>
             </div>
         )
     }
-
-    const img = images[active]
 
     return (
         <div className="flex flex-col gap-3">
@@ -143,40 +130,12 @@ function ImageGallery({ images, title }: { images: ImportedImage[]; title: strin
                 className="relative w-full aspect-square rounded-2xl overflow-hidden"
                 style={{ backgroundColor: C.bg, border: `1px solid ${C.border}` }}
             >
-                {img?.supabase_url || img?.source_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                        src={img.supabase_url ?? img.source_url}
-                        alt={title}
-                        className="w-full h-full object-contain"
-                    />
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                        <Package size={48} style={{ color: C.muted }} />
-                    </div>
-                )}
-
-                {/* Prev / Next */}
-                {images.length > 1 && (
-                    <>
-                        <button
-                            onClick={() => setActive(i => Math.max(0, i - 1))}
-                            disabled={active === 0}
-                            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center transition-all disabled:opacity-20"
-                            style={{ backgroundColor: C.surface, boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}
-                        >
-                            <ChevronLeft size={16} style={{ color: C.body }} />
-                        </button>
-                        <button
-                            onClick={() => setActive(i => Math.min(images.length - 1, i + 1))}
-                            disabled={active === images.length - 1}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center transition-all disabled:opacity-20"
-                            style={{ backgroundColor: C.surface, boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}
-                        >
-                            <ChevronRight size={16} style={{ color: C.body }} />
-                        </button>
-                    </>
-                )}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                    src={images[active]}
+                    alt="Product photo"
+                    className="w-full h-full object-contain"
+                />
 
                 {/* Image counter */}
                 {images.length > 1 && (
@@ -192,9 +151,9 @@ function ImageGallery({ images, title }: { images: ImportedImage[]; title: strin
             {/* Thumbnails */}
             {images.length > 1 && (
                 <div className="flex gap-2 flex-wrap">
-                    {images.slice(0, 6).map((img, i) => (
+                    {images.slice(0, 6).map((url, i) => (
                         <button
-                            key={img.id}
+                            key={i}
                             onClick={() => setActive(i)}
                             className="w-14 h-14 rounded-xl overflow-hidden shrink-0 transition-all"
                             style={{
@@ -202,16 +161,8 @@ function ImageGallery({ images, title }: { images: ImportedImage[]; title: strin
                                 backgroundColor: C.bg,
                             }}
                         >
-                            {img.supabase_url || img.source_url ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                    src={img.supabase_url ?? img.source_url}
-                                    alt=""
-                                    className="w-full h-full object-cover"
-                                />
-                            ) : (
-                                <Package size={20} style={{ color: C.muted }} />
-                            )}
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={url} alt="" className="w-full h-full object-cover" />
                         </button>
                     ))}
                 </div>
@@ -220,7 +171,7 @@ function ImageGallery({ images, title }: { images: ImportedImage[]; title: strin
     )
 }
 
-// ── Section label ─────────────────────────────────────────────
+// ── Section label ──────────────────────────────────────────────
 function Label({ children }: { children: ReactNode }) {
     return (
         <p
@@ -232,24 +183,25 @@ function Label({ children }: { children: ReactNode }) {
     )
 }
 
-// ── Divider ───────────────────────────────────────────────────
+// ── Divider ────────────────────────────────────────────────────
 function Divider() {
     return <div className="h-px w-full my-4" style={{ backgroundColor: C.border }} />
 }
 
-// ── Props ─────────────────────────────────────────────────────
+// ── Props ──────────────────────────────────────────────────────
 interface Props {
-    result: UrlImportResult
-    onConfirm: (listing: ImportedListingData) => void
+    result: ImageImportResult
+    photoCount?: number
+    onConfirm: (result: ImageImportResult) => void
     onBack: () => void
     onCancel: () => void
 }
 
-// ── Main Component ────────────────────────────────────────────
-export default function UrlImportPreview({ result, onConfirm, onBack, onCancel }: Props) {
+// ── Main Component ─────────────────────────────────────────────
+export default function ImageImportPreview({ result, photoCount, onConfirm, onBack, onCancel }: Props) {
     const listing = result.listing!
 
-    // Editable fields — user can tweak before creating
+    // Editable fields
     const [title, setTitle] = useState(listing.title_ebay)
     const [price, setPrice] = useState<string>(
         listing.price_suggested != null ? String(listing.price_suggested) : ''
@@ -257,14 +209,8 @@ export default function UrlImportPreview({ result, onConfirm, onBack, onCancel }
     const [showDescription, setShowDescription] = useState(false)
     const [showSpecifics, setShowSpecifics] = useState(false)
 
-    const platformColor = PLATFORM_COLORS[result.platform.logoKey] ?? C.primary
-
-    // Recalculate margin live as price changes
-    const supplierPrice = listing.price_supplier ?? 0
     const currentPrice = parseFloat(price) || 0
-    const ebayFeeEst = currentPrice * 0.1275 + 0.3 // ~12.75% + £0.30 flat
-    const marginLive = currentPrice - supplierPrice - ebayFeeEst
-    const marginPct = currentPrice > 0 ? Math.round((marginLive / currentPrice) * 100) : 0
+    const ebayFeeEst = currentPrice * 0.1275 + 0.3
 
     const titleLen = title.length
     const titleOver = titleLen > 80
@@ -272,35 +218,36 @@ export default function UrlImportPreview({ result, onConfirm, onBack, onCancel }
 
     function handleConfirm() {
         onConfirm({
-            ...listing,
-            title_ebay: title,
-            price_suggested: currentPrice || listing.price_suggested,
-            margin_gbp: parseFloat(marginLive.toFixed(2)),
-            margin_pct: marginPct,
+            ...result,
+            listing: {
+                ...listing,
+                title_ebay: title,
+                price_suggested: currentPrice || listing.price_suggested,
+            },
         })
     }
 
     return (
         <>
             <style>{`
-        @keyframes lgPreviewIn {
+        @keyframes lgImgPreviewIn {
           from { opacity: 0; transform: scale(0.97) translateY(12px); }
           to   { opacity: 1; transform: scale(1)    translateY(0);    }
         }
-        .lg-preview-in { animation: lgPreviewIn 0.3s cubic-bezier(0.4,0,0.2,1) forwards; }
-        .lg-scroll::-webkit-scrollbar { width: 4px; }
-        .lg-scroll::-webkit-scrollbar-track { background: transparent; }
-        .lg-scroll::-webkit-scrollbar-thumb { background: ${C.border}; border-radius: 4px; }
+        .lg-img-preview-in { animation: lgImgPreviewIn 0.3s cubic-bezier(0.4,0,0.2,1) forwards; }
+        .lg-img-scroll::-webkit-scrollbar { width: 4px; }
+        .lg-img-scroll::-webkit-scrollbar-track { background: transparent; }
+        .lg-img-scroll::-webkit-scrollbar-thumb { background: ${C.border}; border-radius: 4px; }
       `}</style>
 
-            {/* ── Backdrop ──────────────────────────────────────── */}
+            {/* Backdrop */}
             <div
                 className="fixed inset-0 z-50 flex items-center justify-center p-4"
                 style={{ backgroundColor: 'rgba(30,21,53,0.72)', backdropFilter: 'blur(8px)' }}
             >
-                {/* ── Panel ─────────────────────────────────────── */}
+                {/* Panel */}
                 <div
-                    className="lg-preview-in relative w-full flex flex-col rounded-3xl overflow-hidden"
+                    className="lg-img-preview-in relative w-full flex flex-col rounded-3xl overflow-hidden"
                     style={{
                         maxWidth: '1020px',
                         maxHeight: '92vh',
@@ -308,8 +255,7 @@ export default function UrlImportPreview({ result, onConfirm, onBack, onCancel }
                         boxShadow: '0 32px 80px rgba(117,48,251,0.2), 0 8px 24px rgba(0,0,0,0.14)',
                     }}
                 >
-
-                    {/* ── Top bar ───────────────────────────────────── */}
+                    {/* Top bar */}
                     <div
                         className="flex items-center justify-between px-7 py-4 shrink-0"
                         style={{ borderBottom: `1px solid ${C.border}` }}
@@ -327,16 +273,17 @@ export default function UrlImportPreview({ result, onConfirm, onBack, onCancel }
 
                             <div className="w-px h-5" style={{ backgroundColor: C.border }} />
 
-                            {/* Platform badge */}
+                            {/* Photo AI badge */}
                             <span
-                                className="px-2.5 py-1 rounded-lg text-[12px] font-bold"
+                                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[12px] font-bold"
                                 style={{
-                                    backgroundColor: platformColor + '18',
-                                    color: platformColor,
+                                    backgroundColor: C.primaryLight,
+                                    color: C.primary,
                                     fontFamily: 'DM Sans, sans-serif',
                                 }}
                             >
-                                {result.platform.displayName}
+                                <Camera size={12} />
+                                Photo AI
                             </span>
 
                             <div>
@@ -344,64 +291,67 @@ export default function UrlImportPreview({ result, onConfirm, onBack, onCancel }
                                     className="text-[15px] font-bold"
                                     style={{ color: C.dark, fontFamily: 'Syne, sans-serif' }}
                                 >
-                                    Review your import
+                                    Review your listing
                                 </p>
                                 <p
                                     className="text-[12px]"
                                     style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}
                                 >
-                                    Check the details then create your listing
+                                    Check the AI-extracted details then create your listing
                                 </p>
                             </div>
                         </div>
 
-                        {/* Source link + close */}
-                        <div className="flex items-center gap-3">
-                            <a
-                                href={listing.source_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-1.5 text-[12px] transition-opacity hover:opacity-70"
-                                style={{ color: C.primary, fontFamily: 'DM Sans, sans-serif' }}
-                            >
-                                <ExternalLink size={13} />
-                                Source
-                            </a>
-
-                            <button
-                                onClick={onCancel}
-                                className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-gray-100"
-                                aria-label="Close"
-                            >
-                                <X size={16} style={{ color: C.secondary }} />
-                            </button>
-                        </div>
+                        {/* Close */}
+                        <button
+                            onClick={onCancel}
+                            className="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-gray-100"
+                            aria-label="Close"
+                        >
+                            <X size={16} style={{ color: C.secondary }} />
+                        </button>
                     </div>
 
-                    {/* ── 2-column body ─────────────────────────────── */}
+                    {/* 2-column body */}
                     <div className="flex flex-1 min-h-0">
 
-                        {/* ── LEFT: Image gallery ──────────────────────── */}
+                        {/* LEFT: Image gallery */}
                         <div
-                            className="w-[340px] shrink-0 p-6 overflow-y-auto lg-scroll"
+                            className="w-[300px] shrink-0 p-6 overflow-y-auto lg-img-scroll"
                             style={{ borderRight: `1px solid ${C.border}` }}
                         >
-                            <ImageGallery images={listing.images} title={listing.title_raw} />
+                            <ImageGallery
+                                images={listing.images ?? []}
+                                photoCount={photoCount}
+                            />
 
-                            {/* Source title (for reference) */}
-                            <div className="mt-4">
-                                <Label>Original title</Label>
-                                <p
-                                    className="text-[12px] leading-relaxed"
-                                    style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}
-                                >
-                                    {listing.title_raw}
+                            {/* Photo re-upload reminder — #8 */}
+                            <div
+                                className="mt-4 flex items-start gap-2.5 px-3 py-2.5 rounded-xl"
+                                style={{ backgroundColor: C.primaryLight, border: `1px solid ${C.border}` }}
+                            >
+                                <Info size={13} style={{ color: C.primary, flexShrink: 0, marginTop: 2 }} />
+                                <p className="text-[11px] leading-relaxed" style={{ color: C.primary, fontFamily: 'DM Sans, sans-serif' }}>
+                                    Your uploaded photos aren&apos;t saved to the draft — re-upload them in the wizard&apos;s <strong>Photos step</strong>.
                                 </p>
                             </div>
+
+                            {/* Original title (AI-detected) */}
+                            {listing.title_raw && listing.title_raw !== listing.title_ebay && (
+                                <div className="mt-4">
+                                    <Label>AI-detected product</Label>
+                                    <p
+                                        className="text-[12px] leading-relaxed"
+                                        style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}
+                                    >
+                                        {listing.title_raw}
+                                    </p>
+                                </div>
+                            )}
                         </div>
 
-                        {/* ── RIGHT: Listing data ──────────────────────── */}
-                        <div className="flex-1 min-w-0 p-6 overflow-y-auto lg-scroll">
+                        {/* RIGHT: Listing data */}
+                        <div className="flex-1 min-w-0 p-6 overflow-y-auto lg-img-scroll">
 
                             {/* VeRO status — shown first if not clear */}
                             {listing.vero_status !== 'clear' && (
@@ -410,13 +360,11 @@ export default function UrlImportPreview({ result, onConfirm, onBack, onCancel }
                                 </div>
                             )}
 
-                            {/* ── eBay Title ──────────────────────────────── */}
+                            {/* eBay title */}
                             <div>
                                 <div className="flex items-center justify-between mb-1.5">
                                     <Label>eBay title</Label>
-                                    <div className="flex items-center gap-2">
-                                        <CassiniScore score={listing.cassini_score} />
-                                    </div>
+                                    <CassiniScore score={listing.cassini_score} />
                                 </div>
 
                                 <textarea
@@ -437,7 +385,6 @@ export default function UrlImportPreview({ result, onConfirm, onBack, onCancel }
                                     onBlur={e => (e.target.style.borderColor = titleOver ? C.danger : C.borderInput)}
                                 />
 
-                                {/* Character counter */}
                                 <div className="flex items-center justify-between mt-1">
                                     <p className="text-[11px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
                                         AI-optimised for Cassini SEO
@@ -453,27 +400,12 @@ export default function UrlImportPreview({ result, onConfirm, onBack, onCancel }
 
                             <Divider />
 
-                            {/* ── Pricing ─────────────────────────────────── */}
+                            {/* Pricing */}
                             <div>
-                                <Label>Pricing & Margin</Label>
-                                <div className="grid grid-cols-3 gap-3">
+                                <Label>Suggested price</Label>
+                                <div className="grid grid-cols-2 gap-3">
 
-                                    {/* Supplier cost */}
-                                    <div
-                                        className="p-3 rounded-xl"
-                                        style={{ backgroundColor: C.bg, border: `1px solid ${C.border}` }}
-                                    >
-                                        <p className="text-[11px] font-semibold mb-1" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                                            Supplier cost
-                                        </p>
-                                        <p className="text-[18px] font-bold" style={{ color: C.body, fontFamily: 'Syne, sans-serif' }}>
-                                            {listing.price_supplier != null
-                                                ? `£${listing.price_supplier.toFixed(2)}`
-                                                : '—'}
-                                        </p>
-                                    </div>
-
-                                    {/* Your eBay price — editable */}
+                                    {/* Suggested eBay price — editable */}
                                     <div
                                         className="p-3 rounded-xl"
                                         style={{ border: `1.5px solid ${C.primary}`, backgroundColor: C.primaryLight }}
@@ -499,46 +431,39 @@ export default function UrlImportPreview({ result, onConfirm, onBack, onCancel }
                                         </p>
                                     </div>
 
-                                    {/* Margin */}
+                                    {/* eBay fee estimate */}
                                     <div
                                         className="p-3 rounded-xl"
-                                        style={{
-                                            backgroundColor: marginLive > 0 ? C.successBg : C.dangerBg,
-                                            border: `1px solid ${marginLive > 0 ? '#bbf7d0' : '#fecaca'}`,
-                                        }}
+                                        style={{ backgroundColor: C.bg, border: `1px solid ${C.border}` }}
                                     >
-                                        <p className="text-[11px] font-semibold mb-1" style={{ color: marginLive > 0 ? C.success : C.danger, fontFamily: 'DM Sans, sans-serif' }}>
-                                            Est. profit
+                                        <p className="text-[11px] font-semibold mb-1" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                            Est. eBay fees
                                         </p>
-                                        <p className="text-[18px] font-bold" style={{ color: marginLive > 0 ? C.success : C.danger, fontFamily: 'Syne, sans-serif' }}>
-                                            {marginLive > 0 ? `+£${marginLive.toFixed(2)}` : `−£${Math.abs(marginLive).toFixed(2)}`}
+                                        <p className="text-[18px] font-bold" style={{ color: C.body, fontFamily: 'Syne, sans-serif' }}>
+                                            {currentPrice > 0 ? `£${ebayFeeEst.toFixed(2)}` : '—'}
                                         </p>
-                                        <p className="text-[10px]" style={{ color: marginLive > 0 ? C.success : C.danger, fontFamily: 'DM Sans, sans-serif', opacity: 0.8 }}>
-                                            {marginPct}% after eBay fees
+                                        <p className="text-[10px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                            ~12.75% + £0.30
                                         </p>
                                     </div>
-
                                 </div>
 
                                 <p className="text-[11px] mt-2" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                                    eBay fee estimate: ~12.75% + £0.30 final value fee
+                                    AI suggests this price based on market analysis — adjust before listing
                                 </p>
                             </div>
 
                             <Divider />
 
-                            {/* ── Product details ──────────────────────────── */}
+                            {/* Product details */}
                             <div>
                                 <Label>Product details</Label>
                                 <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-
                                     {[
                                         { label: 'Condition', value: listing.condition },
                                         { label: 'Category', value: listing.category_label },
-                                        { label: 'Brand', value: listing.brand ?? 'Not specified' },
+                                        { label: 'Brand', value: listing.brand ?? 'Not identified' },
                                         { label: 'EAN / Barcode', value: listing.ean ?? 'Not found' },
-                                        { label: 'Seller type', value: listing.seller_type?.replace('_', ' ') },
-                                        { label: 'Source', value: result.platform.displayName },
                                     ].map(({ label, value }) => (
                                         <div key={label}>
                                             <p className="text-[11px] font-semibold" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
@@ -549,11 +474,10 @@ export default function UrlImportPreview({ result, onConfirm, onBack, onCancel }
                                             </p>
                                         </div>
                                     ))}
-
                                 </div>
                             </div>
 
-                            {/* ── VeRO clear (inline) ──────────────────────── */}
+                            {/* VeRO clear (inline) */}
                             {listing.vero_status === 'clear' && (
                                 <>
                                     <Divider />
@@ -563,7 +487,7 @@ export default function UrlImportPreview({ result, onConfirm, onBack, onCancel }
 
                             <Divider />
 
-                            {/* ── Description (collapsible) ────────────────── */}
+                            {/* Description (collapsible) */}
                             <div>
                                 <button
                                     onClick={() => setShowDescription(v => !v)}
@@ -577,7 +501,7 @@ export default function UrlImportPreview({ result, onConfirm, onBack, onCancel }
 
                                 {showDescription && (
                                     <div
-                                        className="mt-2 p-4 rounded-xl text-[13px] leading-relaxed overflow-auto max-h-40 lg-scroll"
+                                        className="mt-2 p-4 rounded-xl text-[13px] leading-relaxed overflow-auto max-h-40 lg-img-scroll"
                                         style={{
                                             backgroundColor: C.bg,
                                             border: `1px solid ${C.border}`,
@@ -589,7 +513,7 @@ export default function UrlImportPreview({ result, onConfirm, onBack, onCancel }
                                 )}
                             </div>
 
-                            {/* ── Item specifics (collapsible) ─────────────── */}
+                            {/* Item specifics (collapsible) */}
                             {Object.keys(listing.item_specifics ?? {}).length > 0 && (
                                 <>
                                     <Divider />
@@ -627,12 +551,11 @@ export default function UrlImportPreview({ result, onConfirm, onBack, onCancel }
                         </div>
                     </div>
 
-                    {/* ── Bottom action bar ─────────────────────────── */}
+                    {/* Bottom action bar */}
                     <div
                         className="flex items-center justify-between gap-4 px-7 py-4 shrink-0"
                         style={{ borderTop: `1px solid ${C.border}`, backgroundColor: C.surface }}
                     >
-                        {/* Left side info */}
                         <div className="flex items-center gap-3">
                             <div
                                 className="flex items-center gap-2 px-3 py-1.5 rounded-xl"
@@ -643,13 +566,11 @@ export default function UrlImportPreview({ result, onConfirm, onBack, onCancel }
                                     AI-ready
                                 </span>
                             </div>
-
                             <p className="text-[12px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
                                 Will pre-fill all 4 wizard steps
                             </p>
                         </div>
 
-                        {/* Right side actions */}
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={onCancel}
