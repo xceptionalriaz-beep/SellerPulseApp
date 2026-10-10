@@ -112,28 +112,100 @@ async function getAuthUserId(): Promise<string | null> {
     } catch { return null }
 }
 
-// ── VeRO brand check ─────────────────────────────────────────────────────────
-async function checkVeRO(brand: string | null): Promise<{
+// ── VeRO brand check (DB exact match → AI fallback) ──────────────────────────
+async function checkVeRO(
+    brand: string | null,
+    titleText?: string | null,
+    anthropicKey?: string | null
+): Promise<{
     status: 'clear' | 'warning' | 'flagged'
     reason: string | null
     vero_brand: string | null
 }> {
     const empty = { status: 'clear' as const, reason: null, vero_brand: null }
     if (!brand || brand.trim().length < 2) return empty
+
+    const brandClean = brand.trim()
+
     try {
+        // ── Layer 1: exact DB match ──────────────────────────────────────────────
         const { data } = await supabaseAdmin
             .from('vero_brands')
             .select('brand_name, risk_level')
-            .ilike('brand_name', brand.trim())
+            .ilike('brand_name', brandClean)
             .limit(1)
             .maybeSingle()
-        if (!data) return empty
-        const level = (data.risk_level ?? 'medium').toLowerCase()
-        return {
-            status: level === 'high' ? 'flagged' : 'warning',
-            reason: `${data.brand_name} is a VeRO rights owner — verify you are authorised to sell this brand on eBay`,
-            vero_brand: data.brand_name,
+
+        if (data) {
+            const level = (data.risk_level ?? 'medium').toLowerCase()
+            return {
+                status: level === 'high' ? 'flagged' : 'warning',
+                reason: `${data.brand_name} is a VeRO rights owner — verify you are authorised to sell this brand on eBay`,
+                vero_brand: data.brand_name,
+            }
         }
+
+        // ── Layer 2: title keyword scan against DB brands ────────────────────────
+        if (titleText && titleText.length > 2) {
+            const { data: allBrands } = await supabaseAdmin
+                .from('vero_brands')
+                .select('brand_name, risk_level')
+                .limit(500)
+
+            if (allBrands) {
+                const titleLower = titleText.toLowerCase()
+                const hit = allBrands.find(b =>
+                    b.brand_name && titleLower.includes(b.brand_name.toLowerCase())
+                )
+                if (hit) {
+                    const level = (hit.risk_level ?? 'medium').toLowerCase()
+                    return {
+                        status: level === 'high' ? 'flagged' : 'warning',
+                        reason: `${hit.brand_name} found in listing title — verify you are authorised to sell this brand on eBay`,
+                        vero_brand: hit.brand_name,
+                    }
+                }
+            }
+        }
+
+        // ── Layer 3: AI fallback for brands not in DB ────────────────────────────
+        if (anthropicKey) {
+            try {
+                const timeout = new Promise<null>(r => setTimeout(() => r(null), 8_000))
+                const req = fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': anthropicKey,
+                        'anthropic-version': '2023-06-01',
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-haiku-4-5',
+                        max_tokens: 80,
+                        messages: [{
+                            role: 'user',
+                            content: `Is the brand "${brandClean}" known to be registered with eBay's VeRO (Verified Rights Owner) programme, or is it a major brand that aggressively enforces IP on eBay UK?\n\nReply ONLY with valid JSON, no explanation:\n{"risk": "high" | "medium" | "low", "reason": "one sentence"}`,
+                        }],
+                    }),
+                }).catch(() => null)
+
+                const res = await Promise.race([req, timeout])
+                if (res && res.ok) {
+                    const d = await res.json() as { content?: Array<{ text?: string }> }
+                    const text = d.content?.[0]?.text?.trim() ?? ''
+                    const parsed = (() => { try { return JSON.parse(text.replace(/^```json?\n?/i, '').replace(/\n?```$/i, '').trim()) } catch { return null } })()
+                    if (parsed && parsed.risk && parsed.risk !== 'low') {
+                        return {
+                            status: parsed.risk === 'high' ? 'flagged' : 'warning',
+                            reason: parsed.reason ?? `${brandClean} may be a VeRO registered brand — verify before listing`,
+                            vero_brand: brandClean,
+                        }
+                    }
+                }
+            } catch { /* non-fatal — fall through to clear */ }
+        }
+
+        return empty
     } catch { return empty }
 }
 
@@ -163,6 +235,7 @@ async function saveDraft(
                 product_name: listing.title_raw,
                 title: listing.title_ebay,
                 title_score: listing.cassini_score,
+                health_score: listing.cassini_score ?? 60,
                 description_html: listing.description_html,
                 category: listing.category_label ?? null,
                 condition: listing.condition,
@@ -533,7 +606,7 @@ export async function POST(req: NextRequest) {
 
     // ── Step 7: VeRO ────────────────────────────────────────────────────────────
     set('vero', 'running')
-    const vero = await checkVeRO(finalBrand)
+    const vero = await checkVeRO(finalBrand, titleEbay, anthropicKey)
     set(
         'vero',
         vero.status === 'flagged' ? 'failed' : 'done',

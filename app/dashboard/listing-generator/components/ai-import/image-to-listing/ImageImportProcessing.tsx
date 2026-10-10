@@ -16,7 +16,6 @@ import {
     Clock,
     Camera,
     SkipForward,
-    ImageIcon,
 } from 'lucide-react'
 import { ProcessingTask, ProcessingTaskStatus } from '@/app/dashboard/listing-generator/types/url-import.types'
 import type { ImageImportData } from './ImageImport'
