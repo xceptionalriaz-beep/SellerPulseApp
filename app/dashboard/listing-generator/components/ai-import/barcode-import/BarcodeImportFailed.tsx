@@ -131,9 +131,7 @@ function altActions(): AltAction[] {
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function BarcodeImportFailed({ item, onClose, onRemove, onRetry }: BarcodeImportFailedProps) {
     const panelRef   = useRef<HTMLDivElement>(null)
-    const [retrying, setRetrying] = [false, () => {}]  // handled by parent
     const info       = errorInfo(item.errorCode)
-    const alts       = altActions()
 
     // Close on Escape
     useEffect(() => {
@@ -239,7 +237,7 @@ export default function BarcodeImportFailed({ item, onClose, onRemove, onRetry }
                             What to do instead
                         </p>
                         <div className="space-y-2">
-                            {alts.map(alt => (
+                            {altActions().map(alt => (
                                 <div
                                     key={alt.title}
                                     className="flex items-start gap-3 px-3 py-3 rounded-xl"
