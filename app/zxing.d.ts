@@ -18,6 +18,10 @@ declare module '@zxing/browser' {
             videoElement: HTMLVideoElement,
             callbackFn: (result: import('@zxing/library').Result | null, error?: Error) => void
         ): Promise<import('@zxing/library').IScannerControls>
+        /** Decode a barcode from an image URL (data URL or object URL) */
+        decodeFromImageUrl(src: string): Promise<import('@zxing/library').Result>
+        /** Decode a barcode from an HTMLImageElement */
+        decodeFromImageElement(element: HTMLImageElement | string): Promise<import('@zxing/library').Result>
     }
 }
 

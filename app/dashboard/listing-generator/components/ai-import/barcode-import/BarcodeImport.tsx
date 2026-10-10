@@ -18,6 +18,7 @@ import {
     validateCheckDigit,
 } from '../../../types/barcode-import.types'
 import BarcodeCamera from './BarcodeCamera'
+import BarcodeImageScan from './BarcodeImageScan'
 import BarcodeQueueRow from './BarcodeQueueRow'
 import BarcodeImportPreview from './BarcodeImportPreview'
 import BarcodeImportFailed from './BarcodeImportFailed'
@@ -435,6 +436,19 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
                     scanFeedback={cameraScanFeedback}
                     className="w-full"
                 />
+
+                {/* ── Scan from Image ───────────────────────────────────────── */}
+                {!cameraActive && (
+                    <BarcodeImageScan
+                        onDetected={barcode => {
+                            const result = addBarcode(barcode)
+                            if (result === 'duplicate') setInputError(`${barcode} is already in the queue.`)
+                            else if (result === 'full') setInputError(`Queue is full (${MAX_QUEUE} items max).`)
+                            else setInputError(null)
+                        }}
+                        disabled={queue.length >= MAX_QUEUE}
+                    />
+                )}
 
                 {/* ── Manual input ─────────────────────────────────────────── */}
                 <form onSubmit={handleManualSubmit} className="flex gap-2">
