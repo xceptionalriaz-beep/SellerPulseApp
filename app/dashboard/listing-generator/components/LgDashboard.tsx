@@ -23,6 +23,8 @@ import {
 import UrlImport from '@/app/dashboard/listing-generator/components/ai-import/UrlImport'
 import UrlImportProcessing from '@/app/dashboard/listing-generator/components/ai-import/UrlImportProcessing'
 import UrlImportPreview from '@/app/dashboard/listing-generator/components/ai-import/UrlImportPreview'
+import UrlImportVeroWarning from '@/app/dashboard/listing-generator/components/ai-import/UrlImportVeroWarning'
+import UrlImportFailed from '@/app/dashboard/listing-generator/components/ai-import/UrlImportFailed'
 import type { PlatformDetection, UrlImportResult, ImportedListingData } from '@/app/dashboard/listing-generator/types/url-import.types'
 
 // ── Design tokens ─────────────────────────────────────────────
@@ -243,6 +245,9 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
     const [copiedId, setCopiedId] = useState<string | null>(null)
     const [showUrlImport, setShowUrlImport] = useState(false)
     const [showProcessing, setShowProcessing] = useState(false)
+    const [showVeroWarning, setShowVeroWarning] = useState(false)
+    const [showFailed, setShowFailed] = useState(false)
+    const [failedErrorCode, setFailedErrorCode] = useState<string | undefined>(undefined)
     const [showPreview, setShowPreview] = useState(false)
     const [importUrl, setImportUrl] = useState<string>('')
     const [importPlatform, setImportPlatform] = useState<PlatformDetection | null>(null)
@@ -1064,15 +1069,78 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                     onComplete={(result: UrlImportResult) => {
                         setShowProcessing(false)
                         setImportResult(result)
-                        setShowPreview(true)
+                        // Gate on VeRO: show warning screen first if risk detected
+                        const veroStatus = result.listing?.vero_status
+                        if (veroStatus === 'warning' || veroStatus === 'flagged') {
+                            setShowVeroWarning(true)
+                        } else {
+                            setShowPreview(true)
+                        }
                     }}
-                    onFailed={(_errorCode, _message) => {
+                    onFailed={(errorCode, _message) => {
                         setShowProcessing(false)
-                        onNewListingProp()
+                        setFailedErrorCode(errorCode ?? undefined)
+                        setShowFailed(true)
                     }}
                     onCancel={() => {
                         setShowProcessing(false)
                         setShowUrlImport(true)
+                    }}
+                />
+            )}
+
+            {/* ── Screen 2b: VeRO Warning (shown before preview if risk found) ── */}
+            {showVeroWarning && importResult?.listing && (
+                <UrlImportVeroWarning
+                    brand={importResult.listing.vero_brand ?? importResult.listing.brand ?? 'Unknown Brand'}
+                    riskLevel={importResult.listing.vero_status === 'flagged' ? 'flagged' : 'warning'}
+                    reason={importResult.listing.vero_reason ?? 'This brand may be registered with eBay\'s VeRO programme.'}
+                    onBack={() => {
+                        setShowVeroWarning(false)
+                        setImportResult(null)
+                        setImportPlatform(null)
+                        setImportUrl('')
+                    }}
+                    onContinue={() => {
+                        setShowVeroWarning(false)
+                        setShowPreview(true)
+                    }}
+                />
+            )}
+
+            {/* ── Screen 2c: Failed import fallback ────────────────── */}
+            {showFailed && (
+                <UrlImportFailed
+                    errorCode={failedErrorCode}
+                    url={importUrl || undefined}
+                    platform={importPlatform}
+                    onTryAgain={() => {
+                        setShowFailed(false)
+                        setFailedErrorCode(undefined)
+                        setImportUrl('')
+                        setImportPlatform(null)
+                        setShowUrlImport(true)
+                    }}
+                    onTitleMode={() => {
+                        setShowFailed(false)
+                        setFailedErrorCode(undefined)
+                        setImportUrl('')
+                        setImportPlatform(null)
+                        onNewListingProp()
+                    }}
+                    onBarcodeMode={() => {
+                        setShowFailed(false)
+                        setFailedErrorCode(undefined)
+                        setImportUrl('')
+                        setImportPlatform(null)
+                        // TODO: trigger barcode mode when built
+                        onNewListingProp()
+                    }}
+                    onCancel={() => {
+                        setShowFailed(false)
+                        setFailedErrorCode(undefined)
+                        setImportUrl('')
+                        setImportPlatform(null)
                     }}
                 />
             )}
