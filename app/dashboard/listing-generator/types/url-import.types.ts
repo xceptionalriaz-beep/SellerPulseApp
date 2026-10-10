@@ -184,6 +184,7 @@ export const SUPPORTED_PLATFORMS: PlatformMeta[] = [
     { key: 'dhgate', displayName: 'DHgate', domain: 'dhgate.com', color: '#C41E3A', phase: 2 },
     { key: 'walmart', displayName: 'Walmart', domain: 'walmart.com', color: '#0071CE', phase: 2 },
     { key: 'costco', displayName: 'Costco', domain: 'costco.co.uk', color: '#005DAA', phase: 2 },
+    { key: 'cj_dropshipping', displayName: 'CJ Dropshipping', domain: 'cjdropshipping.com', color: '#FF6600', phase: 2 },
 ]
 
 // ── URL Validator ─────────────────────────────────────────────
@@ -236,6 +237,10 @@ export function detectPlatformFromUrl(url: string): PlatformDetection | null {
             'walmart.com': { platform: 'walmart_us' as ImportPlatform, displayName: 'Walmart', logoKey: 'walmart', supported: true, requiresLogin: false },
             'costco.co.uk': { platform: 'costco', displayName: 'Costco', logoKey: 'costco', supported: true, requiresLogin: false },
             'costco.com': { platform: 'costco', displayName: 'Costco', logoKey: 'costco', supported: true, requiresLogin: false },
+            // CJ Dropshipping
+            'cjdropshipping.com': { platform: 'cj_dropshipping', displayName: 'CJ Dropshipping', logoKey: 'cj', supported: true, requiresLogin: false },
+            'cj.com': { platform: 'cj_dropshipping', displayName: 'CJ Dropshipping', logoKey: 'cj', supported: true, requiresLogin: false },
+            'cjpacket.com': { platform: 'cj_dropshipping', displayName: 'CJ Dropshipping', logoKey: 'cj', supported: true, requiresLogin: false },
         }
 
         const match = map[host]

@@ -64,7 +64,7 @@ const PLATFORM_META: Record<string, { displayName: string; logoKey: string; curr
     dhgate: { displayName: 'DHgate', logoKey: 'dhgate', currency: 'USD' },
     walmart: { displayName: 'Walmart', logoKey: 'walmart', currency: 'USD' },
     costco: { displayName: 'Costco', logoKey: 'costco', currency: 'GBP' },
-    cj_dropshipping: { displayName: 'CJ Drop', logoKey: 'cj', currency: 'USD' },
+    cj_dropshipping: { displayName: 'CJ Dropshipping', logoKey: 'cj', currency: 'USD' },
     manomano: { displayName: 'ManoMano', logoKey: 'manomano', currency: 'GBP' },
 }
 
@@ -273,6 +273,166 @@ async function getKeys(platformName: string): Promise<[string | null, string | n
             data.primary_key_2 === 'EMPTY' ? null : data.primary_key_2,
         ]
     } catch { return [null, null] }
+}
+
+// ── Extract CJ Dropshipping PID from URL ──────────────────────────────────────
+// Handles URLs like:
+//   https://www.cjdropshipping.com/product/name-here-p-XXXXXXXX.html
+//   https://cjdropshipping.com/product-list/name-p-XXXXXXXX.html?skuId=...
+//   https://cj.com/product/p-XXXXXXXX.html
+function extractCJPid(url: string): string | null {
+    try {
+        const u = new URL(url)
+        // Try query param ?pid= first
+        const qPid = u.searchParams.get('pid') || u.searchParams.get('productId')
+        if (qPid) return qPid
+
+        // Try path segment: /product/anything-p-XXXXXXXX.html
+        const pidMatch = u.pathname.match(/[/-]p-([A-Za-z0-9]+)(?:\.html)?(?:[/?#]|$)/i)
+        if (pidMatch) return pidMatch[1]
+
+        return null
+    } catch { return null }
+}
+
+// ── CJ Dropshipping native API scraper ────────────────────────────────────────
+// Uses the official CJ Open API v2.0 to fetch clean product data.
+// Keys in api_fleet_config:
+//   primary_key_1 = CJ API email address
+//   primary_key_2 = CJ API password
+async function scrapeWithCJApi(
+    url: string,
+    email: string,
+    password: string
+): Promise<RawProductData | null> {
+    try {
+        // Step 1: get access token
+        const tokenFetch = fetch(
+            'https://developers.cjdropshipping.com/api2.0/v1/authentication/getAccessToken',
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            }
+        ).catch(() => null)
+        const tokenTimeout = new Promise<null>(resolve => setTimeout(() => resolve(null), 10_000))
+        const tokenRes = await Promise.race([tokenFetch, tokenTimeout])
+        if (!tokenRes || !tokenRes.ok) {
+            console.warn('[url-import] CJ: failed to get access token')
+            return null
+        }
+
+        const tokenData = await tokenRes.json() as {
+            code: number
+            data?: { accessToken?: string; refreshToken?: string }
+            message?: string
+        }
+        if (tokenData.code !== 200 || !tokenData.data?.accessToken) {
+            console.warn('[url-import] CJ: token error:', tokenData.message)
+            return null
+        }
+        const accessToken = tokenData.data.accessToken
+
+        // Step 2: extract product PID from URL
+        const pid = extractCJPid(url)
+        if (!pid) {
+            console.warn('[url-import] CJ: could not extract PID from URL:', url)
+            return null
+        }
+
+        // Step 3: query product details
+        const productFetch = fetch(
+            `https://developers.cjdropshipping.com/api2.0/v1/product/query?pid=${encodeURIComponent(pid)}`,
+            {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'CJ-Access-Token': accessToken,
+                },
+            }
+        ).catch(() => null)
+        const productTimeout = new Promise<null>(resolve => setTimeout(() => resolve(null), 15_000))
+        const productRes = await Promise.race([productFetch, productTimeout])
+        if (!productRes || !productRes.ok) {
+            console.warn('[url-import] CJ: product fetch failed')
+            return null
+        }
+
+        const productData = await productRes.json() as {
+            code: number
+            message?: string
+            data?: {
+                pid?: string
+                productNameEn?: string
+                description?: string
+                productUnit?: number
+                sellPrice?: number
+                variantList?: Array<{
+                    variantSellPrice?: number
+                    variantImage?: string
+                    variantProperty?: string
+                }>
+                productImageSet?: Array<{ imageUrl?: string; middleImage?: string }>
+                categoryName?: string
+                weight?: number
+                productType?: string
+            }
+        }
+
+        if (productData.code !== 200 || !productData.data) {
+            console.warn('[url-import] CJ: product query error:', productData.message)
+            return null
+        }
+
+        const p = productData.data
+
+        // Collect images from productImageSet + variant images
+        const images: string[] = []
+        if (p.productImageSet) {
+            for (const img of p.productImageSet) {
+                const src = img.imageUrl ?? img.middleImage
+                if (src && src.startsWith('http')) images.push(src)
+                if (images.length >= 12) break
+            }
+        }
+        if (images.length === 0 && p.variantList) {
+            for (const v of p.variantList) {
+                if (v.variantImage && v.variantImage.startsWith('http')) {
+                    images.push(v.variantImage)
+                    if (images.length >= 12) break
+                }
+            }
+        }
+
+        // Price: use lowest variant price or base sell price
+        let price: number | null = p.sellPrice ?? null
+        if (p.variantList && p.variantList.length > 0) {
+            const variantPrices = p.variantList
+                .map(v => v.variantSellPrice)
+                .filter((v): v is number => typeof v === 'number' && v > 0)
+            if (variantPrices.length > 0) {
+                price = Math.min(...variantPrices)
+            }
+        }
+
+        return {
+            title_raw: p.productNameEn ?? '',
+            description_raw: p.description ?? '',
+            price_raw: price,
+            currency_raw: 'USD',
+            images_raw: images,
+            brand_raw: null,
+            ean_raw: null,
+            asin_raw: null,
+            category_raw: p.categoryName ?? null,
+            condition_raw: 'New',
+            item_specifics_raw: { Weight: p.weight ? `${p.weight}g` : '' },
+            stock_status: (p.productUnit ?? 0) > 0 ? 'in_stock' : 'unknown',
+        }
+    } catch (err) {
+        console.warn('[url-import] CJ API threw:', err)
+        return null
+    }
 }
 
 // ── Track API usage ────────────────────────────────────────────────────────────
@@ -654,14 +814,31 @@ export async function POST(req: NextRequest) {
     let raw: RawProductData | null = null
     let dataSource = 'simulation'
 
-    const apifyToken = await getKey('apify')
-    if (apifyToken) {
-        raw = await scrapeWithApify(url, platform, apifyToken)
-        if (raw?.title_raw) {
-            dataSource = 'apify'
-            await trackUsage('apify')
-        } else {
-            raw = null
+    // ── Try CJ Dropshipping native API first (if platform is cj_dropshipping) ──
+    if (platform === 'cj_dropshipping') {
+        const [cjEmail, cjPassword] = await getKeys('cj_dropshipping')
+        if (cjEmail && cjPassword) {
+            raw = await scrapeWithCJApi(url, cjEmail, cjPassword)
+            if (raw?.title_raw) {
+                dataSource = 'cj_api'
+                await trackUsage('cj_dropshipping')
+            } else {
+                raw = null
+            }
+        }
+    }
+
+    // ── Try Apify for all other platforms (or CJ if native API had no keys) ────
+    if (!raw) {
+        const apifyToken = await getKey('apify')
+        if (apifyToken) {
+            raw = await scrapeWithApify(url, platform, apifyToken)
+            if (raw?.title_raw) {
+                dataSource = 'apify'
+                await trackUsage('apify')
+            } else {
+                raw = null
+            }
         }
     }
 
@@ -670,7 +847,13 @@ export async function POST(req: NextRequest) {
         raw = buildSimulatedRaw(platform)
     }
 
-    set('fetch', 'done', dataSource === 'apify' ? 'Product page loaded' : 'Demo data used')
+    set(
+        'fetch',
+        'done',
+        dataSource === 'cj_api' ? 'CJ API — product data loaded' :
+            dataSource === 'apify' ? 'Product page loaded' :
+                'Demo data used'
+    )
 
     // ── Step 2: Images ─────────────────────────────────────────────────────────
     set('images', 'running')
