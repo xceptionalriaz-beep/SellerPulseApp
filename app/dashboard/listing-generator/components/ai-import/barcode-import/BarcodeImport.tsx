@@ -81,6 +81,9 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
     const [bulkDone, setBulkDone] = useState(false)
     const [bulkSavedCount, setBulkSavedCount] = useState(0)
     const [restoreSession, setRestoreSession] = useState<StoredSession | null>(null)
+    // ── AI options — user can toggle before creating ──────────────────────────
+    const [aiTitle, setAiTitle] = useState(true)   // AI-optimised title + description
+    const [aiPrice, setAiPrice] = useState(true)   // AI suggested price
     // Camera scan feedback: 'added' (green flash) | 'duplicate' (amber) | 'invalid' (red)
     const [cameraScanFeedback, setCameraScanFeedback] = useState<'added' | 'duplicate' | 'invalid' | null>(null)
     const inFlightRef = useRef<Set<string>>(new Set())
@@ -114,7 +117,12 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
             const res = await fetch('/api/listing/barcode-import', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ barcode, identifierMode: identifierModeRef.current }),
+                body: JSON.stringify({
+                    barcode,
+                    identifierMode: identifierModeRef.current,
+                    useAiTitle: aiTitle,
+                    useAiPrice: aiPrice,
+                }),
                 signal: controller.signal,
             })
             const data: BarcodeImportResponse = await res.json()
@@ -143,7 +151,7 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
             clearTimeout(timeoutId)
             inFlightRef.current.delete(id)
         }
-    }, [])
+    }, [aiTitle, aiPrice])
 
     // ── Add barcode to queue ──────────────────────────────────────────────────
     // Returns 'added' | 'duplicate' | 'invalid' | 'full' for caller feedback.
@@ -713,42 +721,109 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
                         </div>
                     </div>
                 )}
-            </div>
 
-            {/* ── Bulk action footer (sticky) ────────────────────────────────── */}
-            {selected.length > 0 && !bulkDone && (
-                <div
-                    className="fixed bottom-0 left-0 right-0 z-40 border-t px-4 py-3 flex items-center justify-between gap-3"
-                    style={{ backgroundColor: C.surface, borderColor: C.border, boxShadow: '0 -4px 24px rgba(117,48,251,0.08)' }}
-                >
-                    <div className="flex items-center gap-2">
+                {/* ── AI Options + Create panel ─────────────────────────────── */}
+                {selected.length > 0 && !bulkDone && (
+                    <div
+                        className="rounded-2xl overflow-hidden"
+                        style={{ border: `1.5px solid ${C.primary}`, backgroundColor: C.surface }}
+                    >
+                        {/* Header */}
                         <div
-                            className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm"
-                            style={{ backgroundColor: C.primary, color: '#fff', fontFamily: 'Syne, sans-serif' }}
+                            className="px-4 py-2.5 border-b"
+                            style={{ backgroundColor: C.primaryLight, borderColor: C.border }}
                         >
-                            {selected.length}
+                            <p className="text-[11px] font-bold uppercase tracking-wider" style={{ color: C.primary, fontFamily: 'Syne, sans-serif' }}>
+                                AI Options
+                            </p>
                         </div>
-                        <div>
-                            <p className="text-xs font-semibold" style={{ color: C.text }}>
-                                {selected.length} draft{selected.length !== 1 ? 's' : ''} ready
-                            </p>
-                            <p className="text-[10px]" style={{ color: C.success }}>
-                                ✓ Saved automatically — view when ready
-                            </p>
+
+                        {/* Toggles */}
+                        <div className="px-4 py-3 space-y-3">
+                            {/* Toggle: AI title + description */}
+                            <label className="flex items-center justify-between gap-4 cursor-pointer group">
+                                <div>
+                                    <p className="text-sm font-semibold" style={{ color: C.text, fontFamily: 'DM Sans, sans-serif' }}>
+                                        AI-optimised title &amp; description
+                                    </p>
+                                    <p className="text-[11px] mt-0.5" style={{ color: C.muted }}>
+                                        Rewrites the title for eBay Cassini and generates an HTML description
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    role="switch"
+                                    aria-checked={aiTitle}
+                                    onClick={() => setAiTitle(v => !v)}
+                                    className="relative flex-shrink-0 w-11 h-6 rounded-full transition-colors duration-200"
+                                    style={{ backgroundColor: aiTitle ? C.primary : '#d1d5db' }}
+                                >
+                                    <span
+                                        className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200"
+                                        style={{ transform: aiTitle ? 'translateX(20px)' : 'translateX(0)' }}
+                                    />
+                                </button>
+                            </label>
+
+                            {/* Divider */}
+                            <div style={{ borderTop: `1px solid ${C.border}` }} />
+
+                            {/* Toggle: AI price */}
+                            <label className="flex items-center justify-between gap-4 cursor-pointer group">
+                                <div>
+                                    <p className="text-sm font-semibold" style={{ color: C.text, fontFamily: 'DM Sans, sans-serif' }}>
+                                        AI suggested price
+                                    </p>
+                                    <p className="text-[11px] mt-0.5" style={{ color: C.muted }}>
+                                        Estimates a competitive UK eBay selling price from market data
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    role="switch"
+                                    aria-checked={aiPrice}
+                                    onClick={() => setAiPrice(v => !v)}
+                                    className="relative flex-shrink-0 w-11 h-6 rounded-full transition-colors duration-200"
+                                    style={{ backgroundColor: aiPrice ? C.primary : '#d1d5db' }}
+                                >
+                                    <span
+                                        className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200"
+                                        style={{ transform: aiPrice ? 'translateX(20px)' : 'translateX(0)' }}
+                                    />
+                                </button>
+                            </label>
+                        </div>
+
+                        {/* Create button */}
+                        <div className="px-4 pb-4">
+                            <button
+                                onClick={handleViewDrafts}
+                                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-base transition-opacity hover:opacity-90 active:scale-[0.99]"
+                                style={{
+                                    backgroundColor: C.primary,
+                                    color: '#fff',
+                                    fontFamily: 'Syne, sans-serif',
+                                    boxShadow: '0 4px 16px rgba(117,48,251,0.25)',
+                                }}
+                            >
+                                <ArrowRight size={17} />
+                                Create {selected.length} Listing{selected.length !== 1 ? 's' : ''}
+                            </button>
+                            {(!aiTitle || !aiPrice) && (
+                                <p className="text-center text-[10px] mt-2" style={{ color: C.muted }}>
+                                    {!aiTitle && !aiPrice
+                                        ? 'AI title, description and price skipped — raw data only'
+                                        : !aiTitle
+                                            ? 'AI title & description skipped — raw product name will be used'
+                                            : 'AI price skipped — price will not be set automatically'}
+                                </p>
+                            )}
                         </div>
                     </div>
-                    <button
-                        onClick={handleViewDrafts}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-opacity"
-                        style={{ backgroundColor: C.accent, color: C.text, fontFamily: 'Syne, sans-serif' }}
-                    >
-                        View {selected.length} Draft{selected.length !== 1 ? 's' : ''}
-                        <ArrowRight size={15} />
-                    </button>
-                </div>
-            )}
+                )}
+            </div>{/* ── /max-w-2xl ── */}
 
-            {/* ── Preview panel ─────────────────────────────────────────────── */}
+            {/* ── Preview panel (overlay) ───────────────────────────────────── */}
             {previewItem && (
                 <BarcodeImportPreview
                     item={previewItem}
@@ -757,7 +832,7 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
                 />
             )}
 
-            {/* ── Failed panel ───────────────────────────────────────────────── */}
+            {/* ── Failed panel (overlay) ────────────────────────────────────── */}
             {failedItem && (
                 <BarcodeImportFailed
                     item={failedItem}

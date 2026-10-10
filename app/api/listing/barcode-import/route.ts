@@ -325,10 +325,14 @@ async function lookupOpenFoodFacts(barcode: string): Promise<RawProduct | null> 
 }
 
 // ── Lookup: UPCitemdb (general EAN / UPC) ─────────────────────────────────────
-async function lookupUpcItemDb(barcode: string): Promise<RawProduct | null> {
+// Free tier:  https://api.upcitemdb.com/prod/trial/lookup   (100 req/day, no key)
+// Paid tier:  https://api.upcitemdb.com/prod/v1/lookup      (key passed as user_key param)
+async function lookupUpcItemDb(barcode: string, userKey?: string | null): Promise<RawProduct | null> {
     try {
-        const url = `https://api.upcitemdb.com/prod/trial/lookup?upc=${encodeURIComponent(barcode)}`
-        const res = await fetch(url, {
+        const base = userKey
+            ? `https://api.upcitemdb.com/prod/v1/lookup?upc=${encodeURIComponent(barcode)}&user_key=${encodeURIComponent(userKey)}`
+            : `https://api.upcitemdb.com/prod/trial/lookup?upc=${encodeURIComponent(barcode)}`
+        const res = await fetch(base, {
             signal: AbortSignal.timeout(8_000),
             headers: { 'Accept': 'application/json' },
         })
@@ -382,6 +386,101 @@ async function lookupUpcItemDb(barcode: string): Promise<RawProduct | null> {
             images: (item.images ?? []).filter(Boolean).slice(0, 4),
             category: item.category?.trim() ?? undefined,
             price_market: priceMarket,
+        }
+    } catch { return null }
+}
+
+// ── Lookup: Barcode Lookup (barcodelookup.com) ────────────────────────────────
+// Paid API — key passed as ?formatted=y&barcode=...&key=YOUR_KEY
+// Plans start at ~$49/mo for 50k lookups. Strong US/EU coverage + images + reviews.
+async function lookupBarcodeLookup(barcode: string, apiKey: string): Promise<RawProduct | null> {
+    try {
+        const url = `https://api.barcodelookup.com/v3/products?barcode=${encodeURIComponent(barcode)}&formatted=y&key=${encodeURIComponent(apiKey)}`
+        const res = await fetch(url, {
+            signal: AbortSignal.timeout(8_000),
+            headers: { 'Accept': 'application/json' },
+        })
+        if (res.status === 403 || res.status === 429) {
+            console.warn('[barcode-import] Barcode Lookup: quota or auth error', res.status)
+            return null
+        }
+        if (!res.ok) return null
+
+        const data = await res.json() as {
+            products?: Array<{
+                title?: string
+                brand?: string
+                description?: string
+                category?: string
+                images?: string[]
+                stores?: Array<{ price?: string }>
+            }>
+        }
+
+        const item = data.products?.[0]
+        if (!item?.title || item.title.trim().length < 2) return null
+
+        let priceMarket: number | undefined
+        if (item.stores?.length) {
+            const prices = item.stores
+                .map(s => parseFloat(s.price ?? ''))
+                .filter(p => !isNaN(p) && p > 0)
+            if (prices.length) priceMarket = Math.min(...prices)
+        }
+
+        await trackUsage('barcodelookup')
+
+        return {
+            title: item.title.trim(),
+            brand: item.brand?.trim() ?? undefined,
+            description: item.description?.trim() ?? undefined,
+            images: (item.images ?? []).filter(Boolean).slice(0, 4),
+            category: item.category?.trim() ?? undefined,
+            price_market: priceMarket,
+        }
+    } catch { return null }
+}
+
+// ── Lookup: Go-UPC (go-upc.com) ───────────────────────────────────────────────
+// Paid API — Bearer token in Authorization header.
+// Good EU/UK coverage. Free tier: 100/mo. Paid: from $9/mo.
+async function lookupGoUpc(barcode: string, apiKey: string): Promise<RawProduct | null> {
+    try {
+        const url = `https://go-upc.com/api/v1/code/${encodeURIComponent(barcode)}`
+        const res = await fetch(url, {
+            signal: AbortSignal.timeout(8_000),
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${apiKey}`,
+            },
+        })
+        if (res.status === 401 || res.status === 429) {
+            console.warn('[barcode-import] Go-UPC: quota or auth error', res.status)
+            return null
+        }
+        if (!res.ok) return null
+
+        const data = await res.json() as {
+            product?: {
+                name?: string
+                brand?: string
+                description?: string
+                category?: string
+                imageUrl?: string
+            }
+        }
+
+        const p = data.product
+        if (!p?.name || p.name.trim().length < 2) return null
+
+        await trackUsage('go_upc')
+
+        return {
+            title: p.name.trim(),
+            brand: p.brand?.trim() ?? undefined,
+            description: p.description?.trim() ?? undefined,
+            images: p.imageUrl ? [p.imageUrl] : [],
+            category: p.category?.trim() ?? undefined,
         }
     } catch { return null }
 }
@@ -577,8 +676,15 @@ export async function POST(req: NextRequest) {
     const userId = await getAuthUserId()
 
     // Parse body
-    const body = await req.json().catch(() => ({})) as { barcode?: string }
+    const body = await req.json().catch(() => ({})) as {
+        barcode?: string
+        identifierMode?: string
+        useAiTitle?: boolean
+        useAiPrice?: boolean
+    }
     const rawBarcode = (body.barcode ?? '').trim()
+    const useAiTitle = body.useAiTitle !== false  // default true
+    const useAiPrice = body.useAiPrice !== false  // default true
 
     if (!rawBarcode) {
         return NextResponse.json(
@@ -606,10 +712,13 @@ export async function POST(req: NextRequest) {
         )
     }
 
-    // ── Step 2: Fetch AI keys ────────────────────────────────────────────────────
-    const [geminiKey, anthropicKey] = await Promise.all([
+    // ── Step 2: Fetch API keys ───────────────────────────────────────────────────
+    const [geminiKey, anthropicKey, upcitemdbKey, barcodelookupKey, goUpcKey] = await Promise.all([
         getKey('gemini'),
         getKey('anthropic'),
+        getKey('upcitemdb'),      // null on free tier — set in vault UI to unlock paid limits
+        getKey('barcodelookup'),  // optional paid alternative — barcodelookup.com
+        getKey('go_upc'),         // optional paid alternative — go-upc.com (good EU coverage)
     ])
 
     // ── Step 3: Product lookup cascade ──────────────────────────────────────────
@@ -631,9 +740,21 @@ export async function POST(req: NextRequest) {
     }
 
     if (!raw) {
-        // General fallback: UPCitemdb
-        raw = await lookupUpcItemDb(digits)
+        // General fallback: UPCitemdb (uses paid key if set in vault, otherwise free trial)
+        raw = await lookupUpcItemDb(digits, upcitemdbKey)
         if (raw) source = 'upcitemdb'
+    }
+
+    if (!raw && barcodelookupKey) {
+        // Optional: Barcode Lookup (barcodelookup.com) — activates when key added to vault
+        raw = await lookupBarcodeLookup(digits, barcodelookupKey)
+        if (raw) source = 'barcodelookup'
+    }
+
+    if (!raw && goUpcKey) {
+        // Optional: Go-UPC (go-upc.com) — activates when key added to vault; strong EU/UK coverage
+        raw = await lookupGoUpc(digits, goUpcKey)
+        if (raw) source = 'go_upc'
     }
 
     if (!raw) {
@@ -653,7 +774,8 @@ export async function POST(req: NextRequest) {
     // ── Step 4: AI transforms raw → eBay listing fields ─────────────────────────
     let ai: AiListingResult | null = null
 
-    if (geminiKey || anthropicKey) {
+    // Only call AI when the user wants AI-enhanced output AND a key exists
+    if (useAiTitle && (geminiKey || anthropicKey)) {
         const [aiGemini, aiAnthropic] = await Promise.all([
             geminiKey ? aiTransformWithGemini(raw, barcodeType, digits, geminiKey) : Promise.resolve(null),
             anthropicKey ? aiTransformWithAnthropic(raw, barcodeType, digits, anthropicKey) : Promise.resolve(null),
@@ -661,11 +783,13 @@ export async function POST(req: NextRequest) {
         ai = aiGemini ?? aiAnthropic
     }
 
-    // Fallbacks when AI unavailable
-    const titleEbay = ai?.title_ebay ?? raw.title.slice(0, 80)
+    // Fallbacks when AI disabled or unavailable
+    const titleEbay = useAiTitle ? (ai?.title_ebay ?? raw.title.slice(0, 80)) : raw.title.slice(0, 80)
     const cassini = ai?.cassini_score ?? 60
-    const descHtml = ai?.description_html
-        ?? `<p>${raw.title}${raw.brand ? ` by ${raw.brand}` : ''}. Please see product details below.</p>${raw.description ? `<p>${raw.description}</p>` : ''}`
+    const descHtml = useAiTitle
+        ? (ai?.description_html
+            ?? `<p>${raw.title}${raw.brand ? ` by ${raw.brand}` : ''}. Please see product details below.</p>${raw.description ? `<p>${raw.description}</p>` : ''}`)
+        : `<p>${raw.title}${raw.brand ? ` by ${raw.brand}` : ''}. Please see product details below.</p>${raw.description ? `<p>${raw.description}</p>` : ''}`
     const categoryLabel = ai?.category_label ?? raw.category ?? 'General'
     const itemSpecifics: Record<string, string> = {
         Brand: raw.brand ?? 'Unbranded',
@@ -675,12 +799,15 @@ export async function POST(req: NextRequest) {
     if (isIsbn && raw.author) itemSpecifics['Author'] = raw.author
     if (raw.publisher) itemSpecifics['Publisher'] = raw.publisher
 
-    // Price: AI suggestion → market anchor × 0.85 (eBay typically 15% below market) → null
+    // Price: AI suggestion → market anchor × 0.85 → null
+    // Skipped entirely when useAiPrice = false (price_suggested will be undefined)
     let priceSuggested: number | null = null
-    if (ai?.price_suggested && ai.price_suggested > 0) {
-        priceSuggested = ai.price_suggested
-    } else if (raw.price_market && raw.price_market > 0) {
-        priceSuggested = parseFloat((raw.price_market * 0.85).toFixed(2))
+    if (useAiPrice) {
+        if (ai?.price_suggested && ai.price_suggested > 0) {
+            priceSuggested = ai.price_suggested
+        } else if (raw.price_market && raw.price_market > 0) {
+            priceSuggested = parseFloat((raw.price_market * 0.85).toFixed(2))
+        }
     }
 
     // ── Step 5: VeRO check ───────────────────────────────────────────────────────
@@ -692,7 +819,7 @@ export async function POST(req: NextRequest) {
         title_ebay: titleEbay,
         brand: raw.brand ?? undefined,
         description_html: descHtml,
-        description_is_fallback: !ai?.description_html,
+        description_is_fallback: !useAiTitle || !ai?.description_html,
         images: raw.images,
         category_label: categoryLabel,
         condition: 'New',       // barcode lookups default to new; seller adjusts in wizard

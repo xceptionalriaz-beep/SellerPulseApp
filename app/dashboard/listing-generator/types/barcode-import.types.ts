@@ -55,7 +55,9 @@ export type BarcodeImportErrorCode =
 export type BarcodeDataSource =
     | 'google_books'      // ISBN lookups (free, unlimited)
     | 'open_food_facts'   // food/grocery EANs (free, unlimited)
-    | 'upcitemdb'         // general EAN/UPC (100/day free tier)
+    | 'upcitemdb'         // general EAN/UPC (100/day free tier; paid key unlocks more)
+    | 'barcodelookup'     // barcodelookup.com — optional paid alternative
+    | 'go_upc'            // go-upc.com — optional paid alternative, strong EU/UK
     | 'ai_simulation'     // Gemini/Anthropic fallback
 
 // ── Full product result from a successful lookup ───────────────
