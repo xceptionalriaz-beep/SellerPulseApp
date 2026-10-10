@@ -3,12 +3,16 @@
 // app/dashboard/listing-generator/components/ai-import/barcode-import/BarcodeCamera.tsx
 // ──────────────────────────────────────────────────────────────────────────────
 // Riazify — Barcode camera overlay component
-// Uses the native BarcodeDetector API (Chrome 88+, Edge 88+, Android Chrome)
-// Falls back gracefully to manual-entry-only mode on unsupported browsers
+// Scan mode priority:
+//   1. window.BarcodeDetector (native — Android Chrome / ChromeOS)
+//   2. @zxing/browser BrowserMultiFormatReader (JS fallback — all browsers)
+// Camera scanning now works in Chrome desktop, Firefox, Safari, Edge.
 // ──────────────────────────────────────────────────────────────────────────────
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { Camera, CameraOff, Loader2, ZoomIn, ZoomOut, SwitchCamera } from 'lucide-react'
+import { BrowserMultiFormatReader } from '@zxing/browser'
+import { NotFoundException } from '@zxing/library'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -74,10 +78,12 @@ export default function BarcodeCamera({
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const streamRef = useRef<MediaStream | null>(null)
     const detectorRef = useRef<BarcodeDetectorInstance | null>(null)
+    const zxingRef = useRef<BrowserMultiFormatReader | null>(null)
     const rafRef = useRef<number>(0)
     const lastRef = useRef<{ value: string; at: number } | null>(null)
 
-    const [supported, setSupported] = useState<boolean | null>(null) // null = checking
+    // 'native' = BarcodeDetector API, 'zxing' = @zxing/browser fallback, null = initialising
+    const [scanMode, setScanMode] = useState<'native' | 'zxing' | null>(null)
     const [cameraError, setCameraError] = useState<string | null>(null)
     const [cameras, setCameras] = useState<MediaDeviceInfo[]>([])
     const [cameraIdx, setCameraIdx] = useState(0)
@@ -86,32 +92,35 @@ export default function BarcodeCamera({
     const [lastScan, setLastScan] = useState<string | null>(null)
     const [flashActive, setFlashActive] = useState(false)
 
-    // ── Check BarcodeDetector support once ────────────────────────────────────
+    // ── Detect scan mode once on mount ────────────────────────────────────────
     useEffect(() => {
         if (typeof window === 'undefined') return
-        const has = typeof window.BarcodeDetector !== 'undefined'
-        setSupported(has)
-        if (has) {
+
+        if (typeof window.BarcodeDetector !== 'undefined') {
+            // Native path — fast, hardware-accelerated
+            setScanMode('native')
             void window.BarcodeDetector!.getSupportedFormats().then(fmts => {
                 const intersection = BARCODE_FORMATS.filter(f => fmts.includes(f))
                 detectorRef.current = new window.BarcodeDetector!({
                     formats: intersection.length ? intersection : BARCODE_FORMATS,
                 })
             }).catch(() => {
-                detectorRef.current = new window.BarcodeDetector!({
-                    formats: BARCODE_FORMATS,
-                })
+                detectorRef.current = new window.BarcodeDetector!({ formats: BARCODE_FORMATS })
             })
+        } else {
+            // JS fallback — works in Chrome desktop, Firefox, Safari, Edge
+            setScanMode('zxing')
+            zxingRef.current = new BrowserMultiFormatReader()
         }
     }, [])
 
     // ── List available cameras ─────────────────────────────────────────────────
     useEffect(() => {
-        if (!supported) return
+        if (!scanMode) return
         navigator.mediaDevices.enumerateDevices().then(devices => {
             setCameras(devices.filter(d => d.kind === 'videoinput'))
         }).catch(() => { })
-    }, [supported])
+    }, [scanMode])
 
     // ── Start / stop camera stream ─────────────────────────────────────────────
     const stopStream = useCallback(() => {
@@ -158,43 +167,58 @@ export default function BarcodeCamera({
     }, [cameras, stopStream])
 
     useEffect(() => {
-        if (isActive && supported) {
+        if (isActive && scanMode) {
             void startStream(cameraIdx)
         } else {
             stopStream()
         }
         return stopStream
-    }, [isActive, supported, cameraIdx, startStream, stopStream])
+    }, [isActive, scanMode, cameraIdx, startStream, stopStream])
 
-    // ── Scan loop using requestAnimationFrame ──────────────────────────────────
+    // ── Scan one frame ────────────────────────────────────────────────────────
     const scan = useCallback(async () => {
-        if (!videoRef.current || !detectorRef.current) return
+        if (!videoRef.current) return
         const video = videoRef.current
         if (video.readyState < 2 || video.paused) return
 
         try {
-            const results = await detectorRef.current.detect(video)
-            for (const r of results) {
-                const now = Date.now()
-                const raw = r.rawValue.trim()
-                if (!raw) continue
-                // Deduplicate — skip if same barcode scanned within DEDUPE_MS
-                if (lastRef.current && lastRef.current.value === raw && now - lastRef.current.at < DEDUPE_MS) continue
-                lastRef.current = { value: raw, at: now }
-                setLastScan(raw)
-                // Flash animation
-                setFlashActive(true)
-                setTimeout(() => setFlashActive(false), 300)
-                onDetected(raw)
-                break // only handle one per frame
+            let rawValue: string | null = null
+
+            if (scanMode === 'native' && detectorRef.current) {
+                // Native BarcodeDetector path
+                const results = await detectorRef.current.detect(video)
+                if (results.length > 0) rawValue = results[0].rawValue.trim() || null
+            } else if (scanMode === 'zxing' && zxingRef.current) {
+                // @zxing/browser JS fallback path
+                try {
+                    const result = await zxingRef.current.decodeOnceFromVideoElement(video)
+                    rawValue = result.getText()
+                } catch (e) {
+                    // NotFoundException = no barcode in this frame — totally normal, keep looping
+                    if (!(e instanceof NotFoundException)) throw e
+                }
             }
+
+            if (!rawValue) return
+
+            const now = Date.now()
+            // Deduplicate — skip if same barcode scanned within DEDUPE_MS
+            if (lastRef.current && lastRef.current.value === rawValue && now - lastRef.current.at < DEDUPE_MS) return
+            lastRef.current = { value: rawValue, at: now }
+            setLastScan(rawValue)
+            // Flash animation
+            setFlashActive(true)
+            setTimeout(() => setFlashActive(false), 300)
+            onDetected(rawValue)
+
         } catch {
             // detector errors are non-fatal — keep scanning
         }
-    }, [onDetected])
+    }, [scanMode, onDetected])
 
+    // ── RAF scan loop ─────────────────────────────────────────────────────────
     useEffect(() => {
-        if (!isActive || !supported) return
+        if (!isActive || !scanMode) return
         let running = true
         const loop = async () => {
             if (!running) return
@@ -203,7 +227,7 @@ export default function BarcodeCamera({
         }
         rafRef.current = requestAnimationFrame(loop)
         return () => { running = false; cancelAnimationFrame(rafRef.current) }
-    }, [isActive, supported, scan])
+    }, [isActive, scanMode, scan])
 
     // ── Zoom (where supported) ────────────────────────────────────────────────
     const applyZoom = useCallback((level: number) => {
@@ -222,31 +246,7 @@ export default function BarcodeCamera({
         setCameraIdx(i => (i + 1) % cameras.length)
     }
 
-    // ── Not supported ─────────────────────────────────────────────────────────
-    if (supported === false) {
-        return (
-            <div
-                className={`rounded-2xl flex items-start gap-3 p-4 ${className}`}
-                style={{ backgroundColor: C.warningLight, border: `1px dashed ${C.warning}` }}
-            >
-                <CameraOff size={20} style={{ color: C.warning, flexShrink: 0, marginTop: 2 }} />
-                <div>
-                    <p className="font-bold text-sm" style={{ color: C.text, fontFamily: 'Syne, sans-serif' }}>
-                        Camera scanning not available in this browser
-                    </p>
-                    <p className="text-xs mt-1 leading-relaxed" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                        Firefox and Safari don&apos;t support the camera barcode scanner.
-                        Switch to <strong>Chrome</strong> or <strong>Edge</strong> for camera scanning.
-                    </p>
-                    <p className="text-xs mt-2 font-semibold" style={{ color: C.text }}>
-                        ↓ You can still type or paste any barcode in the field below
-                    </p>
-                </div>
-            </div>
-        )
-    }
-
-    // ── Camera inactive (button to start) ─────────────────────────────────────
+    // ── Camera inactive or still initialising (button to start) ───────────────
     if (!isActive) {
         return (
             <button
@@ -288,7 +288,7 @@ export default function BarcodeCamera({
                 style={{ minHeight: 240, maxHeight: 360 }}
             />
 
-            {/* Hidden canvas for future frame capture if needed */}
+            {/* Hidden canvas (unused for now, kept for future frame capture) */}
             <canvas ref={canvasRef} className="hidden" />
 
             {/* Loading overlay */}
@@ -379,6 +379,22 @@ export default function BarcodeCamera({
                     >
                         ✓ {lastScan}
                     </div>
+                </div>
+            )}
+
+            {/* Scan mode badge (dev helper — subtle, bottom-left) */}
+            {process.env.NODE_ENV === 'development' && scanMode && (
+                <div className="absolute bottom-10 left-3 pointer-events-none">
+                    <span
+                        className="text-[9px] px-1.5 py-0.5 rounded"
+                        style={{
+                            backgroundColor: scanMode === 'native' ? 'rgba(184,250,51,0.7)' : 'rgba(117,48,251,0.7)',
+                            color: '#fff',
+                            fontFamily: 'DM Mono, monospace',
+                        }}
+                    >
+                        {scanMode === 'native' ? 'native' : 'zxing'}
+                    </span>
                 </div>
             )}
 
