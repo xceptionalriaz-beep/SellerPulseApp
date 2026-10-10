@@ -23,6 +23,7 @@
     "@react-email/render": "^2.0.9",
     "@supabase/ssr": "0.4.0",
     "@supabase/supabase-js": "^2.44.4",
+    "@zxing/browser": "^0.2.1",
     "chart.js": "^4.5.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
