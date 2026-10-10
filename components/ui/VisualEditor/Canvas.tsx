@@ -1146,21 +1146,28 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
       }
     }, true);
 
-    // In-place text editing on double click
-    var editableSelectors = 'h1, h2, h3, h4, h5, h6, p, span, td, li, blockquote';
+    // ── Canva-Style Inline Text Editing Engine ──
+    var editableSelectors = 'h1, h2, h3, h4, h5, h6, p, span, div[style*="font"], td, li, blockquote';
     var activeEditable = null;
     var originalText = '';
+    var originalStyles = {};
 
     function commitEdit(el) {
       if (!el || !el._riazifyEditing) return;
       el._riazifyEditing = false;
       el.contentEditable = 'false';
-      el.style.outline = '';
-      el.style.cursor = '';
-      el.style.borderRadius = '';
+
+      // Restore styles cleanly
+      el.style.outline = originalStyles.outline || '';
+      el.style.boxShadow = originalStyles.boxShadow || '';
+      el.style.borderRadius = originalStyles.borderRadius || '';
+      el.style.cursor = originalStyles.cursor || '';
+      el.style.display = originalStyles.display || '';
+      el.style.width = originalStyles.width || '';
+
       var newHtml = el.innerHTML || '';
       var newText = el.innerText || el.textContent || '';
-      // If innerHTML has span/a tags (formatted), commit as HTML
+
       if (/<[a-z][\s\S]*>/i.test(newHtml)) {
         window.parent.postMessage({
           type: 'RIAZIFY_COMMIT_HTML_EDIT',
@@ -1176,44 +1183,66 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
         }, '*');
       }
       activeEditable = null;
+      originalStyles = {};
     }
 
     function cancelEdit(el) {
       if (!el || !el._riazifyEditing) return;
       el._riazifyEditing = false;
       el.contentEditable = 'false';
-      el.style.outline = '';
-      el.style.cursor = '';
-      el.style.borderRadius = '';
+      el.style.outline = originalStyles.outline || '';
+      el.style.boxShadow = originalStyles.boxShadow || '';
+      el.style.borderRadius = originalStyles.borderRadius || '';
+      el.style.cursor = originalStyles.cursor || '';
+      el.style.display = originalStyles.display || '';
+      el.style.width = originalStyles.width || '';
       el.innerText = originalText;
       activeEditable = null;
+      originalStyles = {};
     }
 
     document.addEventListener('dblclick', function(e) {
       var target = e.target;
       if (!target) return;
-      // Don't activate inside dropzones or overlays
+      // Don't activate inside interactive dropzones or overlays
       if (target.closest('[data-canvas-dropzone]') || target.closest('[data-canvas-overlay]')) return;
-      var el = target.closest(editableSelectors);
+
+      // Find the most specific text element (prefer span, p, h1 over td)
+      var el = target.closest('h1, h2, h3, h4, h5, h6, p, span, li, blockquote') || target.closest(editableSelectors);
       if (!el) return;
+
       e.preventDefault();
       e.stopPropagation();
-      // Commit any previous edit first
+
       if (activeEditable && activeEditable !== el) commitEdit(activeEditable);
       activeEditable = el;
       originalText = el.innerText || el.textContent || '';
+
+      // Backup original styles before applying Canva focus box
+      originalStyles = {
+        outline: el.style.outline,
+        boxShadow: el.style.boxShadow,
+        borderRadius: el.style.borderRadius,
+        cursor: el.style.cursor,
+        display: el.style.display,
+        width: el.style.width,
+      };
+
       el._riazifyEditing = true;
       el.contentEditable = 'true';
+
+      // 💡 CANVA STYLE: Tight text bounding box with rounded corners and glow
       el.style.outline = '2px solid #7530fb';
-      el.style.borderRadius = '3px';
+      el.style.boxShadow = '0 0 0 3px rgba(117, 48, 251, 0.18)';
+      el.style.borderRadius = '4px';
       el.style.cursor = 'text';
+
+      // If it's an inline element or paragraph, ensure it hugs the text tightly
+      if (el.tagName === 'SPAN') {
+        el.style.display = 'inline-block';
+      }
+
       el.focus();
-      // Select all text
-      var range = document.createRange();
-      range.selectNodeContents(el);
-      var sel = window.getSelection();
-      sel.removeAllRanges();
-      sel.addRange(range);
     });
 
     document.addEventListener('keydown', function(e) {
