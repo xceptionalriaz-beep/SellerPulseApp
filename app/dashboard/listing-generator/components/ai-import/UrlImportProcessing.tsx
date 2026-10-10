@@ -200,16 +200,21 @@ export default function UrlImportProcessing({
 
     // ── Real API attempt → simulation fallback ────────────────
     async function runImport() {
-        // Try real API first
-        try {
-            updateTask('fetch', 'running')
+        updateTask('fetch', 'running')
 
+        // Use AbortController for wide browser compatibility
+        const controller = new AbortController()
+        const hardTimeout = setTimeout(() => controller.abort(), 90_000)
+
+        try {
             const res = await fetch('/api/listing/url-import', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url, platform: platform.platform }),
-                signal: AbortSignal.timeout(90_000),
+                signal: controller.signal,
             })
+
+            clearTimeout(hardTimeout)
 
             if (res.ok) {
                 const result: UrlImportResult = await res.json()
@@ -229,8 +234,12 @@ export default function UrlImportProcessing({
                 }
                 return
             }
+
+            // Non-ok response (4xx / 5xx / Vercel timeout) → fall through to simulation
+            clearTimeout(hardTimeout)
         } catch {
-            // API not yet built — fall through to simulation
+            // AbortError (timeout) or network error → fall through to simulation
+            clearTimeout(hardTimeout)
         }
 
         if (cancelledRef.current) return

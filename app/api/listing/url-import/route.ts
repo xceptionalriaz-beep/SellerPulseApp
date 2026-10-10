@@ -323,15 +323,18 @@ async function scrapeWithApify(
     const dedicated = APIFY_ACTORS[platform]
     if (dedicated) {
         try {
+            const apifyCtrl = new AbortController()
+            const apifyTimer = setTimeout(() => apifyCtrl.abort(), 35_000)
             const res = await fetch(
-                `https://api.apify.com/v2/acts/${dedicated.actorId}/run-sync-get-dataset-items?token=${token}&timeout=60`,
+                `https://api.apify.com/v2/acts/${dedicated.actorId}/run-sync-get-dataset-items?token=${token}&timeout=30`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(dedicated.buildInput(url)),
-                    signal: AbortSignal.timeout(65_000),
+                    signal: apifyCtrl.signal,
                 }
             )
+            clearTimeout(apifyTimer)
             if (res.ok) {
                 const items = await res.json() as unknown[]
                 if (Array.isArray(items) && items.length > 0) {
@@ -351,8 +354,10 @@ async function scrapeWithApify(
 
     try {
         const pageFunction = buildCheerioPageFunction(selectors)
+        const cheerioCtrl = new AbortController()
+        const cheerioTimer = setTimeout(() => cheerioCtrl.abort(), 35_000)
         const res = await fetch(
-            `https://api.apify.com/v2/acts/apify~cheerio-scraper/run-sync-get-dataset-items?token=${token}&timeout=60`,
+            `https://api.apify.com/v2/acts/apify~cheerio-scraper/run-sync-get-dataset-items?token=${token}&timeout=30`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -361,9 +366,10 @@ async function scrapeWithApify(
                     pageFunction,
                     maxPagesPerCrawl: 1,
                 }),
-                signal: AbortSignal.timeout(65_000),
+                signal: cheerioCtrl.signal,
             }
         )
+        clearTimeout(cheerioTimer)
         if (!res.ok) return null
         const items = await res.json() as unknown[]
         if (Array.isArray(items) && items.length > 0) {
