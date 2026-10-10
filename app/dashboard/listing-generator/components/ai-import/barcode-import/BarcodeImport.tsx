@@ -6,8 +6,7 @@
 // Scan queue UX: scan all barcodes → lookups run in parallel → bulk create drafts
 // ──────────────────────────────────────────────────────────────────────────────
 
-import { useState, useCallback, useRef, useTransition } from 'react'
-import { nanoid } from 'nanoid'
+import { useState, useCallback, useRef, useTransition, useEffect } from 'react'
 import {
     ScanBarcode, PlusCircle, CheckSquare, Square, Trash2,
     ArrowLeft, Layers, RefreshCcw,
@@ -126,7 +125,7 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
             setInputError(null)
 
             const newItem: BarcodeQueueItem = {
-                id: nanoid(8),
+                id: crypto.randomUUID().slice(0, 8),
                 barcode,
                 barcodeType,
                 status: 'pending',
@@ -145,12 +144,19 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
         })
     }, [lookupBarcode])
 
-    // ── Process pending items as slots free up ────────────────────────────────
-    // We use a lightweight effect-free approach: every time inFlightRef shrinks,
-    // we schedule next pending items. We trigger this by watching queue state
-    // via a callback when lookupBarcode resolves.
-    // Simpler: just fire lookups immediately up to MAX_CONCURRENT.
-    // Any item stuck in 'pending' is retried by the user via "Retry pending".
+    // ── Auto-process pending items when concurrent slots free up ─────────────
+    // Fires whenever queue changes (e.g. a lookup finishes). Checks inFlightRef
+    // synchronously so we never double-start the same item.
+    useEffect(() => {
+        const slotsAvailable = MAX_CONCURRENT - inFlightRef.current.size
+        if (slotsAvailable <= 0) return
+        const pendingItems = queue.filter(i => i.status === 'pending')
+        pendingItems.slice(0, slotsAvailable).forEach(item => {
+            void lookupBarcode(item.id, item.barcode)
+        })
+    }, [queue, lookupBarcode])
+
+    // ── Manual retry button (still available for failed/stuck items) ──────────
     const retryPending = useCallback(() => {
         setQueue(q => {
             const pendingItems = q.filter(i => i.status === 'pending')
