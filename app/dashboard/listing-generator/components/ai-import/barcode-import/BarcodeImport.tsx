@@ -6,10 +6,10 @@
 // Scan queue UX: scan all barcodes → lookups run in parallel → bulk create drafts
 // ──────────────────────────────────────────────────────────────────────────────
 
-import { useState, useCallback, useRef, useTransition, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import {
     ScanBarcode, PlusCircle, CheckSquare, Square, Trash2,
-    ArrowLeft, Layers, RefreshCcw,
+    ArrowLeft, ArrowRight, RefreshCcw,
 } from 'lucide-react'
 import {
     BarcodeQueueItem,
@@ -57,8 +57,8 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
     const [inputError, setInputError] = useState<string | null>(null)
     const [previewItem, setPreviewItem] = useState<BarcodeQueueItem | null>(null)
     const [failedItem, setFailedItem] = useState<BarcodeQueueItem | null>(null)
-    const [bulkCreating, startBulkCreate] = useTransition()
     const [bulkDone, setBulkDone] = useState(false)
+    const [bulkSavedCount, setBulkSavedCount] = useState(0)
     const inFlightRef = useRef<Set<string>>(new Set())
     const inputRef = useRef<HTMLInputElement>(null)
 
@@ -205,17 +205,16 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
     const clearQueue = () => {
         setQueue([])
         setBulkDone(false)
+        setBulkSavedCount(0)
     }
 
-    // ── Bulk create drafts ────────────────────────────────────────────────────
-    // The API route already auto-saves each item when it finds a product.
-    // "Bulk create" here just navigates to the draft list with a success notice.
-    const handleBulkCreate = () => {
-        startBulkCreate(async () => {
-            // Give a beat for any in-flight saves to complete
-            await new Promise(r => setTimeout(r, 400))
-            setBulkDone(true)
-        })
+    // ── View drafts ───────────────────────────────────────────────────────────
+    // Drafts are already auto-saved by the API route on each successful lookup.
+    // This button simply navigates the user to their saved drafts.
+    const handleViewDrafts = () => {
+        setBulkSavedCount(selected.length)
+        setBulkDone(true)
+        onBack?.()   // goes to /dashboard/listing-generator where drafts live
     }
 
     // ── Stats bar ─────────────────────────────────────────────────────────────
@@ -346,22 +345,36 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
                     </button>
                 </form>
 
-                {/* ── Bulk done banner ─────────────────────────────────────── */}
+                {/* ── Bulk done banner (shown if navigation didn't fire) ────── */}
                 {bulkDone && (
                     <div
-                        className="rounded-xl px-4 py-3 flex items-center justify-between gap-3"
+                        className="rounded-xl px-4 py-3 flex items-center justify-between gap-3 flex-wrap"
                         style={{ backgroundColor: C.successLight, border: `1px solid ${C.success}` }}
                     >
-                        <p className="text-sm font-semibold" style={{ color: C.success }}>
-                            ✓ {selected.length} draft{selected.length !== 1 ? 's' : ''} created — find them in your Drafts.
-                        </p>
-                        <button
-                            onClick={clearQueue}
-                            className="text-xs font-semibold underline"
-                            style={{ color: C.success }}
-                        >
-                            Start new session
-                        </button>
+                        <div>
+                            <p className="text-sm font-bold" style={{ color: C.success }}>
+                                ✓ {bulkSavedCount} draft{bulkSavedCount !== 1 ? 's' : ''} saved successfully
+                            </p>
+                            <p className="text-[11px] mt-0.5" style={{ color: C.success, opacity: 0.75 }}>
+                                Find them in your Listing Generator
+                            </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <a
+                                href="/dashboard/listing-generator"
+                                className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg"
+                                style={{ backgroundColor: C.success, color: '#fff' }}
+                            >
+                                View Drafts <ArrowRight size={11} />
+                            </a>
+                            <button
+                                onClick={clearQueue}
+                                className="text-xs font-semibold underline"
+                                style={{ color: C.success }}
+                            >
+                                Scan more
+                            </button>
+                        </div>
                     </div>
                 )}
 
@@ -475,21 +488,20 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
                         </div>
                         <div>
                             <p className="text-xs font-semibold" style={{ color: C.text }}>
-                                {selected.length} listing{selected.length !== 1 ? 's' : ''} selected
+                                {selected.length} draft{selected.length !== 1 ? 's' : ''} ready
                             </p>
-                            <p className="text-[10px]" style={{ color: C.muted }}>
-                                Ready to save as drafts
+                            <p className="text-[10px]" style={{ color: C.success }}>
+                                ✓ Saved automatically — view when ready
                             </p>
                         </div>
                     </div>
                     <button
-                        onClick={handleBulkCreate}
-                        disabled={bulkCreating}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-opacity disabled:opacity-60"
+                        onClick={handleViewDrafts}
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-opacity"
                         style={{ backgroundColor: C.accent, color: C.text, fontFamily: 'Syne, sans-serif' }}
                     >
-                        <Layers size={15} />
-                        {bulkCreating ? 'Saving…' : `Create ${selected.length} Draft${selected.length !== 1 ? 's' : ''}`}
+                        View {selected.length} Draft{selected.length !== 1 ? 's' : ''}
+                        <ArrowRight size={15} />
                     </button>
                 </div>
             )}
