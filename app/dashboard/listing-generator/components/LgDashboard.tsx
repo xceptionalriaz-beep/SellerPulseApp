@@ -1343,7 +1343,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center p-4"
                     style={{ background: 'rgba(26,21,35,0.55)', backdropFilter: 'blur(4px)' }}
-                    onClick={e => { if (e.target === e.currentTarget) setShowBarcodeImport(false) }}
+                    onClick={e => { if (e.target === e.currentTarget) { setShowBarcodeImport(false); loadListings() } }}
                 >
                     <div
                         className="relative w-full rounded-2xl overflow-y-auto"
@@ -1363,7 +1363,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                         >
                             <X size={15} style={{ color: '#7530fb' }} />
                         </button>
-                        <BarcodeImport onBack={() => setShowBarcodeImport(false)} />
+                        <BarcodeImport onBack={() => { setShowBarcodeImport(false); loadListings() }} />
                     </div>
                 </div>
             )}
@@ -1373,7 +1373,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center p-4"
                     style={{ background: 'rgba(26,21,35,0.55)', backdropFilter: 'blur(4px)' }}
-                    onClick={e => { if (e.target === e.currentTarget) setShowTitleImport(false) }}
+                    onClick={e => { if (e.target === e.currentTarget) { setShowTitleImport(false); loadListings() } }}
                 >
                     <div
                         className="relative w-full rounded-2xl overflow-y-auto"
@@ -1393,7 +1393,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                         >
                             <X size={15} style={{ color: '#7530fb' }} />
                         </button>
-                        <TitleImport onBack={() => setShowTitleImport(false)} />
+                        <TitleImport onBack={() => { setShowTitleImport(false); loadListings() }} />
                     </div>
                 </div>
             )}
