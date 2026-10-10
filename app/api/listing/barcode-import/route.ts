@@ -325,10 +325,14 @@ async function lookupOpenFoodFacts(barcode: string): Promise<RawProduct | null> 
 }
 
 // ── Lookup: UPCitemdb (general EAN / UPC) ─────────────────────────────────────
-async function lookupUpcItemDb(barcode: string): Promise<RawProduct | null> {
+// Free tier:  https://api.upcitemdb.com/prod/trial/lookup   (100 req/day, no key)
+// Paid tier:  https://api.upcitemdb.com/prod/v1/lookup      (key passed as user_key param)
+async function lookupUpcItemDb(barcode: string, userKey?: string | null): Promise<RawProduct | null> {
     try {
-        const url = `https://api.upcitemdb.com/prod/trial/lookup?upc=${encodeURIComponent(barcode)}`
-        const res = await fetch(url, {
+        const base = userKey
+            ? `https://api.upcitemdb.com/prod/v1/lookup?upc=${encodeURIComponent(barcode)}&user_key=${encodeURIComponent(userKey)}`
+            : `https://api.upcitemdb.com/prod/trial/lookup?upc=${encodeURIComponent(barcode)}`
+        const res = await fetch(base, {
             signal: AbortSignal.timeout(8_000),
             headers: { 'Accept': 'application/json' },
         })
@@ -606,10 +610,11 @@ export async function POST(req: NextRequest) {
         )
     }
 
-    // ── Step 2: Fetch AI keys ────────────────────────────────────────────────────
-    const [geminiKey, anthropicKey] = await Promise.all([
+    // ── Step 2: Fetch API keys ───────────────────────────────────────────────────
+    const [geminiKey, anthropicKey, upcitemdbKey] = await Promise.all([
         getKey('gemini'),
         getKey('anthropic'),
+        getKey('upcitemdb'),   // null on free tier — set in vault UI to unlock paid limits
     ])
 
     // ── Step 3: Product lookup cascade ──────────────────────────────────────────
@@ -631,8 +636,8 @@ export async function POST(req: NextRequest) {
     }
 
     if (!raw) {
-        // General fallback: UPCitemdb
-        raw = await lookupUpcItemDb(digits)
+        // General fallback: UPCitemdb (uses paid key if set in vault, otherwise free trial)
+        raw = await lookupUpcItemDb(digits, upcitemdbKey)
         if (raw) source = 'upcitemdb'
     }
 
