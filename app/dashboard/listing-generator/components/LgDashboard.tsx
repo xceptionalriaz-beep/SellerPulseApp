@@ -266,6 +266,19 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
     useEffect(() => {
         function onNewListing(e: Event) {
             const mode = (e as CustomEvent).detail?.mode
+            // Close every import modal/overlay before opening the new one
+            setShowUrlImport(false)
+            setShowProcessing(false)
+            setShowVeroWarning(false)
+            setShowFailed(false)
+            setShowPreview(false)
+            setImportResult(null)
+            setImportPlatform(null)
+            setImportUrl('')
+            setShowImageImport(false)
+            setShowImageProcessing(false)
+            setImageImportData(null)
+
             if (mode === 'ai_url') {
                 setShowUrlImport(true)
             } else if (mode === 'ai_image') {
