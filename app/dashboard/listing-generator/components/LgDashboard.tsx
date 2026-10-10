@@ -30,6 +30,7 @@ import ImageImportProcessing from '@/app/dashboard/listing-generator/components/
 import ImageImportPreview from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImportPreview'
 import ImageImportFailed from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImportFailed'
 import BarcodeImport from '@/app/dashboard/listing-generator/components/ai-import/barcode-import/BarcodeImport'
+import TitleImport from '@/app/dashboard/listing-generator/components/ai-import/title-to-listing/TitleImport'
 import type { PlatformDetection, UrlImportResult, ImportedListingData } from '@/app/dashboard/listing-generator/types/url-import.types'
 import type { ImageImportData } from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImport'
 import type { ImageImportResult } from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImportProcessing'
@@ -277,6 +278,8 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
     const [imageFailedCode, setImageFailedCode] = useState<string | undefined>(undefined)
     // Barcode import modal
     const [showBarcodeImport, setShowBarcodeImport] = useState(false)
+    // Title import modal
+    const [showTitleImport, setShowTitleImport] = useState(false)
 
     // Listen for top bar button events
     useEffect(() => {
@@ -301,6 +304,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
             setShowImageVeroWarning(false)
             setImageFailedCode(undefined)
             setShowBarcodeImport(false)
+            setShowTitleImport(false)
 
             if (mode === 'ai_url') {
                 setShowUrlImport(true)
@@ -308,6 +312,8 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                 setShowImageImport(true)
             } else if (mode === 'ai_barcode') {
                 setShowBarcodeImport(true)
+            } else if (mode === 'ai_title') {
+                setShowTitleImport(true)
             } else {
                 onNewListingProp()
             }
@@ -1358,6 +1364,36 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                             <X size={15} style={{ color: '#7530fb' }} />
                         </button>
                         <BarcodeImport onBack={() => setShowBarcodeImport(false)} />
+                    </div>
+                </div>
+            )}
+
+            {/* ── Title Import Modal ────────────────────────────────── */}
+            {showTitleImport && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                    style={{ background: 'rgba(26,21,35,0.55)', backdropFilter: 'blur(4px)' }}
+                    onClick={e => { if (e.target === e.currentTarget) setShowTitleImport(false) }}
+                >
+                    <div
+                        className="relative w-full rounded-2xl overflow-y-auto"
+                        style={{
+                            maxWidth: 680,
+                            maxHeight: '92vh',
+                            backgroundColor: '#f8f7ff',
+                            boxShadow: '0 24px 80px rgba(117,48,251,0.22)',
+                        }}
+                    >
+                        {/* Close button */}
+                        <button
+                            onClick={() => setShowTitleImport(false)}
+                            className="absolute top-3 right-3 z-10 w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:opacity-70"
+                            style={{ backgroundColor: '#ede9fe' }}
+                            title="Close"
+                        >
+                            <X size={15} style={{ color: '#7530fb' }} />
+                        </button>
+                        <TitleImport onBack={() => setShowTitleImport(false)} />
                     </div>
                 </div>
             )}
