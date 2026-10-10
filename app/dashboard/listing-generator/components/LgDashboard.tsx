@@ -1472,7 +1472,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
 
                         {/* Text */}
                         <div className="text-center">
-                            <p className="text-base font-bold" style={{ color: C.text, fontFamily: 'Syne, sans-serif' }}>
+                            <p className="text-base font-bold" style={{ color: C.dark, fontFamily: 'Syne, sans-serif' }}>
                                 Delete this listing?
                             </p>
                             <p className="text-sm mt-1" style={{ color: C.muted }}>
@@ -1489,7 +1489,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                 onClick={() => setDeletingId(null)}
                                 disabled={deleteLoading}
                                 className="flex-1 py-2.5 rounded-xl font-semibold text-sm transition-opacity hover:opacity-80 disabled:opacity-40"
-                                style={{ backgroundColor: C.bg, color: C.text, border: `1px solid ${C.border}` }}
+                                style={{ backgroundColor: C.bg, color: C.dark, border: `1px solid ${C.border}` }}
                             >
                                 Cancel
                             </button>
