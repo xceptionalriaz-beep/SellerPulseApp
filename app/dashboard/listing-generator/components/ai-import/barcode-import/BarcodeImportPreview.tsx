@@ -439,8 +439,10 @@ export default function BarcodeImportPreview({ item, onClose, onRemove }: Barcod
                                 >
                                     <AlertTriangle size={12} style={{ color: C.warning, flexShrink: 0, marginTop: 1 }} />
                                     <p className="text-[11px]" style={{ color: C.warning }}>
-                                        <strong>AI description unavailable</strong> — this is a basic template.
-                                        Edit the listing before publishing to improve quality.
+                                        <strong>AI description unavailable</strong> — a basic template was used instead.
+                                        To enable AI descriptions, add your Gemini or Anthropic API key in{' '}
+                                        <span className="underline cursor-pointer font-semibold">Settings → AI Keys</span>.
+                                        Edit this listing manually to improve it before publishing.
                                     </p>
                                 </div>
                             )}

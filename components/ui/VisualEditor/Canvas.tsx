@@ -1146,8 +1146,8 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
       }
     }, true);
 
-    // ── Canva-Style Inline Text Editing Engine ──
-    var editableSelectors = 'h1, h2, h3, h4, h5, h6, p, span, div[style*="font"], td, li, blockquote';
+// ── CANVA TRUE AUTO-FIT TEXT ENGINE (Auto Grows & Shrinks As You Type) ──
+    var editableSelectors = 'h1, h2, h3, h4, h5, h6, p, span, td, li, blockquote';
     var activeEditable = null;
     var originalText = '';
     var originalStyles = {};
@@ -1157,13 +1157,15 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
       el._riazifyEditing = false;
       el.contentEditable = 'false';
 
-      // Restore styles cleanly
+      // Clean up Canva bounding box styles
+      el.style.display = originalStyles.display || '';
+      el.style.width = originalStyles.width || '';
+      el.style.maxWidth = originalStyles.maxWidth || '';
       el.style.outline = originalStyles.outline || '';
       el.style.boxShadow = originalStyles.boxShadow || '';
       el.style.borderRadius = originalStyles.borderRadius || '';
       el.style.cursor = originalStyles.cursor || '';
-      el.style.display = originalStyles.display || '';
-      el.style.width = originalStyles.width || '';
+      el.style.padding = originalStyles.padding || '';
 
       var newHtml = el.innerHTML || '';
       var newText = el.innerText || el.textContent || '';
@@ -1190,12 +1192,14 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
       if (!el || !el._riazifyEditing) return;
       el._riazifyEditing = false;
       el.contentEditable = 'false';
+      el.style.display = originalStyles.display || '';
+      el.style.width = originalStyles.width || '';
+      el.style.maxWidth = originalStyles.maxWidth || '';
       el.style.outline = originalStyles.outline || '';
       el.style.boxShadow = originalStyles.boxShadow || '';
       el.style.borderRadius = originalStyles.borderRadius || '';
       el.style.cursor = originalStyles.cursor || '';
-      el.style.display = originalStyles.display || '';
-      el.style.width = originalStyles.width || '';
+      el.style.padding = originalStyles.padding || '';
       el.innerText = originalText;
       activeEditable = null;
       originalStyles = {};
@@ -1204,11 +1208,17 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
     document.addEventListener('dblclick', function(e) {
       var target = e.target;
       if (!target) return;
-      // Don't activate inside interactive dropzones or overlays
       if (target.closest('[data-canvas-dropzone]') || target.closest('[data-canvas-overlay]')) return;
 
-      // Find the most specific text element (prefer span, p, h1 over td)
-      var el = target.closest('h1, h2, h3, h4, h5, h6, p, span, li, blockquote') || target.closest(editableSelectors);
+      // Prefer inner text elements over outer container
+      var el = target.closest('h1, h2, h3, h4, h5, h6, p, span, li, blockquote');
+
+      // If clicked inside a table cell (like Bullet List or Numbered List)
+      if (!el && target.closest('td')) {
+        var td = target.closest('td');
+        el = td.querySelector('p, span, h1, h2, h3, h4, div') || td;
+      }
+      if (!el) el = target.closest(editableSelectors);
       if (!el) return;
 
       e.preventDefault();
@@ -1218,29 +1228,34 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
       activeEditable = el;
       originalText = el.innerText || el.textContent || '';
 
-      // Backup original styles before applying Canva focus box
+      // Backup styles
       originalStyles = {
+        display: el.style.display,
+        width: el.style.width,
+        maxWidth: el.style.maxWidth,
         outline: el.style.outline,
         boxShadow: el.style.boxShadow,
         borderRadius: el.style.borderRadius,
         cursor: el.style.cursor,
-        display: el.style.display,
-        width: el.style.width,
+        padding: el.style.padding,
       };
 
       el._riazifyEditing = true;
       el.contentEditable = 'true';
 
-      // 💡 CANVA STYLE: Tight text bounding box with rounded corners and glow
-      el.style.outline = '2px solid #7530fb';
-      el.style.boxShadow = '0 0 0 3px rgba(117, 48, 251, 0.18)';
-      el.style.borderRadius = '4px';
-      el.style.cursor = 'text';
-
-      // If it's an inline element or paragraph, ensure it hugs the text tightly
-      if (el.tagName === 'SPAN') {
-        el.style.display = 'inline-block';
-      }
+      // 💡 CANVA AUTO-FIT MODE:
+      // display: inline-block + width: fit-content causes the box to:
+      // 1. Hug the text tightly with ZERO empty space on the right
+      // 2. Automatically GROW as you type more words
+      // 3. Automatically SHRINK as you backspace/delete words
+      el.style.setProperty('display', 'inline-block', 'important');
+      el.style.setProperty('width', 'fit-content', 'important');
+      el.style.setProperty('max-width', '100%', 'important');
+      el.style.setProperty('outline', '2px solid #7530fb', 'important');
+      el.style.setProperty('box-shadow', '0 0 0 3px rgba(117, 48, 251, 0.18)', 'important');
+      el.style.setProperty('border-radius', '4px', 'important');
+      el.style.setProperty('padding', '2px 6px', 'important');
+      el.style.setProperty('cursor', 'text', 'important');
 
       el.focus();
     });

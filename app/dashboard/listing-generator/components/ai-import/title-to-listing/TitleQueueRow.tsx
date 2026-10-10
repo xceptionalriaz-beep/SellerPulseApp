@@ -9,7 +9,7 @@
 import { useEffect, useRef } from 'react'
 import {
     Loader2, CheckCircle2, XCircle, AlertTriangle, Clock,
-    Eye, Trash2, ShieldAlert,
+    Eye, Trash2, ShieldAlert, Package,
 } from 'lucide-react'
 import { TitleQueueItem } from './TitleImport'
 
@@ -179,7 +179,7 @@ export default function TitleQueueRow({ item, onView, onRemove, onToggleSelect }
                     className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
                     style={{ backgroundColor: C.bg, border: `1px solid ${C.border}` }}
                 >
-                    <span style={{ fontSize: 18 }}>🔍</span>
+                    <Package size={18} style={{ color: C.muted }} />
                 </div>
             )}
 

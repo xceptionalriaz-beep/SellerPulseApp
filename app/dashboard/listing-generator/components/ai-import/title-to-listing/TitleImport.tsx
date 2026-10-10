@@ -11,7 +11,7 @@ import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import {
     Type, PlusCircle, CheckSquare, Square, Trash2,
     ArrowRight, RefreshCcw, AlertTriangle, History, X,
-    Sparkles,
+    Sparkles, CheckCircle2,
 } from 'lucide-react'
 import {
     BarcodeImportResult,
@@ -117,7 +117,7 @@ function adaptForPreview(item: TitleQueueItem): BarcodeQueueItem {
     return {
         id: item.id,
         barcode: item.searchTitle,
-        barcodeType: 'unknown',
+        barcodeType: item.result?.barcodeType ?? 'TITLE',
         status: item.status,
         result: item.result,
         errorCode: item.errorCode,
@@ -849,6 +849,12 @@ export default function TitleImport({ onBack }: TitleImportProps) {
 
                         {/* Toggles */}
                         <div className="px-4 py-3 space-y-3">
+                            {/* Info: toggles affect future lookups */}
+                            {queue.some(i => i.status === 'found' || i.status === 'vero_risk') && (
+                                <p className="text-[10px] px-2 py-1.5 rounded-lg" style={{ color: C.muted, backgroundColor: C.primaryLight }}>
+                                    ℹ️ Changes here only affect new lookups — already-found items keep their current data.
+                                </p>
+                            )}
                             {/* AI title + description */}
                             <label className="flex items-center justify-between gap-4 cursor-pointer">
                                 <div>
@@ -914,8 +920,8 @@ export default function TitleImport({ onBack }: TitleImportProps) {
                                     boxShadow: '0 4px 16px rgba(117,48,251,0.25)',
                                 }}
                             >
-                                <ArrowRight size={17} />
-                                Create {selected.length} Listing{selected.length !== 1 ? 's' : ''}
+                                <CheckCircle2 size={17} />
+                                Done — View {selected.length} Saved Draft{selected.length !== 1 ? 's' : ''}
                             </button>
                             {(!aiTitle || !aiPrice) && (
                                 <p className="text-center text-[10px] mt-2" style={{ color: C.muted }}>
