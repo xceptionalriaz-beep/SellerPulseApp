@@ -224,13 +224,32 @@ export default function ImageImportProcessing({ data, onComplete, onFailed, onCa
         return new Promise(resolve => setTimeout(resolve, ms))
     }
 
-    // ── Base64 encode a single File ───────────────────────────────────────────
-    function encodeFile(file: File): Promise<string> {
+    // ── Resize to max 1024px then base64 encode ───────────────────────────────
+    // Keeps each image well under 200 KB so the JSON body stays inside Vercel's
+    // 4.5 MB serverless limit even with 9 photos.
+    const MAX_PX = 1024
+
+    function resizeAndEncode(file: File): Promise<string> {
         return new Promise((resolve, reject) => {
-            const reader = new FileReader()
-            reader.onload = () => resolve((reader.result as string).split(',')[1])
-            reader.onerror = reject
-            reader.readAsDataURL(file)
+            const img = new window.Image()
+            const objUrl = URL.createObjectURL(file)
+            img.onload = () => {
+                URL.revokeObjectURL(objUrl)
+                const { naturalWidth: w, naturalHeight: h } = img
+                const scale = Math.min(1, MAX_PX / Math.max(w, h))
+                const canvas = document.createElement('canvas')
+                canvas.width = Math.round(w * scale)
+                canvas.height = Math.round(h * scale)
+                const ctx = canvas.getContext('2d')
+                if (!ctx) { reject(new Error('Canvas unavailable')); return }
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+                // Keep PNG for PNGs (may have transparency), JPEG for everything else
+                const mime = file.type === 'image/png' ? 'image/png' : 'image/jpeg'
+                const quality = mime === 'image/jpeg' ? 0.85 : undefined
+                resolve(canvas.toDataURL(mime, quality).split(',')[1])
+            }
+            img.onerror = reject
+            img.src = objUrl
         })
     }
 
@@ -247,13 +266,16 @@ export default function ImageImportProcessing({ data, onComplete, onFailed, onCa
         try {
             // Encode all images to base64
             const encoded = await Promise.all(
-                data.images.map(async (file, i) => ({
-                    index: i,
-                    name: file.name,
-                    type: file.type,
-                    data: await encodeFile(file),
-                    isLabel: i === data.labelImageIndex,
-                }))
+                data.images.map(async (file, i) => {
+                    const resized = await resizeAndEncode(file)
+                    return {
+                        index: i,
+                        name: file.name,
+                        type: file.type === 'image/png' ? 'image/png' : 'image/jpeg',
+                        data: resized,
+                        isLabel: i === data.labelImageIndex,
+                    }
+                })
             )
 
             if (cancelledRef.current) return
