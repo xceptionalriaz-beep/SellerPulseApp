@@ -14,6 +14,8 @@ import {
 import {
     BarcodeQueueItem,
     BarcodeImportResponse,
+    IdentifierMode,
+    IDENTIFIER_MODE_OPTIONS,
     detectBarcodeType,
     validateCheckDigit,
 } from '../../../types/barcode-import.types'
@@ -68,6 +70,8 @@ interface StoredSession {
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function BarcodeImport({ onBack }: BarcodeImportProps) {
     const [queue, setQueue] = useState<BarcodeQueueItem[]>([])
+    const [identifierMode, setIdentifierMode] = useState<IdentifierMode>('UPC')
+    const identifierModeRef = useRef<IdentifierMode>('UPC')
     const [cameraActive, setCameraActive] = useState(false)
     const [manualInput, setManualInput] = useState('')
     const [inputError, setInputError] = useState<string | null>(null)
@@ -92,6 +96,9 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
     // ── Keep queueRef in sync (allows synchronous reads without stale closures) ──
     useEffect(() => { queueRef.current = queue }, [queue])
 
+    // ── Keep identifierModeRef in sync ────────────────────────────────────────
+    useEffect(() => { identifierModeRef.current = identifierMode }, [identifierMode])
+
     // ── Lookup a single barcode via API ───────────────────────────────────────
     const lookupBarcode = useCallback(async (id: string, barcode: string) => {
         // Mark as loading
@@ -106,7 +113,7 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
             const res = await fetch('/api/listing/barcode-import', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ barcode }),
+                body: JSON.stringify({ barcode, identifierMode: identifierModeRef.current }),
                 signal: controller.signal,
             })
             const data: BarcodeImportResponse = await res.json()
@@ -141,13 +148,20 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
     // Returns 'added' | 'duplicate' | 'invalid' | 'full' for caller feedback.
     // Uses queueRef for synchronous duplicate check (no stale closure).
     const addBarcode = useCallback((raw: string): 'added' | 'duplicate' | 'invalid' | 'full' => {
-        const barcode = raw.trim().replace(/[^0-9Xx]/g, '')
-        const barcodeType = detectBarcodeType(barcode)
+        const mode = identifierModeRef.current
+
+        // MPN and EPID are alphanumeric — preserve them as-is (just trim whitespace)
+        const isAlpha = mode === 'MPN' || mode === 'EPID'
+        const barcode = isAlpha
+            ? raw.trim().replace(/\s+/g, '')
+            : raw.trim().replace(/[^0-9Xx]/g, '')
+
+        const barcodeType = isAlpha ? 'unknown' : detectBarcodeType(barcode)
 
         if (!barcode) return 'invalid'
 
-        // Check digit validation
-        if (!validateCheckDigit(barcode, barcodeType)) {
+        // Check digit validation — skip for MPN, EPID, or unknown
+        if (!isAlpha && !validateCheckDigit(barcode, barcodeType)) {
             setInputError(`Invalid barcode: check digit mismatch — is it typed correctly?`)
             return 'invalid'
         }
@@ -410,6 +424,38 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
                     </div>
                 )}
 
+                {/* ── Identifier Type selector ────────────────────────────── */}
+                <div
+                    className="rounded-xl px-4 py-3"
+                    style={{ backgroundColor: C.surface, border: `1.5px solid ${C.border}` }}
+                >
+                    <p className="text-[11px] font-semibold mb-2" style={{ color: C.muted, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                        Identifier Type
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                        {IDENTIFIER_MODE_OPTIONS.map(opt => (
+                            <button
+                                key={opt.value}
+                                type="button"
+                                onClick={() => setIdentifierMode(opt.value)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                                style={{
+                                    backgroundColor: identifierMode === opt.value ? C.primary : C.bg,
+                                    color: identifierMode === opt.value ? '#fff' : C.muted,
+                                    border: `1.5px solid ${identifierMode === opt.value ? C.primary : C.border}`,
+                                    fontFamily: 'DM Mono, monospace',
+                                }}
+                            >
+                                {opt.label}
+                            </button>
+                        ))}
+                    </div>
+                    <p className="text-[11px] mt-2" style={{ color: C.muted }}>
+                        {IDENTIFIER_MODE_OPTIONS.find(o => o.value === identifierMode)?.hint ?? ''}
+                        {' '}— the scanner will optimise lookups for this type.
+                    </p>
+                </div>
+
                 {/* ── Camera ──────────────────────────────────────────────── */}
                 <BarcodeCamera
                     isActive={cameraActive}
@@ -438,11 +484,16 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
                         <input
                             ref={inputRef}
                             type="text"
-                            inputMode="numeric"
-                            pattern="[0-9Xx]*"
+                            inputMode={identifierMode === 'MPN' ? 'text' : 'numeric'}
+                            pattern={identifierMode === 'MPN' ? undefined : '[0-9Xx]*'}
                             value={manualInput}
                             onChange={e => { setManualInput(e.target.value); setInputError(null) }}
-                            placeholder="Type or paste a barcode (EAN, UPC, ISBN…)"
+                            placeholder={
+                                identifierMode === 'MPN' ? 'Type a manufacturer part number (e.g. MK-700)' :
+                                    identifierMode === 'EPID' ? 'Type an eBay Product ID (numeric)' :
+                                        identifierMode === 'ISBN' ? 'Type or paste an ISBN-10 or ISBN-13' :
+                                            `Type or paste a ${identifierMode} barcode`
+                            }
                             className="w-full rounded-xl px-4 py-2.5 text-sm outline-none transition-shadow"
                             style={{
                                 border: `1.5px solid ${inputError ? C.error : C.border}`,

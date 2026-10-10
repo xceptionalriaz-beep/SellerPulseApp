@@ -5,6 +5,25 @@
 //          BarcodeImportPreview, BarcodeImportFailed
 // ─────────────────────────────────────────────────────────────
 
+// ── User-selected identifier mode (what the user tells us they're scanning) ──
+// Drives lookup routing and validation rules.
+export type IdentifierMode =
+    | 'UPC'   // 12-digit US barcode → UPCitemdb
+    | 'EAN'   // 13-digit EU/global barcode → UPCitemdb / Open Food Facts
+    | 'GTIN'  // Global Trade Item Number (superset of UPC/EAN)
+    | 'ISBN'  // Books (978/979 prefix) → Google Books
+    | 'MPN'   // Manufacturer Part Number (alphanumeric) → AI lookup
+    | 'EPID'  // eBay Product ID (numeric, platform-specific)
+
+export const IDENTIFIER_MODE_OPTIONS: { value: IdentifierMode; label: string; hint: string }[] = [
+    { value: 'UPC', label: 'UPC', hint: '12-digit US barcodes' },
+    { value: 'EAN', label: 'EAN', hint: '13-digit global barcodes' },
+    { value: 'GTIN', label: 'GTIN', hint: 'Universal trade identifiers' },
+    { value: 'ISBN', label: 'ISBN', hint: 'Books & publications' },
+    { value: 'MPN', label: 'MPN', hint: 'Manufacturer part numbers' },
+    { value: 'EPID', label: 'EPID', hint: 'eBay product identifiers' },
+]
+
 // ── Barcode format types ───────────────────────────────────────
 export type BarcodeType =
     | 'EAN13'    // 13 digits — most UK/EU retail products
@@ -108,6 +127,7 @@ export interface BarcodeQueueItem {
 // ── API request body ───────────────────────────────────────────
 export interface BarcodeImportRequest {
     barcode: string
+    identifierMode?: IdentifierMode   // hint from user — overrides auto-detection
 }
 
 // ── API response body ──────────────────────────────────────────
