@@ -280,6 +280,9 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
     const [showBarcodeImport, setShowBarcodeImport] = useState(false)
     // Title import modal
     const [showTitleImport, setShowTitleImport] = useState(false)
+    // Delete confirmation: id of listing pending deletion
+    const [deletingId, setDeletingId] = useState<string | null>(null)
+    const [deleteLoading, setDeleteLoading] = useState(false)
 
     // Listen for top bar button events
     useEffect(() => {
@@ -453,6 +456,23 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
     }
 
     function clearSelection() { setSelectedIds(new Set()) }
+
+    // ── Delete listing ──────────────────────────────────────────
+    async function confirmDelete(id: string) {
+        setDeleteLoading(true)
+        try {
+            const { error } = await (supabase.from('listing_drafts') as any)
+                .delete()
+                .eq('id', id)
+            if (error) throw error
+            setListings(prev => prev.filter(l => l.id !== id))
+            setSelectedIds(prev => { const n = new Set(prev); n.delete(id); return n })
+        } catch (e) {
+            console.error('[LgDashboard] Delete error:', e)
+        }
+        setDeleteLoading(false)
+        setDeletingId(null)
+    }
 
     function copyToClipboard(text: string, key: string) {
         navigator.clipboard.writeText(text)
@@ -808,7 +828,10 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                                             listing.source_platform === 'aliexpress' ? 'AliExpress' :
                                                                 listing.source_platform === 'amazon_uk' ? 'Amazon UK' :
                                                                     listing.source_platform === 'image_import' ? 'Photo AI' :
-                                                                        listing.source_platform.charAt(0).toUpperCase() + listing.source_platform.slice(1)}
+                                                                        listing.source_platform === 'barcode_import' ? 'Barcode AI' :
+                                                                            listing.source_platform === 'title_import' ? 'Title AI' :
+                                                                                listing.source_platform === 'url_import' ? 'URL AI' :
+                                                                                    listing.source_platform.charAt(0).toUpperCase() + listing.source_platform.slice(1)}
                                                     </span>
                                                 ) : (
                                                     <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
@@ -961,7 +984,9 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                                         title="Export CSV">
                                                         <Download size={13} style={{ color: C.secondary }} />
                                                     </button>
-                                                    <button className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
+                                                    <button
+                                                        onClick={() => setDeletingId(listing.id)}
+                                                        className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
                                                         style={{ backgroundColor: C.dangerBg }}
                                                         title="Delete Listing">
                                                         <Trash2 size={13} style={{ color: C.danger }} />
@@ -1426,6 +1451,61 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                         setImageImportData(null)
                     }}
                 />
+            )}
+
+            {/* ── Delete Confirmation Modal ──────────────────────── */}
+            {deletingId && (
+                <div
+                    className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+                    style={{ background: 'rgba(26,21,35,0.6)', backdropFilter: 'blur(4px)' }}
+                    onClick={e => { if (e.target === e.currentTarget && !deleteLoading) setDeletingId(null) }}
+                >
+                    <div
+                        className="w-full rounded-2xl p-6 flex flex-col gap-4"
+                        style={{ maxWidth: 360, backgroundColor: '#ffffff', boxShadow: '0 24px 80px rgba(117,48,251,0.22)' }}
+                    >
+                        {/* Icon */}
+                        <div className="w-11 h-11 rounded-xl flex items-center justify-center mx-auto"
+                            style={{ backgroundColor: '#fef2f2' }}>
+                            <Trash2 size={22} style={{ color: C.danger }} />
+                        </div>
+
+                        {/* Text */}
+                        <div className="text-center">
+                            <p className="text-base font-bold" style={{ color: C.dark, fontFamily: 'Syne, sans-serif' }}>
+                                Delete this listing?
+                            </p>
+                            <p className="text-sm mt-1" style={{ color: C.muted }}>
+                                {listings.find(l => l.id === deletingId)?.product_name || listings.find(l => l.id === deletingId)?.title || 'This listing'}
+                            </p>
+                            <p className="text-xs mt-2" style={{ color: C.muted }}>
+                                This cannot be undone.
+                            </p>
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setDeletingId(null)}
+                                disabled={deleteLoading}
+                                className="flex-1 py-2.5 rounded-xl font-semibold text-sm transition-opacity hover:opacity-80 disabled:opacity-40"
+                                style={{ backgroundColor: C.bg, color: C.dark, border: `1px solid ${C.border}` }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => confirmDelete(deletingId)}
+                                disabled={deleteLoading}
+                                className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white transition-opacity hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
+                                style={{ backgroundColor: C.danger }}
+                            >
+                                {deleteLoading
+                                    ? <><span className="w-4 h-4 rounded-full border-2 border-white/40 border-t-white animate-spin" /> Deleting…</>
+                                    : <><Trash2 size={14} /> Delete</>}
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
 
         </div>
