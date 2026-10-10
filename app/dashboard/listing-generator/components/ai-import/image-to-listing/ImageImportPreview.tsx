@@ -10,8 +10,8 @@
 import { useState, type ReactNode } from 'react'
 import {
     X, ArrowLeft,
-    CheckCircle2, AlertTriangle, ShieldCheck,
-    Package, Zap, Info,
+    AlertTriangle, ShieldCheck,
+    Zap, Info,
     Sparkles, ChevronDown, ChevronUp, Camera,
 } from 'lucide-react'
 import type { ImageImportResult } from './ImageImportProcessing'
