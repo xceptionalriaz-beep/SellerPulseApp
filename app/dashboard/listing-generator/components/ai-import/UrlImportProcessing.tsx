@@ -208,7 +208,7 @@ export default function UrlImportProcessing({
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url, platform: platform.platform }),
-                signal: AbortSignal.timeout(5_000),
+                signal: AbortSignal.timeout(90_000),
             })
 
             if (res.ok) {

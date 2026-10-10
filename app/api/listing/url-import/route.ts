@@ -15,6 +15,9 @@
 // ─────────────────────────────────────────────────────────────
 
 import { NextRequest, NextResponse } from 'next/server'
+
+// Tell Vercel to allow up to 60 seconds for this function (Pro plan)
+export const maxDuration = 60
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
