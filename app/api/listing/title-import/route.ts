@@ -254,6 +254,20 @@ async function saveDraft(
     }
 }
 
+// ── Relevance guard ───────────────────────────────────────────────────────────
+// Rejects UPCitemdb results that share fewer than 30% of meaningful words with
+// the search query — catches cases where the DB returns a totally unrelated
+// product (e.g. "pet glove" → "Hematite ankle chain").
+function isTitleRelevant(searchTitle: string, resultTitle: string, threshold = 0.3): boolean {
+    const tokenise = (s: string) =>
+        s.toLowerCase().split(/\W+/).filter(w => w.length > 2)
+    const searchWords = new Set(tokenise(searchTitle))
+    const resultWords = tokenise(resultTitle)
+    if (searchWords.size === 0) return false
+    const matchCount = resultWords.filter(w => searchWords.has(w)).length
+    return matchCount / searchWords.size >= threshold
+}
+
 // ── Step 1: UPCitemdb title search ────────────────────────────────────────────
 // Searches by product name instead of barcode. Works on free trial (limited)
 // and unlocks more results with a paid key from vault.
@@ -291,6 +305,12 @@ async function searchUpcItemDb(title: string, userKey?: string | null): Promise<
 
         const item = data.items?.[0]
         if (!item?.title || item.title.trim().length < 2) return null
+
+        // Reject results with no meaningful overlap with the search query
+        if (!isTitleRelevant(title, item.title)) {
+            console.log(`[title-import] UPCitemdb result "${item.title.slice(0, 60)}" skipped — low relevance to "${title}"`)
+            return null
+        }
 
         await trackUsage('upcitemdb')
 
@@ -685,7 +705,7 @@ export async function POST(req: NextRequest) {
     // ── Step 7: Return result ───────────────────────────────────────────────────
     const result: BarcodeImportResult = {
         barcode: rawTitle,          // reuses barcode field as the search term
-        barcodeType: 'unknown',         // not applicable for title import
+        barcodeType: 'TITLE',           // signals title-import mode → panel shows "Title"
         source: source as 'upcitemdb' | 'ai_simulation',
         product,
         draft_id: draftId ?? undefined,

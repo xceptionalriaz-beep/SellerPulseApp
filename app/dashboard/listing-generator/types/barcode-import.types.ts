@@ -32,6 +32,7 @@ export type BarcodeType =
     | 'ISBN10'   // 10 chars (may end in X) — older books
     | 'EAN8'     // 8 digits — small packaging
     | 'UPC_E'    // 8 digits compressed — some US products
+    | 'TITLE'    // plain-text product title (title-import mode)
     | 'unknown'
 
 // ── Queue item lifecycle ───────────────────────────────────────
@@ -211,6 +212,7 @@ export function barcodTypeLabel(type: BarcodeType): string {
         case 'ISBN10': return 'ISBN-10'
         case 'EAN8': return 'EAN-8'
         case 'UPC_E': return 'UPC-E'
+        case 'TITLE': return 'Title'
         default: return 'Barcode'
     }
 }
