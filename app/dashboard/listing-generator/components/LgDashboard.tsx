@@ -20,11 +20,11 @@ import {
     Download, Trash2, ChevronLeft, ChevronRight,
     X, Package, TrendingUp, Circle, Zap, Copy, Check,
 } from 'lucide-react'
-import UrlImport from '@/app/dashboard/listing-generator/components/ai-import/UrlImport'
-import UrlImportProcessing from '@/app/dashboard/listing-generator/components/ai-import/UrlImportProcessing'
-import UrlImportPreview from '@/app/dashboard/listing-generator/components/ai-import/UrlImportPreview'
-import UrlImportVeroWarning from '@/app/dashboard/listing-generator/components/ai-import/UrlImportVeroWarning'
-import UrlImportFailed from '@/app/dashboard/listing-generator/components/ai-import/UrlImportFailed'
+import UrlImport from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImport'
+import UrlImportProcessing from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImportProcessing'
+import UrlImportPreview from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImportPreview'
+import UrlImportVeroWarning from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImportVeroWarning'
+import UrlImportFailed from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImportFailed'
 import type { PlatformDetection, UrlImportResult, ImportedListingData } from '@/app/dashboard/listing-generator/types/url-import.types'
 
 // ── Design tokens ─────────────────────────────────────────────
