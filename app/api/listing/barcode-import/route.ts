@@ -390,6 +390,101 @@ async function lookupUpcItemDb(barcode: string, userKey?: string | null): Promis
     } catch { return null }
 }
 
+// ── Lookup: Barcode Lookup (barcodelookup.com) ────────────────────────────────
+// Paid API — key passed as ?formatted=y&barcode=...&key=YOUR_KEY
+// Plans start at ~$49/mo for 50k lookups. Strong US/EU coverage + images + reviews.
+async function lookupBarcodeLookup(barcode: string, apiKey: string): Promise<RawProduct | null> {
+    try {
+        const url = `https://api.barcodelookup.com/v3/products?barcode=${encodeURIComponent(barcode)}&formatted=y&key=${encodeURIComponent(apiKey)}`
+        const res = await fetch(url, {
+            signal: AbortSignal.timeout(8_000),
+            headers: { 'Accept': 'application/json' },
+        })
+        if (res.status === 403 || res.status === 429) {
+            console.warn('[barcode-import] Barcode Lookup: quota or auth error', res.status)
+            return null
+        }
+        if (!res.ok) return null
+
+        const data = await res.json() as {
+            products?: Array<{
+                title?: string
+                brand?: string
+                description?: string
+                category?: string
+                images?: string[]
+                stores?: Array<{ price?: string }>
+            }>
+        }
+
+        const item = data.products?.[0]
+        if (!item?.title || item.title.trim().length < 2) return null
+
+        let priceMarket: number | undefined
+        if (item.stores?.length) {
+            const prices = item.stores
+                .map(s => parseFloat(s.price ?? ''))
+                .filter(p => !isNaN(p) && p > 0)
+            if (prices.length) priceMarket = Math.min(...prices)
+        }
+
+        await trackUsage('barcodelookup')
+
+        return {
+            title:        item.title.trim(),
+            brand:        item.brand?.trim() ?? undefined,
+            description:  item.description?.trim() ?? undefined,
+            images:       (item.images ?? []).filter(Boolean).slice(0, 4),
+            category:     item.category?.trim() ?? undefined,
+            price_market: priceMarket,
+        }
+    } catch { return null }
+}
+
+// ── Lookup: Go-UPC (go-upc.com) ───────────────────────────────────────────────
+// Paid API — Bearer token in Authorization header.
+// Good EU/UK coverage. Free tier: 100/mo. Paid: from $9/mo.
+async function lookupGoUpc(barcode: string, apiKey: string): Promise<RawProduct | null> {
+    try {
+        const url = `https://go-upc.com/api/v1/code/${encodeURIComponent(barcode)}`
+        const res = await fetch(url, {
+            signal: AbortSignal.timeout(8_000),
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${apiKey}`,
+            },
+        })
+        if (res.status === 401 || res.status === 429) {
+            console.warn('[barcode-import] Go-UPC: quota or auth error', res.status)
+            return null
+        }
+        if (!res.ok) return null
+
+        const data = await res.json() as {
+            product?: {
+                name?: string
+                brand?: string
+                description?: string
+                category?: string
+                imageUrl?: string
+            }
+        }
+
+        const p = data.product
+        if (!p?.name || p.name.trim().length < 2) return null
+
+        await trackUsage('go_upc')
+
+        return {
+            title:       p.name.trim(),
+            brand:       p.brand?.trim() ?? undefined,
+            description: p.description?.trim() ?? undefined,
+            images:      p.imageUrl ? [p.imageUrl] : [],
+            category:    p.category?.trim() ?? undefined,
+        }
+    } catch { return null }
+}
+
 // ── AI transform: raw product → eBay listing fields ──────────────────────────
 interface AiListingResult {
     title_ebay: string
@@ -611,10 +706,12 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Step 2: Fetch API keys ───────────────────────────────────────────────────
-    const [geminiKey, anthropicKey, upcitemdbKey] = await Promise.all([
+    const [geminiKey, anthropicKey, upcitemdbKey, barcodelookupKey, goUpcKey] = await Promise.all([
         getKey('gemini'),
         getKey('anthropic'),
-        getKey('upcitemdb'),   // null on free tier — set in vault UI to unlock paid limits
+        getKey('upcitemdb'),      // null on free tier — set in vault UI to unlock paid limits
+        getKey('barcodelookup'),  // optional paid alternative — barcodelookup.com
+        getKey('go_upc'),         // optional paid alternative — go-upc.com (good EU coverage)
     ])
 
     // ── Step 3: Product lookup cascade ──────────────────────────────────────────
@@ -639,6 +736,18 @@ export async function POST(req: NextRequest) {
         // General fallback: UPCitemdb (uses paid key if set in vault, otherwise free trial)
         raw = await lookupUpcItemDb(digits, upcitemdbKey)
         if (raw) source = 'upcitemdb'
+    }
+
+    if (!raw && barcodelookupKey) {
+        // Optional: Barcode Lookup (barcodelookup.com) — activates when key added to vault
+        raw = await lookupBarcodeLookup(digits, barcodelookupKey)
+        if (raw) source = 'barcodelookup'
+    }
+
+    if (!raw && goUpcKey) {
+        // Optional: Go-UPC (go-upc.com) — activates when key added to vault; strong EU/UK coverage
+        raw = await lookupGoUpc(digits, goUpcKey)
+        if (raw) source = 'go_upc'
     }
 
     if (!raw) {
