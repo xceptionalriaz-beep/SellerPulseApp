@@ -14,6 +14,7 @@
 //   onCancel      — X / close → back to dashboard
 // ─────────────────────────────────────────────────────────────
 
+import type { ElementType } from 'react'
 import { X, Camera, Type, Barcode, RefreshCw, AlertCircle } from 'lucide-react'
 
 // ── Design tokens ──────────────────────────────────────────────
@@ -105,7 +106,7 @@ function AltOption({
     onClick,
     accent,
 }: {
-    icon: React.ElementType
+    icon: ElementType
     label: string
     description: string
     onClick: () => void
