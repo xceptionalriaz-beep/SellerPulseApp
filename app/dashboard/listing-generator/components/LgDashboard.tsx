@@ -25,7 +25,11 @@ import UrlImportProcessing from '@/app/dashboard/listing-generator/components/ai
 import UrlImportPreview from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImportPreview'
 import UrlImportVeroWarning from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImportVeroWarning'
 import UrlImportFailed from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImportFailed'
+import ImageImport from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImport'
+import ImageImportProcessing from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImportProcessing'
 import type { PlatformDetection, UrlImportResult, ImportedListingData } from '@/app/dashboard/listing-generator/types/url-import.types'
+import type { ImageImportData } from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImport'
+import type { ImageImportResult } from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImportProcessing'
 
 // ── Design tokens ─────────────────────────────────────────────
 const C = {
@@ -252,6 +256,11 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
     const [importUrl, setImportUrl] = useState<string>('')
     const [importPlatform, setImportPlatform] = useState<PlatformDetection | null>(null)
     const [importResult, setImportResult] = useState<UrlImportResult | null>(null)
+    // Image import states
+    const [showImageImport, setShowImageImport] = useState(false)
+    const [showImageProcessing, setShowImageProcessing] = useState(false)
+    const [imageImportData, setImageImportData] = useState<ImageImportData | null>(null)
+    const [imageImportResult, setImageImportResult] = useState<ImageImportResult | null>(null)
 
     // Listen for top bar button events
     useEffect(() => {
@@ -259,6 +268,8 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
             const mode = (e as CustomEvent).detail?.mode
             if (mode === 'ai_url') {
                 setShowUrlImport(true)
+            } else if (mode === 'ai_image') {
+                setShowImageImport(true)
             } else {
                 onNewListingProp()
             }
@@ -1168,6 +1179,52 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                         setImportResult(null)
                         setImportPlatform(null)
                         setImportUrl('')
+                    }}
+                />
+            )}
+
+            {/* ── Image Import Screen 1: Upload modal ───────────────── */}
+            {showImageImport && (
+                <ImageImport
+                    onClose={() => setShowImageImport(false)}
+                    onImport={(data: ImageImportData) => {
+                        setShowImageImport(false)
+                        setImageImportData(data)
+                        setShowImageProcessing(true)
+                    }}
+                    onSwitchToUrl={() => {
+                        setShowImageImport(false)
+                        setShowUrlImport(true)
+                    }}
+                />
+            )}
+
+            {/* ── Image Import Screen 2: Processing overlay ─────────── */}
+            {showImageProcessing && imageImportData && (
+                <ImageImportProcessing
+                    data={imageImportData}
+                    onComplete={(result: ImageImportResult) => {
+                        setShowImageProcessing(false)
+                        setImageImportResult(result)
+                        // Open the saved draft directly if we have its ID
+                        if (result.draft_id) {
+                            onEditDraft(result.draft_id)
+                        } else {
+                            onNewListingProp()
+                        }
+                        // Refresh the listings table so the new draft appears
+                        loadListings()
+                    }}
+                    onFailed={(_errorCode, _message) => {
+                        setShowImageProcessing(false)
+                        setImageImportData(null)
+                        // Fall back to the upload screen so user can try again
+                        setShowImageImport(true)
+                    }}
+                    onCancel={() => {
+                        setShowImageProcessing(false)
+                        setImageImportData(null)
+                        setShowImageImport(true)
                     }}
                 />
             )}
