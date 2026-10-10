@@ -54,6 +54,7 @@ const MAX_CONCURRENT = 3
 
 // ── Max queue size (prevents accidental bulk overflow) ────────────────────────
 const MAX_QUEUE = 100
+const MAX_BULK_PASTE = 50
 
 // ── Fetch timeout (ms) — items stuck in loading forever is bad UX ─────────────
 const FETCH_TIMEOUT_MS = 30_000
@@ -85,7 +86,7 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
     const inFlightRef = useRef<Set<string>>(new Set())
     // Mirror of queue for synchronous reads (avoids stale closure in camera handler)
     const queueRef = useRef<BarcodeQueueItem[]>([])
-    const inputRef = useRef<HTMLInputElement>(null)
+    const inputRef = useRef<HTMLTextAreaElement>(null)
 
     // ── Derived state ─────────────────────────────────────────────────────────
     const found = queue.filter(i => i.status === 'found' || i.status === 'vero_risk')
@@ -284,11 +285,47 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
         setTimeout(() => setCameraScanFeedback(null), 1_500)
     }, [addBarcode])
 
-    // ── Manual input submit ───────────────────────────────────────────────────
+    // ── Manual input submit — supports single entry or bulk paste (one per line) ──
     const handleManualSubmit = (e: React.FormEvent) => {
         e.preventDefault()
         if (!manualInput.trim()) return
-        addBarcode(manualInput)
+
+        const lines = manualInput
+            .split(/[\n,]+/)          // split on newlines or commas
+            .map(l => l.trim())
+            .filter(Boolean)
+
+        if (lines.length === 1) {
+            // Single entry — existing behaviour
+            addBarcode(lines[0])
+        } else {
+            // Bulk paste — cap at MAX_BULK_PASTE per submission
+            const batch = lines.slice(0, MAX_BULK_PASTE)
+            const skipped = lines.length - batch.length
+            let added = 0
+            let dupes = 0
+            let invalid = 0
+            let hitLimit = false
+
+            for (const line of batch) {
+                const result = addBarcode(line)
+                if (result === 'added') added++
+                else if (result === 'duplicate') dupes++
+                else if (result === 'invalid') invalid++
+                else if (result === 'full') { hitLimit = true; break }
+            }
+
+            // Build a summary message
+            const parts: string[] = []
+            if (added > 0) parts.push(`${added} added`)
+            if (dupes > 0) parts.push(`${dupes} duplicate${dupes > 1 ? 's' : ''} skipped`)
+            if (invalid > 0) parts.push(`${invalid} invalid`)
+            if (hitLimit) parts.push('queue full — remove items to add more')
+            if (skipped > 0) parts.push(`${skipped} over the ${MAX_BULK_PASTE}-per-paste limit`)
+            if (parts.length) setInputError(parts.join(' · '))
+            else setInputError(null)
+        }
+
         setManualInput('')
         inputRef.current?.focus()
     }
@@ -478,51 +515,76 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
                     />
                 )}
 
-                {/* ── Manual input ─────────────────────────────────────────── */}
-                <form onSubmit={handleManualSubmit} className="flex gap-2">
-                    <div className="flex-1">
-                        <input
+                {/* ── Manual / bulk input ──────────────────────────────────── */}
+                <form onSubmit={handleManualSubmit} className="flex flex-col gap-2">
+                    <div className="relative">
+                        <textarea
                             ref={inputRef}
-                            type="text"
-                            inputMode={identifierMode === 'MPN' ? 'text' : 'numeric'}
-                            pattern={identifierMode === 'MPN' ? undefined : '[0-9Xx]*'}
+                            rows={4}
                             value={manualInput}
                             onChange={e => { setManualInput(e.target.value); setInputError(null) }}
                             placeholder={
-                                identifierMode === 'MPN' ? 'Type a manufacturer part number (e.g. MK-700)' :
-                                    identifierMode === 'EPID' ? 'Type an eBay Product ID (numeric)' :
-                                        identifierMode === 'ISBN' ? 'Type or paste an ISBN-10 or ISBN-13' :
-                                            `Type or paste a ${identifierMode} barcode`
+                                identifierMode === 'MPN'
+                                    ? 'Paste manufacturer part numbers — one per line (up to 50)'
+                                    : identifierMode === 'EPID'
+                                        ? 'Paste eBay Product IDs — one per line (up to 50)'
+                                        : identifierMode === 'ISBN'
+                                            ? 'Paste ISBN numbers — one per line (up to 50)'
+                                            : `Paste ${identifierMode} barcodes — one per line (up to 50)`
                             }
-                            className="w-full rounded-xl px-4 py-2.5 text-sm outline-none transition-shadow"
+                            className="w-full rounded-xl px-4 py-3 text-sm outline-none resize-none transition-shadow"
                             style={{
                                 border: `1.5px solid ${inputError ? C.error : C.border}`,
                                 backgroundColor: C.surface,
                                 color: C.text,
                                 fontFamily: 'DM Mono, monospace',
+                                lineHeight: '1.6',
                             }}
                             onFocus={e => (e.currentTarget.style.borderColor = inputError ? C.error : C.primary)}
                             onBlur={e => (e.currentTarget.style.borderColor = inputError ? C.error : C.border)}
+                            onKeyDown={e => {
+                                // Ctrl/Cmd+Enter submits without needing the button
+                                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                                    e.preventDefault()
+                                    handleManualSubmit(e as unknown as React.FormEvent)
+                                }
+                            }}
                         />
-                        {inputError && (
-                            <p className="text-[11px] mt-1 ml-1" style={{ color: C.error }}>
-                                {inputError}
-                            </p>
+                        {/* Line count hint */}
+                        {manualInput.trim() && (
+                            <span
+                                className="absolute bottom-2.5 right-3 text-[10px] pointer-events-none"
+                                style={{ color: C.muted, fontFamily: 'DM Mono, monospace' }}
+                            >
+                                {Math.min(manualInput.split(/[\n,]+/).filter(l => l.trim()).length, MAX_BULK_PASTE)}/{MAX_BULK_PASTE}
+                            </span>
                         )}
                     </div>
-                    <button
-                        type="submit"
-                        disabled={!manualInput.trim()}
-                        className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-semibold text-sm transition-opacity disabled:opacity-40"
-                        style={{
-                            backgroundColor: C.primary,
-                            color: '#fff',
-                            fontFamily: 'DM Sans, sans-serif',
-                        }}
-                    >
-                        <PlusCircle size={15} />
-                        Add
-                    </button>
+
+                    {inputError && (
+                        <p className="text-[11px] ml-1" style={{ color: inputError.includes('added') ? C.success : C.error }}>
+                            {inputError}
+                        </p>
+                    )}
+
+                    <div className="flex items-center justify-between gap-3">
+                        <p className="text-[11px]" style={{ color: C.muted }}>
+                            One per line · up to {MAX_BULK_PASTE} at once · Ctrl+Enter to add
+                        </p>
+                        <button
+                            type="submit"
+                            disabled={!manualInput.trim()}
+                            className="flex items-center gap-1.5 px-5 py-2 rounded-xl font-semibold text-sm transition-opacity disabled:opacity-40 flex-shrink-0"
+                            style={{
+                                backgroundColor: C.primary,
+                                color: '#fff',
+                                fontFamily: 'DM Sans, sans-serif',
+                            }}
+                        >
+                            <PlusCircle size={15} />
+                            Add
+                        </button>
+                    </div>
                 </form>
 
                 {/* ── Bulk done banner (shown if navigation didn't fire) ────── */}
