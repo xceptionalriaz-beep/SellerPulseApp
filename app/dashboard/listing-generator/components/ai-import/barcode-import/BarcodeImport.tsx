@@ -410,7 +410,7 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
                         </div>
 
                         {/* Queue rows */}
-                        <div className="divide-y" style={{ divideColor: C.border }}>
+                        <div className="divide-y divide-[#ede9fe]">
                             {queue.map(item => (
                                 <BarcodeQueueRow
                                     key={item.id}
