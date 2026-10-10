@@ -967,31 +967,59 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
 
                                             {/* Actions */}
                                             <td className="px-3 py-1.5" onClick={e => e.stopPropagation()}>
-                                                <div className="flex items-center justify-end gap-1">
-                                                    <button onClick={() => onEditDraft(listing.id)}
-                                                        className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
-                                                        style={{ backgroundColor: C.primaryLight }}
-                                                        title="Edit in Wizard">
-                                                        <Pencil size={13} style={{ color: C.primary }} />
-                                                    </button>
-                                                    <button className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
-                                                        style={{ backgroundColor: C.warningBg }}
-                                                        title="Re-check VeRO">
-                                                        <ShieldCheck size={13} style={{ color: C.warning }} />
-                                                    </button>
-                                                    <button className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
-                                                        style={{ backgroundColor: C.bg }}
-                                                        title="Export CSV">
-                                                        <Download size={13} style={{ color: C.secondary }} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => setDeletingId(listing.id)}
-                                                        className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
-                                                        style={{ backgroundColor: C.dangerBg }}
-                                                        title="Delete Listing">
-                                                        <Trash2 size={13} style={{ color: C.danger }} />
-                                                    </button>
-                                                </div>
+                                                {deletingId === listing.id ? (
+                                                    /* ── Inline delete confirm ── */
+                                                    <div className="flex items-center justify-end gap-1.5">
+                                                        <span className="text-[11px] font-semibold" style={{ color: C.danger }}>
+                                                            Delete?
+                                                        </span>
+                                                        <button
+                                                            onClick={() => setDeletingId(null)}
+                                                            className="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-opacity hover:opacity-80"
+                                                            style={{ backgroundColor: C.bg, color: C.muted, border: `1px solid ${C.border}` }}
+                                                        >
+                                                            No
+                                                        </button>
+                                                        <button
+                                                            onClick={() => confirmDelete(listing.id)}
+                                                            disabled={deleteLoading}
+                                                            className="px-2.5 py-1 rounded-lg text-[11px] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 flex items-center gap-1"
+                                                            style={{ backgroundColor: C.danger }}
+                                                        >
+                                                            {deleteLoading
+                                                                ? <span className="w-3 h-3 rounded-full border border-white/40 border-t-white animate-spin" />
+                                                                : <Trash2 size={11} />}
+                                                            Yes
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    /* ── Normal action buttons ── */
+                                                    <div className="flex items-center justify-end gap-1">
+                                                        <button onClick={() => onEditDraft(listing.id)}
+                                                            className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
+                                                            style={{ backgroundColor: C.primaryLight }}
+                                                            title="Edit in Wizard">
+                                                            <Pencil size={13} style={{ color: C.primary }} />
+                                                        </button>
+                                                        <button className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
+                                                            style={{ backgroundColor: C.warningBg }}
+                                                            title="Re-check VeRO">
+                                                            <ShieldCheck size={13} style={{ color: C.warning }} />
+                                                        </button>
+                                                        <button className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
+                                                            style={{ backgroundColor: C.bg }}
+                                                            title="Export CSV">
+                                                            <Download size={13} style={{ color: C.secondary }} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setDeletingId(listing.id)}
+                                                            className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
+                                                            style={{ backgroundColor: C.dangerBg }}
+                                                            title="Delete Listing">
+                                                            <Trash2 size={13} style={{ color: C.danger }} />
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </td>
                                         </tr>
                                     )
@@ -1453,60 +1481,6 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                 />
             )}
 
-            {/* ── Delete Confirmation Modal ──────────────────────── */}
-            {deletingId && (
-                <div
-                    className="fixed inset-0 z-[60] flex items-center justify-center p-4"
-                    style={{ background: 'rgba(26,21,35,0.6)', backdropFilter: 'blur(4px)' }}
-                    onClick={e => { if (e.target === e.currentTarget && !deleteLoading) setDeletingId(null) }}
-                >
-                    <div
-                        className="w-full rounded-2xl p-6 flex flex-col gap-4"
-                        style={{ maxWidth: 360, backgroundColor: '#ffffff', boxShadow: '0 24px 80px rgba(117,48,251,0.22)' }}
-                    >
-                        {/* Icon */}
-                        <div className="w-11 h-11 rounded-xl flex items-center justify-center mx-auto"
-                            style={{ backgroundColor: '#fef2f2' }}>
-                            <Trash2 size={22} style={{ color: C.danger }} />
-                        </div>
-
-                        {/* Text */}
-                        <div className="text-center">
-                            <p className="text-base font-bold" style={{ color: C.dark, fontFamily: 'Syne, sans-serif' }}>
-                                Delete this listing?
-                            </p>
-                            <p className="text-sm mt-1" style={{ color: C.muted }}>
-                                {listings.find(l => l.id === deletingId)?.product_name || listings.find(l => l.id === deletingId)?.title || 'This listing'}
-                            </p>
-                            <p className="text-xs mt-2" style={{ color: C.muted }}>
-                                This cannot be undone.
-                            </p>
-                        </div>
-
-                        {/* Buttons */}
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => setDeletingId(null)}
-                                disabled={deleteLoading}
-                                className="flex-1 py-2.5 rounded-xl font-semibold text-sm transition-opacity hover:opacity-80 disabled:opacity-40"
-                                style={{ backgroundColor: C.bg, color: C.dark, border: `1px solid ${C.border}` }}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={() => confirmDelete(deletingId)}
-                                disabled={deleteLoading}
-                                className="flex-1 py-2.5 rounded-xl font-bold text-sm text-white transition-opacity hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
-                                style={{ backgroundColor: C.danger }}
-                            >
-                                {deleteLoading
-                                    ? <><span className="w-4 h-4 rounded-full border-2 border-white/40 border-t-white animate-spin" /> Deleting…</>
-                                    : <><Trash2 size={14} /> Delete</>}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
 
         </div>
     )
