@@ -676,8 +676,15 @@ export async function POST(req: NextRequest) {
     const userId = await getAuthUserId()
 
     // Parse body
-    const body = await req.json().catch(() => ({})) as { barcode?: string }
-    const rawBarcode = (body.barcode ?? '').trim()
+    const body = await req.json().catch(() => ({})) as {
+        barcode?: string
+        identifierMode?: string
+        useAiTitle?: boolean
+        useAiPrice?: boolean
+    }
+    const rawBarcode   = (body.barcode ?? '').trim()
+    const useAiTitle   = body.useAiTitle   !== false  // default true
+    const useAiPrice   = body.useAiPrice   !== false  // default true
 
     if (!rawBarcode) {
         return NextResponse.json(
@@ -767,7 +774,8 @@ export async function POST(req: NextRequest) {
     // ── Step 4: AI transforms raw → eBay listing fields ─────────────────────────
     let ai: AiListingResult | null = null
 
-    if (geminiKey || anthropicKey) {
+    // Only call AI when the user wants AI-enhanced output AND a key exists
+    if (useAiTitle && (geminiKey || anthropicKey)) {
         const [aiGemini, aiAnthropic] = await Promise.all([
             geminiKey    ? aiTransformWithGemini(raw, barcodeType, digits, geminiKey)       : Promise.resolve(null),
             anthropicKey ? aiTransformWithAnthropic(raw, barcodeType, digits, anthropicKey) : Promise.resolve(null),
@@ -775,11 +783,13 @@ export async function POST(req: NextRequest) {
         ai = aiGemini ?? aiAnthropic
     }
 
-    // Fallbacks when AI unavailable
-    const titleEbay   = ai?.title_ebay    ?? raw.title.slice(0, 80)
+    // Fallbacks when AI disabled or unavailable
+    const titleEbay   = useAiTitle ? (ai?.title_ebay    ?? raw.title.slice(0, 80)) : raw.title.slice(0, 80)
     const cassini     = ai?.cassini_score ?? 60
-    const descHtml    = ai?.description_html
-        ?? `<p>${raw.title}${raw.brand ? ` by ${raw.brand}` : ''}. Please see product details below.</p>${raw.description ? `<p>${raw.description}</p>` : ''}`
+    const descHtml    = useAiTitle
+        ? (ai?.description_html
+            ?? `<p>${raw.title}${raw.brand ? ` by ${raw.brand}` : ''}. Please see product details below.</p>${raw.description ? `<p>${raw.description}</p>` : ''}`)
+        : `<p>${raw.title}${raw.brand ? ` by ${raw.brand}` : ''}. Please see product details below.</p>${raw.description ? `<p>${raw.description}</p>` : ''}`
     const categoryLabel = ai?.category_label ?? raw.category ?? 'General'
     const itemSpecifics: Record<string, string> = {
         Brand: raw.brand ?? 'Unbranded',
@@ -789,12 +799,15 @@ export async function POST(req: NextRequest) {
     if (isIsbn && raw.author) itemSpecifics['Author'] = raw.author
     if (raw.publisher)        itemSpecifics['Publisher'] = raw.publisher
 
-    // Price: AI suggestion → market anchor × 0.85 (eBay typically 15% below market) → null
+    // Price: AI suggestion → market anchor × 0.85 → null
+    // Skipped entirely when useAiPrice = false (price_suggested will be undefined)
     let priceSuggested: number | null = null
-    if (ai?.price_suggested && ai.price_suggested > 0) {
-        priceSuggested = ai.price_suggested
-    } else if (raw.price_market && raw.price_market > 0) {
-        priceSuggested = parseFloat((raw.price_market * 0.85).toFixed(2))
+    if (useAiPrice) {
+        if (ai?.price_suggested && ai.price_suggested > 0) {
+            priceSuggested = ai.price_suggested
+        } else if (raw.price_market && raw.price_market > 0) {
+            priceSuggested = parseFloat((raw.price_market * 0.85).toFixed(2))
+        }
     }
 
     // ── Step 5: VeRO check ───────────────────────────────────────────────────────
@@ -806,7 +819,7 @@ export async function POST(req: NextRequest) {
         title_ebay:     titleEbay,
         brand:          raw.brand ?? undefined,
         description_html:       descHtml,
-        description_is_fallback: !ai?.description_html,
+        description_is_fallback: !useAiTitle || !ai?.description_html,
         images:         raw.images,
         category_label: categoryLabel,
         condition:      'New',       // barcode lookups default to new; seller adjusts in wizard
