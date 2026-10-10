@@ -316,7 +316,7 @@ export default function BarcodeImportPreview({ item, onClose, onRemove }: Barcod
                                 Price Intelligence
                             </span>
                         </div>
-                        <div className="px-3 divide-y" style={{ divideColor: C.border }}>
+                        <div className="px-3 divide-y divide-[#ede9fe]">
                             <PriceRow label="Suggested list price" value={product.price_suggested} />
                             <PriceRow label="Avg eBay sold price" value={product.price_avg_sold} />
                             <PriceRow label="Sold price range low" value={product.price_range_low} />
@@ -352,7 +352,7 @@ export default function BarcodeImportPreview({ item, onClose, onRemove }: Barcod
                                     Item Specifics
                                 </span>
                             </div>
-                            <div className="px-3 divide-y" style={{ divideColor: C.border }}>
+                            <div className="px-3 divide-y divide-[#ede9fe]">
                                 {Object.entries(product.item_specifics).map(([k, v]) => (
                                     <div key={k} className="flex items-start justify-between gap-3 py-1.5">
                                         <span className="text-[11px]" style={{ color: C.muted, flexShrink: 0 }}>{k}</span>
