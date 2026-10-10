@@ -1340,7 +1340,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                     onClick={e => { if (e.target === e.currentTarget) setShowBarcodeImport(false) }}
                 >
                     <div
-                        className="relative w-full rounded-2xl overflow-hidden flex flex-col"
+                        className="relative w-full rounded-2xl overflow-y-auto"
                         style={{
                             maxWidth: 680,
                             maxHeight: '92vh',
@@ -1348,10 +1348,16 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                             boxShadow: '0 24px 80px rgba(117,48,251,0.22)',
                         }}
                     >
-                        {/* Scrollable content */}
-                        <div className="overflow-y-auto flex-1">
-                            <BarcodeImport onBack={() => setShowBarcodeImport(false)} />
-                        </div>
+                        {/* Close button */}
+                        <button
+                            onClick={() => setShowBarcodeImport(false)}
+                            className="absolute top-3 right-3 z-10 w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:opacity-70"
+                            style={{ backgroundColor: '#ede9fe' }}
+                            title="Close"
+                        >
+                            <X size={15} style={{ color: '#7530fb' }} />
+                        </button>
+                        <BarcodeImport onBack={() => setShowBarcodeImport(false)} />
                     </div>
                 </div>
             )}
