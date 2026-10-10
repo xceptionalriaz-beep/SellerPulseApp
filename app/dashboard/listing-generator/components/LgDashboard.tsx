@@ -57,7 +57,7 @@ const C = {
 
 // ── Types ─────────────────────────────────────────────────────
 type ListingStatus = 'published' | 'draft' | 'ended' | 'scheduled'
-type VeroStatus = 'clear' | 'flagged' | 'unchecked'
+type VeroStatus = 'clear' | 'warning' | 'flagged' | 'unchecked'
 type SellerType = 'own_stock' | 'wholesale' | 'retail_arb' | 'dropship' | 'pod' | 'reseller'
 type TabFilter = 'all' | 'published' | 'draft' | 'ended' | 'scheduled'
 
@@ -136,6 +136,12 @@ function VeroBadge({ status }: { status: VeroStatus }) {
         <div className="flex items-center gap-1.5">
             <AlertTriangle size={14} style={{ color: C.danger }} />
             <span className="text-[12px] font-semibold" style={{ color: C.danger, fontFamily: 'DM Sans, sans-serif' }}>Flagged</span>
+        </div>
+    )
+    if (status === 'warning') return (
+        <div className="flex items-center gap-1.5">
+            <AlertTriangle size={14} style={{ color: C.warning }} />
+            <span className="text-[12px] font-semibold" style={{ color: C.warning, fontFamily: 'DM Sans, sans-serif' }}>Warning</span>
         </div>
     )
     return (
@@ -260,7 +266,8 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
     const [showImageImport, setShowImageImport] = useState(false)
     const [showImageProcessing, setShowImageProcessing] = useState(false)
     const [imageImportData, setImageImportData] = useState<ImageImportData | null>(null)
-    const [imageImportResult, setImageImportResult] = useState<ImageImportResult | null>(null)
+    const [imageVeroResult, setImageVeroResult] = useState<ImageImportResult | null>(null)
+    const [showImageVeroWarning, setShowImageVeroWarning] = useState(false)
 
     // Listen for top bar button events
     useEffect(() => {
@@ -278,6 +285,8 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
             setShowImageImport(false)
             setShowImageProcessing(false)
             setImageImportData(null)
+            setImageVeroResult(null)
+            setShowImageVeroWarning(false)
 
             if (mode === 'ai_url') {
                 setShowUrlImport(true)
@@ -776,7 +785,8 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                                         {listing.source_platform === 'cj_dropshipping' ? 'CJ Drop' :
                                                             listing.source_platform === 'aliexpress' ? 'AliExpress' :
                                                                 listing.source_platform === 'amazon_uk' ? 'Amazon UK' :
-                                                                    listing.source_platform.charAt(0).toUpperCase() + listing.source_platform.slice(1)}
+                                                                    listing.source_platform === 'image_import' ? 'Photo AI' :
+                                                                        listing.source_platform.charAt(0).toUpperCase() + listing.source_platform.slice(1)}
                                                     </span>
                                                 ) : (
                                                     <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
@@ -1218,15 +1228,20 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                     data={imageImportData}
                     onComplete={(result: ImageImportResult) => {
                         setShowImageProcessing(false)
-                        setImageImportResult(result)
-                        // Open the saved draft directly if we have its ID
-                        if (result.draft_id) {
-                            onEditDraft(result.draft_id)
+                        // Gate on VeRO — show warning screen before opening wizard
+                        const veroStatus = result.listing?.vero_status
+                        if (veroStatus === 'warning' || veroStatus === 'flagged') {
+                            setImageVeroResult(result)
+                            setShowImageVeroWarning(true)
                         } else {
-                            onNewListingProp()
+                            // No VeRO risk — open draft directly
+                            if (result.draft_id) {
+                                onEditDraft(result.draft_id)
+                            } else {
+                                onNewListingProp()
+                            }
+                            loadListings()
                         }
-                        // Refresh the listings table so the new draft appears
-                        loadListings()
                     }}
                     onFailed={(_errorCode, _message) => {
                         setShowImageProcessing(false)
@@ -1238,6 +1253,30 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                         setShowImageProcessing(false)
                         setImageImportData(null)
                         setShowImageImport(true)
+                    }}
+                />
+            )}
+
+            {/* ── Image Import Screen 2b: VeRO Warning ──────────────── */}
+            {showImageVeroWarning && imageVeroResult?.listing && (
+                <UrlImportVeroWarning
+                    brand={imageVeroResult.listing.vero_brand ?? imageVeroResult.listing.brand ?? 'Unknown Brand'}
+                    riskLevel={imageVeroResult.listing.vero_status === 'flagged' ? 'flagged' : 'warning'}
+                    reason={imageVeroResult.listing.vero_reason ?? 'This brand may be registered with eBay\'s VeRO programme.'}
+                    onBack={() => {
+                        setShowImageVeroWarning(false)
+                        setImageVeroResult(null)
+                        setImageImportData(null)
+                    }}
+                    onContinue={() => {
+                        setShowImageVeroWarning(false)
+                        if (imageVeroResult.draft_id) {
+                            onEditDraft(imageVeroResult.draft_id)
+                        } else {
+                            onNewListingProp()
+                        }
+                        loadListings()
+                        setImageVeroResult(null)
                     }}
                 />
             )}
