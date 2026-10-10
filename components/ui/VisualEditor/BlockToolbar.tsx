@@ -515,64 +515,90 @@ export default function BlockToolbar({
                         top: 'calc(100% + 6px)',
                         left: 0,
                         zIndex: 9999,
-                        width: 360,
+                        width: 260,
                         backgroundColor: '#ffffff',
                         border: '1px solid #e2e8f0',
                         borderRadius: 14,
-                        boxShadow: '0 20px 48px rgba(0,0,0,0.20)',
+                        boxShadow: '0 16px 42px rgba(0,0,0,0.18)',
                         overflow: 'hidden',
                         display: 'flex',
                         flexDirection: 'column',
                         fontFamily: 'DM Sans, sans-serif',
                     }}>
                         {/* Search Input */}
-                        <div style={{ padding: '10px 14px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: 9, backgroundColor: '#f8fafc' }}>
-                            <Search size={15} color="#7530fb" />
+                        <div style={{ padding: '9px 12px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: 8, backgroundColor: '#f8fafc' }}>
+                            <Search size={14} color="#7530fb" />
                             <input
                                 autoFocus
                                 type="text"
                                 value={fontSearch}
                                 onChange={e => setFontSearch(e.target.value)}
-                                placeholder="Search 100+ fonts by name..."
+                                placeholder="Search fonts..."
                                 style={{
                                     width: '100%',
                                     border: 'none',
                                     outline: 'none',
-                                    fontSize: 13,
+                                    fontSize: 12,
                                     backgroundColor: 'transparent',
                                     color: '#1e1535',
                                     fontFamily: 'DM Sans, sans-serif',
                                 }}
                             />
                             {fontSearch && (
-                                <button onClick={() => setFontSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 15, color: '#94a3b8' }}>×</button>
+                                <button onClick={() => setFontSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: '#94a3b8' }}>×</button>
                             )}
                         </div>
 
-                        {/* Category Filter Tabs */}
-                        <div style={{ display: 'flex', gap: 4, padding: '7px 10px', borderBottom: '1px solid #f1f5f9', backgroundColor: '#ffffff', justifyContent: 'space-between' }}>
-                            {(['all', 'sans', 'serif', 'display', 'mono', 'system'] as const).map(cat => (
-                                <button
-                                    key={cat}
-                                    onClick={() => setSelectedCategory(cat)}
-                                    style={{
-                                        flex: 1,
-                                        padding: '5px 0',
-                                        fontSize: 10.5,
-                                        fontWeight: 700,
-                                        borderRadius: 8,
-                                        border: `1px solid ${selectedCategory === cat ? '#7530fb' : '#ede9fe'}`,
-                                        backgroundColor: selectedCategory === cat ? '#7530fb' : '#f8f7ff',
-                                        color: selectedCategory === cat ? '#ffffff' : '#64748b',
-                                        cursor: 'pointer',
-                                        textTransform: 'capitalize',
-                                        textAlign: 'center',
-                                        transition: 'all 0.12s',
-                                    }}
-                                >
-                                    {cat === 'all' ? 'All' : cat}
-                                </button>
-                            ))}
+                        {/* 2-Row Category Tabs (3 Tabs per Row) for a Slim Layout */}
+                        <div style={{ padding: '7px 10px', borderBottom: '1px solid #f1f5f9', backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', gap: 5 }}>
+                            {/* Row 1: All, Sans, Serif */}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 5 }}>
+                                {(['all', 'sans', 'serif'] as const).map(cat => (
+                                    <button
+                                        key={cat}
+                                        onClick={() => setSelectedCategory(cat)}
+                                        style={{
+                                            padding: '4px 0',
+                                            fontSize: 11,
+                                            fontWeight: 700,
+                                            borderRadius: 6,
+                                            border: `1px solid ${selectedCategory === cat ? '#7530fb' : '#ede9fe'}`,
+                                            backgroundColor: selectedCategory === cat ? '#7530fb' : '#f8f7ff',
+                                            color: selectedCategory === cat ? '#ffffff' : '#64748b',
+                                            cursor: 'pointer',
+                                            textTransform: 'capitalize',
+                                            textAlign: 'center',
+                                            transition: 'all 0.12s',
+                                        }}
+                                    >
+                                        {cat === 'all' ? 'All' : cat}
+                                    </button>
+                                ))}
+                            </div>
+                            {/* Row 2: Display, Mono, System */}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 5 }}>
+                                {(['display', 'mono', 'system'] as const).map(cat => (
+                                    <button
+                                        key={cat}
+                                        onClick={() => setSelectedCategory(cat)}
+                                        style={{
+                                            padding: '4px 0',
+                                            fontSize: 11,
+                                            fontWeight: 700,
+                                            borderRadius: 6,
+                                            border: `1px solid ${selectedCategory === cat ? '#7530fb' : '#ede9fe'}`,
+                                            backgroundColor: selectedCategory === cat ? '#7530fb' : '#f8f7ff',
+                                            color: selectedCategory === cat ? '#ffffff' : '#64748b',
+                                            cursor: 'pointer',
+                                            textTransform: 'capitalize',
+                                            textAlign: 'center',
+                                            transition: 'all 0.12s',
+                                        }}
+                                    >
+                                        {cat}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
                         {/* Font List — Longer View (520px) showing 15+ fonts at once with clear large font size */}
