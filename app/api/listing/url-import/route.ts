@@ -323,19 +323,17 @@ async function scrapeWithApify(
     const dedicated = APIFY_ACTORS[platform]
     if (dedicated) {
         try {
-            const apifyCtrl = new AbortController()
-            const apifyTimer = setTimeout(() => apifyCtrl.abort(), 35_000)
-            const res = await fetch(
-                `https://api.apify.com/v2/acts/${dedicated.actorId}/run-sync-get-dataset-items?token=${token}&timeout=30`,
+            const apifyFetch = fetch(
+                `https://api.apify.com/v2/acts/${dedicated.actorId}/run-sync-get-dataset-items?token=${token}&timeout=25`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(dedicated.buildInput(url)),
-                    signal: apifyCtrl.signal,
                 }
-            )
-            clearTimeout(apifyTimer)
-            if (res.ok) {
+            ).catch(() => null)
+            const apifyTimeout = new Promise<null>(resolve => setTimeout(() => resolve(null), 28_000))
+            const res = await Promise.race([apifyFetch, apifyTimeout])
+            if (res && res.ok) {
                 const items = await res.json() as unknown[]
                 if (Array.isArray(items) && items.length > 0) {
                     const normalized = normalizeApifyResponse(items[0] as Record<string, unknown>, platform)
@@ -354,10 +352,8 @@ async function scrapeWithApify(
 
     try {
         const pageFunction = buildCheerioPageFunction(selectors)
-        const cheerioCtrl = new AbortController()
-        const cheerioTimer = setTimeout(() => cheerioCtrl.abort(), 35_000)
-        const res = await fetch(
-            `https://api.apify.com/v2/acts/apify~cheerio-scraper/run-sync-get-dataset-items?token=${token}&timeout=30`,
+        const cheerioFetch = fetch(
+            `https://api.apify.com/v2/acts/apify~cheerio-scraper/run-sync-get-dataset-items?token=${token}&timeout=25`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -366,11 +362,11 @@ async function scrapeWithApify(
                     pageFunction,
                     maxPagesPerCrawl: 1,
                 }),
-                signal: cheerioCtrl.signal,
             }
-        )
-        clearTimeout(cheerioTimer)
-        if (!res.ok) return null
+        ).catch(() => null)
+        const cheerioTimeout = new Promise<null>(resolve => setTimeout(() => resolve(null), 28_000))
+        const res = await Promise.race([cheerioFetch, cheerioTimeout])
+        if (!res || !res.ok) return null
         const items = await res.json() as unknown[]
         if (Array.isArray(items) && items.length > 0) {
             return normalizeApifyResponse(items[0] as Record<string, unknown>, platform)

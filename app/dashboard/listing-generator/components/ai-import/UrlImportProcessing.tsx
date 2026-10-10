@@ -202,21 +202,22 @@ export default function UrlImportProcessing({
     async function runImport() {
         updateTask('fetch', 'running')
 
-        // Use AbortController for wide browser compatibility
-        const controller = new AbortController()
-        const hardTimeout = setTimeout(() => controller.abort(), 90_000)
-
+        // Race the real API against a hard 30-second timeout
+        // 30s is enough for the route to either succeed or fall back itself
         try {
-            const res = await fetch('/api/listing/url-import', {
+            const timeoutPromise = new Promise<null>(resolve =>
+                setTimeout(() => resolve(null), 30_000)
+            )
+
+            const fetchPromise = fetch('/api/listing/url-import', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url, platform: platform.platform }),
-                signal: controller.signal,
-            })
+            }).then(r => r).catch(() => null)
 
-            clearTimeout(hardTimeout)
+            const res = await Promise.race([fetchPromise, timeoutPromise])
 
-            if (res.ok) {
+            if (res && res.ok) {
                 const result: UrlImportResult = await res.json()
 
                 // Sync tasks from API response
@@ -235,11 +236,9 @@ export default function UrlImportProcessing({
                 return
             }
 
-            // Non-ok response (4xx / 5xx / Vercel timeout) → fall through to simulation
-            clearTimeout(hardTimeout)
+            // null (timeout) or non-ok → fall through to simulation
         } catch {
-            // AbortError (timeout) or network error → fall through to simulation
-            clearTimeout(hardTimeout)
+            // Network error → fall through to simulation
         }
 
         if (cancelledRef.current) return
