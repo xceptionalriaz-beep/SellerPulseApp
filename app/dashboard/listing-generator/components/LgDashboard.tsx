@@ -1232,6 +1232,10 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                         setShowImageImport(false)
                         setShowUrlImport(true)
                     }}
+                    onSwitchToBarcode={() => {
+                        setShowImageImport(false)
+                        router.push('/dashboard/listing-generator/barcode-import')
+                    }}
                 />
             )}
 
