@@ -16,6 +16,8 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 import type {
     ImportPlatform,
     UrlImportResult,
@@ -153,6 +155,80 @@ const PLATFORM_SELECTORS: Record<string, {
         description: '#product-details-tab .content, [class*="product-details"]',
         brand: '.brand',
     },
+}
+
+// ── Get authenticated user from cookies ──────────────────────────────────────
+async function getAuthUserId(): Promise<string | null> {
+    try {
+        const cookieStore = await cookies()
+        const supabase = createServerClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            { cookies: { getAll() { return cookieStore.getAll() } } }
+        )
+        const { data: { user } } = await supabase.auth.getUser()
+        return user?.id ?? null
+    } catch { return null }
+}
+
+// ── Save imported listing as draft ────────────────────────────────────────────
+async function saveDraft(
+    userId: string,
+    listing: ImportedListingData,
+    sourceUrl: string
+): Promise<string | null> {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('listing_drafts')
+            .insert({
+                user_id: userId,
+                product_name: listing.title_raw,
+                title: listing.title_ebay,
+                title_score: listing.cassini_score,
+                description_html: listing.description_html,
+                category: listing.category_label ?? null,
+                condition: listing.condition,
+                ean: listing.ean ?? '',
+                item_specifics: listing.item_specifics,
+                sell_price: listing.price_suggested,
+                buy_price: listing.price_supplier,
+                supplier_price: listing.price_supplier,
+                supplier_currency: listing.price_currency,
+                markup_percentage: listing.markup_pct,
+                net_profit: listing.margin_gbp,
+                margin: listing.margin_pct,
+                seller_type: listing.seller_type,
+                source_platform: listing.platform,
+                supplier_url: sourceUrl,
+                supplier_images: listing.images.map(img => ({
+                    id: img.id,
+                    source_url: img.source_url,
+                    is_main: img.is_main,
+                })),
+                photos: listing.images.map(img => ({
+                    id: img.id,
+                    url: img.source_url,
+                    is_main: img.is_main,
+                })),
+                main_photo_url: listing.images.find(i => i.is_main)?.source_url ?? null,
+                photo_count: listing.images.length,
+                vero_status: listing.vero_status,
+                vero_brands_found: listing.vero_brand ? [listing.vero_brand] : [],
+                status: 'draft',
+                current_step: 1,
+            })
+            .select('id')
+            .single()
+
+        if (error || !data) {
+            console.warn('[url-import] Failed to save draft:', error?.message)
+            return null
+        }
+        return data.id as string
+    } catch (err) {
+        console.warn('[url-import] saveDraft threw:', err)
+        return null
+    }
 }
 
 // ── Read API key from vault ────────────────────────────────────────────────────
@@ -507,6 +583,9 @@ function buildSimulatedRaw(platform: ImportPlatform): RawProductData {
 
 // ── Main POST handler ──────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
+    // ── Get logged-in user ─────────────────────────────────────────────────────
+    const userId = await getAuthUserId()
+
     // ── Parse & validate ───────────────────────────────────────────────────────
     const body = await req.json().catch(() => ({})) as { url?: string; platform?: string }
     const { url, platform: platformKey } = body
@@ -677,12 +756,19 @@ export async function POST(req: NextRequest) {
         }
     }
 
+    // ── Save to listing_drafts ─────────────────────────────────────────────────
+    let draftId: string | null = null
+    if (userId) {
+        draftId = await saveDraft(userId, listing, url)
+    }
+
     const result: UrlImportResult = {
         success: true,
         platform: platformDetection,
         raw,
         listing,
         tasks,
+        draft_id: draftId,
     }
 
     return NextResponse.json(result)

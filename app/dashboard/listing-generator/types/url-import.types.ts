@@ -143,6 +143,7 @@ export interface UrlImportResult {
     raw: RawProductData | null
     listing: ImportedListingData | null
     tasks: ProcessingTask[]         // for the progress screen
+    draft_id?: string | null        // saved listing_drafts row ID
     error_code?: UrlImportErrorCode
     error_message?: string
 }
