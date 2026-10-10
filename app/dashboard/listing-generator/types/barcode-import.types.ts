@@ -46,6 +46,7 @@ export interface BarcodeProductData {
     title_ebay: string          // AI-optimised eBay title
     brand?: string
     description_html: string    // AI-generated eBay description
+    description_is_fallback?: boolean  // true when AI description was unavailable
 
     // Media
     images: string[]            // product image URLs

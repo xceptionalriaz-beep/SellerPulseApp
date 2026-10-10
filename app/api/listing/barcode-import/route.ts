@@ -692,6 +692,7 @@ export async function POST(req: NextRequest) {
         title_ebay: titleEbay,
         brand: raw.brand ?? undefined,
         description_html: descHtml,
+        description_is_fallback: !ai?.description_html,
         images: raw.images,
         category_label: categoryLabel,
         condition: 'New',       // barcode lookups default to new; seller adjusts in wizard

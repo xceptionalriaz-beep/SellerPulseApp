@@ -226,18 +226,20 @@ export default function BarcodeCamera({
     if (supported === false) {
         return (
             <div
-                className={`rounded-2xl flex flex-col items-center justify-center gap-3 p-6 text-center ${className}`}
+                className={`rounded-2xl flex items-start gap-3 p-4 ${className}`}
                 style={{ backgroundColor: C.warningLight, border: `1px dashed ${C.warning}` }}
             >
-                <CameraOff size={28} style={{ color: C.warning }} />
+                <CameraOff size={20} style={{ color: C.warning, flexShrink: 0, marginTop: 2 }} />
                 <div>
-                    <p className="font-semibold text-sm" style={{ color: C.text, fontFamily: 'Syne, sans-serif' }}>
-                        Camera scanner unavailable
+                    <p className="font-bold text-sm" style={{ color: C.text, fontFamily: 'Syne, sans-serif' }}>
+                        Camera scanning not available in this browser
                     </p>
-                    <p className="text-xs mt-1" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                        BarcodeDetector API is not supported in this browser.
-                        Use <strong>Chrome</strong> or <strong>Edge</strong> for camera scanning,
-                        or type barcodes manually below.
+                    <p className="text-xs mt-1 leading-relaxed" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                        Firefox and Safari don&apos;t support the camera barcode scanner.
+                        Switch to <strong>Chrome</strong> or <strong>Edge</strong> for camera scanning.
+                    </p>
+                    <p className="text-xs mt-2 font-semibold" style={{ color: C.text }}>
+                        ↓ You can still type or paste any barcode in the field below
                     </p>
                 </div>
             </div>

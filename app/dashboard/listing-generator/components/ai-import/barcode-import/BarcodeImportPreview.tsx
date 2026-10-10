@@ -9,7 +9,7 @@
 import { useEffect, useRef, useState } from 'react'
 import {
     X, ChevronLeft, ChevronRight, ShieldCheck, ShieldAlert, ShieldX,
-    ExternalLink, BarChart2, Tag, BookOpen, Package,
+    ExternalLink, BarChart2, Tag, BookOpen, Package, PencilLine, AlertTriangle,
 } from 'lucide-react'
 import { BarcodeQueueItem, barcodTypeLabel } from '../../../types/barcode-import.types'
 
@@ -112,6 +112,45 @@ function PriceRow({ label, value }: { label: string; value?: number }) {
     )
 }
 
+// ── Manual price input ────────────────────────────────────────────────────────
+function ManualPriceInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+    return (
+        <div className="py-2">
+            <p className="text-[11px] mb-1.5" style={{ color: C.muted }}>
+                Set your asking price manually:
+            </p>
+            <div className="flex items-center gap-1.5">
+                <span className="text-sm font-bold" style={{ color: C.text }}>£</span>
+                <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={value}
+                    onChange={e => onChange(e.target.value)}
+                    placeholder="0.00"
+                    className="flex-1 px-2 py-1 rounded-lg text-sm outline-none"
+                    style={{
+                        border: `1.5px solid ${C.border}`,
+                        backgroundColor: C.surface,
+                        color: C.text,
+                        fontFamily: 'DM Mono, monospace',
+                    }}
+                    onFocus={e => (e.currentTarget.style.borderColor = C.primary)}
+                    onBlur={e => (e.currentTarget.style.borderColor = C.border)}
+                />
+                {value && parseFloat(value) > 0 && (
+                    <span className="text-[11px] font-semibold" style={{ color: C.success }}>
+                        ✓ noted
+                    </span>
+                )}
+            </div>
+            <p className="text-[10px] mt-1" style={{ color: C.muted, opacity: 0.7 }}>
+                You can adjust the price in the full listing editor.
+            </p>
+        </div>
+    )
+}
+
 // ── Image gallery (mini) ──────────────────────────────────────────────────────
 function ImageStrip({ images }: { images: string[] }) {
     const [idx, setIdx] = useState(0)
@@ -181,6 +220,14 @@ export default function BarcodeImportPreview({ item, onClose, onRemove }: Barcod
     const panelRef = useRef<HTMLDivElement>(null)
     const product = item.result?.product
     const isVeRO = item.status === 'vero_risk'
+    const [manualPrice, setManualPrice] = useState('')
+
+    const noPriceData = product && (
+        product.price_suggested === undefined &&
+        product.price_avg_sold === undefined &&
+        product.price_range_low === undefined &&
+        product.price_range_high === undefined
+    )
 
     // Trap focus + close on Escape
     useEffect(() => {
@@ -337,6 +384,21 @@ export default function BarcodeImportPreview({ item, onClose, onRemove }: Barcod
                                     </span>
                                 </div>
                             )}
+                            {/* Empty state — free APIs don't return pricing */}
+                            {noPriceData && (
+                                <div className="py-2.5 space-y-1">
+                                    <p className="text-[11px] font-semibold flex items-center gap-1" style={{ color: C.muted }}>
+                                        <PencilLine size={11} />
+                                        No price data from lookup
+                                    </p>
+                                    <p className="text-[10px]" style={{ color: C.muted, opacity: 0.75 }}>
+                                        Free APIs (Open Food Facts, UPCitemdb) don't include pricing.
+                                        Check <a href="https://www.ebay.co.uk/sch/" target="_blank" rel="noopener noreferrer" className="underline">eBay completed listings</a> for market rate.
+                                    </p>
+                                </div>
+                            )}
+                            {/* Manual price input — always shown so user can note their price */}
+                            <ManualPriceInput value={manualPrice} onChange={setManualPrice} />
                         </div>
                     </div>
 
@@ -369,6 +431,19 @@ export default function BarcodeImportPreview({ item, onClose, onRemove }: Barcod
                             <p className="text-[10px] font-semibold uppercase tracking-wide mb-2" style={{ color: C.muted }}>
                                 eBay Description Preview
                             </p>
+                            {/* Fallback description warning */}
+                            {product.description_is_fallback && (
+                                <div
+                                    className="flex items-start gap-2 px-3 py-2 rounded-xl mb-2"
+                                    style={{ backgroundColor: C.warningLight, border: `1px solid ${C.warning}` }}
+                                >
+                                    <AlertTriangle size={12} style={{ color: C.warning, flexShrink: 0, marginTop: 1 }} />
+                                    <p className="text-[11px]" style={{ color: C.warning }}>
+                                        <strong>AI description unavailable</strong> — this is a basic template.
+                                        Edit the listing before publishing to improve quality.
+                                    </p>
+                                </div>
+                            )}
                             <div
                                 className="text-xs p-3 rounded-xl leading-relaxed"
                                 style={{ backgroundColor: C.bg, border: `1px solid ${C.border}`, color: C.text, fontFamily: 'DM Sans, sans-serif' }}

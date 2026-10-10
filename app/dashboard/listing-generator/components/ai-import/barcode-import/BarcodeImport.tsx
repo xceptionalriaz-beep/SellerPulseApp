@@ -49,6 +49,15 @@ interface BarcodeImportProps {
 // ── Max concurrent lookups (avoid hammering free APIs) ────────────────────────
 const MAX_CONCURRENT = 3
 
+// ── Session persistence key ───────────────────────────────────────────────────
+const SESSION_KEY = 'riazify_barcode_session'
+
+// ── Types for stored session ──────────────────────────────────────────────────
+interface StoredSession {
+    items: BarcodeQueueItem[]
+    savedAt: number
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function BarcodeImport({ onBack }: BarcodeImportProps) {
     const [queue, setQueue] = useState<BarcodeQueueItem[]>([])
@@ -59,6 +68,7 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
     const [failedItem, setFailedItem] = useState<BarcodeQueueItem | null>(null)
     const [bulkDone, setBulkDone] = useState(false)
     const [bulkSavedCount, setBulkSavedCount] = useState(0)
+    const [restoreSession, setRestoreSession] = useState<StoredSession | null>(null)
     const inFlightRef = useRef<Set<string>>(new Set())
     const inputRef = useRef<HTMLInputElement>(null)
 
@@ -171,6 +181,48 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
         })
     }, [lookupBarcode])
 
+    // ── Session persistence — load on mount ───────────────────────────────────
+    useEffect(() => {
+        try {
+            const raw = localStorage.getItem(SESSION_KEY)
+            if (!raw) return
+            const session: StoredSession = JSON.parse(raw)
+            // Only offer restore if session is less than 24 hours old and has terminal items
+            const age = Date.now() - session.savedAt
+            const hasTerminal = session.items.some(
+                i => i.status === 'found' || i.status === 'vero_risk' || i.status === 'not_found' || i.status === 'error'
+            )
+            if (age < 86_400_000 && hasTerminal) {
+                setRestoreSession(session)
+            }
+        } catch { /* localStorage unavailable or corrupt */ }
+    }, [])
+
+    // ── Session persistence — save on queue change ────────────────────────────
+    useEffect(() => {
+        if (queue.length === 0) return
+        const terminalItems = queue.filter(
+            i => i.status === 'found' || i.status === 'vero_risk' || i.status === 'not_found' || i.status === 'error'
+        )
+        if (terminalItems.length === 0) return
+        try {
+            const session: StoredSession = { items: terminalItems, savedAt: Date.now() }
+            localStorage.setItem(SESSION_KEY, JSON.stringify(session))
+        } catch { /* storage quota exceeded */ }
+    }, [queue])
+
+    // ── Restore previous session ──────────────────────────────────────────────
+    const handleRestore = () => {
+        if (!restoreSession) return
+        setQueue(restoreSession.items)
+        setRestoreSession(null)
+    }
+
+    const handleDismissRestore = () => {
+        setRestoreSession(null)
+        try { localStorage.removeItem(SESSION_KEY) } catch { /* ignore */ }
+    }
+
     // ── Manual input submit ───────────────────────────────────────────────────
     const handleManualSubmit = (e: React.FormEvent) => {
         e.preventDefault()
@@ -206,6 +258,7 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
         setQueue([])
         setBulkDone(false)
         setBulkSavedCount(0)
+        try { localStorage.removeItem(SESSION_KEY) } catch { /* ignore */ }
     }
 
     // ── View drafts ───────────────────────────────────────────────────────────
@@ -294,6 +347,39 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
 
             {/* ── Body ──────────────────────────────────────────────────────── */}
             <div className="max-w-2xl mx-auto px-4 sm:px-6 py-5 space-y-4">
+
+                {/* ── Restore session banner ───────────────────────────── */}
+                {restoreSession && (
+                    <div
+                        className="rounded-xl px-4 py-3 flex items-center justify-between gap-3 flex-wrap"
+                        style={{ backgroundColor: C.primaryLight, border: `1px solid ${C.primary}` }}
+                    >
+                        <div>
+                            <p className="text-sm font-bold" style={{ color: C.primary, fontFamily: 'Syne, sans-serif' }}>
+                                Restore previous session?
+                            </p>
+                            <p className="text-[11px] mt-0.5" style={{ color: C.muted }}>
+                                {restoreSession.items.length} barcode{restoreSession.items.length !== 1 ? 's' : ''} from your last scan session
+                            </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={handleRestore}
+                                className="px-3 py-1.5 rounded-lg text-xs font-bold"
+                                style={{ backgroundColor: C.primary, color: '#fff', fontFamily: 'DM Sans, sans-serif' }}
+                            >
+                                Restore
+                            </button>
+                            <button
+                                onClick={handleDismissRestore}
+                                className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+                                style={{ backgroundColor: C.bg, color: C.muted, fontFamily: 'DM Sans, sans-serif' }}
+                            >
+                                Dismiss
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 {/* ── Camera ──────────────────────────────────────────────── */}
                 <BarcodeCamera
