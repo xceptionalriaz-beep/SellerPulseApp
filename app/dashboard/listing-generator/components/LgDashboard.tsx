@@ -15,13 +15,16 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useSegments } from '../hooks/useSegments'
+import { useColumnConfig } from '../hooks/useColumnConfig'
 import { SegmentSidebar } from './segments/SegmentSidebar'
+import { ColumnPanel } from './columns/ColumnPanel'
 import { applySegment } from '../lib/segment-filter'
 import {
     Search, Upload, ChevronDown, LayoutList, LayoutGrid,
     CheckCircle2, AlertTriangle, Pencil, ShieldCheck,
     Download, Trash2, ChevronLeft, ChevronRight,
     X, Package, TrendingUp, Circle, Zap, Copy, Check,
+    Columns,
 } from 'lucide-react'
 import UrlImport from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImport'
 import UrlImportProcessing from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImportProcessing'
@@ -298,6 +301,19 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
         updateSegment,
         deleteSegment,
     } = useSegments()
+
+    // ── Column config (per-segment, localStorage-backed) ────────
+    const {
+        visibleColumns,
+        allColumns,
+        visibleIds,
+        isDefault: columnIsDefault,
+        toggleColumn,
+        moveColumn,
+        resetToDefaults: resetColumns,
+    } = useColumnConfig(activeSegmentId)
+
+    const [showColumnPanel, setShowColumnPanel] = useState(false)
 
     // Listen for top bar button events
     useEffect(() => {
@@ -709,6 +725,29 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                     <LayoutGrid size={14} />
                                 </button>
                             </div>
+
+                            {/* Columns button */}
+                            <button
+                                onClick={() => setShowColumnPanel(v => !v)}
+                                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[12px] font-semibold transition-all"
+                                style={{
+                                    backgroundColor: showColumnPanel ? C.primary : C.surface,
+                                    border: `1px solid ${showColumnPanel ? C.primary : C.border}`,
+                                    color: showColumnPanel ? '#fff' : C.body,
+                                    fontFamily: 'DM Sans, sans-serif',
+                                }}
+                                title="Manage columns"
+                            >
+                                <Columns size={13} />
+                                Columns
+                                {!columnIsDefault && (
+                                    <span style={{
+                                        width: 6, height: 6, borderRadius: '50%',
+                                        background: showColumnPanel ? '#fff' : C.primary,
+                                        flexShrink: 0,
+                                    }} />
+                                )}
+                            </button>
                         </div>
                     </div>{/* end toolbar card */}
 
@@ -721,6 +760,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                 {/* STICKY HEADER */}
                                 <thead className="sticky top-0 z-10">
                                     <tr style={{ backgroundColor: C.surface, borderBottom: `1px solid ${C.border}` }}>
+                                        {/* Fixed: checkbox */}
                                         <th style={{ width: 40 }} className="px-4 py-1.5">
                                             <input type="checkbox"
                                                 checked={paginated.length > 0 && selectedIds.size === paginated.length}
@@ -729,26 +769,28 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                                 style={{ accentColor: C.primary }}
                                             />
                                         </th>
+                                        {/* Fixed: photo */}
                                         <th style={{ width: 40, color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }} className="px-0 py-2 text-left text-[12px] font-bold uppercase tracking-widest"></th>
-                                        <th style={{ width: 220, color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }} className="px-3 py-2 text-left text-[12px] font-bold uppercase tracking-widest">Product</th>
-                                        <th style={{ width: 110, color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }} className="px-3 py-2 text-left text-[12px] font-bold uppercase tracking-widest">Condition</th>
-                                        <th style={{ width: 110, color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }} className="px-3 py-2 text-left text-[12px] font-bold uppercase tracking-widest">Category</th>
-                                        <th style={{ width: 100, color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }} className="px-3 py-2 text-left text-[12px] font-bold uppercase tracking-widest">Source</th>
-                                        <th style={{ width: 90, color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }} className="px-3 py-2 text-left text-[12px] font-bold uppercase tracking-widest">Price</th>
-                                        <th style={{ width: 80, color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }} className="px-3 py-2 text-left text-[12px] font-bold uppercase tracking-widest">Margin</th>
-                                        <th style={{ width: 70, color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }} className="px-3 py-2 text-left text-[12px] font-bold uppercase tracking-widest">Health</th>
-                                        <th style={{ width: 80, color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }} className="px-3 py-2 text-left text-[12px] font-bold uppercase tracking-widest">VeRO</th>
-                                        <th style={{ width: 90, color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }} className="px-3 py-2 text-left text-[12px] font-bold uppercase tracking-widest">Stock</th>
-                                        <th style={{ width: 90, color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }} className="px-3 py-2 text-left text-[12px] font-bold uppercase tracking-widest">Status</th>
-                                        <th style={{ width: 80, color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }} className="px-3 py-2 text-left text-[12px] font-bold uppercase tracking-widest">Date</th>
-                                        <th style={{ width: 160, color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }} className="px-3 py-2 text-left text-[12px] font-bold uppercase tracking-widest">IDs</th>
+
+                                        {/* Dynamic columns */}
+                                        {visibleColumns.map(col => (
+                                            <th
+                                                key={col.id}
+                                                style={{ width: col.width, color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }}
+                                                className="px-3 py-2 text-left text-[12px] font-bold uppercase tracking-widest"
+                                            >
+                                                {col.label}
+                                            </th>
+                                        ))}
+
+                                        {/* Fixed: actions */}
                                         <th style={{ width: 140, color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }} className="px-3 py-2 text-left text-[12px] font-bold uppercase tracking-widest"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {paginated.length === 0 ? (
                                         <tr>
-                                            <td colSpan={14} className="py-16 text-center">
+                                            <td colSpan={2 + visibleColumns.length + 1} className="py-16 text-center">
                                                 <div className="flex flex-col items-center gap-3">
                                                     <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
                                                         style={{ backgroundColor: C.primaryLight }}>
@@ -775,6 +817,248 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                         </tr>
                                     ) : paginated.map((listing) => {
                                         const isSelected = selectedIds.has(listing.id)
+
+                                        // ── Dynamic cell renderer ─────────────
+                                        function renderBodyCell(colId: string) {
+                                            switch (colId) {
+                                                case 'product':
+                                                    return (
+                                                        <td key="product" className="px-3 py-1.5 max-w-[240px]">
+                                                            <p className="text-[12px] font-semibold truncate max-w-[220px]"
+                                                                style={{ color: C.body, fontFamily: 'DM Sans, sans-serif' }}>
+                                                                {listing.title || listing.product_name || 'Untitled'}
+                                                            </p>
+                                                            {listing.sku && (
+                                                                <span className="text-[10px] px-1.5 py-0.5 rounded mt-0.5 inline-block"
+                                                                    style={{ backgroundColor: C.bg, color: C.muted, fontFamily: 'DM Sans, sans-serif', border: `1px solid ${C.border}` }}>
+                                                                    {listing.sku}
+                                                                </span>
+                                                            )}
+                                                        </td>
+                                                    )
+                                                case 'condition':
+                                                    return (
+                                                        <td key="condition" className="px-3 py-1.5">
+                                                            {listing.condition ? (
+                                                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap"
+                                                                    style={{
+                                                                        backgroundColor: listing.condition === 'New' || listing.condition === 'New with tags' ? C.successBg : listing.condition?.includes('Like New') ? C.infoBg : C.warningBg,
+                                                                        color: listing.condition === 'New' || listing.condition === 'New with tags' ? C.success : listing.condition?.includes('Like New') ? C.info : C.warning,
+                                                                        fontFamily: 'DM Sans, sans-serif',
+                                                                    }}>
+                                                                    {listing.condition}
+                                                                </span>
+                                                            ) : (
+                                                                <span style={{ color: C.muted, fontSize: 12 }}>—</span>
+                                                            )}
+                                                        </td>
+                                                    )
+                                                case 'category':
+                                                    return (
+                                                        <td key="category" className="px-3 py-3 max-w-[120px]">
+                                                            {listing.category ? (
+                                                                <span className="text-[11px] truncate block max-w-[120px]"
+                                                                    style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}
+                                                                    title={listing.category}>
+                                                                    {listing.category.split('>').pop()?.trim() || listing.category}
+                                                                </span>
+                                                            ) : (
+                                                                <span style={{ color: C.muted, fontSize: 12 }}>—</span>
+                                                            )}
+                                                        </td>
+                                                    )
+                                                case 'source':
+                                                    return (
+                                                        <td key="source" className="px-3 py-1.5">
+                                                            {listing.source_platform ? (
+                                                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap"
+                                                                    style={{ backgroundColor: C.primaryLight, color: C.primary, fontFamily: 'DM Sans, sans-serif' }}>
+                                                                    {listing.source_platform === 'cj_dropshipping' ? 'CJ Drop' :
+                                                                        listing.source_platform === 'aliexpress' ? 'AliExpress' :
+                                                                            listing.source_platform === 'amazon_uk' ? 'Amazon UK' :
+                                                                                listing.source_platform === 'image_import' ? 'Photo AI' :
+                                                                                    listing.source_platform === 'barcode_import' ? 'Barcode AI' :
+                                                                                        listing.source_platform === 'title_import' ? 'Title AI' :
+                                                                                            listing.source_platform === 'url_import' ? 'URL AI' :
+                                                                                                listing.source_platform.charAt(0).toUpperCase() + listing.source_platform.slice(1)}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                                                                    style={{ backgroundColor: '#f8f7ff', color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
+                                                                    Own
+                                                                </span>
+                                                            )}
+                                                        </td>
+                                                    )
+                                                case 'seller_type':
+                                                    return (
+                                                        <td key="seller_type" className="px-3 py-1.5">
+                                                            <SellerTypePill type={listing.seller_type} />
+                                                        </td>
+                                                    )
+                                                case 'price':
+                                                    return (
+                                                        <td key="price" className="px-3 py-1.5">
+                                                            <span className="text-[14px] font-bold" style={{ color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }}>
+                                                                £{listing.sell_price?.toFixed(2) ?? '—'}
+                                                            </span>
+                                                        </td>
+                                                    )
+                                                case 'margin':
+                                                    return (
+                                                        <td key="margin" className="px-3 py-1.5">
+                                                            {listing.margin !== null ? (
+                                                                <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                                                                    style={{
+                                                                        backgroundColor: listing.margin >= 25 ? C.successBg : listing.margin >= 15 ? C.warningBg : C.dangerBg,
+                                                                        color: listing.margin >= 25 ? C.success : listing.margin >= 15 ? C.warning : C.danger,
+                                                                        fontFamily: 'DM Sans, sans-serif',
+                                                                    }}>
+                                                                    {listing.margin}%
+                                                                </span>
+                                                            ) : (
+                                                                <span style={{ color: C.muted, fontSize: 12 }}>—</span>
+                                                            )}
+                                                        </td>
+                                                    )
+                                                case 'net_profit':
+                                                    return (
+                                                        <td key="net_profit" className="px-3 py-1.5">
+                                                            {listing.net_profit !== null ? (
+                                                                <span className="text-[13px] font-semibold"
+                                                                    style={{ color: listing.net_profit >= 0 ? C.success : C.danger, fontFamily: 'DM Sans, sans-serif' }}>
+                                                                    £{listing.net_profit.toFixed(2)}
+                                                                </span>
+                                                            ) : (
+                                                                <span style={{ color: C.muted, fontSize: 12 }}>—</span>
+                                                            )}
+                                                        </td>
+                                                    )
+                                                case 'health':
+                                                    return (
+                                                        <td key="health" className="px-3 py-1.5">
+                                                            <HealthBadge score={listing.health_score} />
+                                                        </td>
+                                                    )
+                                                case 'vero':
+                                                    return (
+                                                        <td key="vero" className="px-3 py-1.5">
+                                                            <VeroBadge status={listing.vero_status} />
+                                                        </td>
+                                                    )
+                                                case 'stock':
+                                                    return (
+                                                        <td key="stock" className="px-3 py-1.5">
+                                                            <StockCell
+                                                                quantity={listing.quantity}
+                                                                outOfStock={listing.out_of_stock_option}
+                                                                sellerType={listing.seller_type}
+                                                            />
+                                                        </td>
+                                                    )
+                                                case 'status':
+                                                    return (
+                                                        <td key="status" className="px-3 py-1.5">
+                                                            <StatusPill status={listing.status} />
+                                                        </td>
+                                                    )
+                                                case 'date':
+                                                    return (
+                                                        <td key="date" className="px-3 py-1.5">
+                                                            <span className="text-[11px]"
+                                                                style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
+                                                                {new Date(listing.created_at).toLocaleDateString('en-GB', {
+                                                                    day: '2-digit', month: 'short', year: '2-digit'
+                                                                })}
+                                                            </span>
+                                                        </td>
+                                                    )
+                                                case 'updated':
+                                                    return (
+                                                        <td key="updated" className="px-3 py-1.5">
+                                                            <span className="text-[11px]"
+                                                                style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
+                                                                {new Date(listing.updated_at).toLocaleDateString('en-GB', {
+                                                                    day: '2-digit', month: 'short', year: '2-digit'
+                                                                })}
+                                                            </span>
+                                                        </td>
+                                                    )
+                                                case 'ids':
+                                                    return (
+                                                        <td key="ids" className="px-3 py-1.5">
+                                                            <div className="flex flex-col gap-1">
+                                                                {/* EAN / UPC — auto detected */}
+                                                                {(() => {
+                                                                    const gtinValue = listing.item_specifics?.['EAN'] || listing.item_specifics?.['UPC'] || listing.item_specifics?.['GTIN']
+                                                                    if (gtinValue) {
+                                                                        const { label, color, bg } = detectGtinType(gtinValue)
+                                                                        return (
+                                                                            <div className="flex items-center gap-1 group/ean">
+                                                                                <span className="text-[9px] font-bold px-1 py-0.5 rounded"
+                                                                                    style={{ backgroundColor: bg, color, fontFamily: 'DM Sans, sans-serif' }}>
+                                                                                    {label}
+                                                                                </span>
+                                                                                <span className="text-[11px]"
+                                                                                    style={{ color: C.body, fontFamily: 'monospace' }}>
+                                                                                    {gtinValue}
+                                                                                </span>
+                                                                                <button
+                                                                                    onClick={e => { e.stopPropagation(); copyToClipboard(gtinValue, `ean-${listing.id}`) }}
+                                                                                    className="opacity-0 group-hover/ean:opacity-100 transition-opacity p-0.5 rounded"
+                                                                                    style={{ color: copiedId === `ean-${listing.id}` ? C.success : C.muted }}
+                                                                                    title="Copy">
+                                                                                    {copiedId === `ean-${listing.id}` ? <Check size={10} /> : <Copy size={10} />}
+                                                                                </button>
+                                                                            </div>
+                                                                        )
+                                                                    }
+                                                                    return (
+                                                                        <div className="flex items-center gap-1">
+                                                                            <span className="text-[9px] font-bold px-1 py-0.5 rounded"
+                                                                                style={{ backgroundColor: C.bg, color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                                                                EAN
+                                                                            </span>
+                                                                            <span className="text-[11px]" style={{ color: C.muted }}>—</span>
+                                                                        </div>
+                                                                    )
+                                                                })()}
+                                                                {/* eBay Item ID */}
+                                                                {listing.ebay_listing_id ? (
+                                                                    <div className="flex items-center gap-1 group/ebay">
+                                                                        <span className="text-[9px] font-bold px-1 py-0.5 rounded"
+                                                                            style={{ backgroundColor: C.warningBg, color: C.warning, fontFamily: 'DM Sans, sans-serif' }}>
+                                                                            eBay
+                                                                        </span>
+                                                                        <span className="text-[11px]"
+                                                                            style={{ color: C.body, fontFamily: 'monospace' }}>
+                                                                            {listing.ebay_listing_id}
+                                                                        </span>
+                                                                        <button
+                                                                            onClick={e => { e.stopPropagation(); copyToClipboard(listing.ebay_listing_id!, `ebay-${listing.id}`) }}
+                                                                            className="opacity-0 group-hover/ebay:opacity-100 transition-opacity p-0.5 rounded"
+                                                                            style={{ color: copiedId === `ebay-${listing.id}` ? C.success : C.muted }}
+                                                                            title="Copy">
+                                                                            {copiedId === `ebay-${listing.id}` ? <Check size={10} /> : <Copy size={10} />}
+                                                                        </button>
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="flex items-center gap-1">
+                                                                        <span className="text-[9px] font-bold px-1 py-0.5 rounded"
+                                                                            style={{ backgroundColor: C.bg, color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                                                            eBay
+                                                                        </span>
+                                                                        <span className="text-[11px]" style={{ color: C.muted }}>—</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                    )
+                                                default:
+                                                    return <td key={colId} />
+                                            }
+                                        }
+
                                         return (
                                             <tr key={listing.id}
                                                 className="cursor-pointer transition-colors"
@@ -786,7 +1070,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                                 onMouseLeave={e => (e.currentTarget.style.backgroundColor = C.surface)}
                                                 onClick={() => toggleSelect(listing.id)}>
 
-                                                {/* Checkbox */}
+                                                {/* Fixed: Checkbox */}
                                                 <td className="px-4 py-1.5" onClick={e => e.stopPropagation()}>
                                                     <input type="checkbox"
                                                         checked={isSelected}
@@ -796,7 +1080,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                                     />
                                                 </td>
 
-                                                {/* Product Image — fixed size, crops to fit */}
+                                                {/* Fixed: Product Image */}
                                                 <td className="p-0" style={{ width: 40, minWidth: 40, maxWidth: 40, height: 40, maxHeight: 40, overflow: 'hidden' }}>
                                                     <div style={{ width: 40, height: 40, backgroundColor: C.bg, overflow: 'hidden', flexShrink: 0 }}>
                                                         {listing.main_photo_url ? (
@@ -813,196 +1097,10 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                                     </div>
                                                 </td>
 
-                                                {/* Product Info */}
-                                                <td className="px-3 py-1.5 max-w-[240px]">
-                                                    <p className="text-[12px] font-semibold truncate max-w-[220px]"
-                                                        style={{ color: C.body, fontFamily: 'DM Sans, sans-serif' }}>
-                                                        {listing.title || listing.product_name || 'Untitled'}
-                                                    </p>
-                                                    {listing.sku && (
-                                                        <span className="text-[10px] px-1.5 py-0.5 rounded mt-0.5 inline-block"
-                                                            style={{ backgroundColor: C.bg, color: C.muted, fontFamily: 'DM Sans, sans-serif', border: `1px solid ${C.border}` }}>
-                                                            {listing.sku}
-                                                        </span>
-                                                    )}
-                                                </td>
+                                                {/* Dynamic columns */}
+                                                {visibleColumns.map(col => renderBodyCell(col.id))}
 
-                                                {/* Condition */}
-                                                <td className="px-3 py-1.5">
-                                                    {listing.condition ? (
-                                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap"
-                                                            style={{
-                                                                backgroundColor: listing.condition === 'New' || listing.condition === 'New with tags' ? C.successBg : listing.condition?.includes('Like New') ? C.infoBg : C.warningBg,
-                                                                color: listing.condition === 'New' || listing.condition === 'New with tags' ? C.success : listing.condition?.includes('Like New') ? C.info : C.warning,
-                                                                fontFamily: 'DM Sans, sans-serif',
-                                                            }}>
-                                                            {listing.condition}
-                                                        </span>
-                                                    ) : (
-                                                        <span style={{ color: C.muted, fontSize: 12 }}>—</span>
-                                                    )}
-                                                </td>
-
-                                                {/* Category */}
-                                                <td className="px-3 py-3 max-w-[120px]">
-                                                    {listing.category ? (
-                                                        <span className="text-[11px] truncate block max-w-[120px]"
-                                                            style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}
-                                                            title={listing.category}>
-                                                            {listing.category.split('>').pop()?.trim() || listing.category}
-                                                        </span>
-                                                    ) : (
-                                                        <span style={{ color: C.muted, fontSize: 12 }}>—</span>
-                                                    )}
-                                                </td>
-
-                                                {/* Source Platform */}
-                                                <td className="px-3 py-1.5">
-                                                    {listing.source_platform ? (
-                                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap"
-                                                            style={{ backgroundColor: C.primaryLight, color: C.primary, fontFamily: 'DM Sans, sans-serif' }}>
-                                                            {listing.source_platform === 'cj_dropshipping' ? 'CJ Drop' :
-                                                                listing.source_platform === 'aliexpress' ? 'AliExpress' :
-                                                                    listing.source_platform === 'amazon_uk' ? 'Amazon UK' :
-                                                                        listing.source_platform === 'image_import' ? 'Photo AI' :
-                                                                            listing.source_platform === 'barcode_import' ? 'Barcode AI' :
-                                                                                listing.source_platform === 'title_import' ? 'Title AI' :
-                                                                                    listing.source_platform === 'url_import' ? 'URL AI' :
-                                                                                        listing.source_platform.charAt(0).toUpperCase() + listing.source_platform.slice(1)}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
-                                                            style={{ backgroundColor: '#f8f7ff', color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
-                                                            Own
-                                                        </span>
-                                                    )}
-                                                </td>
-
-                                                {/* Price */}
-                                                <td className="px-3 py-1.5">
-                                                    <span className="text-[14px] font-bold" style={{ color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }}>
-                                                        £{listing.sell_price?.toFixed(2) ?? '—'}
-                                                    </span>
-                                                </td>
-
-                                                {/* Margin */}
-                                                <td className="px-3 py-1.5">
-                                                    {listing.margin !== null && (
-                                                        <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold"
-                                                            style={{
-                                                                backgroundColor: listing.margin >= 25 ? C.successBg : listing.margin >= 15 ? C.warningBg : C.dangerBg,
-                                                                color: listing.margin >= 25 ? C.success : listing.margin >= 15 ? C.warning : C.danger,
-                                                                fontFamily: 'DM Sans, sans-serif',
-                                                            }}>
-                                                            {listing.margin}%
-                                                        </span>
-                                                    )}
-                                                </td>
-
-                                                {/* Health Score */}
-                                                <td className="px-3 py-1.5">
-                                                    <HealthBadge score={listing.health_score} />
-                                                </td>
-
-                                                {/* VeRO */}
-                                                <td className="px-3 py-1.5">
-                                                    <VeroBadge status={listing.vero_status} />
-                                                </td>
-
-                                                {/* Stock */}
-                                                <td className="px-3 py-1.5">
-                                                    <StockCell
-                                                        quantity={listing.quantity}
-                                                        outOfStock={listing.out_of_stock_option}
-                                                        sellerType={listing.seller_type}
-                                                    />
-                                                </td>
-
-                                                {/* Status */}
-                                                <td className="px-3 py-1.5">
-                                                    <StatusPill status={listing.status} />
-                                                </td>
-
-                                                {/* Date */}
-                                                <td className="px-3 py-1.5">
-                                                    <span className="text-[11px]"
-                                                        style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
-                                                        {new Date(listing.created_at).toLocaleDateString('en-GB', {
-                                                            day: '2-digit', month: 'short', year: '2-digit'
-                                                        })}
-                                                    </span>
-                                                </td>
-
-                                                {/* IDs — EAN/UPC auto-detect + eBay Item ID */}
-                                                <td className="px-3 py-1.5">
-                                                    <div className="flex flex-col gap-1">
-                                                        {/* EAN / UPC — auto detected */}
-                                                        {(() => {
-                                                            const gtinValue = listing.item_specifics?.['EAN'] || listing.item_specifics?.['UPC'] || listing.item_specifics?.['GTIN']
-                                                            if (gtinValue) {
-                                                                const { label, color, bg } = detectGtinType(gtinValue)
-                                                                return (
-                                                                    <div className="flex items-center gap-1 group/ean">
-                                                                        <span className="text-[9px] font-bold px-1 py-0.5 rounded"
-                                                                            style={{ backgroundColor: bg, color, fontFamily: 'DM Sans, sans-serif' }}>
-                                                                            {label}
-                                                                        </span>
-                                                                        <span className="text-[11px]"
-                                                                            style={{ color: C.body, fontFamily: 'monospace' }}>
-                                                                            {gtinValue}
-                                                                        </span>
-                                                                        <button
-                                                                            onClick={e => { e.stopPropagation(); copyToClipboard(gtinValue, `ean-${listing.id}`) }}
-                                                                            className="opacity-0 group-hover/ean:opacity-100 transition-opacity p-0.5 rounded"
-                                                                            style={{ color: copiedId === `ean-${listing.id}` ? C.success : C.muted }}
-                                                                            title="Copy">
-                                                                            {copiedId === `ean-${listing.id}` ? <Check size={10} /> : <Copy size={10} />}
-                                                                        </button>
-                                                                    </div>
-                                                                )
-                                                            }
-                                                            return (
-                                                                <div className="flex items-center gap-1">
-                                                                    <span className="text-[9px] font-bold px-1 py-0.5 rounded"
-                                                                        style={{ backgroundColor: C.bg, color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                                                                        EAN
-                                                                    </span>
-                                                                    <span className="text-[11px]" style={{ color: C.muted }}>—</span>
-                                                                </div>
-                                                            )
-                                                        })()}
-                                                        {/* eBay Item ID */}
-                                                        {listing.ebay_listing_id ? (
-                                                            <div className="flex items-center gap-1 group/ebay">
-                                                                <span className="text-[9px] font-bold px-1 py-0.5 rounded"
-                                                                    style={{ backgroundColor: C.warningBg, color: C.warning, fontFamily: 'DM Sans, sans-serif' }}>
-                                                                    eBay
-                                                                </span>
-                                                                <span className="text-[11px]"
-                                                                    style={{ color: C.body, fontFamily: 'monospace' }}>
-                                                                    {listing.ebay_listing_id}
-                                                                </span>
-                                                                <button
-                                                                    onClick={e => { e.stopPropagation(); copyToClipboard(listing.ebay_listing_id!, `ebay-${listing.id}`) }}
-                                                                    className="opacity-0 group-hover/ebay:opacity-100 transition-opacity p-0.5 rounded"
-                                                                    style={{ color: copiedId === `ebay-${listing.id}` ? C.success : C.muted }}
-                                                                    title="Copy">
-                                                                    {copiedId === `ebay-${listing.id}` ? <Check size={10} /> : <Copy size={10} />}
-                                                                </button>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="flex items-center gap-1">
-                                                                <span className="text-[9px] font-bold px-1 py-0.5 rounded"
-                                                                    style={{ backgroundColor: C.bg, color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                                                                    eBay
-                                                                </span>
-                                                                <span className="text-[11px]" style={{ color: C.muted }}>—</span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </td>
-
-                                                {/* Actions */}
+                                                {/* Fixed: Actions */}
                                                 <td className="px-3 py-1.5" onClick={e => e.stopPropagation()}>
                                                     {deletingId === listing.id ? (
                                                         /* ── Inline delete confirm ── */
@@ -1488,6 +1586,18 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                     </div>
                 </div>
             )}
+
+            {/* ── Column Manager Panel ──────────────────────────────── */}
+            <ColumnPanel
+                open={showColumnPanel}
+                onClose={() => setShowColumnPanel(false)}
+                allColumns={allColumns}
+                visibleIds={visibleIds}
+                isDefault={columnIsDefault}
+                onToggle={toggleColumn}
+                onMove={moveColumn}
+                onReset={resetColumns}
+            />
 
             {/* ── Image Import Screen 4: Failed ─────────────────────── */}
             {showImageFailed && (
