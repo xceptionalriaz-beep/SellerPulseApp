@@ -72,11 +72,11 @@ const PLATFORM_META: Record<string, { displayName: string; logoKey: string; curr
 // Dedicated actors give cleaner data. Generic cheerio-scraper is the fallback.
 const APIFY_ACTORS: Record<string, { actorId: string; buildInput: (url: string) => object }> = {
     aliexpress: {
-        actorId: 'bebity~aliexpress-product-details-scraper',
+        actorId: 'piotrv1001~aliexpress-product-details-scraper',
         buildInput: (url) => ({ startUrls: [{ url }], maxItems: 1 }),
     },
     aliexpress_wholesale: {
-        actorId: 'bebity~aliexpress-product-details-scraper',
+        actorId: 'piotrv1001~aliexpress-product-details-scraper',
         buildInput: (url) => ({ startUrls: [{ url }], maxItems: 1 }),
     },
     amazon_uk: {
