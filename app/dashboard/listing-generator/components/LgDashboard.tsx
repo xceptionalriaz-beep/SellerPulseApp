@@ -14,6 +14,9 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
+import { useSegments }    from '../hooks/useSegments'
+import { SegmentSidebar } from './segments/SegmentSidebar'
+import { applySegment }   from '../lib/segment-filter'
 import {
     Search, Upload, ChevronDown, LayoutList, LayoutGrid,
     CheckCircle2, AlertTriangle, Pencil, ShieldCheck,
@@ -284,6 +287,18 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
     const [deletingId, setDeletingId] = useState<string | null>(null)
     const [deleteLoading, setDeleteLoading] = useState(false)
 
+    // ── Segments ────────────────────────────────────────────────
+    const {
+        segments,
+        customSegments,
+        activeSegmentId,
+        setActiveSegmentId,
+        loading: segLoading,
+        createSegment,
+        updateSegment,
+        deleteSegment,
+    } = useSegments()
+
     // Listen for top bar button events
     useEffect(() => {
         function onNewListing(e: Event) {
@@ -400,7 +415,13 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
     useEffect(() => { loadListings() }, [loadListings])
 
     // ── Filter listings ─────────────────────────────────────────
-    const filtered = listings.filter(l => {
+    // 1. Apply the active segment (built-in or custom filter rules)
+    const activeSegment = segments.find(s => s.id === activeSegmentId)
+    const segmentFiltered = activeSegment
+        ? applySegment(listings, activeSegment.filters, activeSegment.logic)
+        : listings
+
+    const filtered = segmentFiltered.filter(l => {
         const matchTab = activeTab === 'all' || l.status === activeTab
 
         if (!debouncedSearch) return matchTab
@@ -579,6 +600,22 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                 </div>
 
             </div>
+
+            {/* CONTENT AREA — sidebar + toolbar + table */}
+            <div className="flex-1 flex min-h-0">
+
+            {/* SEGMENT SIDEBAR */}
+            <SegmentSidebar
+                segments={segments}
+                customSegments={customSegments}
+                activeSegmentId={activeSegmentId}
+                listings={listings}
+                loading={segLoading}
+                onSelect={id => { setActiveSegmentId(id); setPage(1); clearSelection() }}
+                onCreateSegment={async (payload) => { await createSegment(payload) }}
+                onUpdateSegment={async (id, payload) => { await updateSegment(id, payload) }}
+                onDeleteSegment={async (id) => { await deleteSegment(id) }}
+            />
 
             {/* TOOLBAR + TABLE — flex col, only tbody scrolls */}
             <div className="flex-1 flex flex-col min-h-0 px-6 pb-6 pt-4">
@@ -1155,7 +1192,8 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
 
                 </div>
 
-            </div>
+            </div>{/* end toolbar+table */}
+            </div>{/* end content area */}
 
             {/* ── Screen 1: URL paste modal ────────────────────────── */}
             {showUrlImport && (
