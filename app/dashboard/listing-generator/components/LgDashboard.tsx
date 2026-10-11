@@ -26,10 +26,10 @@ import type { ActiveFilter } from '../data/filter-definitions'
 import { FILTER_FIELD_DEFS } from '../data/filter-definitions'
 import {
     Search, Upload, ChevronDown, ChevronUp, LayoutList, LayoutGrid,
-    CheckCircle2, AlertTriangle, Pencil, ShieldCheck,
+    CheckCircle2, AlertTriangle, Pencil, Clock,
     Download, Trash2, ChevronLeft, ChevronRight,
     X, Package, TrendingUp, Circle, Zap, Copy, Check,
-    Columns, SlidersHorizontal, Filter,
+    Columns, SlidersHorizontal, Filter, Star,
 } from 'lucide-react'
 import UrlImport from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImport'
 import UrlImportProcessing from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImportProcessing'
@@ -234,6 +234,40 @@ function StockCell({ quantity, outOfStock, sellerType }: {
         )
     }
     return <span className="text-[12px]" style={{ color: C.body, fontFamily: 'DM Sans, sans-serif' }}>{quantity} in stock</span>
+}
+
+// ── Source Badge ──────────────────────────────────────────────
+const SOURCE_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+    cj_dropshipping: { label: 'CJ Drop', color: '#0ea5e9', bg: '#e0f2fe' },
+    aliexpress: { label: 'AliExpress', color: '#f97316', bg: '#ffedd5' },
+    amazon_uk: { label: 'Amazon UK', color: '#d97706', bg: '#fef3c7' },
+    argos: { label: 'Argos', color: '#0d9488', bg: '#ccfbf1' },
+    barcode_import: { label: 'Barcode AI', color: '#8b5cf6', bg: '#ede9fe' },
+    title_import: { label: 'Title AI', color: '#14b8a6', bg: '#ccfbf1' },
+    url_import: { label: 'URL AI', color: '#3b82f6', bg: '#dbeafe' },
+    image_import: { label: 'Photo AI', color: '#ec4899', bg: '#fce7f3' },
+}
+
+function SourceBadge({ platform }: { platform: string | null }) {
+    if (!platform) {
+        return (
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                style={{ backgroundColor: '#f3f4f6', color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }}>
+                Own
+            </span>
+        )
+    }
+    const cfg = SOURCE_CONFIG[platform] ?? {
+        label: platform.charAt(0).toUpperCase() + platform.slice(1).replace(/_/g, ' '),
+        color: '#6b7280',
+        bg: '#f3f4f6',
+    }
+    return (
+        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap"
+            style={{ backgroundColor: cfg.bg, color: cfg.color, fontFamily: 'DM Sans, sans-serif' }}>
+            {cfg.label}
+        </span>
+    )
 }
 
 // ── GTIN Auto-Detector ───────────────────────────────────────
@@ -905,476 +939,606 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                     <div className="flex-1 flex flex-col min-h-0 rounded-b-2xl overflow-hidden"
                         style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, borderTop: 'none', boxShadow: '0 2px 12px rgba(117,48,251,0.06)' }}>
 
-                        <div className="flex-1 overflow-auto min-h-0">
-                            <table className="w-full" style={{ tableLayout: 'fixed' }}>
-                                {/* STICKY HEADER */}
-                                <thead className="sticky top-0 z-10">
-                                    <tr style={{ backgroundColor: C.surface, borderBottom: `1px solid ${C.border}` }}>
-                                        {/* Fixed: checkbox */}
-                                        <th style={{ width: 40 }} className="px-4 py-1.5">
-                                            <input type="checkbox"
-                                                checked={paginated.length > 0 && selectedIds.size === paginated.length}
-                                                onChange={toggleSelectAll}
-                                                className="rounded"
-                                                style={{ accentColor: C.primary }}
-                                            />
-                                        </th>
-                                        {/* Fixed: photo */}
-                                        <th style={{ width: 40, color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }} className="px-0 py-2 text-left text-[12px] font-bold uppercase tracking-widest"></th>
-
-                                        {/* Dynamic columns */}
-                                        {visibleColumns.map(col => {
-                                            const hasFilter = columnFilters.some(f => f.colId === col.id)
-                                            const hasDef = !!FILTER_FIELD_DEFS[col.id]
-                                            const isActiveSort = sortCol === col.id
+                        {viewMode === 'grid' ? (
+                            /* ── GRID / CARD VIEW ────────────────────────── */
+                            <div className="flex-1 overflow-auto min-h-0 p-4">
+                                {paginated.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center py-20 gap-3">
+                                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                                            style={{ backgroundColor: C.primaryLight }}>
+                                            <Package size={22} style={{ color: C.primary }} />
+                                        </div>
+                                        <p className="text-[14px] font-semibold" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>No listings found</p>
+                                    </div>
+                                ) : (
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
+                                        {paginated.map(listing => {
+                                            const isSelected = selectedIds.has(listing.id)
                                             return (
-                                                <th
-                                                    key={col.id}
-                                                    style={{ width: col.width, color: '#6b7280', fontFamily: 'DM Sans, sans-serif', position: 'relative' }}
-                                                    className="px-3 py-2 text-left text-[12px] font-bold uppercase tracking-widest"
+                                                <div key={listing.id}
+                                                    onClick={() => toggleSelect(listing.id)}
+                                                    style={{
+                                                        backgroundColor: C.surface,
+                                                        border: `2px solid ${isSelected ? C.primary : C.border}`,
+                                                        borderRadius: 16,
+                                                        overflow: 'hidden',
+                                                        cursor: 'pointer',
+                                                        transition: 'box-shadow 0.15s, border-color 0.15s',
+                                                        boxShadow: isSelected ? `0 0 0 3px ${C.primary}22` : '0 2px 8px rgba(117,48,251,0.06)',
+                                                    }}
+                                                    onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLDivElement).style.borderColor = C.primary + '66' }}
+                                                    onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLDivElement).style.borderColor = C.border }}
                                                 >
-                                                    <div
-                                                        style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', userSelect: 'none' }}
-                                                        onClick={() => toggleSort(col.id)}
-                                                        title={`Sort by ${col.label}`}
-                                                    >
-                                                        <span style={{ color: isActiveSort ? C.primary : '#6b7280' }}>{col.label}</span>
-                                                        {/* Sort chevron */}
-                                                        <span style={{ color: isActiveSort ? C.primary : C.borderInput, flexShrink: 0, display: 'flex' }}>
-                                                            {isActiveSort && sortDir === 'asc'
-                                                                ? <ChevronUp size={12} />
-                                                                : <ChevronDown size={12} />}
-                                                        </span>
-                                                        {/* Filter icon */}
-                                                        {hasDef && (
-                                                            <button
-                                                                type="button"
-                                                                onClick={e => { e.stopPropagation(); setOpenColFilter(openColFilter === col.id ? null : col.id) }}
-                                                                title={`Filter by ${col.label}`}
-                                                                style={{
-                                                                    width: 16,
-                                                                    height: 16,
-                                                                    borderRadius: 4,
-                                                                    border: 'none',
-                                                                    background: hasFilter ? C.primary : 'transparent',
-                                                                    color: hasFilter ? '#fff' : C.muted,
-                                                                    cursor: 'pointer',
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    justifyContent: 'center',
-                                                                    flexShrink: 0,
-                                                                }}
-                                                            >
-                                                                <Filter size={9} />
-                                                            </button>
+                                                    {/* Image */}
+                                                    <div style={{ position: 'relative', height: 160, backgroundColor: C.bg, overflow: 'hidden' }}>
+                                                        {listing.main_photo_url ? (
+                                                            <img src={listing.main_photo_url} alt={listing.title || ''}
+                                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                        ) : (
+                                                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                <Package size={32} style={{ color: C.muted }} />
+                                                            </div>
                                                         )}
+                                                        {/* Checkbox overlay top-left */}
+                                                        <div style={{ position: 'absolute', top: 8, left: 8 }}
+                                                            onClick={e => e.stopPropagation()}>
+                                                            <input type="checkbox"
+                                                                checked={isSelected}
+                                                                onChange={() => toggleSelect(listing.id)}
+                                                                style={{ accentColor: C.primary, width: 16, height: 16, cursor: 'pointer' }}
+                                                            />
+                                                        </div>
+                                                        {/* Status top-right */}
+                                                        <div style={{ position: 'absolute', top: 8, right: 8 }}>
+                                                            <StatusPill status={listing.status} />
+                                                        </div>
                                                     </div>
-                                                    {openColFilter === col.id && (
-                                                        <ColumnFilterPopover
-                                                            colId={col.id}
-                                                            activeFilter={columnFilters.find(f => f.colId === col.id) ?? null}
-                                                            onApply={upsertFilter}
-                                                            onClear={() => clearFilter(col.id)}
-                                                            onClose={() => setOpenColFilter(null)}
-                                                        />
-                                                    )}
-                                                </th>
+
+                                                    {/* Body */}
+                                                    <div style={{ padding: '12px 14px 10px' }}>
+                                                        {/* Title + SKU */}
+                                                        <p style={{ fontSize: 13, fontWeight: 600, color: C.body, fontFamily: 'DM Sans, sans-serif', marginBottom: 2, lineHeight: 1.4 }}
+                                                            className="line-clamp-2">
+                                                            {listing.title || listing.product_name || 'Untitled'}
+                                                        </p>
+                                                        {listing.sku && (
+                                                            <span style={{
+                                                                fontSize: 10, color: C.muted, fontFamily: 'DM Sans, sans-serif',
+                                                                backgroundColor: C.bg, border: `1px solid ${C.border}`,
+                                                                borderRadius: 4, padding: '1px 6px', display: 'inline-block', marginBottom: 8
+                                                            }}>
+                                                                {listing.sku}
+                                                            </span>
+                                                        )}
+
+                                                        {/* Price row */}
+                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                                                            <span style={{ fontSize: 18, fontWeight: 700, color: C.dark, fontFamily: 'Syne, sans-serif' }}>
+                                                                {listing.sell_price != null ? `£${listing.sell_price.toFixed(2)}` : '—'}
+                                                            </span>
+                                                            {listing.margin != null && (
+                                                                <span style={{
+                                                                    fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12,
+                                                                    backgroundColor: listing.margin >= 25 ? C.successBg : listing.margin >= 15 ? C.warningBg : C.dangerBg,
+                                                                    color: listing.margin >= 25 ? C.success : listing.margin >= 15 ? C.warning : C.danger,
+                                                                    fontFamily: 'DM Sans, sans-serif',
+                                                                }}>
+                                                                    {listing.margin}%
+                                                                </span>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Health + Source */}
+                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                                <HealthBadge score={listing.health_score} />
+                                                                <StockCell quantity={listing.quantity} outOfStock={listing.out_of_stock_option} sellerType={listing.seller_type} />
+                                                            </div>
+                                                            <SourceBadge platform={listing.source_platform} />
+                                                        </div>
+
+                                                        {/* Actions row */}
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingTop: 8, borderTop: `1px solid ${C.border}` }}
+                                                            onClick={e => e.stopPropagation()}>
+                                                            <button onClick={() => onEditDraft(listing.id)}
+                                                                style={{
+                                                                    flex: 1, height: 30, borderRadius: 8, border: 'none',
+                                                                    backgroundColor: C.primaryLight, color: C.primary, cursor: 'pointer',
+                                                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                                }}
+                                                                title="Edit">
+                                                                <Pencil size={13} />
+                                                            </button>
+                                                            <button
+                                                                style={{
+                                                                    flex: 1, height: 30, borderRadius: 8, border: 'none',
+                                                                    backgroundColor: C.bg, color: C.secondary, cursor: 'pointer',
+                                                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                                }}
+                                                                title="View History">
+                                                                <Clock size={13} />
+                                                            </button>
+                                                            <button
+                                                                style={{
+                                                                    flex: 1, height: 30, borderRadius: 8, border: 'none',
+                                                                    backgroundColor: C.bg, color: C.secondary, cursor: 'pointer',
+                                                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                                }}
+                                                                title="Export CSV">
+                                                                <Download size={13} />
+                                                            </button>
+                                                            <button onClick={() => setDeletingId(listing.id)}
+                                                                style={{
+                                                                    flex: 1, height: 30, borderRadius: 8, border: 'none',
+                                                                    backgroundColor: C.dangerBg, color: C.danger, cursor: 'pointer',
+                                                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                                }}
+                                                                title="Delete">
+                                                                <Trash2 size={13} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             )
                                         })}
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="flex-1 overflow-auto min-h-0">
+                                <table className="w-full" style={{ tableLayout: 'fixed' }}>
+                                    {/* STICKY HEADER */}
+                                    <thead className="sticky top-0 z-10">
+                                        <tr style={{ backgroundColor: C.surface, borderBottom: `1px solid ${C.border}` }}>
+                                            {/* Fixed: checkbox */}
+                                            <th style={{ width: 40 }} className="px-4 py-1.5">
+                                                <input type="checkbox"
+                                                    checked={paginated.length > 0 && selectedIds.size === paginated.length}
+                                                    onChange={toggleSelectAll}
+                                                    className="rounded"
+                                                    style={{ accentColor: C.primary }}
+                                                />
+                                            </th>
+                                            {/* Fixed: photo */}
+                                            <th style={{ width: 40, color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }} className="px-0 py-2 text-left text-[12px] font-bold uppercase tracking-widest"></th>
 
-                                        {/* Fixed: actions */}
-                                        <th style={{ width: 140, color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }} className="px-3 py-2 text-left text-[12px] font-bold uppercase tracking-widest"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {paginated.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={2 + visibleColumns.length + 1} className="py-16 text-center">
-                                                <div className="flex flex-col items-center gap-3">
-                                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
-                                                        style={{ backgroundColor: C.primaryLight }}>
-                                                        <Package size={22} style={{ color: C.primary }} />
-                                                    </div>
-                                                    <p className="text-[14px] font-semibold" style={{ color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }}>
-                                                        No listings found
-                                                    </p>
-                                                    <p className="text-[13px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                                                        {debouncedSearch
-                                                            ? `No results for "${debouncedSearch}" — try a different search or scope`
-                                                            : columnFilters.length > 0
-                                                                ? 'No listings match the active filters'
-                                                                : 'No listings in this status'}
-                                                    </p>
-                                                    {(debouncedSearch || columnFilters.length > 0) && (
-                                                        <div className="flex gap-2">
-                                                            {debouncedSearch && (
+                                            {/* Dynamic columns */}
+                                            {visibleColumns.map(col => {
+                                                const hasFilter = columnFilters.some(f => f.colId === col.id)
+                                                const hasDef = !!FILTER_FIELD_DEFS[col.id]
+                                                const isActiveSort = sortCol === col.id
+                                                return (
+                                                    <th
+                                                        key={col.id}
+                                                        style={{ width: col.width, color: '#6b7280', fontFamily: 'DM Sans, sans-serif', position: 'relative' }}
+                                                        className="px-3 py-2 text-left text-[12px] font-bold uppercase tracking-widest"
+                                                    >
+                                                        <div
+                                                            style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', userSelect: 'none' }}
+                                                            onClick={() => toggleSort(col.id)}
+                                                            title={`Sort by ${col.label}`}
+                                                        >
+                                                            <span style={{ color: isActiveSort ? C.primary : '#6b7280' }}>{col.label}</span>
+                                                            {/* Sort chevron */}
+                                                            <span style={{ color: isActiveSort ? C.primary : C.borderInput, flexShrink: 0, display: 'flex' }}>
+                                                                {isActiveSort && sortDir === 'asc'
+                                                                    ? <ChevronUp size={12} />
+                                                                    : <ChevronDown size={12} />}
+                                                            </span>
+                                                            {/* Filter icon */}
+                                                            {hasDef && (
                                                                 <button
-                                                                    onClick={() => { setSearch(''); setDebouncedSearch('') }}
-                                                                    className="px-3 py-1.5 rounded-xl text-[12px] font-semibold transition-all hover:opacity-80"
-                                                                    style={{ backgroundColor: C.primaryLight, color: C.primary, fontFamily: 'DM Sans, sans-serif' }}>
-                                                                    Clear Search
-                                                                </button>
-                                                            )}
-                                                            {columnFilters.length > 0 && (
-                                                                <button
-                                                                    onClick={clearAllFilters}
-                                                                    className="px-3 py-1.5 rounded-xl text-[12px] font-semibold transition-all hover:opacity-80"
-                                                                    style={{ backgroundColor: C.dangerBg, color: C.danger, fontFamily: 'DM Sans, sans-serif' }}>
-                                                                    Clear Filters
+                                                                    type="button"
+                                                                    onClick={e => { e.stopPropagation(); setOpenColFilter(openColFilter === col.id ? null : col.id) }}
+                                                                    title={`Filter by ${col.label}`}
+                                                                    style={{
+                                                                        width: 16,
+                                                                        height: 16,
+                                                                        borderRadius: 4,
+                                                                        border: 'none',
+                                                                        background: hasFilter ? C.primary : 'transparent',
+                                                                        color: hasFilter ? '#fff' : C.muted,
+                                                                        cursor: 'pointer',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'center',
+                                                                        flexShrink: 0,
+                                                                    }}
+                                                                >
+                                                                    <Filter size={9} />
                                                                 </button>
                                                             )}
                                                         </div>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ) : paginated.map((listing) => {
-                                        const isSelected = selectedIds.has(listing.id)
-
-                                        // ── Dynamic cell renderer ─────────────
-                                        function renderBodyCell(colId: string) {
-                                            switch (colId) {
-                                                case 'product':
-                                                    return (
-                                                        <td key="product" className="px-3 py-1.5 max-w-[240px]">
-                                                            <p className="text-[12px] font-semibold truncate max-w-[220px]"
-                                                                style={{ color: C.body, fontFamily: 'DM Sans, sans-serif' }}>
-                                                                {listing.title || listing.product_name || 'Untitled'}
-                                                            </p>
-                                                            {listing.sku && (
-                                                                <span className="text-[10px] px-1.5 py-0.5 rounded mt-0.5 inline-block"
-                                                                    style={{ backgroundColor: C.bg, color: C.muted, fontFamily: 'DM Sans, sans-serif', border: `1px solid ${C.border}` }}>
-                                                                    {listing.sku}
-                                                                </span>
-                                                            )}
-                                                        </td>
-                                                    )
-                                                case 'condition':
-                                                    return (
-                                                        <td key="condition" className="px-3 py-1.5">
-                                                            {listing.condition ? (
-                                                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap"
-                                                                    style={{
-                                                                        backgroundColor: listing.condition === 'New' || listing.condition === 'New with tags' ? C.successBg : listing.condition?.includes('Like New') ? C.infoBg : C.warningBg,
-                                                                        color: listing.condition === 'New' || listing.condition === 'New with tags' ? C.success : listing.condition?.includes('Like New') ? C.info : C.warning,
-                                                                        fontFamily: 'DM Sans, sans-serif',
-                                                                    }}>
-                                                                    {listing.condition}
-                                                                </span>
-                                                            ) : (
-                                                                <span style={{ color: C.muted, fontSize: 12 }}>—</span>
-                                                            )}
-                                                        </td>
-                                                    )
-                                                case 'category':
-                                                    return (
-                                                        <td key="category" className="px-3 py-3 max-w-[120px]">
-                                                            {listing.category ? (
-                                                                <span className="text-[11px] truncate block max-w-[120px]"
-                                                                    style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}
-                                                                    title={listing.category}>
-                                                                    {listing.category.split('>').pop()?.trim() || listing.category}
-                                                                </span>
-                                                            ) : (
-                                                                <span style={{ color: C.muted, fontSize: 12 }}>—</span>
-                                                            )}
-                                                        </td>
-                                                    )
-                                                case 'source':
-                                                    return (
-                                                        <td key="source" className="px-3 py-1.5">
-                                                            {listing.source_platform ? (
-                                                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap"
-                                                                    style={{ backgroundColor: C.primaryLight, color: C.primary, fontFamily: 'DM Sans, sans-serif' }}>
-                                                                    {listing.source_platform === 'cj_dropshipping' ? 'CJ Drop' :
-                                                                        listing.source_platform === 'aliexpress' ? 'AliExpress' :
-                                                                            listing.source_platform === 'amazon_uk' ? 'Amazon UK' :
-                                                                                listing.source_platform === 'image_import' ? 'Photo AI' :
-                                                                                    listing.source_platform === 'barcode_import' ? 'Barcode AI' :
-                                                                                        listing.source_platform === 'title_import' ? 'Title AI' :
-                                                                                            listing.source_platform === 'url_import' ? 'URL AI' :
-                                                                                                listing.source_platform.charAt(0).toUpperCase() + listing.source_platform.slice(1)}
-                                                                </span>
-                                                            ) : (
-                                                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
-                                                                    style={{ backgroundColor: '#f8f7ff', color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
-                                                                    Own
-                                                                </span>
-                                                            )}
-                                                        </td>
-                                                    )
-                                                case 'seller_type':
-                                                    return (
-                                                        <td key="seller_type" className="px-3 py-1.5">
-                                                            <SellerTypePill type={listing.seller_type} />
-                                                        </td>
-                                                    )
-                                                case 'price':
-                                                    return (
-                                                        <td key="price" className="px-3 py-1.5">
-                                                            <span className="text-[14px] font-bold" style={{ color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }}>
-                                                                £{listing.sell_price?.toFixed(2) ?? '—'}
-                                                            </span>
-                                                        </td>
-                                                    )
-                                                case 'margin':
-                                                    return (
-                                                        <td key="margin" className="px-3 py-1.5">
-                                                            {listing.margin !== null ? (
-                                                                <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold"
-                                                                    style={{
-                                                                        backgroundColor: listing.margin >= 25 ? C.successBg : listing.margin >= 15 ? C.warningBg : C.dangerBg,
-                                                                        color: listing.margin >= 25 ? C.success : listing.margin >= 15 ? C.warning : C.danger,
-                                                                        fontFamily: 'DM Sans, sans-serif',
-                                                                    }}>
-                                                                    {listing.margin}%
-                                                                </span>
-                                                            ) : (
-                                                                <span style={{ color: C.muted, fontSize: 12 }}>—</span>
-                                                            )}
-                                                        </td>
-                                                    )
-                                                case 'net_profit':
-                                                    return (
-                                                        <td key="net_profit" className="px-3 py-1.5">
-                                                            {listing.net_profit !== null ? (
-                                                                <span className="text-[13px] font-semibold"
-                                                                    style={{ color: listing.net_profit >= 0 ? C.success : C.danger, fontFamily: 'DM Sans, sans-serif' }}>
-                                                                    £{listing.net_profit.toFixed(2)}
-                                                                </span>
-                                                            ) : (
-                                                                <span style={{ color: C.muted, fontSize: 12 }}>—</span>
-                                                            )}
-                                                        </td>
-                                                    )
-                                                case 'health':
-                                                    return (
-                                                        <td key="health" className="px-3 py-1.5">
-                                                            <HealthBadge score={listing.health_score} />
-                                                        </td>
-                                                    )
-                                                case 'vero':
-                                                    return (
-                                                        <td key="vero" className="px-3 py-1.5">
-                                                            <VeroBadge status={listing.vero_status} />
-                                                        </td>
-                                                    )
-                                                case 'stock':
-                                                    return (
-                                                        <td key="stock" className="px-3 py-1.5">
-                                                            <StockCell
-                                                                quantity={listing.quantity}
-                                                                outOfStock={listing.out_of_stock_option}
-                                                                sellerType={listing.seller_type}
+                                                        {openColFilter === col.id && (
+                                                            <ColumnFilterPopover
+                                                                colId={col.id}
+                                                                activeFilter={columnFilters.find(f => f.colId === col.id) ?? null}
+                                                                onApply={upsertFilter}
+                                                                onClear={() => clearFilter(col.id)}
+                                                                onClose={() => setOpenColFilter(null)}
                                                             />
-                                                        </td>
-                                                    )
-                                                case 'status':
-                                                    return (
-                                                        <td key="status" className="px-3 py-1.5">
-                                                            <StatusPill status={listing.status} />
-                                                        </td>
-                                                    )
-                                                case 'date':
-                                                    return (
-                                                        <td key="date" className="px-3 py-1.5">
-                                                            <span className="text-[11px]"
-                                                                style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
-                                                                {new Date(listing.created_at).toLocaleDateString('en-GB', {
-                                                                    day: '2-digit', month: 'short', year: '2-digit'
-                                                                })}
-                                                            </span>
-                                                        </td>
-                                                    )
-                                                case 'updated':
-                                                    return (
-                                                        <td key="updated" className="px-3 py-1.5">
-                                                            <span className="text-[11px]"
-                                                                style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
-                                                                {new Date(listing.updated_at).toLocaleDateString('en-GB', {
-                                                                    day: '2-digit', month: 'short', year: '2-digit'
-                                                                })}
-                                                            </span>
-                                                        </td>
-                                                    )
-                                                case 'ids':
-                                                    return (
-                                                        <td key="ids" className="px-3 py-1.5">
-                                                            <div className="flex flex-col gap-1">
-                                                                {/* EAN / UPC — auto detected */}
-                                                                {(() => {
-                                                                    const gtinValue = listing.item_specifics?.['EAN'] || listing.item_specifics?.['UPC'] || listing.item_specifics?.['GTIN']
-                                                                    if (gtinValue) {
-                                                                        const { label, color, bg } = detectGtinType(gtinValue)
+                                                        )}
+                                                    </th>
+                                                )
+                                            })}
+
+                                            {/* Fixed: actions */}
+                                            <th style={{ width: 140, color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }} className="px-3 py-2 text-left text-[12px] font-bold uppercase tracking-widest"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {paginated.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={2 + visibleColumns.length + 1} className="py-16 text-center">
+                                                    <div className="flex flex-col items-center gap-3">
+                                                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                                                            style={{ backgroundColor: C.primaryLight }}>
+                                                            <Package size={22} style={{ color: C.primary }} />
+                                                        </div>
+                                                        <p className="text-[14px] font-semibold" style={{ color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }}>
+                                                            No listings found
+                                                        </p>
+                                                        <p className="text-[13px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                                            {debouncedSearch
+                                                                ? `No results for "${debouncedSearch}" — try a different search or scope`
+                                                                : columnFilters.length > 0
+                                                                    ? 'No listings match the active filters'
+                                                                    : 'No listings in this status'}
+                                                        </p>
+                                                        {(debouncedSearch || columnFilters.length > 0) && (
+                                                            <div className="flex gap-2">
+                                                                {debouncedSearch && (
+                                                                    <button
+                                                                        onClick={() => { setSearch(''); setDebouncedSearch('') }}
+                                                                        className="px-3 py-1.5 rounded-xl text-[12px] font-semibold transition-all hover:opacity-80"
+                                                                        style={{ backgroundColor: C.primaryLight, color: C.primary, fontFamily: 'DM Sans, sans-serif' }}>
+                                                                        Clear Search
+                                                                    </button>
+                                                                )}
+                                                                {columnFilters.length > 0 && (
+                                                                    <button
+                                                                        onClick={clearAllFilters}
+                                                                        className="px-3 py-1.5 rounded-xl text-[12px] font-semibold transition-all hover:opacity-80"
+                                                                        style={{ backgroundColor: C.dangerBg, color: C.danger, fontFamily: 'DM Sans, sans-serif' }}>
+                                                                        Clear Filters
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ) : paginated.map((listing) => {
+                                            const isSelected = selectedIds.has(listing.id)
+
+                                            // ── Dynamic cell renderer ─────────────
+                                            function renderBodyCell(colId: string) {
+                                                switch (colId) {
+                                                    case 'product':
+                                                        return (
+                                                            <td key="product" className="px-3 py-1.5 max-w-[240px]">
+                                                                <p className="text-[12px] font-semibold truncate max-w-[220px]"
+                                                                    style={{ color: C.body, fontFamily: 'DM Sans, sans-serif' }}>
+                                                                    {listing.title || listing.product_name || 'Untitled'}
+                                                                </p>
+                                                                {listing.sku && (
+                                                                    <span className="text-[10px] px-1.5 py-0.5 rounded mt-0.5 inline-block"
+                                                                        style={{ backgroundColor: C.bg, color: C.muted, fontFamily: 'DM Sans, sans-serif', border: `1px solid ${C.border}` }}>
+                                                                        {listing.sku}
+                                                                    </span>
+                                                                )}
+                                                            </td>
+                                                        )
+                                                    case 'condition':
+                                                        return (
+                                                            <td key="condition" className="px-3 py-1.5">
+                                                                {listing.condition ? (
+                                                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap"
+                                                                        style={{
+                                                                            backgroundColor: listing.condition === 'New' || listing.condition === 'New with tags' ? C.successBg : listing.condition?.includes('Like New') ? C.infoBg : C.warningBg,
+                                                                            color: listing.condition === 'New' || listing.condition === 'New with tags' ? C.success : listing.condition?.includes('Like New') ? C.info : C.warning,
+                                                                            fontFamily: 'DM Sans, sans-serif',
+                                                                        }}>
+                                                                        {listing.condition}
+                                                                    </span>
+                                                                ) : (
+                                                                    <span style={{ color: C.muted, fontSize: 12 }}>—</span>
+                                                                )}
+                                                            </td>
+                                                        )
+                                                    case 'category':
+                                                        return (
+                                                            <td key="category" className="px-3 py-3 max-w-[120px]">
+                                                                {listing.category ? (
+                                                                    <span className="text-[11px] truncate block max-w-[120px]"
+                                                                        style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}
+                                                                        title={listing.category}>
+                                                                        {listing.category.split('>').pop()?.trim() || listing.category}
+                                                                    </span>
+                                                                ) : (
+                                                                    <span style={{ color: C.muted, fontSize: 12 }}>—</span>
+                                                                )}
+                                                            </td>
+                                                        )
+                                                    case 'source':
+                                                        return (
+                                                            <td key="source" className="px-3 py-1.5">
+                                                                <SourceBadge platform={listing.source_platform} />
+                                                            </td>
+                                                        )
+                                                    case 'seller_type':
+                                                        return (
+                                                            <td key="seller_type" className="px-3 py-1.5">
+                                                                <SellerTypePill type={listing.seller_type} />
+                                                            </td>
+                                                        )
+                                                    case 'price':
+                                                        return (
+                                                            <td key="price" className="px-3 py-1.5">
+                                                                <span className="text-[14px] font-bold" style={{ color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }}>
+                                                                    £{listing.sell_price?.toFixed(2) ?? '—'}
+                                                                </span>
+                                                            </td>
+                                                        )
+                                                    case 'margin':
+                                                        return (
+                                                            <td key="margin" className="px-3 py-1.5">
+                                                                {listing.margin !== null ? (
+                                                                    <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                                                                        style={{
+                                                                            backgroundColor: listing.margin >= 25 ? C.successBg : listing.margin >= 15 ? C.warningBg : C.dangerBg,
+                                                                            color: listing.margin >= 25 ? C.success : listing.margin >= 15 ? C.warning : C.danger,
+                                                                            fontFamily: 'DM Sans, sans-serif',
+                                                                        }}>
+                                                                        {listing.margin}%
+                                                                    </span>
+                                                                ) : (
+                                                                    <span style={{ color: C.muted, fontSize: 12 }}>—</span>
+                                                                )}
+                                                            </td>
+                                                        )
+                                                    case 'net_profit':
+                                                        return (
+                                                            <td key="net_profit" className="px-3 py-1.5">
+                                                                {listing.net_profit !== null ? (
+                                                                    <span className="text-[13px] font-semibold"
+                                                                        style={{ color: listing.net_profit >= 0 ? C.success : C.danger, fontFamily: 'DM Sans, sans-serif' }}>
+                                                                        £{listing.net_profit.toFixed(2)}
+                                                                    </span>
+                                                                ) : (
+                                                                    <span style={{ color: C.muted, fontSize: 12 }}>—</span>
+                                                                )}
+                                                            </td>
+                                                        )
+                                                    case 'health':
+                                                        return (
+                                                            <td key="health" className="px-3 py-1.5">
+                                                                <HealthBadge score={listing.health_score} />
+                                                            </td>
+                                                        )
+                                                    case 'vero':
+                                                        return (
+                                                            <td key="vero" className="px-3 py-1.5">
+                                                                <VeroBadge status={listing.vero_status} />
+                                                            </td>
+                                                        )
+                                                    case 'stock':
+                                                        return (
+                                                            <td key="stock" className="px-3 py-1.5">
+                                                                <StockCell
+                                                                    quantity={listing.quantity}
+                                                                    outOfStock={listing.out_of_stock_option}
+                                                                    sellerType={listing.seller_type}
+                                                                />
+                                                            </td>
+                                                        )
+                                                    case 'status':
+                                                        return (
+                                                            <td key="status" className="px-3 py-1.5">
+                                                                <StatusPill status={listing.status} />
+                                                            </td>
+                                                        )
+                                                    case 'date':
+                                                        return (
+                                                            <td key="date" className="px-3 py-1.5">
+                                                                <span className="text-[11px]"
+                                                                    style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
+                                                                    {new Date(listing.created_at).toLocaleDateString('en-GB', {
+                                                                        day: '2-digit', month: 'short', year: '2-digit'
+                                                                    })}
+                                                                </span>
+                                                            </td>
+                                                        )
+                                                    case 'updated':
+                                                        return (
+                                                            <td key="updated" className="px-3 py-1.5">
+                                                                <span className="text-[11px]"
+                                                                    style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
+                                                                    {new Date(listing.updated_at).toLocaleDateString('en-GB', {
+                                                                        day: '2-digit', month: 'short', year: '2-digit'
+                                                                    })}
+                                                                </span>
+                                                            </td>
+                                                        )
+                                                    case 'ids':
+                                                        return (
+                                                            <td key="ids" className="px-3 py-1.5">
+                                                                <div className="flex flex-col gap-1">
+                                                                    {/* EAN / UPC — auto detected */}
+                                                                    {(() => {
+                                                                        const gtinValue = listing.item_specifics?.['EAN'] || listing.item_specifics?.['UPC'] || listing.item_specifics?.['GTIN']
+                                                                        if (gtinValue) {
+                                                                            const { label, color, bg } = detectGtinType(gtinValue)
+                                                                            return (
+                                                                                <div className="flex items-center gap-1 group/ean">
+                                                                                    <span className="text-[9px] font-bold px-1 py-0.5 rounded"
+                                                                                        style={{ backgroundColor: bg, color, fontFamily: 'DM Sans, sans-serif' }}>
+                                                                                        {label}
+                                                                                    </span>
+                                                                                    <span className="text-[11px]"
+                                                                                        style={{ color: C.body, fontFamily: 'monospace' }}>
+                                                                                        {gtinValue}
+                                                                                    </span>
+                                                                                    <button
+                                                                                        onClick={e => { e.stopPropagation(); copyToClipboard(gtinValue, `ean-${listing.id}`) }}
+                                                                                        className="opacity-0 group-hover/ean:opacity-100 transition-opacity p-0.5 rounded"
+                                                                                        style={{ color: copiedId === `ean-${listing.id}` ? C.success : C.muted }}
+                                                                                        title="Copy">
+                                                                                        {copiedId === `ean-${listing.id}` ? <Check size={10} /> : <Copy size={10} />}
+                                                                                    </button>
+                                                                                </div>
+                                                                            )
+                                                                        }
                                                                         return (
-                                                                            <div className="flex items-center gap-1 group/ean">
+                                                                            <div className="flex items-center gap-1">
                                                                                 <span className="text-[9px] font-bold px-1 py-0.5 rounded"
-                                                                                    style={{ backgroundColor: bg, color, fontFamily: 'DM Sans, sans-serif' }}>
-                                                                                    {label}
+                                                                                    style={{ backgroundColor: C.bg, color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                                                                    EAN
                                                                                 </span>
-                                                                                <span className="text-[11px]"
-                                                                                    style={{ color: C.body, fontFamily: 'monospace' }}>
-                                                                                    {gtinValue}
-                                                                                </span>
-                                                                                <button
-                                                                                    onClick={e => { e.stopPropagation(); copyToClipboard(gtinValue, `ean-${listing.id}`) }}
-                                                                                    className="opacity-0 group-hover/ean:opacity-100 transition-opacity p-0.5 rounded"
-                                                                                    style={{ color: copiedId === `ean-${listing.id}` ? C.success : C.muted }}
-                                                                                    title="Copy">
-                                                                                    {copiedId === `ean-${listing.id}` ? <Check size={10} /> : <Copy size={10} />}
-                                                                                </button>
+                                                                                <span className="text-[11px]" style={{ color: C.muted }}>—</span>
                                                                             </div>
                                                                         )
-                                                                    }
-                                                                    return (
+                                                                    })()}
+                                                                    {/* eBay Item ID */}
+                                                                    {listing.ebay_listing_id ? (
+                                                                        <div className="flex items-center gap-1 group/ebay">
+                                                                            <span className="text-[9px] font-bold px-1 py-0.5 rounded"
+                                                                                style={{ backgroundColor: C.warningBg, color: C.warning, fontFamily: 'DM Sans, sans-serif' }}>
+                                                                                eBay
+                                                                            </span>
+                                                                            <span className="text-[11px]"
+                                                                                style={{ color: C.body, fontFamily: 'monospace' }}>
+                                                                                {listing.ebay_listing_id}
+                                                                            </span>
+                                                                            <button
+                                                                                onClick={e => { e.stopPropagation(); copyToClipboard(listing.ebay_listing_id!, `ebay-${listing.id}`) }}
+                                                                                className="opacity-0 group-hover/ebay:opacity-100 transition-opacity p-0.5 rounded"
+                                                                                style={{ color: copiedId === `ebay-${listing.id}` ? C.success : C.muted }}
+                                                                                title="Copy">
+                                                                                {copiedId === `ebay-${listing.id}` ? <Check size={10} /> : <Copy size={10} />}
+                                                                            </button>
+                                                                        </div>
+                                                                    ) : (
                                                                         <div className="flex items-center gap-1">
                                                                             <span className="text-[9px] font-bold px-1 py-0.5 rounded"
                                                                                 style={{ backgroundColor: C.bg, color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                                                                                EAN
+                                                                                eBay
                                                                             </span>
                                                                             <span className="text-[11px]" style={{ color: C.muted }}>—</span>
                                                                         </div>
-                                                                    )
-                                                                })()}
-                                                                {/* eBay Item ID */}
-                                                                {listing.ebay_listing_id ? (
-                                                                    <div className="flex items-center gap-1 group/ebay">
-                                                                        <span className="text-[9px] font-bold px-1 py-0.5 rounded"
-                                                                            style={{ backgroundColor: C.warningBg, color: C.warning, fontFamily: 'DM Sans, sans-serif' }}>
-                                                                            eBay
-                                                                        </span>
-                                                                        <span className="text-[11px]"
-                                                                            style={{ color: C.body, fontFamily: 'monospace' }}>
-                                                                            {listing.ebay_listing_id}
-                                                                        </span>
-                                                                        <button
-                                                                            onClick={e => { e.stopPropagation(); copyToClipboard(listing.ebay_listing_id!, `ebay-${listing.id}`) }}
-                                                                            className="opacity-0 group-hover/ebay:opacity-100 transition-opacity p-0.5 rounded"
-                                                                            style={{ color: copiedId === `ebay-${listing.id}` ? C.success : C.muted }}
-                                                                            title="Copy">
-                                                                            {copiedId === `ebay-${listing.id}` ? <Check size={10} /> : <Copy size={10} />}
-                                                                        </button>
-                                                                    </div>
-                                                                ) : (
-                                                                    <div className="flex items-center gap-1">
-                                                                        <span className="text-[9px] font-bold px-1 py-0.5 rounded"
-                                                                            style={{ backgroundColor: C.bg, color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                                                                            eBay
-                                                                        </span>
-                                                                        <span className="text-[11px]" style={{ color: C.muted }}>—</span>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </td>
-                                                    )
-                                                default:
-                                                    return <td key={colId} />
+                                                                    )}
+                                                                </div>
+                                                            </td>
+                                                        )
+                                                    default:
+                                                        return <td key={colId} />
+                                                }
                                             }
-                                        }
 
-                                        return (
-                                            <tr key={listing.id}
-                                                className="cursor-pointer transition-colors"
-                                                style={{
-                                                    backgroundColor: C.surface,
-                                                    borderBottom: `1px solid ${C.border}`,
-                                                }}
-                                                onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f3eeff')}
-                                                onMouseLeave={e => (e.currentTarget.style.backgroundColor = C.surface)}
-                                                onClick={() => toggleSelect(listing.id)}>
+                                            return (
+                                                <tr key={listing.id}
+                                                    className="cursor-pointer transition-colors"
+                                                    style={{
+                                                        backgroundColor: C.surface,
+                                                        borderBottom: `1px solid ${C.border}`,
+                                                    }}
+                                                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f3eeff')}
+                                                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = C.surface)}
+                                                    onClick={() => toggleSelect(listing.id)}>
 
-                                                {/* Fixed: Checkbox */}
-                                                <td className="px-4 py-1.5" onClick={e => e.stopPropagation()}>
-                                                    <input type="checkbox"
-                                                        checked={isSelected}
-                                                        onChange={() => toggleSelect(listing.id)}
-                                                        style={{ accentColor: C.primary }}
-                                                        className="rounded"
-                                                    />
-                                                </td>
+                                                    {/* Fixed: Checkbox */}
+                                                    <td className="px-4 py-1.5" onClick={e => e.stopPropagation()}>
+                                                        <input type="checkbox"
+                                                            checked={isSelected}
+                                                            onChange={() => toggleSelect(listing.id)}
+                                                            style={{ accentColor: C.primary }}
+                                                            className="rounded"
+                                                        />
+                                                    </td>
 
-                                                {/* Fixed: Product Image */}
-                                                <td className="p-0" style={{ width: 40, minWidth: 40, maxWidth: 40, height: 40, maxHeight: 40, overflow: 'hidden' }}>
-                                                    <div style={{ width: 40, height: 40, backgroundColor: C.bg, overflow: 'hidden', flexShrink: 0 }}>
-                                                        {listing.main_photo_url ? (
-                                                            <img
-                                                                src={listing.main_photo_url}
-                                                                alt={listing.title || ''}
-                                                                style={{ width: 40, height: 40, objectFit: 'cover', display: 'block' }}
-                                                            />
+                                                    {/* Fixed: Product Image */}
+                                                    <td className="p-0" style={{ width: 40, minWidth: 40, maxWidth: 40, height: 40, maxHeight: 40, overflow: 'hidden' }}>
+                                                        <div style={{ width: 40, height: 40, backgroundColor: C.bg, overflow: 'hidden', flexShrink: 0 }}>
+                                                            {listing.main_photo_url ? (
+                                                                <img
+                                                                    src={listing.main_photo_url}
+                                                                    alt={listing.title || ''}
+                                                                    style={{ width: 40, height: 40, objectFit: 'cover', display: 'block' }}
+                                                                />
+                                                            ) : (
+                                                                <div style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                    <Package size={14} style={{ color: C.muted }} />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </td>
+
+                                                    {/* Dynamic columns */}
+                                                    {visibleColumns.map(col => renderBodyCell(col.id))}
+
+                                                    {/* Fixed: Actions */}
+                                                    <td className="px-3 py-1.5" onClick={e => e.stopPropagation()}>
+                                                        {deletingId === listing.id ? (
+                                                            /* ── Inline delete confirm ── */
+                                                            <div className="flex items-center justify-end gap-1.5">
+                                                                <span className="text-[11px] font-semibold" style={{ color: C.danger }}>
+                                                                    Delete?
+                                                                </span>
+                                                                <button
+                                                                    onClick={() => setDeletingId(null)}
+                                                                    className="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-opacity hover:opacity-80"
+                                                                    style={{ backgroundColor: C.bg, color: C.muted, border: `1px solid ${C.border}` }}
+                                                                >
+                                                                    No
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => confirmDelete(listing.id)}
+                                                                    disabled={deleteLoading}
+                                                                    className="px-2.5 py-1 rounded-lg text-[11px] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 flex items-center gap-1"
+                                                                    style={{ backgroundColor: C.danger }}
+                                                                >
+                                                                    {deleteLoading
+                                                                        ? <span className="w-3 h-3 rounded-full border border-white/40 border-t-white animate-spin" />
+                                                                        : <Trash2 size={11} />}
+                                                                    Yes
+                                                                </button>
+                                                            </div>
                                                         ) : (
-                                                            <div style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                <Package size={14} style={{ color: C.muted }} />
+                                                            /* ── Normal action buttons ── */
+                                                            <div className="flex items-center justify-end gap-1">
+                                                                <button onClick={() => onEditDraft(listing.id)}
+                                                                    className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
+                                                                    style={{ backgroundColor: C.primaryLight }}
+                                                                    title="Edit in Wizard">
+                                                                    <Pencil size={13} style={{ color: C.primary }} />
+                                                                </button>
+                                                                <button className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
+                                                                    style={{ backgroundColor: C.bg }}
+                                                                    title="View History">
+                                                                    <Clock size={13} style={{ color: C.secondary }} />
+                                                                </button>
+                                                                <button className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
+                                                                    style={{ backgroundColor: C.bg }}
+                                                                    title="Export CSV">
+                                                                    <Download size={13} style={{ color: C.secondary }} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => setDeletingId(listing.id)}
+                                                                    className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
+                                                                    style={{ backgroundColor: C.dangerBg }}
+                                                                    title="Delete Listing">
+                                                                    <Trash2 size={13} style={{ color: C.danger }} />
+                                                                </button>
                                                             </div>
                                                         )}
-                                                    </div>
-                                                </td>
-
-                                                {/* Dynamic columns */}
-                                                {visibleColumns.map(col => renderBodyCell(col.id))}
-
-                                                {/* Fixed: Actions */}
-                                                <td className="px-3 py-1.5" onClick={e => e.stopPropagation()}>
-                                                    {deletingId === listing.id ? (
-                                                        /* ── Inline delete confirm ── */
-                                                        <div className="flex items-center justify-end gap-1.5">
-                                                            <span className="text-[11px] font-semibold" style={{ color: C.danger }}>
-                                                                Delete?
-                                                            </span>
-                                                            <button
-                                                                onClick={() => setDeletingId(null)}
-                                                                className="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-opacity hover:opacity-80"
-                                                                style={{ backgroundColor: C.bg, color: C.muted, border: `1px solid ${C.border}` }}
-                                                            >
-                                                                No
-                                                            </button>
-                                                            <button
-                                                                onClick={() => confirmDelete(listing.id)}
-                                                                disabled={deleteLoading}
-                                                                className="px-2.5 py-1 rounded-lg text-[11px] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 flex items-center gap-1"
-                                                                style={{ backgroundColor: C.danger }}
-                                                            >
-                                                                {deleteLoading
-                                                                    ? <span className="w-3 h-3 rounded-full border border-white/40 border-t-white animate-spin" />
-                                                                    : <Trash2 size={11} />}
-                                                                Yes
-                                                            </button>
-                                                        </div>
-                                                    ) : (
-                                                        /* ── Normal action buttons ── */
-                                                        <div className="flex items-center justify-end gap-1">
-                                                            <button onClick={() => onEditDraft(listing.id)}
-                                                                className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
-                                                                style={{ backgroundColor: C.primaryLight }}
-                                                                title="Edit in Wizard">
-                                                                <Pencil size={13} style={{ color: C.primary }} />
-                                                            </button>
-                                                            <button className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
-                                                                style={{ backgroundColor: C.warningBg }}
-                                                                title="Re-check VeRO">
-                                                                <ShieldCheck size={13} style={{ color: C.warning }} />
-                                                            </button>
-                                                            <button className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
-                                                                style={{ backgroundColor: C.bg }}
-                                                                title="Export CSV">
-                                                                <Download size={13} style={{ color: C.secondary }} />
-                                                            </button>
-                                                            <button
-                                                                onClick={() => setDeletingId(listing.id)}
-                                                                className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
-                                                                style={{ backgroundColor: C.dangerBg }}
-                                                                title="Delete Listing">
-                                                                <Trash2 size={13} style={{ color: C.danger }} />
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        )
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
+                                                    </td>
+                                                </tr>
+                                            )
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}{/* end table/grid conditional */}
 
                         {/* PAGINATION — fixed at bottom, doubles as bulk action bar */}
                         {sorted.length > 0 && (
