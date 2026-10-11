@@ -75,7 +75,7 @@ const C = {
 type ListingStatus = 'published' | 'draft' | 'ended' | 'scheduled'
 type VeroStatus = 'clear' | 'warning' | 'flagged' | 'unchecked'
 type SellerType = 'own_stock' | 'wholesale' | 'retail_arb' | 'dropship' | 'pod' | 'reseller'
-type TabFilter = 'all' | 'published' | 'draft' | 'ended' | 'scheduled' | 'templates'
+type TabFilter = 'all' | 'published' | 'draft' | 'ended' | 'scheduled'
 
 interface Listing {
     id: string
@@ -299,6 +299,8 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
     const [recentSearches, setRecentSearches] = useState<string[]>([])
     const [showSearchDropdown, setShowSearchDropdown] = useState(false)
     const [activeTab, setActiveTab] = useState<TabFilter>('all')
+    const [showTemplates, setShowTemplates] = useState(false)
+    const [templateCount, setTemplateCount] = useState(0)
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
     const [page, setPage] = useState(1)
     const [rowsPerPage, setRowsPerPage] = useState(50)
@@ -576,6 +578,11 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                     scheduled, vero_flagged: flagged, avg_health: avgHealth,
                 })
             }
+
+            // Template count
+            const { count: tCount } = await (supabase.from('visual_templates') as any)
+                .select('id', { count: 'exact', head: true })
+            setTemplateCount(tCount ?? 0)
         } catch (e) {
             console.error('[LgDashboard] Load error:', e)
         }
@@ -719,7 +726,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
             <div className="flex-1 flex flex-col h-full min-w-0">
 
             {/* METRIC CARDS - fixed */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 px-6 pt-4 shrink-0">
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 px-6 pt-4 shrink-0">
 
                 {/* Active Listings */}
                 <div className="rounded-2xl p-5 relative overflow-hidden"
@@ -804,6 +811,32 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                     </div>
                 </div>
 
+                {/* My Templates */}
+                <div className="rounded-2xl p-5"
+                    style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.primary}`, boxShadow: '0 2px 12px rgba(117,48,251,0.06)' }}>
+                    <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                            <Palette size={10} color={C.primary} />
+                            <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>My Templates</span>
+                        </div>
+                        {templateCount > 0 ? (
+                            <button
+                                onClick={() => setShowTemplates(true)}
+                                className="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors hover:opacity-80"
+                                style={{ backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ${C.border}`, fontFamily: 'DM Sans, sans-serif' }}>
+                                View Templates
+                            </button>
+                        ) : (
+                            <a href="/dashboard/design" target="_blank" rel="noopener noreferrer"
+                                className="px-2.5 py-1 rounded-lg text-[11px] font-semibold"
+                                style={{ backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ${C.border}`, fontFamily: 'DM Sans, sans-serif', textDecoration: 'none' }}>
+                                Create one
+                            </a>
+                        )}
+                    </div>
+                    <p className="text-[36px] font-bold leading-none" style={{ color: C.primary, fontFamily: 'Syne, sans-serif' }}>{templateCount}</p>
+                </div>
+
             </div>
 
             {/* TOOLBAR + TABLE — flex col, only tbody scrolls */}
@@ -820,7 +853,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                         {/* Status Tabs */}
                         {(Object.entries(tabCounts) as [TabFilter, number][]).map(([tab, count], index) => {
                             const labels: Record<TabFilter, string> = {
-                                all: 'All', published: 'Active', draft: 'Drafts', ended: 'Ended', scheduled: 'Scheduled', templates: 'Templates'
+                                all: 'All', published: 'Active', draft: 'Drafts', ended: 'Ended', scheduled: 'Scheduled'
                             }
                             const isActive = activeTab === tab
                             return (
@@ -849,32 +882,9 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                             )
                         })}
 
-                        {/* Templates tab — separate from listing filter tabs */}
-                        {(() => {
-                            const isActive = activeTab === 'templates'
-                            return (
-                                <button
-                                    onClick={() => { setActiveTab('templates'); setPage(1) }}
-                                    className="flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-semibold transition-all whitespace-nowrap"
-                                    style={{
-                                        color: isActive ? C.primary : C.secondary,
-                                        fontFamily: 'DM Sans, sans-serif',
-                                        backgroundColor: isActive ? '#ffffff' : 'transparent',
-                                        border: isActive ? `2px solid #7530fb` : '2px solid transparent',
-                                        borderBottom: isActive ? `2px solid #ffffff` : '2px solid transparent',
-                                        borderRadius: '8px 8px 0 0',
-                                        marginBottom: '-2px',
-                                        marginLeft: '4px',
-                                    }}
-                                >
-                                    <Palette size={12} />
-                                    Templates
-                                </button>
-                            )
-                        })()}
 
-                        {/* Search / Filter / View — hidden on Templates tab */}
-                        {activeTab !== 'templates' && (<>
+                        {/* Search / Filter / View — hidden when gallery is open */}
+                        {!showTemplates && (<>
                         <div className="flex-1" />
 
                         {/* Search */}
@@ -966,16 +976,16 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                     </div>
                 </div>{/* end toolbar card */}
 
-                {/* MY TEMPLATES GALLERY — shown when Templates tab active */}
-                {activeTab === 'templates' && (
+                {/* MY TEMPLATES GALLERY — shown when View Templates clicked */}
+                {showTemplates && (
                     <div className="flex-1 flex flex-col min-h-0 rounded-b-2xl overflow-hidden"
                         style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, borderTop: 'none', boxShadow: '0 2px 12px rgba(117,48,251,0.06)' }}>
-                        <MyTemplatesGallery />
+                        <MyTemplatesGallery onClose={() => setShowTemplates(false)} />
                     </div>
                 )}
 
                 {/* TABLE CARD — one table, sticky thead, scrolling tbody */}
-                {activeTab !== 'templates' && (
+                {!showTemplates && (
                 <div className="flex-1 flex flex-col min-h-0 rounded-b-2xl overflow-hidden"
                     style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, borderTop: 'none', boxShadow: '0 2px 12px rgba(117,48,251,0.06)' }}>
 

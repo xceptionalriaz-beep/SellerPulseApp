@@ -14,7 +14,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
     Palette, ExternalLink, RefreshCw, Plus,
-    LayoutGrid, Clock, Layers, Search, X,
+    LayoutGrid, Clock, Layers, Search, X, ArrowLeft,
 } from 'lucide-react'
 
 const C = {
@@ -47,7 +47,11 @@ interface VisualTemplate {
     canvas_settings_json: any
 }
 
-export default function MyTemplatesGallery() {
+interface Props {
+    onClose?: () => void
+}
+
+export default function MyTemplatesGallery({ onClose }: Props) {
     const supabase = createClient()
 
     const [templates, setTemplates] = useState<VisualTemplate[]>([])
@@ -181,6 +185,23 @@ export default function MyTemplatesGallery() {
                 background: C.surface,
                 flexShrink: 0,
             }}>
+                {/* Back button */}
+                {onClose && (
+                    <button
+                        onClick={onClose}
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: 6,
+                            padding: '6px 12px', borderRadius: 10, flexShrink: 0,
+                            background: 'none', border: `1px solid ${C.borderInput}`,
+                            cursor: 'pointer', color: C.secondary,
+                            fontSize: 12, fontWeight: 600, fontFamily: 'DM Sans, sans-serif',
+                        }}
+                    >
+                        <ArrowLeft size={13} />
+                        Back
+                    </button>
+                )}
+
                 {/* Icon */}
                 <div style={{
                     width: 32, height: 32, borderRadius: 8,
