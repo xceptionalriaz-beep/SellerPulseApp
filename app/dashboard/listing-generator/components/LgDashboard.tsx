@@ -43,6 +43,7 @@ import ImageImportFailed from '@/app/dashboard/listing-generator/components/ai-i
 import BarcodeImport from '@/app/dashboard/listing-generator/components/ai-import/barcode-import/BarcodeImport'
 import TitleImport from '@/app/dashboard/listing-generator/components/ai-import/title-to-listing/TitleImport'
 import MyTemplatesGallery from './MyTemplatesGallery'
+import { AIButton, PrimaryButton } from '@/components/ui/Buttons'
 import type { PlatformDetection, UrlImportResult, ImportedListingData } from '@/app/dashboard/listing-generator/types/url-import.types'
 import type { ImageImportData } from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImport'
 import type { ImageImportResult } from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImportProcessing'
@@ -735,14 +736,9 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
 
                 {/* AI Listing dropdown */}
                 <div className="relative">
-                    <button
-                        onClick={() => setAiDropdownOpen(o => !o)}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold transition-all hover:opacity-80"
-                        style={{ background: `linear-gradient(135deg, ${C.primary}, #9b59fb)`, color: '#fff', border: 'none', fontFamily: 'DM Sans, sans-serif', boxShadow: '0 4px 16px rgba(117,48,251,0.3)' }}>
-                        <Zap size={14} />
-                        ✦ AI Listing
-                        {aiDropdownOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-                    </button>
+                    <AIButton chevron onClick={() => setAiDropdownOpen(o => !o)}>
+                        AI Listing
+                    </AIButton>
 
                     {aiDropdownOpen && (
                         <>
@@ -777,13 +773,9 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                 </div>
 
                 {/* List New Item */}
-                <button
-                    onClick={() => window.dispatchEvent(new CustomEvent('lg:newListing', { detail: { mode: 'manual' } }))}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold transition-all hover:opacity-80"
-                    style={{ backgroundColor: C.accent, color: C.accentText, border: 'none', fontFamily: 'DM Sans, sans-serif', boxShadow: '0 4px 12px rgba(184,250,51,0.35)' }}>
-                    <Star size={14} />
+                <PrimaryButton onClick={() => window.dispatchEvent(new CustomEvent('lg:newListing', { detail: { mode: 'manual' } }))}>
                     List New Item
-                </button>
+                </PrimaryButton>
 
                 <div className="flex-1" />
 
