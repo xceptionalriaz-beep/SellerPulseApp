@@ -39,7 +39,7 @@ import {
   Package, Radar, ShieldCheck, Settings,
   ShieldAlert, LogOut, Bell, Menu, X, MessageCircle, ChevronDown,
   Users, Key, Power, Zap, Trophy, BarChart2, Mail, CreditCard, FileText, DollarSign, BookOpen, Wrench, Image, Briefcase, Eye, Lock, ListChecks,
-  Globe, History, RotateCcw, Upload, Sparkles, Palette,
+  Globe, History, RotateCcw, Sparkles, Palette,
   LayoutTemplate, User, Settings2, ChevronRight,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
@@ -56,7 +56,6 @@ import TeamSwitcherBanner from '@/components/TeamSwitcherBanner'
 import SupportModal from '@/components/dashboard/SupportModal'
 import SecurityTab from '@/app/dashboard/profile/tabs/SecurityTab'
 import AnnouncementBanner from '@/components/dashboard/AnnouncementBanner'
-import { AIButton, PrimaryButton } from '@/components/ui/Buttons'
 
 // -- Nav items (mirrors Dart sidebar exactly) -------------------
 const isInUserMode = typeof window !== 'undefined' && sessionStorage.getItem('riazify_usermode') === '1'
@@ -211,7 +210,6 @@ function ExcludeInput({ exclude, setExclude }: {
 
 // ── ListingStudioTopBar ────────────────────────────────────────
 function ListingStudioTopBar() {
-  const [aiDropdownOpen, setAiDropdownOpen] = useState(false)
   const [wizardStep, setWizardStep] = useState<number | null>(null)
 
   useEffect(() => {
@@ -234,13 +232,6 @@ function ListingStudioTopBar() {
     3: 'Step 3 — Price & Shipping',
     4: 'Step 4 — Audit & Publish',
   }
-
-  const aiOptions = [
-    { icon: '🔗', label: 'URL to Listing', mode: 'ai_url', desc: 'Paste any supplier or product URL' },
-    { icon: '📷', label: 'Image to Listing', mode: 'ai_image', desc: 'Upload a photo, AI reads the product' },
-    { icon: '#', label: 'Barcode to Listing', mode: 'ai_barcode', desc: 'Type or scan EAN / UPC barcode' },
-    { icon: 'T', label: 'Title to Listing', mode: 'ai_title', desc: 'Type a product name to search' },
-  ]
 
   return (
     <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -266,58 +257,6 @@ function ListingStudioTopBar() {
       </div>
 
       <div className="flex-1" />
-
-      {/* Hide buttons when in wizard */}
-      {!wizardStep && (
-        <>
-          {/* Bulk Upload */}
-          <button
-            onClick={() => window.dispatchEvent(new CustomEvent('lg:bulkUpload'))}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-[13px] font-semibold transition-all hover:opacity-80"
-            style={{ backgroundColor: '#f3eeff', color: '#7530fb', border: '1px solid #ede9fe', fontFamily: 'DM Sans, sans-serif' }}>
-            <Upload size={14} />
-            Bulk Upload
-          </button>
-
-          {/* AI Listing dropdown */}
-          <div className="relative">
-            <AIButton chevron onClick={() => setAiDropdownOpen(o => !o)}>
-              AI Listing
-            </AIButton>
-
-            {aiDropdownOpen && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setAiDropdownOpen(false)} />
-                <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-[260px] rounded-2xl overflow-hidden"
-                  style={{ backgroundColor: '#ffffff', border: '1px solid #ede9fe', boxShadow: '0 8px 32px rgba(117,48,251,0.15)' }}>
-                  <div className="px-4 py-3" style={{ borderBottom: '1px solid #ede9fe', backgroundColor: '#f3eeff' }}>
-                    <p className="text-[12px] font-bold" style={{ color: '#7530fb', fontFamily: 'Syne, sans-serif' }}>AI Listing</p>
-                    <p className="text-[11px]" style={{ color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }}>Let AI build your listing automatically</p>
-                  </div>
-                  {aiOptions.map(opt => (
-                    <button key={opt.mode}
-                      onClick={() => { setAiDropdownOpen(false); window.dispatchEvent(new CustomEvent('lg:newListing', { detail: { mode: opt.mode } })) }}
-                      className="w-full flex items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-[#f8f7ff]"
-                      style={{ borderBottom: '1px solid #f3eeff' }}>
-                      <span className="w-7 h-7 rounded-lg flex items-center justify-center text-[12px] font-bold shrink-0 mt-0.5"
-                        style={{ backgroundColor: '#f3eeff', color: '#7530fb' }}>{opt.icon}</span>
-                      <div>
-                        <p className="text-[13px] font-semibold" style={{ color: '#1e1535', fontFamily: 'DM Sans, sans-serif' }}>{opt.label}</p>
-                        <p className="text-[11px]" style={{ color: '#9ca3af', fontFamily: 'DM Sans, sans-serif' }}>{opt.desc}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* List New Item */}
-          <PrimaryButton onClick={() => window.dispatchEvent(new CustomEvent('lg:newListing', { detail: { mode: 'manual' } }))}>
-            List New Item
-          </PrimaryButton>
-        </>
-      )}
     </div>
   )
 }

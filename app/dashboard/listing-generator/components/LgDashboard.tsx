@@ -300,7 +300,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
     const [showSearchDropdown, setShowSearchDropdown] = useState(false)
     const [activeTab, setActiveTab] = useState<TabFilter>('all')
     const [showTemplates, setShowTemplates] = useState(false)
-    const [templateCount, setTemplateCount] = useState(0)
+    const [aiDropdownOpen, setAiDropdownOpen] = useState(false)
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
     const [page, setPage] = useState(1)
     const [rowsPerPage, setRowsPerPage] = useState(50)
@@ -579,10 +579,6 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                 })
             }
 
-            // Template count
-            const { count: tCount } = await (supabase.from('visual_templates') as any)
-                .select('id', { count: 'exact', head: true })
-            setTemplateCount(tCount ?? 0)
         } catch (e) {
             console.error('[LgDashboard] Load error:', e)
         }
@@ -725,8 +721,85 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
             {/* MAIN COLUMN — metric cards + toolbar + table */}
             <div className="flex-1 flex flex-col h-full min-w-0">
 
+            {/* ACTION BAR — above KPI cards */}
+            {!showTemplates && (
+            <div className="flex items-center gap-3 px-6 pt-4 pb-0 shrink-0 flex-wrap">
+                {/* Bulk Upload */}
+                <button
+                    onClick={() => window.dispatchEvent(new CustomEvent('lg:bulkUpload'))}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold transition-all hover:opacity-80"
+                    style={{ backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ${C.border}`, fontFamily: 'DM Sans, sans-serif' }}>
+                    <Upload size={14} />
+                    Bulk Upload
+                </button>
+
+                {/* AI Listing dropdown */}
+                <div className="relative">
+                    <button
+                        onClick={() => setAiDropdownOpen(o => !o)}
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold transition-all hover:opacity-80"
+                        style={{ background: `linear-gradient(135deg, ${C.primary}, #9b59fb)`, color: '#fff', border: 'none', fontFamily: 'DM Sans, sans-serif', boxShadow: '0 4px 16px rgba(117,48,251,0.3)' }}>
+                        <Zap size={14} />
+                        ✦ AI Listing
+                        {aiDropdownOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                    </button>
+
+                    {aiDropdownOpen && (
+                        <>
+                            <div className="fixed inset-0 z-40" onClick={() => setAiDropdownOpen(false)} />
+                            <div className="absolute left-0 top-[calc(100%+8px)] z-50 w-[260px] rounded-2xl overflow-hidden"
+                                style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, boxShadow: '0 8px 32px rgba(117,48,251,0.15)' }}>
+                                <div className="px-4 py-3" style={{ borderBottom: `1px solid ${C.border}`, backgroundColor: C.primaryLight }}>
+                                    <p className="text-[12px] font-bold" style={{ color: C.primary, fontFamily: 'Syne, sans-serif' }}>AI Listing</p>
+                                    <p className="text-[11px]" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>Let AI build your listing automatically</p>
+                                </div>
+                                {[
+                                    { icon: '🔗', label: 'URL to Listing',   mode: 'ai_url',     desc: 'Paste any supplier or product URL' },
+                                    { icon: '📷', label: 'Image to Listing', mode: 'ai_image',   desc: 'Upload a photo, AI reads the product' },
+                                    { icon: '#',  label: 'Barcode to Listing',mode: 'ai_barcode', desc: 'Type or scan EAN / UPC barcode' },
+                                    { icon: 'T',  label: 'Title to Listing', mode: 'ai_title',   desc: 'Type a product name to search' },
+                                ].map(opt => (
+                                    <button key={opt.mode}
+                                        onClick={() => { setAiDropdownOpen(false); window.dispatchEvent(new CustomEvent('lg:newListing', { detail: { mode: opt.mode } })) }}
+                                        className="w-full flex items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-[#f8f7ff]"
+                                        style={{ borderBottom: `1px solid ${C.primaryLight}` }}>
+                                        <span className="w-7 h-7 rounded-lg flex items-center justify-center text-[12px] font-bold shrink-0 mt-0.5"
+                                            style={{ backgroundColor: C.primaryLight, color: C.primary }}>{opt.icon}</span>
+                                        <div>
+                                            <p className="text-[13px] font-semibold" style={{ color: C.dark, fontFamily: 'DM Sans, sans-serif' }}>{opt.label}</p>
+                                            <p className="text-[11px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>{opt.desc}</p>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                {/* List New Item */}
+                <button
+                    onClick={() => window.dispatchEvent(new CustomEvent('lg:newListing', { detail: { mode: 'manual' } }))}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold transition-all hover:opacity-80"
+                    style={{ backgroundColor: C.accent, color: C.accentText, border: 'none', fontFamily: 'DM Sans, sans-serif', boxShadow: '0 4px 12px rgba(184,250,51,0.35)' }}>
+                    <Star size={14} />
+                    List New Item
+                </button>
+
+                <div className="flex-1" />
+
+                {/* My Templates shortcut */}
+                <button
+                    onClick={() => setShowTemplates(true)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-[13px] font-semibold transition-all hover:opacity-80"
+                    style={{ backgroundColor: C.surface, color: C.primary, border: `1px solid ${C.border}`, fontFamily: 'DM Sans, sans-serif' }}>
+                    <Palette size={14} />
+                    My Templates
+                </button>
+            </div>
+            )}
+
             {/* METRIC CARDS - fixed */}
-            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 px-6 pt-4 shrink-0">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 px-6 pt-4 shrink-0">
 
                 {/* Active Listings */}
                 <div className="rounded-2xl p-5 relative overflow-hidden"
@@ -809,32 +882,6 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                     <div className="h-1.5 rounded-full" style={{ backgroundColor: C.border }}>
                         <div className="h-full rounded-full transition-all" style={{ width: `${metrics.avg_health}%`, backgroundColor: C.accent }} />
                     </div>
-                </div>
-
-                {/* My Templates */}
-                <div className="rounded-2xl p-5"
-                    style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.primary}`, boxShadow: '0 2px 12px rgba(117,48,251,0.06)' }}>
-                    <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                            <Palette size={10} color={C.primary} />
-                            <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>My Templates</span>
-                        </div>
-                        {templateCount > 0 ? (
-                            <button
-                                onClick={() => setShowTemplates(true)}
-                                className="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors hover:opacity-80"
-                                style={{ backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ${C.border}`, fontFamily: 'DM Sans, sans-serif' }}>
-                                View Templates
-                            </button>
-                        ) : (
-                            <a href="/dashboard/design" target="_blank" rel="noopener noreferrer"
-                                className="px-2.5 py-1 rounded-lg text-[11px] font-semibold"
-                                style={{ backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ${C.border}`, fontFamily: 'DM Sans, sans-serif', textDecoration: 'none' }}>
-                                Create one
-                            </a>
-                        )}
-                    </div>
-                    <p className="text-[36px] font-bold leading-none" style={{ color: C.primary, fontFamily: 'Syne, sans-serif' }}>{templateCount}</p>
                 </div>
 
             </div>
