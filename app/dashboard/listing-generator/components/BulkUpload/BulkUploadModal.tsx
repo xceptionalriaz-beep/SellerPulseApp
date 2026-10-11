@@ -89,7 +89,24 @@ const TEMPLATE_HEADERS = COLUMN_META.map(c => c.key)
 type Step = 'drop' | 'preview' | 'generating' | 'summary'
 
 // ── Download template helper ──────────────────────────────────
-function downloadTemplate() {
+// Tries the static public file first; falls back to client-side
+// generation if the fetch fails (e.g. dev server without /public).
+async function downloadTemplate() {
+    try {
+        const res = await fetch('/templates/bulk-upload-template.csv')
+        if (res.ok) {
+            const blob = await res.blob()
+            const url  = URL.createObjectURL(blob)
+            const a    = document.createElement('a')
+            a.href     = url
+            a.download = 'riazify-bulk-upload-template.csv'
+            a.click()
+            URL.revokeObjectURL(url)
+            return
+        }
+    } catch { /* fall through to generated version */ }
+
+    // Fallback: generate client-side from COLUMN_META
     const csv  = generateCSVTemplate()
     const blob = new Blob([csv], { type: 'text/csv' })
     const url  = URL.createObjectURL(blob)
