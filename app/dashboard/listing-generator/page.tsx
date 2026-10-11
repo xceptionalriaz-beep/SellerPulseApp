@@ -408,6 +408,11 @@ export default function ListingGeneratorPage() {
     // ── Bulk upload handlers ────────────────────────────────────
 
     function handleOpenBulkModal() {
+        // Show upgrade popup instead of bulk modal (testing — remove when live)
+        setUpgradeOpen(true)
+        return
+
+        // eslint-disable-next-line no-unreachable
         cancelledRef.current = false
         setBulkRows([])
         setBulkView('modal')
