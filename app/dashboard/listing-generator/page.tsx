@@ -410,11 +410,6 @@ export default function ListingGeneratorPage() {
     // ── Bulk upload handlers ────────────────────────────────────
 
     function handleOpenBulkModal() {
-        // Show teaser first — testing (revert to real bulk flow when done)
-        setTeaserOpen(true)
-        return
-
-        // eslint-disable-next-line no-unreachable
         cancelledRef.current = false
         setBulkRows([])
         setBulkView('modal')

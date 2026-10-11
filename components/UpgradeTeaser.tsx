@@ -6,7 +6,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import { useEffect } from 'react'
-import { X, Zap, CheckCircle2 } from 'lucide-react'
+import { X, CheckCircle2 } from 'lucide-react'
 
 interface UpgradeTeaserProps {
     onClose:       () => void
@@ -79,16 +79,6 @@ export function UpgradeTeaser({
                     }}>
                     <X size={15} />
                 </button>
-
-                {/* Icon */}
-                <div style={{
-                    width: '52px', height: '52px', borderRadius: '14px',
-                    background: '#0a0d08',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    marginBottom: '20px',
-                }}>
-                    <Zap size={24} fill="#8fff00" color="#8fff00" />
-                </div>
 
                 {/* Heading */}
                 <p style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.1em', color: '#4a8f00', textTransform: 'uppercase', margin: '0 0 6px' }}>
