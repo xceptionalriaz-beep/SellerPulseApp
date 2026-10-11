@@ -25,7 +25,7 @@ import { applyColumnFilters } from '../lib/apply-column-filters'
 import type { ActiveFilter } from '../data/filter-definitions'
 import { FILTER_FIELD_DEFS } from '../data/filter-definitions'
 import {
-    Search, Upload, ChevronDown, LayoutList, LayoutGrid,
+    Search, Upload, ChevronDown, ChevronUp, LayoutList, LayoutGrid,
     CheckCircle2, AlertTriangle, Pencil, ShieldCheck,
     Download, Trash2, ChevronLeft, ChevronRight,
     X, Package, TrendingUp, Circle, Zap, Copy, Check,
@@ -325,6 +325,14 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
     const [showFilterPanel, setShowFilterPanel] = useState(false)
     const [openColFilter, setOpenColFilter] = useState<string | null>(null) // colId
 
+    // ── Sort state ──────────────────────────────────────────────
+    const [sortCol, setSortCol] = useState<string | null>(null)
+    const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
+
+    // ── Bulk action state ───────────────────────────────────────
+    const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false)
+    const [bulkLoading, setBulkLoading] = useState(false)
+
     function upsertFilter(partial: Omit<ActiveFilter, 'id'>) {
         setColumnFilters(prev => {
             const existing = prev.find(f => f.colId === partial.colId)
@@ -342,6 +350,85 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
 
     function clearAllFilters() {
         setColumnFilters([])
+    }
+
+    // ── Column sort toggle ──────────────────────────────────────
+    // none → asc → desc → none
+    function toggleSort(colId: string) {
+        if (sortCol !== colId) {
+            setSortCol(colId)
+            setSortDir('asc')
+        } else if (sortDir === 'asc') {
+            setSortDir('desc')
+        } else {
+            setSortCol(null)
+            setSortDir('asc')
+        }
+        setPage(1)
+    }
+
+    // ── Bulk: change status ─────────────────────────────────────
+    async function bulkChangeStatus(newStatus: ListingStatus) {
+        setBulkLoading(true)
+        try {
+            const ids = Array.from(selectedIds)
+            const { error } = await (supabase.from('listing_drafts') as any)
+                .update({ status: newStatus, updated_at: new Date().toISOString() })
+                .in('id', ids)
+            if (error) throw error
+            setListings(prev => prev.map(l =>
+                selectedIds.has(l.id) ? { ...l, status: newStatus } : l
+            ))
+            clearSelection()
+        } catch (e) {
+            console.error('[LgDashboard] Bulk status error:', e)
+        }
+        setBulkLoading(false)
+    }
+
+    // ── Bulk: delete ────────────────────────────────────────────
+    async function bulkDelete() {
+        setBulkLoading(true)
+        try {
+            const ids = Array.from(selectedIds)
+            const { error } = await (supabase.from('listing_drafts') as any)
+                .delete()
+                .in('id', ids)
+            if (error) throw error
+            setListings(prev => prev.filter(l => !selectedIds.has(l.id)))
+            clearSelection()
+            setBulkDeleteConfirm(false)
+        } catch (e) {
+            console.error('[LgDashboard] Bulk delete error:', e)
+        }
+        setBulkLoading(false)
+    }
+
+    // ── Bulk: export CSV ────────────────────────────────────────
+    function exportSelectedCsv() {
+        const selected = listings.filter(l => selectedIds.has(l.id))
+        const headers = ['SKU', 'Title', 'Condition', 'Category', 'Price (£)', 'Margin %', 'Health', 'VeRO', 'Stock', 'Status', 'Created']
+        const rows = selected.map(l => [
+            l.sku ?? '',
+            `"${(l.title || l.product_name || '').replace(/"/g, '""')}"`,
+            l.condition ?? '',
+            `"${(l.category ?? '').replace(/"/g, '""')}"`,
+            l.sell_price?.toFixed(2) ?? '',
+            l.margin ?? '',
+            l.health_score,
+            l.vero_status,
+            l.quantity,
+            l.status,
+            new Date(l.created_at).toLocaleDateString('en-GB'),
+        ].join(','))
+        const csv = [headers.join(','), ...rows].join('\n')
+        const blob = new Blob([csv], { type: 'text/csv' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `listings-export-${new Date().toISOString().split('T')[0]}.csv`
+        a.click()
+        URL.revokeObjectURL(url)
     }
 
     // Listen for top bar button events
@@ -503,9 +590,25 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
     // 3. Apply column-level filters
     const colFiltered = applyColumnFilters(filtered, columnFilters)
 
+    // 4. Sort
+    const sorted = sortCol ? [...colFiltered].sort((a, b) => {
+        const def = FILTER_FIELD_DEFS[sortCol]
+        if (!def) return 0
+        const av = a[def.field as keyof Listing]
+        const bv = b[def.field as keyof Listing]
+        if (av == null && bv == null) return 0
+        if (av == null) return 1
+        if (bv == null) return -1
+        let cmp = 0
+        if (def.type === 'number') cmp = Number(av) - Number(bv)
+        else if (def.type === 'date') cmp = new Date(String(av)).getTime() - new Date(String(bv)).getTime()
+        else cmp = String(av).toLowerCase().localeCompare(String(bv).toLowerCase())
+        return sortDir === 'asc' ? cmp : -cmp
+    }) : colFiltered
+
     const PER_PAGE = rowsPerPage
-    const totalPages = Math.ceil(colFiltered.length / PER_PAGE)
-    const paginated = colFiltered.slice((page - 1) * PER_PAGE, page * PER_PAGE)
+    const totalPages = Math.ceil(sorted.length / PER_PAGE)
+    const paginated = sorted.slice((page - 1) * PER_PAGE, page * PER_PAGE)
 
     // ── Selection ───────────────────────────────────────────────
     function toggleSelect(id: string) {
@@ -823,14 +926,26 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                         {visibleColumns.map(col => {
                                             const hasFilter = columnFilters.some(f => f.colId === col.id)
                                             const hasDef = !!FILTER_FIELD_DEFS[col.id]
+                                            const isActiveSort = sortCol === col.id
                                             return (
                                                 <th
                                                     key={col.id}
                                                     style={{ width: col.width, color: '#6b7280', fontFamily: 'DM Sans, sans-serif', position: 'relative' }}
                                                     className="px-3 py-2 text-left text-[12px] font-bold uppercase tracking-widest"
                                                 >
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                                                        <span>{col.label}</span>
+                                                    <div
+                                                        style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', userSelect: 'none' }}
+                                                        onClick={() => toggleSort(col.id)}
+                                                        title={`Sort by ${col.label}`}
+                                                    >
+                                                        <span style={{ color: isActiveSort ? C.primary : '#6b7280' }}>{col.label}</span>
+                                                        {/* Sort chevron */}
+                                                        <span style={{ color: isActiveSort ? C.primary : C.borderInput, flexShrink: 0, display: 'flex' }}>
+                                                            {isActiveSort && sortDir === 'asc'
+                                                                ? <ChevronUp size={12} />
+                                                                : <ChevronDown size={12} />}
+                                                        </span>
+                                                        {/* Filter icon */}
                                                         {hasDef && (
                                                             <button
                                                                 type="button"
@@ -1261,8 +1376,129 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                             </table>
                         </div>
 
+                        {/* BULK ACTION BAR — appears when rows are selected */}
+                        {selectedIds.size > 0 && (
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 8,
+                                padding: '10px 16px',
+                                backgroundColor: C.dark,
+                                borderTop: `2px solid ${C.primary}`,
+                                flexShrink: 0,
+                            }}>
+                                {/* Count + deselect */}
+                                <span style={{
+                                    backgroundColor: C.primary,
+                                    color: '#fff', fontSize: 12, fontWeight: 800,
+                                    padding: '3px 10px', borderRadius: 20,
+                                    fontFamily: 'DM Sans, sans-serif', whiteSpace: 'nowrap',
+                                }}>
+                                    {selectedIds.size} selected
+                                </span>
+                                <button
+                                    onClick={clearSelection}
+                                    style={{
+                                        background: 'transparent', border: 'none',
+                                        color: '#9ca3af', cursor: 'pointer',
+                                        display: 'flex', alignItems: 'center', gap: 4,
+                                        fontSize: 12, fontFamily: 'DM Sans, sans-serif',
+                                    }}
+                                >
+                                    <X size={12} /> Deselect all
+                                </button>
+
+                                <div style={{ flex: 1 }} />
+
+                                {bulkDeleteConfirm ? (
+                                    /* ── Confirm delete ── */
+                                    <>
+                                        <span style={{ color: '#fca5a5', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}>
+                                            Delete {selectedIds.size} listing{selectedIds.size !== 1 ? 's' : ''}?
+                                        </span>
+                                        <button
+                                            onClick={() => setBulkDeleteConfirm(false)}
+                                            style={{
+                                                padding: '5px 14px', borderRadius: 8,
+                                                border: '1.5px solid #374151', background: 'transparent',
+                                                color: '#9ca3af', fontSize: 12, fontWeight: 600,
+                                                cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                                            }}>
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={bulkDelete}
+                                            disabled={bulkLoading}
+                                            style={{
+                                                padding: '5px 14px', borderRadius: 8,
+                                                border: 'none', background: C.danger,
+                                                color: '#fff', fontSize: 12, fontWeight: 700,
+                                                cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                                                display: 'flex', alignItems: 'center', gap: 6,
+                                                opacity: bulkLoading ? 0.7 : 1,
+                                            }}>
+                                            {bulkLoading
+                                                ? <span style={{ width: 12, height: 12, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', display: 'inline-block' }} className="animate-spin" />
+                                                : <Trash2 size={12} />}
+                                            Yes, delete
+                                        </button>
+                                    </>
+                                ) : (
+                                    /* ── Normal bulk actions ── */
+                                    <>
+                                        <button
+                                            onClick={() => bulkChangeStatus('published')}
+                                            disabled={bulkLoading}
+                                            style={{
+                                                padding: '5px 14px', borderRadius: 8,
+                                                border: '1.5px solid #16a34a', background: 'transparent',
+                                                color: '#4ade80', fontSize: 12, fontWeight: 600,
+                                                cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                                            }}>
+                                            ✓ Publish
+                                        </button>
+                                        <button
+                                            onClick={() => bulkChangeStatus('ended')}
+                                            disabled={bulkLoading}
+                                            style={{
+                                                padding: '5px 14px', borderRadius: 8,
+                                                border: '1.5px solid #374151', background: 'transparent',
+                                                color: '#9ca3af', fontSize: 12, fontWeight: 600,
+                                                cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                                            }}>
+                                            ○ End Listings
+                                        </button>
+                                        <button
+                                            onClick={exportSelectedCsv}
+                                            style={{
+                                                padding: '5px 14px', borderRadius: 8,
+                                                border: `1.5px solid ${C.primary}`, background: 'transparent',
+                                                color: '#a78bfa', fontSize: 12, fontWeight: 600,
+                                                cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                                                display: 'flex', alignItems: 'center', gap: 6,
+                                            }}>
+                                            <Download size={12} />
+                                            Export CSV
+                                        </button>
+                                        <button
+                                            onClick={() => setBulkDeleteConfirm(true)}
+                                            style={{
+                                                padding: '5px 14px', borderRadius: 8,
+                                                border: `1.5px solid ${C.danger}`, background: 'transparent',
+                                                color: '#fca5a5', fontSize: 12, fontWeight: 600,
+                                                cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                                                display: 'flex', alignItems: 'center', gap: 6,
+                                            }}>
+                                            <Trash2 size={12} />
+                                            Delete
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        )}
+
                         {/* PAGINATION — fixed at bottom */}
-                        {filtered.length > 0 && (
+                        {sorted.length > 0 && (
                             <div className="flex items-center justify-between px-5 py-3 shrink-0 gap-3"
                                 style={{ borderTop: `1px solid ${C.border}`, backgroundColor: C.surface }}>
 
@@ -1270,10 +1506,10 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                 <div className="flex items-center gap-3">
                                     <p className="text-[12px] whitespace-nowrap" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
                                         <span style={{ color: C.dark, fontWeight: 600 }}>
-                                            {((page - 1) * PER_PAGE) + 1}–{Math.min(page * PER_PAGE, filtered.length)}
+                                            {((page - 1) * PER_PAGE) + 1}–{Math.min(page * PER_PAGE, sorted.length)}
                                         </span>
                                         {' '}of{' '}
-                                        <span style={{ color: C.dark, fontWeight: 600 }}>{filtered.length.toLocaleString()}</span>
+                                        <span style={{ color: C.dark, fontWeight: 600 }}>{sorted.length.toLocaleString()}</span>
                                         {' '}listings
                                     </p>
                                     {/* Rows per page selector */}
