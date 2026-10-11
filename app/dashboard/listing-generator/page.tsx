@@ -19,6 +19,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import KillSwitchGate from '@/components/KillSwitchGate'
 import { PlanUpgradeModal } from '@/components/PlanUpgradeModal'
+import { UpgradeTeaser } from '@/components/UpgradeTeaser'
 import { ListChecks, Sparkles, Loader2, Tag, Calculator, ShieldCheck } from 'lucide-react'
 import LgDashboard from './components/LgDashboard'
 import LgStudio from './components/LgStudio'
@@ -332,6 +333,7 @@ export default function ListingGeneratorPage() {
     const [planLimits, setPlanLimits] = useState<any>(null)
     const [userId, setUserId] = useState<string | null>(null)
     const [currentTier, setCurrentTier] = useState<string>('free')
+    const [teaserOpen, setTeaserOpen] = useState(false)
     const [upgradeOpen, setUpgradeOpen] = useState(false)
 
     // ── Bulk upload state ──────────────────────────────────────
@@ -408,8 +410,8 @@ export default function ListingGeneratorPage() {
     // ── Bulk upload handlers ────────────────────────────────────
 
     function handleOpenBulkModal() {
-        // Show upgrade popup instead of bulk modal (testing — remove when live)
-        setUpgradeOpen(true)
+        // Show teaser first — testing (revert to real bulk flow when done)
+        setTeaserOpen(true)
         return
 
         // eslint-disable-next-line no-unreachable
@@ -579,6 +581,16 @@ export default function ListingGeneratorPage() {
                 <PlanUpgradeModal
                     currentTier={currentTier}
                     onClose={() => setUpgradeOpen(false)}
+                />
+            )}
+
+            {/* ── Upgrade Teaser (step 1) ─────────────────────── */}
+            {teaserOpen && (
+                <UpgradeTeaser
+                    onClose={() => setTeaserOpen(false)}
+                    onViewPlans={() => { setTeaserOpen(false); setUpgradeOpen(true) }}
+                    title="You've reached your plan limit."
+                    description="Upgrade to unlock bulk CSV uploads and unlimited AI listing generation."
                 />
             )}
 

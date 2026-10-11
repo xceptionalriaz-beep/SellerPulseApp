@@ -51,7 +51,7 @@ export function PlanUpgradeModal({ currentTier = 'free', onClose }: PlanUpgradeM
                     background: '#f9fdf4',
                     borderRadius: '24px',
                     width: '100%',
-                    maxWidth: '960px',
+                    maxWidth: '1140px',
                     padding: '32px',
                     position: 'relative',
                     boxShadow: '0 32px 80px rgba(10,13,8,0.25)',
