@@ -15,15 +15,23 @@
 //   ✓ Passes draftId to wizard when editing an existing draft
 // ─────────────────────────────────────────────────────────────
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import KillSwitchGate from '@/components/KillSwitchGate'
 import { ListChecks, Sparkles, Loader2, Tag, Calculator, ShieldCheck } from 'lucide-react'
 import LgDashboard from './components/LgDashboard'
 import LgStudio from './components/LgStudio'
+import { BulkUploadModal } from './components/BulkUpload/BulkUploadModal'
+import { BulkUploadQueue } from './components/BulkUpload/BulkUploadQueue'
+import { BulkUploadSummary } from './components/BulkUpload/BulkUploadSummary'
+import type { ParsedRow, QueueRow } from './components/BulkUpload/BulkUploadModal'
 
 // ── View types ────────────────────────────────────────────────
 type View = 'loading' | 'empty' | 'dashboard' | 'wizard'
+type BulkView = 'modal' | 'queue' | 'summary' | null
+
+// ── Bulk queue concurrency (max parallel AI calls) ────────────
+const BULK_CONCURRENCY = 2
 
 // ── Placeholder components (replaced in Day 3+) ───────────────
 // These will be replaced with real components as we build them
@@ -323,6 +331,11 @@ export default function ListingGeneratorPage() {
     const [planLimits, setPlanLimits] = useState<any>(null)
     const [userId, setUserId] = useState<string | null>(null)
 
+    // ── Bulk upload state ──────────────────────────────────────
+    const [bulkView, setBulkView] = useState<BulkView>(null)
+    const [bulkRows, setBulkRows] = useState<QueueRow[]>([])
+    const cancelledRef = useRef(false)
+
     // ── Load on mount ────────────────────────────────────────
     useEffect(() => {
         async function loadPage() {
@@ -341,7 +354,7 @@ export default function ListingGeneratorPage() {
 
                 // 3. Get plan limits for listing generator
                 const { data: limits } = await (supabase.from('plan_limits') as any)
-                    .select('has_listing_generator, max_listing_generations, has_bulk_listing, has_dropship_import')
+                    .select('has_listing_generator, max_listing_generations, has_bulk_listing, max_bulk_listings, has_dropship_import')
                     .eq('tier', tier)
                     .single()
                 if (limits) setPlanLimits(limits)
@@ -388,6 +401,124 @@ export default function ListingGeneratorPage() {
         }
     }
 
+    // ── Bulk upload handlers ────────────────────────────────────
+
+    function handleOpenBulkModal() {
+        cancelledRef.current = false
+        setBulkRows([])
+        setBulkView('modal')
+    }
+
+    // Called by BulkUploadModal when user clicks "Generate X listings"
+    const handleBulkConfirm = useCallback(async (parsedRows: ParsedRow[]) => {
+        if (parsedRows.length === 0) return
+
+        // Initialise queue rows (all pending)
+        const queue: QueueRow[] = parsedRows.map(r => ({
+            ...r,
+            _status:  'pending',
+            _message: '',
+        }))
+        setBulkRows([...queue])
+        setBulkView('queue')
+        cancelledRef.current = false
+
+        // ── Async queue runner ─────────────────────────────────
+        let i = 0
+
+        async function processOne(idx: number) {
+            if (cancelledRef.current) return
+
+            // Mark as generating
+            setBulkRows(prev => {
+                const next = [...prev]
+                next[idx] = { ...next[idx], _status: 'generating', _message: '' }
+                return next
+            })
+
+            try {
+                const row = queue[idx]
+                const res = await fetch('/api/listing-generator/bulk-generate', {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body:    JSON.stringify({
+                        title:       row.title,
+                        barcode:     row.barcode,
+                        buy_price:   row.buy_price,
+                        sell_price:  row.sell_price,
+                        sku:         row.sku,
+                        condition:   row.condition,
+                        quantity:    row.quantity,
+                        category_id: row.category_id,
+                        images:      row.images,
+                        _rowIndex:   row._rowIndex,
+                    }),
+                })
+
+                const json = await res.json()
+
+                if (!res.ok || !json.ok) {
+                    throw new Error(json.error ?? `HTTP ${res.status}`)
+                }
+
+                setBulkRows(prev => {
+                    const next = [...prev]
+                    next[idx] = { ...next[idx], _status: 'done', _message: json.message || 'Listing created' }
+                    return next
+                })
+            } catch (err: unknown) {
+                const msg = err instanceof Error ? err.message : 'Unexpected error'
+                setBulkRows(prev => {
+                    const next = [...prev]
+                    next[idx] = { ...next[idx], _status: 'error', _message: msg }
+                    return next
+                })
+            }
+        }
+
+        // Run with concurrency = BULK_CONCURRENCY
+        const runner = async () => {
+            while (i < queue.length && !cancelledRef.current) {
+                const batch: Promise<void>[] = []
+                for (let c = 0; c < BULK_CONCURRENCY && i < queue.length; c++, i++) {
+                    batch.push(processOne(i))
+                }
+                await Promise.all(batch)
+            }
+        }
+
+        await runner()
+    }, [])
+
+    function handleBulkCancel() {
+        cancelledRef.current = true
+        setBulkView(null)
+        setBulkRows([])
+    }
+
+    function handleBulkDone() {
+        // BulkUploadQueue calls this when all rows settled — show summary
+        setBulkView('summary')
+    }
+
+    function handleBulkSummaryClose() {
+        setBulkView(null)
+        setBulkRows([])
+        // Refresh draft count so the dashboard updates
+        setDraftCount(prev => prev + bulkRows.filter(r => r._status === 'done').length)
+        setView('dashboard')
+    }
+
+    function handleBulkRetry(failedRows: QueueRow[]) {
+        // Re-queue only the failed rows — treat as a new confirm
+        const reparsed: ParsedRow[] = failedRows.map(r => ({
+            ...r,
+            _errors: [],
+            _valid:  true,
+        }))
+        handleBulkConfirm(reparsed)
+    }
+
     // ── Render ───────────────────────────────────────────────
     return (
         <KillSwitchGate switchTitle="Listing Generator">
@@ -413,7 +544,7 @@ export default function ListingGeneratorPage() {
                                 <LgDashboard
                                     onNewListing={handleNewListing}
                                     onEditDraft={handleEditDraft}
-                                    onBulkUpload={() => { }}
+                                    onBulkUpload={handleOpenBulkModal}
                                 />
                             )}
                         </div>
@@ -430,6 +561,34 @@ export default function ListingGeneratorPage() {
 
                 </div>
             </div>
+
+            {/* ── Bulk Upload Modal (step 1 + 2) ──────────────── */}
+            {bulkView === 'modal' && (
+                <BulkUploadModal
+                    onClose={() => setBulkView(null)}
+                    onConfirm={handleBulkConfirm}
+                    planLimit={planLimits?.max_bulk_listings ?? 0}
+                />
+            )}
+
+            {/* ── Bulk Generation Queue ────────────────────────── */}
+            {bulkView === 'queue' && (
+                <BulkUploadQueue
+                    rows={bulkRows}
+                    onCancel={handleBulkCancel}
+                    onDone={handleBulkDone}
+                />
+            )}
+
+            {/* ── Bulk Results Summary ─────────────────────────── */}
+            {bulkView === 'summary' && (
+                <BulkUploadSummary
+                    rows={bulkRows}
+                    onClose={handleBulkSummaryClose}
+                    onRetry={handleBulkRetry}
+                />
+            )}
+
         </KillSwitchGate>
     )
 }
