@@ -1,14 +1,14 @@
 'use client'
 // components/PlanUpgradeModal.tsx
 // ─────────────────────────────────────────────────────────────
-// Riazify — Simple upgrade prompt popup
-// Shown when a user hits their plan limit.
-// Directs to billing page — no plan cards (those live at /dashboard/profile).
+// Wraps the existing PlanCards component in a modal overlay.
+// Shown when a user hits their plan limit anywhere in the app.
 // ─────────────────────────────────────────────────────────────
 
 import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { X, Zap, CheckCircle2 } from 'lucide-react'
+import { X, TrendingUp } from 'lucide-react'
+import PlanCards from '@/components/dashboard/PlanCards'
+import { useState } from 'react'
 
 interface PlanUpgradeModalProps {
     currentTier?: string
@@ -16,16 +16,8 @@ interface PlanUpgradeModalProps {
     onSelect?: (tier: string) => void
 }
 
-const BULLETS = [
-    'Unlimited AI listing generation',
-    'Bulk CSV upload (200 listings/mo)',
-    'EAN / barcode auto-fill',
-    'Dropship supplier import',
-    'Priority support',
-]
-
-export function PlanUpgradeModal({ onClose }: PlanUpgradeModalProps) {
-    const router = useRouter()
+export function PlanUpgradeModal({ currentTier = 'free', onClose }: PlanUpgradeModalProps) {
+    const [isAnnual, setIsAnnual] = useState(true)
 
     // Lock body scroll
     useEffect(() => {
@@ -40,34 +32,31 @@ export function PlanUpgradeModal({ onClose }: PlanUpgradeModalProps) {
         return () => window.removeEventListener('keydown', handler)
     }, [onClose])
 
-    function handleUpgrade() {
-        onClose()
-        router.push('/dashboard/profile?tab=billing')
-    }
-
     return (
         <div
             onClick={onClose}
             style={{
                 position: 'fixed', inset: 0, zIndex: 9999,
-                background: 'rgba(30, 21, 53, 0.55)',
-                backdropFilter: 'blur(4px)',
+                background: 'rgba(10, 13, 8, 0.6)',
+                backdropFilter: 'blur(6px)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 padding: '16px',
+                overflowY: 'auto',
             }}>
 
-            {/* Card */}
+            {/* Modal card */}
             <div
                 onClick={e => e.stopPropagation()}
                 style={{
-                    background: '#ffffff',
-                    borderRadius: '20px',
+                    background: '#f9fdf4',
+                    borderRadius: '24px',
                     width: '100%',
-                    maxWidth: '460px',
-                    padding: '36px 32px 32px',
+                    maxWidth: '960px',
+                    padding: '32px',
                     position: 'relative',
-                    boxShadow: '0 24px 64px rgba(30,21,53,0.18)',
-                    fontFamily: '"DM Sans", sans-serif',
+                    boxShadow: '0 32px 80px rgba(10,13,8,0.25)',
+                    fontFamily: 'Inter, sans-serif',
+                    margin: 'auto',
                 }}>
 
                 {/* Close */}
@@ -76,59 +65,38 @@ export function PlanUpgradeModal({ onClose }: PlanUpgradeModalProps) {
                     style={{
                         position: 'absolute', top: '16px', right: '16px',
                         width: '32px', height: '32px', borderRadius: '50%',
-                        border: 'none', background: '#f3eeff',
+                        border: '1px solid #e8ede2', background: '#fff',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        cursor: 'pointer', color: '#7530fb',
+                        cursor: 'pointer', color: '#8a9e78',
                     }}>
                     <X size={15} />
                 </button>
 
-                {/* Icon */}
-                <div style={{
-                    width: '52px', height: '52px', borderRadius: '14px',
-                    background: '#1e1535',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    marginBottom: '20px',
-                }}>
-                    <Zap size={24} fill="#b8fa33" color="#b8fa33" />
+                {/* Header */}
+                <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '8px' }}>
+                        <TrendingUp size={16} style={{ color: '#8fff00' }} />
+                        <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.1em', color: '#4a8f00', textTransform: 'uppercase' }}>
+                            Plans & Pricing
+                        </span>
+                    </div>
+                    <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#0a0d08', margin: 0, lineHeight: 1.2 }}>
+                        Upgrade to keep growing
+                    </h2>
+                    <p style={{ fontSize: '13px', color: '#8a9e78', margin: '6px 0 0' }}>
+                        You've reached your plan limit. Pick a plan to continue.
+                    </p>
                 </div>
 
-                {/* Heading */}
-                <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: '#7530fb', textTransform: 'uppercase', margin: '0 0 6px' }}>
-                    Upgrade your plan
-                </p>
-                <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#1e1535', margin: '0 0 8px', fontFamily: '"Syne", sans-serif', lineHeight: 1.2 }}>
-                    You've reached your listing limit.
-                </h2>
-                <p style={{ fontSize: '14px', color: '#6b7280', margin: '0 0 24px', lineHeight: 1.55 }}>
-                    Upgrade to Pro to keep generating AI-powered eBay listings without limits.
-                </p>
+                {/* Plan cards — reuses the existing billing page component */}
+                <PlanCards
+                    currentPlan={currentTier}
+                    isAnnual={isAnnual}
+                    onBillingToggle={() => setIsAnnual(a => !a)}
+                />
 
-                {/* Bullets */}
-                <ul style={{ listStyle: 'none', margin: '0 0 28px', padding: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {BULLETS.map(b => (
-                        <li key={b} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#1e1535' }}>
-                            <CheckCircle2 size={16} color="#7530fb" style={{ flexShrink: 0 }} />
-                            {b}
-                        </li>
-                    ))}
-                </ul>
-
-                {/* CTA */}
-                <button
-                    onClick={handleUpgrade}
-                    style={{
-                        width: '100%', padding: '14px',
-                        borderRadius: '10px', border: 'none',
-                        background: '#b8fa33', color: '#1e1535',
-                        fontSize: '15px', fontWeight: 700,
-                        cursor: 'pointer', letterSpacing: '0.01em',
-                    }}>
-                    View Plans & Upgrade →
-                </button>
-
-                <p style={{ textAlign: 'center', fontSize: '12px', color: '#9ca3af', margin: '14px 0 0' }}>
-                    7-day free trial on all plans · Cancel anytime
+                <p style={{ textAlign: 'center', fontSize: '11px', color: '#8a9e78', marginTop: '20px' }}>
+                    7-day free trial on all plans · Cancel anytime · Prices exc. VAT
                 </p>
             </div>
         </div>
