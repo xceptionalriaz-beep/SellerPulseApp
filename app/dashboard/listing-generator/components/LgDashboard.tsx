@@ -26,10 +26,10 @@ import type { ActiveFilter } from '../data/filter-definitions'
 import { FILTER_FIELD_DEFS } from '../data/filter-definitions'
 import {
     Search, Upload, ChevronDown, ChevronUp, LayoutList, LayoutGrid,
-    CheckCircle2, AlertTriangle, Pencil, ShieldCheck,
+    CheckCircle2, AlertTriangle, Pencil, Clock,
     Download, Trash2, ChevronLeft, ChevronRight,
     X, Package, TrendingUp, Circle, Zap, Copy, Check,
-    Columns, SlidersHorizontal, Filter,
+    Columns, SlidersHorizontal, Filter, Star,
 } from 'lucide-react'
 import UrlImport from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImport'
 import UrlImportProcessing from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImportProcessing'
@@ -234,6 +234,40 @@ function StockCell({ quantity, outOfStock, sellerType }: {
         )
     }
     return <span className="text-[12px]" style={{ color: C.body, fontFamily: 'DM Sans, sans-serif' }}>{quantity} in stock</span>
+}
+
+// ── Source Badge ──────────────────────────────────────────────
+const SOURCE_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+    cj_dropshipping:  { label: 'CJ Drop',    color: '#0ea5e9', bg: '#e0f2fe' },
+    aliexpress:       { label: 'AliExpress',  color: '#f97316', bg: '#ffedd5' },
+    amazon_uk:        { label: 'Amazon UK',   color: '#d97706', bg: '#fef3c7' },
+    argos:            { label: 'Argos',       color: '#0d9488', bg: '#ccfbf1' },
+    barcode_import:   { label: 'Barcode AI',  color: '#8b5cf6', bg: '#ede9fe' },
+    title_import:     { label: 'Title AI',    color: '#14b8a6', bg: '#ccfbf1' },
+    url_import:       { label: 'URL AI',      color: '#3b82f6', bg: '#dbeafe' },
+    image_import:     { label: 'Photo AI',    color: '#ec4899', bg: '#fce7f3' },
+}
+
+function SourceBadge({ platform }: { platform: string | null }) {
+    if (!platform) {
+        return (
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                style={{ backgroundColor: '#f3f4f6', color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }}>
+                Own
+            </span>
+        )
+    }
+    const cfg = SOURCE_CONFIG[platform] ?? {
+        label: platform.charAt(0).toUpperCase() + platform.slice(1).replace(/_/g, ' '),
+        color: '#6b7280',
+        bg:    '#f3f4f6',
+    }
+    return (
+        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap"
+            style={{ backgroundColor: cfg.bg, color: cfg.color, fontFamily: 'DM Sans, sans-serif' }}>
+            {cfg.label}
+        </span>
+    )
 }
 
 // ── GTIN Auto-Detector ───────────────────────────────────────
@@ -905,6 +939,142 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                 <div className="flex-1 flex flex-col min-h-0 rounded-b-2xl overflow-hidden"
                     style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, borderTop: 'none', boxShadow: '0 2px 12px rgba(117,48,251,0.06)' }}>
 
+                    {viewMode === 'grid' ? (
+                        /* ── GRID / CARD VIEW ────────────────────────── */
+                        <div className="flex-1 overflow-auto min-h-0 p-4">
+                            {paginated.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-20 gap-3">
+                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                                        style={{ backgroundColor: C.primaryLight }}>
+                                        <Package size={22} style={{ color: C.primary }} />
+                                    </div>
+                                    <p className="text-[14px] font-semibold" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>No listings found</p>
+                                </div>
+                            ) : (
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
+                                    {paginated.map(listing => {
+                                        const isSelected = selectedIds.has(listing.id)
+                                        return (
+                                            <div key={listing.id}
+                                                onClick={() => toggleSelect(listing.id)}
+                                                style={{
+                                                    backgroundColor: C.surface,
+                                                    border: `2px solid ${isSelected ? C.primary : C.border}`,
+                                                    borderRadius: 16,
+                                                    overflow: 'hidden',
+                                                    cursor: 'pointer',
+                                                    transition: 'box-shadow 0.15s, border-color 0.15s',
+                                                    boxShadow: isSelected ? `0 0 0 3px ${C.primary}22` : '0 2px 8px rgba(117,48,251,0.06)',
+                                                }}
+                                                onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLDivElement).style.borderColor = C.primary + '66' }}
+                                                onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLDivElement).style.borderColor = C.border }}
+                                            >
+                                                {/* Image */}
+                                                <div style={{ position: 'relative', height: 160, backgroundColor: C.bg, overflow: 'hidden' }}>
+                                                    {listing.main_photo_url ? (
+                                                        <img src={listing.main_photo_url} alt={listing.title || ''}
+                                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    ) : (
+                                                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                            <Package size={32} style={{ color: C.muted }} />
+                                                        </div>
+                                                    )}
+                                                    {/* Checkbox overlay top-left */}
+                                                    <div style={{ position: 'absolute', top: 8, left: 8 }}
+                                                        onClick={e => e.stopPropagation()}>
+                                                        <input type="checkbox"
+                                                            checked={isSelected}
+                                                            onChange={() => toggleSelect(listing.id)}
+                                                            style={{ accentColor: C.primary, width: 16, height: 16, cursor: 'pointer' }}
+                                                        />
+                                                    </div>
+                                                    {/* Status top-right */}
+                                                    <div style={{ position: 'absolute', top: 8, right: 8 }}>
+                                                        <StatusPill status={listing.status} />
+                                                    </div>
+                                                </div>
+
+                                                {/* Body */}
+                                                <div style={{ padding: '12px 14px 10px' }}>
+                                                    {/* Title + SKU */}
+                                                    <p style={{ fontSize: 13, fontWeight: 600, color: C.body, fontFamily: 'DM Sans, sans-serif', marginBottom: 2, lineHeight: 1.4 }}
+                                                        className="line-clamp-2">
+                                                        {listing.title || listing.product_name || 'Untitled'}
+                                                    </p>
+                                                    {listing.sku && (
+                                                        <span style={{ fontSize: 10, color: C.muted, fontFamily: 'DM Sans, sans-serif',
+                                                            backgroundColor: C.bg, border: `1px solid ${C.border}`,
+                                                            borderRadius: 4, padding: '1px 6px', display: 'inline-block', marginBottom: 8 }}>
+                                                            {listing.sku}
+                                                        </span>
+                                                    )}
+
+                                                    {/* Price row */}
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                                                        <span style={{ fontSize: 18, fontWeight: 700, color: C.dark, fontFamily: 'Syne, sans-serif' }}>
+                                                            {listing.sell_price != null ? `£${listing.sell_price.toFixed(2)}` : '—'}
+                                                        </span>
+                                                        {listing.margin != null && (
+                                                            <span style={{
+                                                                fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12,
+                                                                backgroundColor: listing.margin >= 25 ? C.successBg : listing.margin >= 15 ? C.warningBg : C.dangerBg,
+                                                                color: listing.margin >= 25 ? C.success : listing.margin >= 15 ? C.warning : C.danger,
+                                                                fontFamily: 'DM Sans, sans-serif',
+                                                            }}>
+                                                                {listing.margin}%
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Health + Source */}
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                            <HealthBadge score={listing.health_score} />
+                                                            <StockCell quantity={listing.quantity} outOfStock={listing.out_of_stock_option} sellerType={listing.seller_type} />
+                                                        </div>
+                                                        <SourceBadge platform={listing.source_platform} />
+                                                    </div>
+
+                                                    {/* Actions row */}
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingTop: 8, borderTop: `1px solid ${C.border}` }}
+                                                        onClick={e => e.stopPropagation()}>
+                                                        <button onClick={() => onEditDraft(listing.id)}
+                                                            style={{ flex: 1, height: 30, borderRadius: 8, border: 'none',
+                                                                backgroundColor: C.primaryLight, color: C.primary, cursor: 'pointer',
+                                                                display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                            title="Edit">
+                                                            <Pencil size={13} />
+                                                        </button>
+                                                        <button
+                                                            style={{ flex: 1, height: 30, borderRadius: 8, border: 'none',
+                                                                backgroundColor: C.bg, color: C.secondary, cursor: 'pointer',
+                                                                display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                            title="View History">
+                                                            <Clock size={13} />
+                                                        </button>
+                                                        <button
+                                                            style={{ flex: 1, height: 30, borderRadius: 8, border: 'none',
+                                                                backgroundColor: C.bg, color: C.secondary, cursor: 'pointer',
+                                                                display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                            title="Export CSV">
+                                                            <Download size={13} />
+                                                        </button>
+                                                        <button onClick={() => setDeletingId(listing.id)}
+                                                            style={{ flex: 1, height: 30, borderRadius: 8, border: 'none',
+                                                                backgroundColor: C.dangerBg, color: C.danger, cursor: 'pointer',
+                                                                display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                            title="Delete">
+                                                            <Trash2 size={13} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    ) : (
                     <div className="flex-1 overflow-auto min-h-0">
                         <table className="w-full" style={{ tableLayout: 'fixed' }}>
                             {/* STICKY HEADER */}
@@ -1083,24 +1253,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                             case 'source':
                                                 return (
                                                     <td key="source" className="px-3 py-1.5">
-                                                        {listing.source_platform ? (
-                                                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap"
-                                                                style={{ backgroundColor: C.primaryLight, color: C.primary, fontFamily: 'DM Sans, sans-serif' }}>
-                                                                {listing.source_platform === 'cj_dropshipping'  ? 'CJ Drop' :
-                                                                 listing.source_platform === 'aliexpress'       ? 'AliExpress' :
-                                                                 listing.source_platform === 'amazon_uk'        ? 'Amazon UK' :
-                                                                 listing.source_platform === 'image_import'     ? 'Photo AI' :
-                                                                 listing.source_platform === 'barcode_import'   ? 'Barcode AI' :
-                                                                 listing.source_platform === 'title_import'     ? 'Title AI' :
-                                                                 listing.source_platform === 'url_import'       ? 'URL AI' :
-                                                                     listing.source_platform.charAt(0).toUpperCase() + listing.source_platform.slice(1)}
-                                                            </span>
-                                                        ) : (
-                                                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
-                                                                style={{ backgroundColor: '#f8f7ff', color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
-                                                                Own
-                                                            </span>
-                                                        )}
+                                                        <SourceBadge platform={listing.source_platform} />
                                                     </td>
                                                 )
                                             case 'seller_type':
@@ -1350,9 +1503,9 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                                             <Pencil size={13} style={{ color: C.primary }} />
                                                         </button>
                                                         <button className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
-                                                            style={{ backgroundColor: C.warningBg }}
-                                                            title="Re-check VeRO">
-                                                            <ShieldCheck size={13} style={{ color: C.warning }} />
+                                                            style={{ backgroundColor: C.bg }}
+                                                            title="View History">
+                                                            <Clock size={13} style={{ color: C.secondary }} />
                                                         </button>
                                                         <button className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
                                                             style={{ backgroundColor: C.bg }}
@@ -1375,6 +1528,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                             </tbody>
                         </table>
                     </div>
+                    )}{/* end table/grid conditional */}
 
                     {/* PAGINATION — fixed at bottom, doubles as bulk action bar */}
                     {sorted.length > 0 && (
