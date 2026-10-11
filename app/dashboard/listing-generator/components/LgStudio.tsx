@@ -178,13 +178,15 @@ const STEPS = [
 
 // ── Props ─────────────────────────────────────────────────────
 interface Props {
-    draftId: string | null
-    onBack: () => void
+    draftId:    string | null
+    onBack:     () => void
+    atLimit?:   boolean        // true → user has hit their plan cap
+    onUpgrade?: () => void     // open PlanUpgradeModal
 }
 
 
 // ── Main Wizard Component ─────────────────────────────────────
-export default function LgStudio({ draftId, onBack }: Props) {
+export default function LgStudio({ draftId, onBack, atLimit = false, onUpgrade }: Props) {
     const supabase = createClient()
 
     const [currentStep, setCurrentStep] = useState<WizardStep>(1)
@@ -393,6 +395,8 @@ export default function LgStudio({ draftId, onBack }: Props) {
                         onNext={goNext}
                         onPrev={goPrev}
                         onSave={saveDraft}
+                        atLimit={atLimit}
+                        onUpgrade={onUpgrade}
                     />
                 )}
                 {currentStep === 3 && (
