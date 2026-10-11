@@ -104,6 +104,7 @@ export interface DraftData {
     status: string
     current_step: number
     photo_count: number
+    template_id: string | null
 }
 
 const INITIAL_DRAFT: DraftData = {
@@ -166,6 +167,7 @@ const INITIAL_DRAFT: DraftData = {
     vero_status: 'unchecked',
     status: 'draft',
     current_step: 1,
+    template_id: null,
 }
 
 // ── Step config ───────────────────────────────────────────────
@@ -322,6 +324,7 @@ export default function LgStudio({ draftId, onBack, atLimit = false, onUpgrade }
                 promoted_priority: draft.promoted_priority,
                 promoted_priority_budget: draft.promoted_priority_budget,
                 item_disclosures: draft.item_disclosures,
+                template_id: draft.template_id ?? null,
                 status: 'draft',
                 current_step: currentStep,
                 updated_at: new Date().toISOString(),
