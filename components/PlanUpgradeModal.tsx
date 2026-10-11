@@ -3,280 +3,296 @@
 // ─────────────────────────────────────────────────────────────
 // Riazify — Plan Upgrade Modal
 //
-// Triggered by the "Upgrade Plan" button in UpgradeBanner.
-// Shows three plan tiers side by side; highlights the recommended
-// upgrade tier based on the user's current plan.
+// Design: Pro card is inverted (dark #1e1535 bg, lime accent).
+// Starter + Business are light surface cards.
+// Monthly / Annual billing toggle at top (annual = 20% off).
+// Key listing quota shown as a large number, not buried in a list.
 //
 // Props:
-//   currentTier  — user's current plan slug  ("free" | "starter" | "pro")
+//   currentTier  — "free" | "starter" | "pro" | "business"
 //   onClose      — close without upgrading
-//   onSelect     — called with chosen tier slug; wire to Stripe/billing
+//   onSelect     — called with chosen tier; wire to Stripe later
 // ─────────────────────────────────────────────────────────────
 
-import { useEffect, useCallback } from 'react'
-import { X, Check, Sparkles, Zap, Crown, type LucideIcon } from 'lucide-react'
+import { useEffect, useCallback, useState } from 'react'
+import { X, ArrowRight, Check, Zap, Sparkles, Crown } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 // ── Props ─────────────────────────────────────────────────────
 interface PlanUpgradeModalProps {
     currentTier?: string
-    onClose: () => void
-    onSelect?: (tier: string) => void
+    onClose:      () => void
+    onSelect?:    (tier: string) => void
 }
 
-// ── Plan definitions ──────────────────────────────────────────
-interface PlanTier {
-    slug:        string
-    name:        string
-    price:       string
-    period:      string
-    tagline:     string
-    icon:        LucideIcon
-    iconColor:   string
-    iconBg:      string
-    accentColor: string
-    badgeLabel?: string
-    features:    string[]
-    cta:         string
+// ── Plan data ─────────────────────────────────────────────────
+interface Plan {
+    slug:          string
+    name:          string
+    priceMonthly:  number
+    priceAnnual:   number   // per month, billed annually
+    quota:         string   // the big number headline
+    quotaLabel:    string
+    tagline:       string
+    icon:          LucideIcon
+    features:      string[]
+    cta:           string
+    // visual variant
+    dark?:         boolean  // inverted card
 }
 
-const PLANS: PlanTier[] = [
+const PLANS: Plan[] = [
     {
-        slug:        'starter',
-        name:        'Starter',
-        price:       '£19',
-        period:      '/mo',
-        tagline:     'For sellers just getting started',
-        icon:        Zap,
-        iconColor:   '#7530fb',
-        iconBg:      '#f3eeff',
-        accentColor: '#7530fb',
+        slug:         'starter',
+        name:         'Starter',
+        priceMonthly: 19,
+        priceAnnual:  15,
+        quota:        '50',
+        quotaLabel:   'listings / mo',
+        tagline:      'For sellers scaling to 50+ items',
+        icon:         Zap,
         features: [
-            '50 AI listing generations / mo',
-            '20 bulk listings / mo',
-            'AI title optimisation',
-            'VeRO protection checks',
+            'AI Cassini title optimiser',
+            '20 bulk CSV uploads / mo',
+            'VeRO risk checker',
             'Profit margin calculator',
             'Email support',
         ],
         cta: 'Start with Starter',
     },
     {
-        slug:        'pro',
-        name:        'Pro',
-        price:       '£49',
-        period:      '/mo',
-        tagline:     'For high-volume eBay sellers',
-        icon:        Sparkles,
-        iconColor:   '#1e1535',
-        iconBg:      '#b8fa33',
-        accentColor: '#1e1535',
-        badgeLabel:  'Most Popular',
+        slug:         'pro',
+        name:         'Pro',
+        priceMonthly: 49,
+        priceAnnual:  39,
+        quota:        '∞',
+        quotaLabel:   'listings / mo',
+        tagline:      'For high-volume eBay sellers',
+        icon:         Sparkles,
         features: [
-            'Unlimited AI listing generations',
-            '200 bulk listings / mo',
-            'Barcode / EAN auto-lookup',
+            'Unlimited AI listing generation',
+            '200 bulk uploads / mo',
+            'EAN / barcode auto-fill',
             'Dropship supplier import',
-            'Template library',
+            'Template library (50+)',
             'Priority support',
         ],
         cta: 'Go Pro',
+        dark: true,
     },
     {
-        slug:        'business',
-        name:        'Business',
-        price:       '£129',
-        period:      '/mo',
-        tagline:     'For agencies & power sellers',
-        icon:        Crown,
-        iconColor:   '#d97706',
-        iconBg:      '#fef3c7',
-        accentColor: '#d97706',
+        slug:         'business',
+        name:         'Business',
+        priceMonthly: 129,
+        priceAnnual:  103,
+        quota:        '∞',
+        quotaLabel:   'everything',
+        tagline:      'For agencies & power sellers',
+        icon:         Crown,
         features: [
             'Everything in Pro',
-            'Unlimited bulk listings',
-            'API access',
-            'Multi-account management',
-            'Custom integrations',
+            'Unlimited bulk uploads',
+            'REST API access',
+            'Multi-seller accounts',
+            'Custom category mapping',
             'Dedicated account manager',
         ],
         cta: 'Go Business',
     },
 ]
 
-// ── Backdrop ─────────────────────────────────────────────────
-function Backdrop({ onClick }: { onClick: () => void }) {
-    return (
-        <div
-            onClick={onClick}
-            style={{
-                position: 'fixed', inset: 0,
-                background: 'rgba(30,21,53,0.55)',
-                backdropFilter: 'blur(4px)',
-                zIndex: 900,
-            }}
-        />
-    )
-}
+// ── Helpers ───────────────────────────────────────────────────
+const fmtPrice = (n: number) => `£${n}`
 
-// ── Plan card ─────────────────────────────────────────────────
+// ── PlanCard ──────────────────────────────────────────────────
 function PlanCard({
     plan,
+    annual,
     isCurrent,
     isRecommended,
     onSelect,
 }: {
-    plan: PlanTier
-    isCurrent: boolean
+    plan:          Plan
+    annual:        boolean
+    isCurrent:     boolean
     isRecommended: boolean
-    onSelect: () => void
+    onSelect:      () => void
 }) {
-    const Icon = plan.icon
+    const Icon  = plan.icon
+    const price = annual ? plan.priceAnnual : plan.priceMonthly
+    const dark  = plan.dark
+
+    // --- token sets per variant ---
+    const card   = dark ? '#1e1535'              : '#ffffff'
+    const border = dark ? 'transparent'          : (isRecommended ? '#ede9fe' : '#f0eefe')
+    const fg     = dark ? '#ffffff'              : '#1e1535'
+    const fgSub  = dark ? 'rgba(255,255,255,0.5)': '#9ca3af'
+    const fgBody = dark ? 'rgba(255,255,255,0.78)': '#374151'
+    const quoteFg= dark ? '#b8fa33'              : '#7530fb'
+    const divider= dark ? 'rgba(255,255,255,0.08)': '#f3f0ff'
+    const iconBg = dark ? 'rgba(184,250,51,0.12)': '#f3eeff'
+    const iconFg = dark ? '#b8fa33'              : '#7530fb'
+    const tickBg = dark ? 'rgba(184,250,51,0.15)': '#f3eeff'
+    const tickFg = dark ? '#b8fa33'              : '#7530fb'
+
+    const btnBg  = dark   ? '#b8fa33'
+                 : isCurrent ? '#f3f4f6'
+                 : '#f3eeff'
+    const btnFg  = dark   ? '#1e1535'
+                 : isCurrent ? '#9ca3af'
+                 : '#7530fb'
+    const btnShadow = (dark && !isCurrent)
+        ? '0 4px 18px rgba(184,250,51,0.28)'
+        : 'none'
 
     return (
         <div style={{
-            flex:          '1 1 0',
-            minWidth:      220,
             display:       'flex',
             flexDirection: 'column',
-            borderRadius:  16,
-            overflow:      'hidden',
-            border:        isRecommended
-                ? `2px solid ${plan.accentColor}`
-                : '1.5px solid #ede9fe',
-            background:    '#ffffff',
-            boxShadow:     isRecommended
-                ? `0 8px 32px rgba(30,21,53,0.12)`
-                : '0 2px 8px rgba(30,21,53,0.04)',
-            position:      'relative',
-            transform:     isRecommended ? 'scale(1.025)' : 'scale(1)',
-            transition:    'transform 0.2s',
+            flex:           '1 1 0',
+            minWidth:       200,
+            maxWidth:       320,
+            borderRadius:   18,
+            border:         `1.5px solid ${border}`,
+            background:     card,
+            boxShadow:      dark
+                ? '0 16px 48px rgba(30,21,53,0.28)'
+                : '0 2px 10px rgba(30,21,53,0.05)',
+            overflow:       'hidden',
+            // recommended lifts slightly
+            transform:      isRecommended ? 'translateY(-6px)' : 'none',
+            transition:     'transform 0.2s',
         }}>
 
-            {/* Popular badge */}
-            {plan.badgeLabel && (
-                <div style={{
-                    position:   'absolute',
-                    top:        -1,
-                    left:       '50%',
-                    transform:  'translateX(-50%)',
-                    background: plan.accentColor,
-                    color:      '#ffffff',
-                    fontSize:   10,
-                    fontWeight: 800,
-                    fontFamily: 'Syne, sans-serif',
-                    padding:    '3px 12px',
-                    borderRadius: '0 0 8px 8px',
-                    letterSpacing: '0.05em',
-                    textTransform: 'uppercase',
-                }}>
-                    {plan.badgeLabel}
-                </div>
-            )}
+            {/* ── Header ─────────────────────────────────────── */}
+            <div style={{ padding: '26px 24px 20px' }}>
 
-            {/* Card header */}
-            <div style={{
-                padding:       '28px 24px 20px',
-                borderBottom:  '1px solid #f3f0ff',
-            }}>
-                {/* Icon + name row */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                {/* Icon + name */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
                     <div style={{
-                        width:          36,
-                        height:         36,
-                        borderRadius:   10,
-                        background:     plan.iconBg,
+                        width:          32,
+                        height:         32,
+                        borderRadius:   9,
+                        background:     iconBg,
                         display:        'flex',
                         alignItems:     'center',
                         justifyContent: 'center',
                         flexShrink:     0,
                     }}>
-                        <Icon size={16} color={plan.iconColor} strokeWidth={2} />
+                        <Icon size={14} color={iconFg} strokeWidth={2} />
                     </div>
+
                     <span style={{
-                        fontSize:   15,
-                        fontWeight: 800,
-                        color:      '#1e1535',
+                        fontSize:   14,
+                        fontWeight: 700,
+                        color:      fg,
                         fontFamily: 'Syne, sans-serif',
+                        letterSpacing: '0.01em',
                     }}>
                         {plan.name}
                     </span>
+
                     {isCurrent && (
                         <span style={{
-                            fontSize:   10,
-                            fontWeight: 700,
-                            color:      '#6b7280',
-                            fontFamily: 'DM Sans, sans-serif',
-                            background: '#f3f4f6',
-                            padding:    '2px 7px',
-                            borderRadius: 20,
+                            fontSize:      10,
+                            fontWeight:    700,
+                            color:         fgSub,
+                            fontFamily:    'DM Sans, sans-serif',
+                            background:    dark ? 'rgba(255,255,255,0.08)' : '#f3f4f6',
+                            padding:       '2px 8px',
+                            borderRadius:  20,
+                            letterSpacing: '0.03em',
+                            marginLeft:    'auto',
                         }}>
                             Current
                         </span>
                     )}
                 </div>
 
-                {/* Price */}
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 2, marginBottom: 4 }}>
+                {/* Quota — the big number */}
+                <div style={{ marginBottom: 4 }}>
                     <span style={{
-                        fontSize:   30,
+                        display:    'block',
+                        fontSize:   44,
                         fontWeight: 800,
-                        color:      '#1e1535',
+                        color:      quoteFg,
                         fontFamily: 'Syne, sans-serif',
                         lineHeight: 1,
+                        letterSpacing: '-0.02em',
                     }}>
-                        {plan.price}
+                        {plan.quota}
                     </span>
                     <span style={{
-                        fontSize:   13,
-                        color:      '#9ca3af',
+                        fontSize:   11,
+                        color:      fgSub,
                         fontFamily: 'DM Sans, sans-serif',
+                        letterSpacing: '0.04em',
+                        textTransform: 'uppercase',
                     }}>
-                        {plan.period}
+                        {plan.quotaLabel}
                     </span>
                 </div>
 
-                {/* Tagline */}
+                {/* Divider */}
+                <div style={{ height: 1, background: divider, margin: '18px 0' }} />
+
+                {/* Price + tagline */}
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 3, marginBottom: 4 }}>
+                    <span style={{
+                        fontSize:   24,
+                        fontWeight: 800,
+                        color:      fg,
+                        fontFamily: 'Syne, sans-serif',
+                        lineHeight: 1,
+                    }}>
+                        {fmtPrice(price)}
+                    </span>
+                    <span style={{
+                        fontSize:   12,
+                        color:      fgSub,
+                        fontFamily: 'DM Sans, sans-serif',
+                    }}>
+                        / mo{annual ? ', billed annually' : ''}
+                    </span>
+                </div>
+
                 <p style={{
                     fontSize:   12,
-                    color:      '#6b7280',
+                    color:      fgSub,
                     fontFamily: 'DM Sans, sans-serif',
-                    lineHeight: 1.4,
                     margin:     0,
+                    lineHeight: 1.4,
                 }}>
                     {plan.tagline}
                 </p>
             </div>
 
-            {/* Feature list */}
+            {/* ── Feature list ───────────────────────────────── */}
             <div style={{
-                padding:       '18px 24px',
+                padding:       '4px 24px 20px',
                 flex:           1,
                 display:        'flex',
                 flexDirection:  'column',
-                gap:            10,
+                gap:            9,
             }}>
                 {plan.features.map(f => (
-                    <div key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                    <div key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 9 }}>
                         <div style={{
-                            width:          18,
-                            height:         18,
-                            borderRadius:   '50%',
-                            background:     isRecommended ? plan.accentColor : '#f3eeff',
+                            width:          16,
+                            height:         16,
+                            borderRadius:   5,
+                            background:     tickBg,
                             display:        'flex',
                             alignItems:     'center',
                             justifyContent: 'center',
                             flexShrink:     0,
                             marginTop:      1,
                         }}>
-                            <Check
-                                size={10}
-                                strokeWidth={3}
-                                color={isRecommended ? (plan.accentColor === '#1e1535' ? '#b8fa33' : '#ffffff') : '#7530fb'}
-                            />
+                            <Check size={9} strokeWidth={3} color={tickFg} />
                         </div>
                         <span style={{
                             fontSize:   12,
-                            color:      '#374151',
+                            color:      fgBody,
                             fontFamily: 'DM Sans, sans-serif',
                             lineHeight: 1.45,
                         }}>
@@ -286,55 +302,144 @@ function PlanCard({
                 ))}
             </div>
 
-            {/* CTA button */}
-            <div style={{ padding: '0 24px 24px' }}>
+            {/* ── CTA ────────────────────────────────────────── */}
+            <div style={{ padding: '4px 24px 24px' }}>
                 <button
                     disabled={isCurrent}
                     onClick={isCurrent ? undefined : onSelect}
                     style={{
                         width:          '100%',
-                        padding:        '10px 0',
+                        display:        'flex',
+                        alignItems:     'center',
+                        justifyContent: 'center',
+                        gap:            6,
+                        padding:        '11px 0',
                         borderRadius:   10,
                         border:         'none',
-                        background:     isCurrent
-                            ? '#f3f4f6'
-                            : isRecommended
-                                ? plan.accentColor
-                                : '#f3eeff',
-                        color:          isCurrent
-                            ? '#9ca3af'
-                            : isRecommended
-                                ? (plan.accentColor === '#1e1535' ? '#b8fa33' : '#ffffff')
-                                : '#7530fb',
+                        background:     btnBg,
+                        color:          btnFg,
                         fontSize:       13,
                         fontWeight:     700,
                         fontFamily:     'Syne, sans-serif',
                         cursor:         isCurrent ? 'default' : 'pointer',
-                        boxShadow:      (!isCurrent && isRecommended)
-                            ? `0 4px 14px rgba(30,21,53,0.2)`
-                            : 'none',
+                        boxShadow:      btnShadow,
                         transition:     'opacity 0.15s, transform 0.1s',
                     }}
                     onMouseEnter={e => {
-                        if (!isCurrent) (e.currentTarget as HTMLButtonElement).style.opacity = '0.88'
+                        if (!isCurrent) {
+                            (e.currentTarget as HTMLButtonElement).style.opacity = '0.88'
+                            ;(e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.015)'
+                        }
                     }}
                     onMouseLeave={e => {
-                        if (!isCurrent) (e.currentTarget as HTMLButtonElement).style.opacity = '1'
+                        if (!isCurrent) {
+                            (e.currentTarget as HTMLButtonElement).style.opacity = '1'
+                            ;(e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)'
+                        }
                     }}
                 >
-                    {isCurrent ? 'Your current plan' : plan.cta}
+                    {isCurrent ? 'Your current plan' : (
+                        <>
+                            {plan.cta}
+                            <ArrowRight size={11} strokeWidth={2.5} />
+                        </>
+                    )}
                 </button>
             </div>
         </div>
     )
 }
 
-// ── Modal shell ───────────────────────────────────────────────
+// ── Billing toggle ────────────────────────────────────────────
+function BillingToggle({
+    annual,
+    onToggle,
+}: {
+    annual:   boolean
+    onToggle: () => void
+}) {
+    return (
+        <div style={{
+            display:        'flex',
+            alignItems:     'center',
+            gap:            12,
+            justifyContent: 'center',
+            flexShrink:     0,
+        }}>
+            <span style={{
+                fontSize:   12,
+                fontWeight: annual ? 400 : 700,
+                color:      annual ? '#9ca3af' : '#1e1535',
+                fontFamily: 'DM Sans, sans-serif',
+                transition: 'color 0.2s',
+            }}>
+                Monthly
+            </span>
+
+            <button
+                onClick={onToggle}
+                role="switch"
+                aria-checked={annual}
+                style={{
+                    width:          46,
+                    height:         26,
+                    borderRadius:   13,
+                    border:         'none',
+                    background:     annual ? '#7530fb' : '#e5e7eb',
+                    cursor:         'pointer',
+                    position:       'relative',
+                    padding:        0,
+                    transition:     'background 0.2s',
+                    flexShrink:     0,
+                }}
+            >
+                <span style={{
+                    position:       'absolute',
+                    top:            3,
+                    left:           annual ? 23 : 3,
+                    width:          20,
+                    height:         20,
+                    borderRadius:   '50%',
+                    background:     '#ffffff',
+                    boxShadow:      '0 1px 4px rgba(0,0,0,0.18)',
+                    transition:     'left 0.2s',
+                }} />
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{
+                    fontSize:   12,
+                    fontWeight: annual ? 700 : 400,
+                    color:      annual ? '#1e1535' : '#9ca3af',
+                    fontFamily: 'DM Sans, sans-serif',
+                    transition: 'color 0.2s',
+                }}>
+                    Annual
+                </span>
+                <span style={{
+                    fontSize:      10,
+                    fontWeight:    700,
+                    color:         '#16a34a',
+                    fontFamily:    'DM Sans, sans-serif',
+                    background:    '#dcfce7',
+                    padding:       '2px 7px',
+                    borderRadius:  20,
+                    letterSpacing: '0.02em',
+                }}>
+                    Save 20%
+                </span>
+            </div>
+        </div>
+    )
+}
+
+// ── Main modal ────────────────────────────────────────────────
 export function PlanUpgradeModal({
     currentTier = 'free',
     onClose,
     onSelect,
 }: PlanUpgradeModalProps) {
+    const [annual, setAnnual] = useState(true)
 
     // Close on Escape
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -343,76 +448,108 @@ export function PlanUpgradeModal({
 
     useEffect(() => {
         document.addEventListener('keydown', handleKeyDown)
-        return () => document.removeEventListener('keydown', handleKeyDown)
+        // Prevent body scroll while modal is open
+        const prev = document.body.style.overflow
+        document.body.style.overflow = 'hidden'
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown)
+            document.body.style.overflow = prev
+        }
     }, [handleKeyDown])
 
-    // Determine recommended tier — one step up from current
-    const tierOrder = ['free', 'starter', 'pro', 'business']
-    const currentIdx = tierOrder.indexOf(currentTier)
-    const recommendedSlug = tierOrder[Math.min(currentIdx + 1, tierOrder.length - 1)]
+    // Recommend one tier up from current
+    const order   = ['free', 'starter', 'pro', 'business']
+    const currIdx = order.indexOf(currentTier)
+    const recSlug = order[Math.min(currIdx + 1, order.length - 1)]
 
     function handleSelect(tier: string) {
-        if (onSelect) {
-            onSelect(tier)
-        } else {
-            // Placeholder: log intent — wire to Stripe / billing router later
-            console.log('[PlanUpgradeModal] Upgrade intent:', tier)
-        }
+        if (onSelect) onSelect(tier)
+        else console.log('[PlanUpgradeModal] Upgrade intent:', tier)
         onClose()
     }
 
     return (
         <>
-            <Backdrop onClick={onClose} />
+            {/* Backdrop */}
+            <div
+                onClick={onClose}
+                style={{
+                    position:       'fixed',
+                    inset:          0,
+                    background:     'rgba(30,21,53,0.6)',
+                    backdropFilter: 'blur(5px)',
+                    zIndex:         900,
+                }}
+            />
 
-            <div style={{
-                position:      'fixed',
-                inset:         0,
-                display:       'flex',
-                alignItems:    'center',
-                justifyContent:'center',
-                zIndex:         910,
-                padding:        '16px',
-                pointerEvents:  'none',
-            }}>
+            {/* Dialog */}
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-label="Upgrade your plan"
+                style={{
+                    position:  'fixed',
+                    inset:     0,
+                    display:   'flex',
+                    alignItems:'center',
+                    justifyContent: 'center',
+                    zIndex:    910,
+                    padding:   '16px',
+                    pointerEvents: 'none',
+                }}
+            >
                 <div style={{
                     pointerEvents:  'all',
                     width:          '100%',
                     maxWidth:       900,
                     maxHeight:      'calc(100vh - 32px)',
                     overflowY:      'auto',
-                    borderRadius:   20,
+                    borderRadius:   22,
                     background:     '#f8f7ff',
-                    boxShadow:      '0 24px 64px rgba(30,21,53,0.28)',
+                    boxShadow:      '0 32px 80px rgba(30,21,53,0.32)',
                     display:        'flex',
                     flexDirection:  'column',
-                    animation:      'modalIn 0.22s cubic-bezier(0.34,1.56,0.64,1) forwards',
+                    gap:            0,
+                    animation:      'modalIn 0.24s cubic-bezier(0.34,1.4,0.64,1) forwards',
                 }}>
                     <style>{`
                         @keyframes modalIn {
-                            from { opacity: 0; transform: scale(0.94) translateY(12px); }
+                            from { opacity: 0; transform: scale(0.93) translateY(16px); }
                             to   { opacity: 1; transform: scale(1)    translateY(0); }
                         }
                     `}</style>
 
-                    {/* Header */}
+                    {/* ── Modal header ─────────────────────────── */}
                     <div style={{
+                        padding:        '28px 28px 0',
                         display:        'flex',
                         alignItems:     'flex-start',
                         justifyContent: 'space-between',
-                        padding:        '28px 28px 0',
+                        gap:            16,
                         flexShrink:     0,
                     }}>
                         <div>
+                            <p style={{
+                                fontSize:      11,
+                                fontWeight:    700,
+                                color:         '#7530fb',
+                                fontFamily:    'DM Sans, sans-serif',
+                                letterSpacing: '0.08em',
+                                textTransform: 'uppercase',
+                                margin:        '0 0 6px',
+                            }}>
+                                Riazify Plans
+                            </p>
                             <h2 style={{
                                 fontSize:   22,
                                 fontWeight: 800,
                                 color:      '#1e1535',
                                 fontFamily: 'Syne, sans-serif',
                                 margin:     0,
-                                lineHeight: 1.2,
+                                lineHeight: 1.15,
+                                textWrap:   'balance',
                             }}>
-                                Upgrade your plan
+                                More listings. More profit.
                             </h2>
                             <p style={{
                                 fontSize:   13,
@@ -420,7 +557,7 @@ export function PlanUpgradeModal({
                                 fontFamily: 'DM Sans, sans-serif',
                                 margin:     '6px 0 0',
                             }}>
-                                Unlock more listings, bulk tools, and advanced features.
+                                Pick the plan that matches your eBay volume.
                             </p>
                         </div>
 
@@ -439,50 +576,52 @@ export function PlanUpgradeModal({
                                 alignItems:     'center',
                                 justifyContent: 'center',
                                 flexShrink:     0,
-                                marginLeft:     16,
                                 transition:     'opacity 0.15s',
                             }}
-                            onMouseEnter={e => ((e.currentTarget as HTMLButtonElement).style.opacity = '0.7')}
+                            onMouseEnter={e => ((e.currentTarget as HTMLButtonElement).style.opacity = '0.65')}
                             onMouseLeave={e => ((e.currentTarget as HTMLButtonElement).style.opacity = '1')}
                         >
                             <X size={15} strokeWidth={2.5} />
                         </button>
                     </div>
 
-                    {/* Plan cards */}
+                    {/* ── Billing toggle ───────────────────────── */}
+                    <div style={{ padding: '20px 28px 6px', flexShrink: 0 }}>
+                        <BillingToggle annual={annual} onToggle={() => setAnnual(a => !a)} />
+                    </div>
+
+                    {/* ── Plan cards ───────────────────────────── */}
                     <div style={{
-                        display:       'flex',
-                        gap:           14,
-                        padding:       '24px 28px 28px',
-                        flexWrap:      'wrap',
-                        alignItems:    'stretch',
+                        display:     'flex',
+                        gap:         14,
+                        padding:     '22px 28px 28px',
+                        flexWrap:    'wrap',
+                        alignItems:  'flex-start',
                     }}>
                         {PLANS.map(plan => (
                             <PlanCard
                                 key={plan.slug}
                                 plan={plan}
+                                annual={annual}
                                 isCurrent={plan.slug === currentTier}
-                                isRecommended={plan.slug === recommendedSlug}
+                                isRecommended={plan.slug === recSlug}
                                 onSelect={() => handleSelect(plan.slug)}
                             />
                         ))}
                     </div>
 
-                    {/* Footer note */}
-                    <div style={{
-                        padding:     '0 28px 22px',
-                        flexShrink:  0,
+                    {/* ── Footer ───────────────────────────────── */}
+                    <p style={{
+                        fontSize:   11,
+                        color:      '#9ca3af',
+                        fontFamily: 'DM Sans, sans-serif',
+                        textAlign:  'center',
+                        padding:    '0 28px 22px',
+                        flexShrink: 0,
+                        margin:     0,
                     }}>
-                        <p style={{
-                            fontSize:   11,
-                            color:      '#9ca3af',
-                            fontFamily: 'DM Sans, sans-serif',
-                            textAlign:  'center',
-                            margin:     0,
-                        }}>
-                            All plans include a 7-day free trial &nbsp;·&nbsp; Cancel anytime &nbsp;·&nbsp; Prices exc. VAT
-                        </p>
-                    </div>
+                        7-day free trial on all plans &nbsp;·&nbsp; Cancel anytime &nbsp;·&nbsp; Prices exc. VAT
+                    </p>
                 </div>
             </div>
         </>
