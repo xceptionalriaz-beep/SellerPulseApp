@@ -4,6 +4,7 @@
 // Reads from landing_pricing table, highlights current plan
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Check, X, ArrowRight, RefreshCw } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 
@@ -51,6 +52,7 @@ interface Props {
 
 export default function PlanCards({ currentPlan, isAnnual, onBillingToggle }: Props) {
   const supabase = createClient()
+  const router   = useRouter()
 
   const [plans,           setPlans]           = useState<DBPlan[]>([])
   const [loaded,          setLoaded]          = useState(false)
@@ -70,7 +72,7 @@ export default function PlanCards({ currentPlan, isAnnual, onBillingToggle }: Pr
     setLoaded(true)
   }
 
-  async function handleCta(plan: DBPlan) {
+  function handleCta(plan: DBPlan) {
     // Current plan â€” do nothing
     if (currentPlan?.toLowerCase() === plan.plan_id) return
     // Custom â€” contact sales
@@ -78,35 +80,10 @@ export default function PlanCards({ currentPlan, isAnnual, onBillingToggle }: Pr
     // Free â€” no action needed from billing tab
     if (plan.plan_id === 'free') return
 
+    // Navigate to custom checkout page
     setCheckoutLoading(plan.plan_id)
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) return
-
-      const res = await fetch('/api/payments/checkout', {
-        method:  'POST',
-        headers: {
-          'Content-Type':  'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          plan:      plan.plan_id,
-          billing:   isAnnual ? 'annual' : 'monthly',
-          userId:    session.user.id,
-          userEmail: session.user.email,
-          userName:  session.user.user_metadata?.full_name ?? '',
-        }),
-      })
-
-      const data = await res.json()
-      if (data.url) {
-        const w    = 520, h = 680
-        const left = Math.round((window.screen.width  - w) / 2)
-        const top  = Math.round((window.screen.height - h) / 2)
-        window.open(data.url, 'ls_checkout', `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`)
-      } else console.error('[PlanCards] No checkout URL:', data.error)
-    } catch (e) { console.error('[PlanCards] Checkout error:', e) }
-    setCheckoutLoading(null)
+    const billing = isAnnual ? 'annual' : 'monthly'
+    router.push(`/checkout?plan=${plan.plan_id}&billing=${billing}`)
   }
 
   if (!loaded) return (
