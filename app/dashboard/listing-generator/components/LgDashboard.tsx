@@ -1376,160 +1376,116 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                             </table>
                         </div>
 
-                        {/* BULK ACTION BAR — appears when rows are selected */}
-                        {selectedIds.size > 0 && (
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 8,
-                                padding: '10px 16px',
-                                backgroundColor: C.dark,
-                                borderTop: `2px solid ${C.primary}`,
-                                flexShrink: 0,
-                            }}>
-                                {/* Count + deselect */}
-                                <span style={{
-                                    backgroundColor: C.primary,
-                                    color: '#fff', fontSize: 12, fontWeight: 800,
-                                    padding: '3px 10px', borderRadius: 20,
-                                    fontFamily: 'DM Sans, sans-serif', whiteSpace: 'nowrap',
-                                }}>
-                                    {selectedIds.size} selected
-                                </span>
-                                <button
-                                    onClick={clearSelection}
-                                    style={{
-                                        background: 'transparent', border: 'none',
-                                        color: '#9ca3af', cursor: 'pointer',
-                                        display: 'flex', alignItems: 'center', gap: 4,
-                                        fontSize: 12, fontFamily: 'DM Sans, sans-serif',
-                                    }}
-                                >
-                                    <X size={12} /> Deselect all
-                                </button>
-
-                                <div style={{ flex: 1 }} />
-
-                                {bulkDeleteConfirm ? (
-                                    /* ── Confirm delete ── */
-                                    <>
-                                        <span style={{ color: '#fca5a5', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}>
-                                            Delete {selectedIds.size} listing{selectedIds.size !== 1 ? 's' : ''}?
-                                        </span>
-                                        <button
-                                            onClick={() => setBulkDeleteConfirm(false)}
-                                            style={{
-                                                padding: '5px 14px', borderRadius: 8,
-                                                border: '1.5px solid #374151', background: 'transparent',
-                                                color: '#9ca3af', fontSize: 12, fontWeight: 600,
-                                                cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
-                                            }}>
-                                            Cancel
-                                        </button>
-                                        <button
-                                            onClick={bulkDelete}
-                                            disabled={bulkLoading}
-                                            style={{
-                                                padding: '5px 14px', borderRadius: 8,
-                                                border: 'none', background: C.danger,
-                                                color: '#fff', fontSize: 12, fontWeight: 700,
-                                                cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
-                                                display: 'flex', alignItems: 'center', gap: 6,
-                                                opacity: bulkLoading ? 0.7 : 1,
-                                            }}>
-                                            {bulkLoading
-                                                ? <span style={{ width: 12, height: 12, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', display: 'inline-block' }} className="animate-spin" />
-                                                : <Trash2 size={12} />}
-                                            Yes, delete
-                                        </button>
-                                    </>
-                                ) : (
-                                    /* ── Normal bulk actions ── */
-                                    <>
-                                        <button
-                                            onClick={() => bulkChangeStatus('published')}
-                                            disabled={bulkLoading}
-                                            style={{
-                                                padding: '5px 14px', borderRadius: 8,
-                                                border: '1.5px solid #16a34a', background: 'transparent',
-                                                color: '#4ade80', fontSize: 12, fontWeight: 600,
-                                                cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
-                                            }}>
-                                            ✓ Publish
-                                        </button>
-                                        <button
-                                            onClick={() => bulkChangeStatus('ended')}
-                                            disabled={bulkLoading}
-                                            style={{
-                                                padding: '5px 14px', borderRadius: 8,
-                                                border: '1.5px solid #374151', background: 'transparent',
-                                                color: '#9ca3af', fontSize: 12, fontWeight: 600,
-                                                cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
-                                            }}>
-                                            ○ End Listings
-                                        </button>
-                                        <button
-                                            onClick={exportSelectedCsv}
-                                            style={{
-                                                padding: '5px 14px', borderRadius: 8,
-                                                border: `1.5px solid ${C.primary}`, background: 'transparent',
-                                                color: '#a78bfa', fontSize: 12, fontWeight: 600,
-                                                cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
-                                                display: 'flex', alignItems: 'center', gap: 6,
-                                            }}>
-                                            <Download size={12} />
-                                            Export CSV
-                                        </button>
-                                        <button
-                                            onClick={() => setBulkDeleteConfirm(true)}
-                                            style={{
-                                                padding: '5px 14px', borderRadius: 8,
-                                                border: `1.5px solid ${C.danger}`, background: 'transparent',
-                                                color: '#fca5a5', fontSize: 12, fontWeight: 600,
-                                                cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
-                                                display: 'flex', alignItems: 'center', gap: 6,
-                                            }}>
-                                            <Trash2 size={12} />
-                                            Delete
-                                        </button>
-                                    </>
-                                )}
-                            </div>
-                        )}
-
-                        {/* PAGINATION — fixed at bottom */}
+                        {/* PAGINATION — fixed at bottom, doubles as bulk action bar */}
                         {sorted.length > 0 && (
                             <div className="flex items-center justify-between px-5 py-3 shrink-0 gap-3"
                                 style={{ borderTop: `1px solid ${C.border}`, backgroundColor: C.surface }}>
 
-                                {/* Left — count + rows per page */}
-                                <div className="flex items-center gap-3">
-                                    <p className="text-[12px] whitespace-nowrap" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
-                                        <span style={{ color: C.dark, fontWeight: 600 }}>
-                                            {((page - 1) * PER_PAGE) + 1}–{Math.min(page * PER_PAGE, sorted.length)}
-                                        </span>
-                                        {' '}of{' '}
-                                        <span style={{ color: C.dark, fontWeight: 600 }}>{sorted.length.toLocaleString()}</span>
-                                        {' '}listings
-                                    </p>
-                                    {/* Rows per page selector */}
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="text-[11px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>Show</span>
-                                        <div className="flex items-center gap-1">
-                                            {[25, 50, 100].map(n => (
-                                                <button key={n}
-                                                    onClick={() => { setRowsPerPage(n); setPage(1) }}
-                                                    className="w-8 h-6 rounded-lg text-[11px] font-semibold transition-all"
-                                                    style={{
-                                                        backgroundColor: rowsPerPage === n ? C.primary : C.bg,
-                                                        color: rowsPerPage === n ? '#fff' : C.secondary,
-                                                        fontFamily: 'DM Sans, sans-serif',
+                                {/* Left — bulk actions when selected, otherwise count */}
+                                <div className="flex items-center gap-2" style={{ minWidth: 0 }}>
+                                    {selectedIds.size > 0 ? (
+                                        /* ── Bulk mode ── */
+                                        <>
+                                            {/* Selected count badge */}
+                                            <span style={{
+                                                backgroundColor: C.primary, color: '#fff',
+                                                fontSize: 11, fontWeight: 800,
+                                                padding: '2px 9px', borderRadius: 20,
+                                                fontFamily: 'DM Sans, sans-serif', whiteSpace: 'nowrap', flexShrink: 0,
+                                            }}>
+                                                {selectedIds.size} selected
+                                            </span>
+                                            {/* Deselect */}
+                                            <button onClick={clearSelection} style={{
+                                                background: 'transparent', border: 'none',
+                                                color: C.muted, cursor: 'pointer',
+                                                display: 'flex', alignItems: 'center', gap: 3,
+                                                fontSize: 11, fontFamily: 'DM Sans, sans-serif', flexShrink: 0,
+                                            }}>
+                                                <X size={11} /> Deselect
+                                            </button>
+
+                                            <div style={{ width: 1, height: 16, backgroundColor: C.border, flexShrink: 0 }} />
+
+                                            {bulkDeleteConfirm ? (
+                                                /* ── Confirm delete ── */
+                                                <>
+                                                    <span style={{ color: C.danger, fontSize: 11, fontFamily: 'DM Sans, sans-serif', whiteSpace: 'nowrap' }}>
+                                                        Delete {selectedIds.size} listing{selectedIds.size !== 1 ? 's' : ''}?
+                                                    </span>
+                                                    <button onClick={() => setBulkDeleteConfirm(false)} style={{
+                                                        padding: '3px 10px', borderRadius: 6,
+                                                        border: `1px solid ${C.border}`, background: C.bg,
+                                                        color: C.secondary, fontSize: 11, fontWeight: 600,
+                                                        cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', flexShrink: 0,
                                                     }}>
-                                                    {n}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
+                                                        Cancel
+                                                    </button>
+                                                    <button onClick={bulkDelete} disabled={bulkLoading} style={{
+                                                        padding: '3px 10px', borderRadius: 6,
+                                                        border: 'none', background: C.danger,
+                                                        color: '#fff', fontSize: 11, fontWeight: 700,
+                                                        cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                                                        display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0,
+                                                        opacity: bulkLoading ? 0.7 : 1,
+                                                    }}>
+                                                        {bulkLoading
+                                                            ? <span style={{ width: 10, height: 10, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', display: 'inline-block' }} className="animate-spin" />
+                                                            : <Trash2 size={11} />}
+                                                        Yes, delete
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                /* ── Normal bulk actions ── */
+                                                <>
+                                                    <button onClick={() => bulkChangeStatus('published')} disabled={bulkLoading} style={{
+                                                        padding: '3px 10px', borderRadius: 6,
+                                                        border: `1px solid ${C.success}`, background: 'transparent',
+                                                        color: C.success, fontSize: 11, fontWeight: 600,
+                                                        cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', flexShrink: 0,
+                                                    }}>
+                                                        ✓ Publish
+                                                    </button>
+                                                    <button onClick={() => bulkChangeStatus('ended')} disabled={bulkLoading} style={{
+                                                        padding: '3px 10px', borderRadius: 6,
+                                                        border: `1px solid ${C.border}`, background: 'transparent',
+                                                        color: C.secondary, fontSize: 11, fontWeight: 600,
+                                                        cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', flexShrink: 0,
+                                                    }}>
+                                                        ○ End
+                                                    </button>
+                                                    <button onClick={exportSelectedCsv} style={{
+                                                        padding: '3px 10px', borderRadius: 6,
+                                                        border: `1px solid ${C.primary}`, background: 'transparent',
+                                                        color: C.primary, fontSize: 11, fontWeight: 600,
+                                                        cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                                                        display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0,
+                                                    }}>
+                                                        <Download size={11} /> CSV
+                                                    </button>
+                                                    <button onClick={() => setBulkDeleteConfirm(true)} style={{
+                                                        padding: '3px 10px', borderRadius: 6,
+                                                        border: `1px solid ${C.danger}`, background: 'transparent',
+                                                        color: C.danger, fontSize: 11, fontWeight: 600,
+                                                        cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                                                        display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0,
+                                                    }}>
+                                                        <Trash2 size={11} /> Delete
+                                                    </button>
+                                                </>
+                                            )}
+                                        </>
+                                    ) : (
+                                        /* ── Normal count ── */
+                                        <p className="text-[12px] whitespace-nowrap" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
+                                            <span style={{ color: C.dark, fontWeight: 600 }}>
+                                                {((page - 1) * PER_PAGE) + 1}–{Math.min(page * PER_PAGE, sorted.length)}
+                                            </span>
+                                            {' '}of{' '}
+                                            <span style={{ color: C.dark, fontWeight: 600 }}>{sorted.length.toLocaleString()}</span>
+                                            {' '}listings
+                                        </p>
+                                    )}
                                 </div>
 
                                 {/* Center — page buttons */}
@@ -1593,31 +1549,51 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                     </div>
                                 )}
 
-                                {/* Right — Jump to page */}
-                                {totalPages > 5 && (
+                                {/* Right — rows per page + optional jump to page */}
+                                <div className="flex items-center gap-3">
+                                    {totalPages > 5 && (
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-[11px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>Go to</span>
+                                            <input
+                                                type="number"
+                                                min={1}
+                                                max={totalPages}
+                                                value={jumpPage}
+                                                onChange={e => setJumpPage(e.target.value)}
+                                                onKeyDown={e => {
+                                                    if (e.key === 'Enter') {
+                                                        const p = parseInt(jumpPage)
+                                                        if (p >= 1 && p <= totalPages) { setPage(p); setJumpPage('') }
+                                                    }
+                                                }}
+                                                placeholder="pg"
+                                                className="w-12 h-7 text-center text-[12px] rounded-lg outline-none"
+                                                style={{ border: `1px solid ${C.borderInput}`, fontFamily: 'DM Sans, sans-serif', color: C.body, backgroundColor: C.bg }}
+                                                onFocus={e => e.target.style.borderColor = C.primary}
+                                                onBlur={e => e.target.style.borderColor = C.borderInput}
+                                            />
+                                            <span className="text-[11px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>of {totalPages}</span>
+                                        </div>
+                                    )}
+                                    {/* Rows per page selector */}
                                     <div className="flex items-center gap-1.5">
-                                        <span className="text-[11px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>Go to</span>
-                                        <input
-                                            type="number"
-                                            min={1}
-                                            max={totalPages}
-                                            value={jumpPage}
-                                            onChange={e => setJumpPage(e.target.value)}
-                                            onKeyDown={e => {
-                                                if (e.key === 'Enter') {
-                                                    const p = parseInt(jumpPage)
-                                                    if (p >= 1 && p <= totalPages) { setPage(p); setJumpPage('') }
-                                                }
-                                            }}
-                                            placeholder="pg"
-                                            className="w-12 h-7 text-center text-[12px] rounded-lg outline-none"
-                                            style={{ border: `1px solid ${C.borderInput}`, fontFamily: 'DM Sans, sans-serif', color: C.body, backgroundColor: C.bg }}
-                                            onFocus={e => e.target.style.borderColor = C.primary}
-                                            onBlur={e => e.target.style.borderColor = C.borderInput}
-                                        />
-                                        <span className="text-[11px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>of {totalPages}</span>
+                                        <span className="text-[11px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>Show</span>
+                                        <div className="flex items-center gap-1">
+                                            {[25, 50, 100].map(n => (
+                                                <button key={n}
+                                                    onClick={() => { setRowsPerPage(n); setPage(1) }}
+                                                    className="w-8 h-6 rounded-lg text-[11px] font-semibold transition-all"
+                                                    style={{
+                                                        backgroundColor: rowsPerPage === n ? C.primary : C.bg,
+                                                        color: rowsPerPage === n ? '#fff' : C.secondary,
+                                                        fontFamily: 'DM Sans, sans-serif',
+                                                    }}>
+                                                    {n}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
-                                )}
+                                </div>
 
                             </div>
                         )}
