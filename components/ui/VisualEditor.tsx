@@ -21,6 +21,7 @@
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
+import type { TemplateSlot, TemplateSlotRole } from '@/app/dashboard/listing-generator/types/listing.types'
 import {
     Undo2, Redo2, Trash2, Eye, EyeOff,
     AlertTriangle, CheckCircle2, X,
@@ -148,6 +149,10 @@ interface VisualEditorProps {
      * default 'pet' sample data.
      */
     initialCategory?: CategoryId
+    /** Phase 1 – slot map: which blocks carry which AI content roles */
+    slots?: TemplateSlot[]
+    /** Called whenever the seller assigns or clears a slot role in the properties panel */
+    onSlotsChange?: (slots: TemplateSlot[]) => void
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -164,6 +169,8 @@ export default function VisualEditor({
     publishStatus = 'idle',
     toolbarSlot,
     onBack,
+    slots = [],
+    onSlotsChange,
 }: VisualEditorProps) {
     // ── Core block state ──────────────────────────────────────────────────────
     const [blocks, setBlocks] = useState<Block[]>([])
@@ -701,6 +708,32 @@ export default function VisualEditor({
         if (next === blocks) return
         commitBlocks(next, blocks)
     }, [commitBlocks, blocks])
+
+    // ── Slot role assignment (Phase 1 AI bridge) ──────────────────────────────
+    const handleSlotChange = useCallback((blockId: string, role: TemplateSlotRole | null) => {
+        if (!onSlotsChange) return
+        if (role === null) {
+            // Remove any existing slot for this block
+            onSlotsChange(slots.filter(s => s.blockId !== blockId))
+        } else {
+            const ROLE_LABELS: Record<TemplateSlotRole, string> = {
+                headline: 'Headline',
+                key_features: 'Key Features',
+                description: 'Description',
+                condition_note: 'Condition Note',
+                trust_statement: 'Trust Statement',
+            }
+            const newSlot: TemplateSlot = { role, blockId, label: ROLE_LABELS[role] }
+            const idx = slots.findIndex(s => s.blockId === blockId)
+            if (idx >= 0) {
+                const updated = [...slots]
+                updated[idx] = newSlot
+                onSlotsChange(updated)
+            } else {
+                onSlotsChange([...slots, newSlot])
+            }
+        }
+    }, [slots, onSlotsChange])
 
     // ── Undo / Redo ───────────────────────────────────────────────────────────
     // ── Save / Load state ─────────────────────────────────────────────────────
@@ -1739,6 +1772,8 @@ export default function VisualEditor({
                             onDeselect={() => setSelectedId(null)}
                             palette={canvasSettings.palette ?? []}
                             onPaletteChange={p => handleUpdateSettings({ ...canvasSettings, palette: p })}
+                            slots={slots}
+                            onSlotChange={onSlotsChange ? handleSlotChange : undefined}
                         />
                     )
                 )}

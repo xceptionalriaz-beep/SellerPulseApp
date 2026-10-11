@@ -30,6 +30,7 @@ import {
 import VisualEditor from '@/components/ui/VisualEditor'
 import ProDropdown, { DropdownOption } from '@/components/ui/ProDropdown'
 import { auditHtml } from '@/components/ui/VisualEditor/audit'
+import type { TemplateSlot } from '@/app/dashboard/listing-generator/types/listing.types'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -178,6 +179,8 @@ function VisualEditorInner() {
     const actionMenuRef = useRef<HTMLDivElement>(null)
     const exportFnRef = useRef<(() => void) | null>(null)
     const [publishStatus, setPublishStatus] = useState<'idle' | 'publishing' | 'published'>('idle')
+    /** Phase 1 AI bridge — slot role map for this template */
+    const [slots, setSlots] = useState<TemplateSlot[]>([])
 
     // ── Close action menu on outside click ───────────────────────────────────
     useEffect(() => {
@@ -206,7 +209,7 @@ function VisualEditorInner() {
                 try {
                     const { data } = await rawDb
                         .from('listing_templates')
-                        .select('id, name, category, description_html')
+                        .select('id, name, category, description_html, slots')
                         .eq('id', templateId)
                         .single()
                     if (data) {
@@ -214,6 +217,7 @@ function VisualEditorInner() {
                         setCategory(data.category || 'general')
                         setHtml(data.description_html || BLANK_HTML)
                         setSavedId(data.id)
+                        setSlots(Array.isArray(data.slots) ? data.slots : [])
                     }
                 } catch (err) {
                     console.error('[visual-editor] load error:', err)
@@ -263,6 +267,7 @@ function VisualEditorInner() {
                         category,
                         description_html: html,
                         is_ebay_compliant: isEbayCompliant,
+                        slots,
                         updated_at: new Date().toISOString(),
                     })
                     .eq('id', savedId)
@@ -276,6 +281,7 @@ function VisualEditorInner() {
                         category,
                         description_html: html,
                         is_ebay_compliant: isEbayCompliant,
+                        slots,
                         description: 'Visual Builder template',
                         is_system: false,
                         is_shared: false,
@@ -300,7 +306,7 @@ function VisualEditorInner() {
             console.error('[visual-editor] auto-save error:', err)
             setAutoSaveLabel('idle')
         }
-    }, [savedId, name, category, html, supabase])
+    }, [savedId, name, category, html, slots, supabase])
 
     // ── Manual Save Draft ─────────────────────────────────────────────────────
     const handleSaveDraft = useCallback(async () => {
@@ -320,6 +326,7 @@ function VisualEditorInner() {
                         category,
                         description_html: html,
                         is_ebay_compliant: isEbayCompliant,
+                        slots,
                         updated_at: new Date().toISOString(),
                     })
                     .eq('id', savedId)
@@ -332,6 +339,7 @@ function VisualEditorInner() {
                         category,
                         description_html: html,
                         is_ebay_compliant: isEbayCompliant,
+                        slots,
                         description: 'Visual Builder template',
                         is_system: false,
                         is_shared: false,
@@ -351,7 +359,7 @@ function VisualEditorInner() {
         } finally {
             setSaving(false)
         }
-    }, [savedId, name, category, html, supabase])
+    }, [savedId, name, category, html, slots, supabase])
 
     // ── Publish ───────────────────────────────────────────────────────────────
     const handlePublish = useCallback(async () => {
@@ -367,6 +375,7 @@ function VisualEditorInner() {
                 category,
                 description_html: html,
                 is_ebay_compliant: auditHtml(html).count === 0,
+                slots,
                 is_shared: true,
                 is_system: isAdmin,
                 thumbnail_url: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?w=200&h=150&fit=crop',
@@ -410,7 +419,7 @@ function VisualEditorInner() {
         } finally {
             setPublishing(false)
         }
-    }, [savedId, name, category, html, supabase, isAdmin])
+    }, [savedId, name, category, html, slots, supabase, isAdmin])
 
     // ── Name edit ─────────────────────────────────────────────────────────────
     const startEditingName = () => {
@@ -993,6 +1002,8 @@ function VisualEditorInner() {
                             : 'pet'
                     }
                     templateCategory={category}
+                    slots={slots}
+                    onSlotsChange={setSlots}
                 />
             </div>
 

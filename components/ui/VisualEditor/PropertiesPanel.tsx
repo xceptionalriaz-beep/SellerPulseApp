@@ -19,6 +19,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useState, useCallback } from 'react'
+import type { TemplateSlot, TemplateSlotRole } from '@/app/dashboard/listing-generator/types/listing.types'
 import { getVariants, hasVariants } from './variants/index'
 import type { BlockVariant } from './variants/hero_header.variants'
 import {
@@ -102,6 +103,22 @@ const C = {
     warningLight: '#fef3c7',
 }
 
+// ── Block types that can carry AI-filled text content ─────────────────────────
+const TEXT_BEARING_TYPES: BlockType[] = [
+    'heading', 'paragraph', 'bullet_list', 'numbered_list',
+    'product_title', 'product_description', 'key_features_grid',
+    'quote_block', 'info_box', 'warning_box',
+]
+
+const SLOT_ROLE_OPTIONS: { value: TemplateSlotRole | ''; label: string }[] = [
+    { value: '', label: 'No AI Role' },
+    { value: 'headline', label: 'Headline' },
+    { value: 'key_features', label: 'Key Features' },
+    { value: 'description', label: 'Description' },
+    { value: 'condition_note', label: 'Condition Note' },
+    { value: 'trust_statement', label: 'Trust Statement' },
+]
+
 // ── Lucide icon lookup — maps icon string keys from blocks.ts to components ────
 const BLOCK_ICONS: Record<string, LucideIcon> = {
     'layout': Layout,
@@ -180,6 +197,10 @@ interface PropertiesPanelProps {
     selectedSubSlot?: string | null
     palette?: string[]
     onPaletteChange?: (palette: string[]) => void
+    /** Current template slot assignments — used to show / edit block AI roles */
+    slots?: TemplateSlot[]
+    /** Called when seller assigns or clears a slot role for this block */
+    onSlotChange?: (blockId: string, role: TemplateSlotRole | null) => void
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -225,6 +246,8 @@ export default function PropertiesPanel({
     selectedSubSlot,
     palette = [],
     onPaletteChange,
+    slots,
+    onSlotChange,
 }: PropertiesPanelProps) {
     const [activeTab, setActiveTab] = useState<PanelTab>('styles')
 
@@ -427,6 +450,66 @@ export default function PropertiesPanel({
                                 : `${blockAudit.count} issue${blockAudit.count > 1 ? 's' : ''}`}
                         </span>
                     </div>
+
+                    {/* ── AI Slot Role picker — only for text-bearing blocks ── */}
+                    {TEXT_BEARING_TYPES.includes(block.type) && slots !== undefined && onSlotChange && (() => {
+                        const currentRole = slots.find(s => s.blockId === block.id)?.role ?? ''
+                        const hasRole = currentRole !== ''
+                        return (
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 6,
+                                marginBottom: 8,
+                                padding: '5px 8px',
+                                borderRadius: 7,
+                                backgroundColor: hasRole ? '#f3eeff' : C.bg,
+                                border: `1px solid ${hasRole ? '#c4b5fd' : C.border}`,
+                            }}>
+                                <Sparkles
+                                    size={11}
+                                    style={{ color: hasRole ? C.primary : C.muted, flexShrink: 0 }}
+                                />
+                                <span style={{
+                                    fontFamily: 'DM Sans, sans-serif',
+                                    fontSize: 10,
+                                    fontWeight: 700,
+                                    color: hasRole ? C.primary : C.muted,
+                                    letterSpacing: 0.3,
+                                    flexShrink: 0,
+                                }}>
+                                    AI Role
+                                </span>
+                                <select
+                                    value={currentRole}
+                                    onChange={e => {
+                                        const val = e.target.value
+                                        onSlotChange(block.id, val ? (val as TemplateSlotRole) : null)
+                                    }}
+                                    style={{
+                                        flex: 1,
+                                        padding: '2px 4px',
+                                        border: `1px solid ${hasRole ? '#c4b5fd' : C.inputBorder}`,
+                                        borderRadius: 5,
+                                        backgroundColor: hasRole ? '#ede9fe' : C.surface,
+                                        fontFamily: 'DM Sans, sans-serif',
+                                        fontSize: 10,
+                                        fontWeight: hasRole ? 600 : 400,
+                                        color: hasRole ? C.primary : C.body,
+                                        cursor: 'pointer',
+                                        outline: 'none',
+                                        minWidth: 0,
+                                    }}
+                                >
+                                    {SLOT_ROLE_OPTIONS.map(opt => (
+                                        <option key={opt.value} value={opt.value}>
+                                            {opt.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )
+                    })()}
 
                     {/* Tabs */}
                     <div style={{ display: 'flex', gap: 2 }}>
@@ -920,9 +1003,10 @@ function StylesTab({
                 {/* ── Block-specific style props ── */}
                 <BlockStyleProps block={block} props={props} updateProps={updateProps} />
 
-                {/* ── Universal: Border + Shadow (Font family now handled exclusively via Top Toolbar) ── */}
+                {/* ── Universal: Border + Shadow + Typography ── */}
                 <UniversalBorder props={props as any} updateProps={p => updateProps(p as any)} />
                 <UniversalShadow props={props as any} updateProps={p => updateProps(p as any)} />
+                <UniversalTypography props={props as any} updateProps={p => updateProps(p as any)} />
             </div>
         </div>
     )
@@ -8038,6 +8122,30 @@ function UniversalShadow({
     )
 }
 
-// UniversalTypography removed — font selection is now exclusively managed via the 220+ font selector in the Top Toolbar
+function UniversalTypography({
+    props, updateProps
+}: {
+    props: Record<string, unknown>
+    updateProps: (p: Record<string, unknown>) => void
+}) {
+    const p = props as any
+    return (
+        <Section title="Font family">
+            <SelectInput
+                label="Font"
+                value={p.fontFamily ?? 'Arial, Helvetica, sans-serif'}
+                options={[
+                    { v: 'Arial, Helvetica, sans-serif', l: 'Arial' },
+                    { v: 'Georgia, Times New Roman, serif', l: 'Georgia' },
+                    { v: 'Verdana, Geneva, sans-serif', l: 'Verdana' },
+                    { v: "'Trebuchet MS', Helvetica, sans-serif", l: 'Trebuchet' },
+                    { v: "'Times New Roman', Times, serif", l: 'Times New Roman' },
+                    { v: "'Courier New', Courier, monospace", l: 'Courier New' },
+                ]}
+                onChange={v => updateProps({ fontFamily: v })}
+            />
+        </Section>
+    )
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
