@@ -17,9 +17,10 @@ import {
     Image as ImageIcon, FileText, Tag, DollarSign,
     Truck, RotateCcw, MapPin, Globe,
     Megaphone, Lock, Users, Hash, Layers,
-    TrendingUp, ArrowRight, Flame,
+    TrendingUp, ArrowRight, Flame, Palette,
 } from 'lucide-react'
 import type { DraftData } from '../LgStudio'
+import TemplatePickerCard from '../TemplatePickerCard'
 import { calcHealth } from '@/lib/health-engine'
 import { ProfitEngine, DEFAULT_SETTINGS } from '@/lib/profit-engine'
 import ProDropdown from '@/components/ui/ProDropdown'
@@ -473,6 +474,22 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
                                 <p className="text-[10px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
                                     For full rich text editing with formatting go to Step 2.
                                 </p>
+                            </div>
+                        </Section>
+
+                        {/* ── 5b. DESIGN TEMPLATE ──────────────────── */}
+                        <Section
+                            icon={<Palette size={14} style={{ color: C.primary }} />}
+                            title="Design Template"
+                            status={draft.template_id ? 'ok' : undefined}
+                        >
+                            <div className="py-2">
+                                <TemplatePickerCard
+                                    templateId={draft.template_id ?? null}
+                                    onChange={id => onChange({ template_id: id })}
+                                    draftId={draft.id}
+                                    onFilled={html => onChange({ description_html: html })}
+                                />
                             </div>
                         </Section>
 
