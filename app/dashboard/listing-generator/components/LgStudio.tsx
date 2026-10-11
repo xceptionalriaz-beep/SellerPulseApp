@@ -12,7 +12,13 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
+import { createClient as createRawClient } from '@supabase/supabase-js'
 import { calcHealth } from '@/lib/health-engine'
+
+const rawDb = createRawClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 import { CheckCircle2 } from 'lucide-react'
 import Step1Product from './steps/Step1Product'
 import Step2Media from './steps/Step2Media'
@@ -105,6 +111,7 @@ export interface DraftData {
     current_step: number
     photo_count: number
     template_id: string | null
+    template_is_compliant: boolean      // fetched from listing_templates on load
 }
 
 const INITIAL_DRAFT: DraftData = {
@@ -168,6 +175,7 @@ const INITIAL_DRAFT: DraftData = {
     status: 'draft',
     current_step: 1,
     template_id: null,
+    template_is_compliant: false,
 }
 
 // ── Step config ───────────────────────────────────────────────
@@ -223,18 +231,47 @@ export default function LgStudio({ draftId, onBack, atLimit = false, onUpgrade }
                 const itemSpecifics = data.item_specifics && typeof data.item_specifics === 'object' && !Array.isArray(data.item_specifics)
                     ? data.item_specifics
                     : {}
+                // Fetch compliance flag for the attached template (if any)
+                let template_is_compliant = false
+                if (data.template_id) {
+                    const { data: tmpl } = await rawDb
+                        .from('listing_templates')
+                        .select('is_ebay_compliant')
+                        .eq('id', data.template_id)
+                        .single()
+                    template_is_compliant = tmpl?.is_ebay_compliant === true
+                }
+
                 setDraft({
                     ...INITIAL_DRAFT,
                     ...data,
                     photo_urls: photoUrls,
                     main_photo_url: data.main_photo_url || photoUrls[0] || '',
                     item_specifics: itemSpecifics,
+                    template_is_compliant,
                 })
                 setCurrentStep((data.current_step || 1) as WizardStep)
             }
         }
         loadDraft()
     }, [draftId])
+
+    // ── Fetch template compliance when template_id changes ───
+    useEffect(() => {
+        if (!draft.template_id) {
+            setDraft(prev => ({ ...prev, template_is_compliant: false }))
+            return
+        }
+        rawDb
+            .from('listing_templates')
+            .select('is_ebay_compliant')
+            .eq('id', draft.template_id)
+            .single()
+            .then(({ data }) => {
+                const compliant = data?.is_ebay_compliant === true
+                setDraft(prev => ({ ...prev, template_is_compliant: compliant }))
+            })
+    }, [draft.template_id]) // eslint-disable-line react-hooks/exhaustive-deps
 
     // ── Calculate health score — shared engine ──────────────
     useEffect(() => {
@@ -247,6 +284,7 @@ export default function LgStudio({ draftId, onBack, atLimit = false, onUpgrade }
         draft.item_specifics, draft.item_zip, draft.upc, draft.ean,
         draft.mpn, draft.subtitle, draft.returns_policy, draft.dispatch_days,
         draft.condition_description, draft.immediate_payment,
+        draft.template_id, draft.template_is_compliant,
     ])
 
     // ── Auto-save every 30s ──────────────────────────────────

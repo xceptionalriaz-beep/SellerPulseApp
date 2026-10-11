@@ -29,6 +29,7 @@ import {
 } from 'lucide-react'
 import VisualEditor from '@/components/ui/VisualEditor'
 import ProDropdown, { DropdownOption } from '@/components/ui/ProDropdown'
+import { auditHtml } from '@/components/ui/VisualEditor/audit'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -251,6 +252,8 @@ function VisualEditorInner() {
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) return
 
+            const isEbayCompliant = auditHtml(html).count === 0
+
             if (savedId) {
                 // Update existing
                 await (supabase as any)
@@ -259,6 +262,7 @@ function VisualEditorInner() {
                         name,
                         category,
                         description_html: html,
+                        is_ebay_compliant: isEbayCompliant,
                         updated_at: new Date().toISOString(),
                     })
                     .eq('id', savedId)
@@ -271,6 +275,7 @@ function VisualEditorInner() {
                         name,
                         category,
                         description_html: html,
+                        is_ebay_compliant: isEbayCompliant,
                         description: 'Visual Builder template',
                         is_system: false,
                         is_shared: false,
@@ -305,6 +310,8 @@ function VisualEditorInner() {
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) throw new Error('Not logged in')
 
+            const isEbayCompliant = auditHtml(html).count === 0
+
             if (savedId) {
                 await (supabase as any)
                     .from('listing_templates')
@@ -312,6 +319,7 @@ function VisualEditorInner() {
                         name,
                         category,
                         description_html: html,
+                        is_ebay_compliant: isEbayCompliant,
                         updated_at: new Date().toISOString(),
                     })
                     .eq('id', savedId)
@@ -323,6 +331,7 @@ function VisualEditorInner() {
                         name,
                         category,
                         description_html: html,
+                        is_ebay_compliant: isEbayCompliant,
                         description: 'Visual Builder template',
                         is_system: false,
                         is_shared: false,
@@ -357,6 +366,7 @@ function VisualEditorInner() {
                 name,
                 category,
                 description_html: html,
+                is_ebay_compliant: auditHtml(html).count === 0,
                 is_shared: true,
                 is_system: isAdmin,
                 thumbnail_url: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?w=200&h=150&fit=crop',

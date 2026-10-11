@@ -380,6 +380,7 @@ export interface ListingTemplate {
     variables: string[]
     is_system: boolean
     is_shared: boolean
+    is_ebay_compliant: boolean          // set by visual editor on save
     thumbnail_url: string | null
     use_count: number
     last_used_at: string | null
