@@ -3,19 +3,25 @@
 // ─────────────────────────────────────────────────────────────────
 // "My Templates" gallery inside Listing Studio.
 // Shows the seller's Design Studio visual templates with:
-//   ✓ Thumbnail preview (auto-generated from blocks_json)
+//   ✓ Thumbnail preview
 //   ✓ Name, category, use_count, last edited
-//   ✓ Open in Design Studio
+//   ✓ Open in Design Studio to edit
 //   ✓ "Used by X listings" badge
 //   ✓ Empty state with CTA to Design Studio
 // ─────────────────────────────────────────────────────────────────
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase'
+import { createClient as createRawClient } from '@supabase/supabase-js'
 import {
     Palette, ExternalLink, RefreshCw, Plus,
-    LayoutGrid, Clock, Layers, Search, X, ArrowLeft,
+    Clock, Layers, Search, X,
 } from 'lucide-react'
+
+// Raw client — listing_templates is not in the typed schema yet
+const rawDb = createRawClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 const C = {
     bg: '#f8f7ff',
@@ -34,17 +40,15 @@ const C = {
     accent: '#b8fa33',
 }
 
-interface VisualTemplate {
+interface ListingTemplate {
     id: string
     name: string
     category: string
     description: string | null
     thumbnail_url: string | null
     use_count: number
-    last_used_at: string | null
     updated_at: string
-    blocks_json: any
-    canvas_settings_json: any
+    description_html: string | null
 }
 
 interface Props {
@@ -52,9 +56,7 @@ interface Props {
 }
 
 export default function MyTemplatesGallery({ onClose }: Props) {
-    const supabase = createClient()
-
-    const [templates, setTemplates] = useState<VisualTemplate[]>([])
+    const [templates, setTemplates] = useState<ListingTemplate[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState('')
     const [hoverId, setHoverId] = useState<string | null>(null)
@@ -63,21 +65,33 @@ export default function MyTemplatesGallery({ onClose }: Props) {
 
     async function load() {
         setLoading(true)
-        const { data } = await (supabase.from('visual_templates') as any)
-            .select('id, name, category, description, thumbnail_url, use_count, last_used_at, updated_at, blocks_json, canvas_settings_json')
-            .order('updated_at', { ascending: false })
-        setTemplates((data as VisualTemplate[]) ?? [])
-        setLoading(false)
+        try {
+            // Get current user first
+            const { data: { user } } = await rawDb.auth.getUser()
+            if (!user) { setLoading(false); return }
+
+            const { data } = await rawDb
+                .from('listing_templates')
+                .select('id, name, category, description, thumbnail_url, use_count, updated_at, description_html')
+                .eq('user_id', user.id)
+                .eq('is_system', false)
+                .order('updated_at', { ascending: false })
+            setTemplates((data as ListingTemplate[]) ?? [])
+        } catch (err) {
+            console.error('[MyTemplatesGallery] load error:', err)
+        } finally {
+            setLoading(false)
+        }
     }
 
     const filtered = templates.filter(t =>
         !search ||
         t.name.toLowerCase().includes(search.toLowerCase()) ||
-        t.category.toLowerCase().includes(search.toLowerCase())
+        (t.category ?? '').toLowerCase().includes(search.toLowerCase())
     )
 
     // ── Thumbnail ─────────────────────────────────────────────
-    function Thumb({ t, size = 120 }: { t: VisualTemplate; size?: number }) {
+    function Thumb({ t, size = 120 }: { t: ListingTemplate; size?: number }) {
         if (t.thumbnail_url) {
             return (
                 <img
@@ -87,24 +101,22 @@ export default function MyTemplatesGallery({ onClose }: Props) {
                 />
             )
         }
-        const blocks: any[] = t.blocks_json?.blocks ?? t.blocks_json ?? []
-        const bg = t.canvas_settings_json?.backgroundColor ?? '#f3eeff'
+        // Fallback: show a styled preview placeholder
         return (
             <div style={{
                 width: '100%', height: size,
-                background: `linear-gradient(135deg, ${bg}, ${bg}cc)`,
+                background: `linear-gradient(135deg, #f3eeff, #e9d8fd)`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 position: 'relative', overflow: 'hidden',
             }}>
-                {/* Decorative block previews */}
-                {blocks.slice(0, 4).map((b: any, i: number) => (
+                {[0, 1, 2, 3].map(i => (
                     <div key={i} style={{
                         position: 'absolute',
-                        top: `${10 + i * 18}%`,
-                        left: '8%', right: '8%',
+                        top: `${12 + i * 20}%`,
+                        left: '10%', right: '10%',
                         height: '10%',
-                        background: b.style?.backgroundColor ?? b.style?.color ?? C.primary,
-                        opacity: 0.22 - i * 0.04,
+                        background: C.primary,
+                        opacity: 0.18 - i * 0.03,
                         borderRadius: 4,
                     }} />
                 ))}
@@ -185,23 +197,6 @@ export default function MyTemplatesGallery({ onClose }: Props) {
                 background: C.surface,
                 flexShrink: 0,
             }}>
-                {/* Back button */}
-                {onClose && (
-                    <button
-                        onClick={onClose}
-                        style={{
-                            display: 'flex', alignItems: 'center', gap: 6,
-                            padding: '6px 12px', borderRadius: 10, flexShrink: 0,
-                            background: 'none', border: `1px solid ${C.borderInput}`,
-                            cursor: 'pointer', color: C.secondary,
-                            fontSize: 12, fontWeight: 600, fontFamily: 'DM Sans, sans-serif',
-                        }}
-                    >
-                        <ArrowLeft size={13} />
-                        Back
-                    </button>
-                )}
-
                 {/* Icon */}
                 <div style={{
                     width: 32, height: 32, borderRadius: 8,
@@ -318,7 +313,7 @@ export default function MyTemplatesGallery({ onClose }: Props) {
                                                 gap: 8,
                                             }}>
                                                 <a
-                                                    href={`/dashboard/design/visual-editor?id=${t.id}`}
+                                                    href={`/dashboard/design/visual-editor?id=${t.id}&name=${encodeURIComponent(t.name)}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     style={{
