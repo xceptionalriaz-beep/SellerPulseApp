@@ -362,6 +362,27 @@ export type ListingDraftInsert = Partial<Omit<ListingDraft, 'id' | 'created_at' 
 export type ListingDraftUpdate = Partial<Omit<ListingDraft, 'id' | 'user_id' | 'created_at'>>
 
 // ─────────────────────────────────────────────────────────────
+// LISTING TEMPLATE — SLOT SYSTEM
+// Each text block in the visual editor can be tagged with a
+// semantic role. These roles are stored in listing_templates.slots
+// and used by the AI Fill engine (Phase 2) to know where to
+// inject product-specific content.
+// ─────────────────────────────────────────────────────────────
+
+export type TemplateSlotRole =
+    | 'headline'        // Short punchy product title line
+    | 'key_features'    // Bullet-point feature list
+    | 'description'     // 2-3 sentence product story
+    | 'condition_note'  // Used/refurbished condition detail
+    | 'trust_statement' // Shipping / returns / seller trust line
+
+export interface TemplateSlot {
+    role:    TemplateSlotRole   // semantic role of this slot
+    blockId: string             // visual editor block ID this slot maps to
+    label:   string             // human-readable label shown in UI
+}
+
+// ─────────────────────────────────────────────────────────────
 // LISTING TEMPLATE
 // Matches listing_templates table
 // ─────────────────────────────────────────────────────────────
@@ -381,6 +402,7 @@ export interface ListingTemplate {
     is_system: boolean
     is_shared: boolean
     is_ebay_compliant: boolean          // set by visual editor on save
+    slots: TemplateSlot[]               // AI Fill slot map (Phase 1)
     thumbnail_url: string | null
     use_count: number
     last_used_at: string | null
