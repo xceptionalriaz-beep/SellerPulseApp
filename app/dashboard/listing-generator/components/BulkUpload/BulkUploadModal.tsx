@@ -13,16 +13,17 @@
 // upward via onConfirm(rows) and the parent drives the queue.
 // ─────────────────────────────────────────────────────────────
 
-import { useState, useRef, useCallback, DragEvent, ChangeEvent } from 'react'
+import { useState, useRef, useCallback, useEffect, DragEvent, ChangeEvent } from 'react'
 import {
     X, Upload, FileSpreadsheet, Download, AlertTriangle,
     CheckCircle2, XCircle, ArrowLeft,
-    Info, Sparkles,
+    Info, Sparkles, Palette, ChevronDown,
 } from 'lucide-react'
 import {
     parseFile, generateCSVTemplate, COLUMN_META,
     applyPlanLimit,
 } from './BulkUploadParser'
+import { createClient } from '@/lib/supabase'
 
 // ── Design tokens ─────────────────────────────────────────────
 const C = {
@@ -73,9 +74,17 @@ export interface QueueRow extends ParsedRow {
     _message: string
 }
 
+// Minimal template shape for the picker
+interface TemplateSummary {
+    id:   string
+    name: string
+    category: string | null
+    is_ebay_compliant: boolean
+}
+
 interface BulkUploadModalProps {
     onClose:   () => void
-    onConfirm: (rows: ParsedRow[]) => void
+    onConfirm: (rows: ParsedRow[], templateId: string | null) => void
     planLimit: number   // max rows allowed by plan (0 = unlimited)
 }
 
@@ -119,12 +128,33 @@ async function downloadTemplate() {
 
 // ─────────────────────────────────────────────────────────────
 export function BulkUploadModal({ onClose, onConfirm, planLimit }: BulkUploadModalProps) {
-    const [step,        setStep]        = useState<Step>('drop')
-    const [dragging,    setDragging]    = useState(false)
-    const [fileName,    setFileName]    = useState('')
-    const [rows,        setRows]        = useState<ParsedRow[]>([])
-    const [parseError,  setParseError]  = useState('')
+    const [step,               setStep]               = useState<Step>('drop')
+    const [dragging,           setDragging]           = useState(false)
+    const [fileName,           setFileName]           = useState('')
+    const [rows,               setRows]               = useState<ParsedRow[]>([])
+    const [parseError,         setParseError]         = useState('')
+    const [templates,          setTemplates]          = useState<TemplateSummary[]>([])
+    const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null)
+    const [templateOpen,       setTemplateOpen]       = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const supabase = createClient()
+
+    // Fetch seller's templates when modal opens
+    useEffect(() => {
+        async function fetchTemplates() {
+            try {
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) return
+                const { data } = await (supabase.from('listing_templates') as any)
+                    .select('id, name, category, is_ebay_compliant')
+                    .or(`user_id.eq.${user.id},is_system.eq.true`)
+                    .order('use_count', { ascending: false })
+                    .limit(50)
+                if (data) setTemplates(data as TemplateSummary[])
+            } catch { /* non-fatal */ }
+        }
+        fetchTemplates()
+    }, [])
 
     const invalidRows             = rows.filter(r => !r._valid)
     const { allowed: limitedRows, blocked } = applyPlanLimit(rows, planLimit)
@@ -167,8 +197,10 @@ export function BulkUploadModal({ onClose, onConfirm, planLimit }: BulkUploadMod
         // Do NOT call onClose() here — the parent drives the view transition
         // to 'queue' inside onConfirm, so calling onClose() would race and
         // reset bulkView to null before the queue component mounts.
-        onConfirm(limitedRows)
+        onConfirm(limitedRows, selectedTemplateId)
     }
+
+    const selectedTemplate = templates.find(t => t.id === selectedTemplateId) ?? null
 
     // ── Render ────────────────────────────────────────────────
     return (
@@ -558,6 +590,176 @@ export function BulkUploadModal({ onClose, onConfirm, planLimit }: BulkUploadMod
                                         </span>
                                     </div>
                                 )}
+
+                                {/* ── Template Picker ─────────────────────── */}
+                                <div style={{ marginTop: 18 }}>
+                                    <div style={{
+                                        padding: '14px 16px', borderRadius: 12,
+                                        border: `1px solid ${selectedTemplateId ? C.primary + '55' : C.border}`,
+                                        background: selectedTemplateId ? C.primaryLight : C.bg,
+                                        transition: 'all 0.15s ease',
+                                    }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                                            <div style={{
+                                                width: 32, height: 32, borderRadius: 8,
+                                                background: selectedTemplateId ? C.primary : C.border,
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                flexShrink: 0, transition: 'background 0.15s ease',
+                                            }}>
+                                                <Palette size={15} style={{ color: selectedTemplateId ? '#fff' : C.muted }} />
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ fontSize: 13, fontWeight: 700, color: C.dark, fontFamily: 'DM Sans, sans-serif' }}>
+                                                    Apply Design Template
+                                                </div>
+                                                <div style={{ fontSize: 11, color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                                    Attach a template to all listings in this batch
+                                                </div>
+                                            </div>
+                                            {selectedTemplateId && (
+                                                <span style={{
+                                                    fontSize: 10, fontWeight: 700,
+                                                    color: C.primary, background: '#fff',
+                                                    border: `1px solid ${C.primary}44`,
+                                                    borderRadius: 20, padding: '2px 8px',
+                                                    fontFamily: 'DM Sans, sans-serif',
+                                                }}>
+                                                    APPLIED
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {/* Dropdown */}
+                                        <div style={{ position: 'relative' }}>
+                                            <button
+                                                onClick={() => setTemplateOpen(o => !o)}
+                                                style={{
+                                                    width: '100%', display: 'flex', alignItems: 'center',
+                                                    justifyContent: 'space-between', gap: 8,
+                                                    padding: '9px 12px', borderRadius: 9,
+                                                    border: `1px solid ${C.borderInput}`,
+                                                    background: C.surface, cursor: 'pointer',
+                                                    fontFamily: 'DM Sans, sans-serif',
+                                                    transition: 'border-color 0.15s ease',
+                                                }}
+                                            >
+                                                <span style={{ fontSize: 13, color: selectedTemplate ? C.dark : C.muted }}>
+                                                    {selectedTemplate
+                                                        ? selectedTemplate.name
+                                                        : 'No template (optional)'}
+                                                </span>
+                                                <ChevronDown
+                                                    size={14}
+                                                    style={{
+                                                        color: C.muted, flexShrink: 0,
+                                                        transform: templateOpen ? 'rotate(180deg)' : 'none',
+                                                        transition: 'transform 0.15s ease',
+                                                    }}
+                                                />
+                                            </button>
+
+                                            {templateOpen && (
+                                                <div style={{
+                                                    position: 'absolute', bottom: 'calc(100% + 4px)', left: 0, right: 0,
+                                                    background: C.surface,
+                                                    border: `1px solid ${C.border}`,
+                                                    borderRadius: 10, boxShadow: '0 8px 24px rgba(117,48,251,0.12)',
+                                                    zIndex: 50, overflow: 'hidden',
+                                                    maxHeight: 200, overflowY: 'auto',
+                                                }}>
+                                                    {/* No template option */}
+                                                    <button
+                                                        onClick={() => { setSelectedTemplateId(null); setTemplateOpen(false) }}
+                                                        style={{
+                                                            width: '100%', textAlign: 'left',
+                                                            padding: '9px 14px', border: 'none',
+                                                            background: selectedTemplateId === null ? C.primaryLight : 'transparent',
+                                                            cursor: 'pointer', borderBottom: `1px solid ${C.border}`,
+                                                            fontFamily: 'DM Sans, sans-serif',
+                                                        }}
+                                                    >
+                                                        <span style={{ fontSize: 13, color: C.muted, fontStyle: 'italic' }}>
+                                                            No template
+                                                        </span>
+                                                    </button>
+
+                                                    {templates.length === 0 && (
+                                                        <div style={{ padding: '10px 14px', fontSize: 12, color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                                            No templates found — create one in Design Studio
+                                                        </div>
+                                                    )}
+
+                                                    {templates.map(t => (
+                                                        <button
+                                                            key={t.id}
+                                                            onClick={() => { setSelectedTemplateId(t.id); setTemplateOpen(false) }}
+                                                            style={{
+                                                                width: '100%', textAlign: 'left',
+                                                                padding: '9px 14px', border: 'none',
+                                                                background: selectedTemplateId === t.id ? C.primaryLight : 'transparent',
+                                                                cursor: 'pointer', borderBottom: `1px solid ${C.border}`,
+                                                                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+                                                                fontFamily: 'DM Sans, sans-serif',
+                                                            }}
+                                                        >
+                                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                                <div style={{ fontSize: 13, color: C.dark, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                                    {t.name}
+                                                                </div>
+                                                                {t.category && (
+                                                                    <div style={{ fontSize: 11, color: C.muted }}>
+                                                                        {t.category}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            {t.is_ebay_compliant ? (
+                                                                <span style={{
+                                                                    fontSize: 10, fontWeight: 700,
+                                                                    color: C.success, background: C.successBg,
+                                                                    borderRadius: 10, padding: '2px 7px',
+                                                                    flexShrink: 0,
+                                                                }}>
+                                                                    COMPLIANT
+                                                                </span>
+                                                            ) : (
+                                                                <span style={{
+                                                                    fontSize: 10, fontWeight: 600,
+                                                                    color: C.warning, background: C.warningBg,
+                                                                    borderRadius: 10, padding: '2px 7px',
+                                                                    flexShrink: 0,
+                                                                }}>
+                                                                    REVIEW
+                                                                </span>
+                                                            )}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Compliance tip */}
+                                        {selectedTemplate && !selectedTemplate.is_ebay_compliant && (
+                                            <div style={{
+                                                marginTop: 8, display: 'flex', gap: 6, alignItems: 'flex-start',
+                                            }}>
+                                                <AlertTriangle size={12} style={{ color: C.warning, flexShrink: 0, marginTop: 1 }} />
+                                                <span style={{ fontSize: 11, color: C.warning, fontFamily: 'DM Sans, sans-serif' }}>
+                                                    This template has compliance issues. Fix in Design Studio to earn full health-score points.
+                                                </span>
+                                            </div>
+                                        )}
+                                        {selectedTemplate?.is_ebay_compliant && (
+                                            <div style={{
+                                                marginTop: 8, display: 'flex', gap: 6, alignItems: 'center',
+                                            }}>
+                                                <CheckCircle2 size={12} style={{ color: C.success }} />
+                                                <span style={{ fontSize: 11, color: C.success, fontFamily: 'DM Sans, sans-serif' }}>
+                                                    eBay-compliant — max health-score boost applied to all listings
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
 
                             {/* Footer CTA */}

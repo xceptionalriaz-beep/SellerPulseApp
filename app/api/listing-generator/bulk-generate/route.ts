@@ -333,6 +333,7 @@ export async function POST(req: NextRequest) {
         quantity?:    string
         category_id?: string
         images?:      string
+        template_id?: string
         _rowIndex?:   number
     }
 
@@ -342,7 +343,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ ok: false, error: 'Invalid JSON body' }, { status: 400 })
     }
 
-    const { title, barcode, buy_price, sell_price, sku, condition, quantity, category_id, images } = body
+    const { title, barcode, buy_price, sell_price, sku, condition, quantity, category_id, images, template_id } = body
 
     // ── 3. Resolve product title ─────────────────────────────────────────────
     let resolvedTitle = title?.trim() || ''
@@ -416,6 +417,7 @@ export async function POST(req: NextRequest) {
             vero_brands_found: vero.brand ? [vero.brand] : [],
             sku:               sku?.trim() || null,
             quantity:          quantity ? parseInt(quantity, 10) : null,
+            template_id:       template_id?.trim() || null,
             status:            'draft',
             current_step:      1,
             notes:             [
