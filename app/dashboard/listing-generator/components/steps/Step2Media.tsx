@@ -98,6 +98,8 @@ interface Props {
     onNext: () => void
     onPrev: () => void
     onSave?: () => void
+    atLimit?: boolean      // user is at their plan cap → lock AI features
+    onUpgrade?: () => void   // open upgrade modal
 }
 
 // ── Photo type ────────────────────────────────────────────────
@@ -111,7 +113,7 @@ interface Photo {
 }
 
 // ── Main Component ────────────────────────────────────────────
-export default function Step2Media({ draft, onChange, onNext, onPrev, onSave }: Props): JSX.Element {
+export default function Step2Media({ draft, onChange, onNext, onPrev, onSave, atLimit = false, onUpgrade }: Props): JSX.Element {
     const supabase = createClient()
     const supabaseRef = useRef(supabase)
     const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -1312,8 +1314,9 @@ export default function Step2Media({ draft, onChange, onNext, onPrev, onSave }: 
                                             uploadedPhotos={draft.photo_urls?.filter(Boolean) || []}
                                             supabaseUpload={uploadPhoto}
                                             onLibrary={() => setDescTab('library')}
-                                            onAiWrite={generateDescription}
+                                            onAiWrite={atLimit ? (onUpgrade ?? (() => { })) : generateDescription}
                                             aiLoading={aiDescLoading}
+                                            aiLocked={atLimit}
                                         />
                                     </div>
                                 )}

@@ -5,7 +5,7 @@ import { AIButton } from '@/components/ui/Buttons'
 import {
     Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight,
     Heading2, Heading3, Type, List, ListOrdered, Palette,
-    Image, Table, Minus, FileText, Smartphone, Monitor, BookOpen,
+    Image, Table, Minus, FileText, Smartphone, Monitor, BookOpen, Lock,
 } from 'lucide-react'
 
 export const C = {
@@ -566,9 +566,10 @@ export interface ToolbarProps {
     onLibrary?: () => void
     onAiWrite?: () => void
     aiLoading?: boolean
+    aiLocked?: boolean
 }
 
-export function EditorToolbar({ activeFormats, onExec, descPreview, onPreview, uploadedPhotos = [], supabaseUpload, onLibrary, onAiWrite, aiLoading }: ToolbarProps): JSX.Element {
+export function EditorToolbar({ activeFormats, onExec, descPreview, onPreview, uploadedPhotos = [], supabaseUpload, onLibrary, onAiWrite, aiLoading, aiLocked = false }: ToolbarProps): JSX.Element {
     return (
         <div data-toolbar className="flex items-center gap-0.5 px-2 py-1.5 overflow-x-auto"
             style={{ borderBottom: `2px solid #7530fb`, backgroundColor: '#f3eeff', scrollbarWidth: 'none' }}>
@@ -600,13 +601,40 @@ export function EditorToolbar({ activeFormats, onExec, descPreview, onPreview, u
             <div className="flex items-center gap-1 shrink-0">
 
                 {/* AI Write Description button — uses our standard AIButton design */}
-                {onAiWrite && (
+                {onAiWrite && !aiLocked && (
                     <AIButton
                         onClick={onAiWrite}
                         disabled={aiLoading}
                         loading={aiLoading}>
                         AI Write Description
                     </AIButton>
+                )}
+
+                {/* Locked state — shown when user has hit their plan limit */}
+                {aiLocked && (
+                    <button
+                        onClick={onAiWrite}
+                        title="Upgrade to unlock AI descriptions"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            padding: '0 10px',
+                            height: '28px',
+                            borderRadius: '6px',
+                            border: `1.5px dashed #b8fa33`,
+                            backgroundColor: '#1e1535',
+                            color: '#b8fa33',
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            letterSpacing: '0.02em',
+                            cursor: 'pointer',
+                            whiteSpace: 'nowrap',
+                            flexShrink: 0,
+                        }}>
+                        <Lock size={11} />
+                        Upgrade to Unlock
+                    </button>
                 )}
 
                 {/* Design Library — BookOpen icon */}
