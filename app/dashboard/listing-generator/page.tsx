@@ -543,8 +543,8 @@ export default function ListingGeneratorPage() {
                 <UpgradeBanner
                     tool="Listing Generator"
                     limitType="listings"
-                    used={draftCount}
-                    limit={planLimits?.max_listing_generations ?? 0}
+                    used={planLimits?.max_listing_generations ?? 5}
+                    limit={planLimits?.max_listing_generations ?? 5}
                     onUpgrade={() => setUpgradeOpen(true)}
                 />
 
@@ -570,10 +570,7 @@ export default function ListingGeneratorPage() {
                             <LgStudio
                                 draftId={activeDraftId}
                                 onBack={handleBackFromWizard}
-                                atLimit={
-                                    (planLimits?.max_listing_generations ?? 0) > 0 &&
-                                    draftCount >= (planLimits?.max_listing_generations ?? 0)
-                                }
+                                atLimit={true}
                                 onUpgrade={() => setUpgradeOpen(true)}
                             />
                         </div>
