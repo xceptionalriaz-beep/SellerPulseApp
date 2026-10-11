@@ -1,12 +1,8 @@
 'use client'
 // components/UpgradeTeaser.tsx
-// ─────────────────────────────────────────────────────────────
-// Step 1 of the upgrade flow — shown when user hits a plan limit.
-// Simple banner popup with a CTA that opens the full pricing modal.
-// ─────────────────────────────────────────────────────────────
 
 import { useEffect } from 'react'
-import { X, Zap, CheckCircle2 } from 'lucide-react'
+import { X, CheckCircle2 } from 'lucide-react'
 
 interface UpgradeTeaserProps {
     onClose: () => void
@@ -27,16 +23,14 @@ export function UpgradeTeaser({
     onClose,
     onViewPlans,
     title = "You've reached your plan limit.",
-    description = 'Upgrade to Pro to keep generating AI-powered eBay listings without limits.',
+    description = 'Upgrade to unlock full access to AI-powered eBay listing tools.',
 }: UpgradeTeaserProps) {
 
-    // Lock body scroll
     useEffect(() => {
         document.body.style.overflow = 'hidden'
         return () => { document.body.style.overflow = '' }
     }, [])
 
-    // Close on Escape
     useEffect(() => {
         const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
         window.addEventListener('keydown', handler)
@@ -48,7 +42,7 @@ export function UpgradeTeaser({
             onClick={onClose}
             style={{
                 position: 'fixed', inset: 0, zIndex: 9999,
-                background: 'rgba(10, 13, 8, 0.55)',
+                background: 'rgba(30, 21, 53, 0.55)',
                 backdropFilter: 'blur(4px)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 padding: '16px',
@@ -60,52 +54,54 @@ export function UpgradeTeaser({
                     background: '#ffffff',
                     borderRadius: '20px',
                     width: '100%',
-                    maxWidth: '480px',
-                    padding: '36px 32px 32px',
+                    maxWidth: '460px',
+                    padding: '32px',
                     position: 'relative',
-                    boxShadow: '0 24px 64px rgba(10,13,8,0.18)',
-                    fontFamily: 'Inter, sans-serif',
+                    boxShadow: '0 24px 64px rgba(117,48,251,0.15)',
+                    border: '1px solid #ede9fe',
+                    fontFamily: '"DM Sans", Inter, sans-serif',
                 }}>
 
                 {/* Close */}
                 <button
                     onClick={onClose}
                     style={{
-                        position: 'absolute', top: '16px', right: '16px',
-                        width: '32px', height: '32px', borderRadius: '50%',
-                        border: '1px solid #e8ede2', background: '#f9fdf4',
+                        position: 'absolute', top: '14px', right: '14px',
+                        width: '30px', height: '30px', borderRadius: '50%',
+                        border: '1px solid #ede9fe', background: '#f8f7ff',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        cursor: 'pointer', color: '#8a9e78',
+                        cursor: 'pointer', color: '#9ca3af',
                     }}>
-                    <X size={15} />
+                    <X size={14} />
                 </button>
 
-                {/* Icon */}
-                <div style={{
-                    width: '52px', height: '52px', borderRadius: '14px',
-                    background: '#0a0d08',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    marginBottom: '20px',
-                }}>
-                    <Zap size={24} fill="#8fff00" color="#8fff00" />
-                </div>
-
-                {/* Heading */}
-                <p style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.1em', color: '#4a8f00', textTransform: 'uppercase', margin: '0 0 6px' }}>
+                {/* Label */}
+                <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: '#7530fb', textTransform: 'uppercase', margin: '0 0 8px' }}>
                     Upgrade your plan
                 </p>
-                <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#0a0d08', margin: '0 0 8px', lineHeight: 1.2 }}>
+
+                {/* Heading */}
+                <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#1e1535', margin: '0 0 8px', lineHeight: 1.25 }}>
                     {title}
                 </h2>
-                <p style={{ fontSize: '14px', color: '#8a9e78', margin: '0 0 24px', lineHeight: 1.55 }}>
+                <p style={{ fontSize: '14px', color: '#6b7280', margin: '0 0 24px', lineHeight: 1.55 }}>
                     {description}
                 </p>
 
+                {/* Divider */}
+                <div style={{ height: 1, background: '#ede9fe', marginBottom: '20px' }} />
+
                 {/* Bullets */}
-                <ul style={{ listStyle: 'none', margin: '0 0 28px', padding: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <ul style={{ listStyle: 'none', margin: '0 0 28px', padding: 0, display: 'flex', flexDirection: 'column', gap: '11px' }}>
                     {BULLETS.map(b => (
-                        <li key={b} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#0a0d08' }}>
-                            <CheckCircle2 size={16} color="#8fff00" style={{ flexShrink: 0 }} />
+                        <li key={b} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13.5px', color: '#1f1d2e' }}>
+                            <div style={{
+                                width: 18, height: 18, borderRadius: '50%',
+                                background: '#f3eeff', flexShrink: 0,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            }}>
+                                <CheckCircle2 size={12} color="#7530fb" />
+                            </div>
                             {b}
                         </li>
                     ))}
@@ -115,16 +111,17 @@ export function UpgradeTeaser({
                 <button
                     onClick={onViewPlans}
                     style={{
-                        width: '100%', padding: '14px',
+                        width: '100%', padding: '13px',
                         borderRadius: '10px', border: 'none',
-                        background: '#8fff00', color: '#0a0d08',
-                        fontSize: '15px', fontWeight: 800,
+                        background: '#7530fb', color: '#ffffff',
+                        fontSize: '14px', fontWeight: 700,
                         cursor: 'pointer', letterSpacing: '0.01em',
+                        boxShadow: '0 4px 16px rgba(117,48,251,0.3)',
                     }}>
                     View Plans & Upgrade →
                 </button>
 
-                <p style={{ textAlign: 'center', fontSize: '12px', color: '#8a9e78', margin: '14px 0 0' }}>
+                <p style={{ textAlign: 'center', fontSize: '12px', color: '#9ca3af', margin: '12px 0 0' }}>
                     7-day free trial on all plans · Cancel anytime
                 </p>
             </div>
