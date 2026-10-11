@@ -1,0 +1,5 @@
+title,barcode,buy_price,sell_price,sku,condition,quantity,category_id,images
+Vintage Canon AE-1 35mm Film Camera Body,,12.50,34.99,CAM-001,used,3,31388,https://example.com/img1.jpg
+,5055002556371,8.00,22.99,LENS-007,used,1,31388,
+Sony WH-1000XM5 Wireless Headphones,,89.00,149.99,SONY-WH-XM5,new,5,112529,"https://example.com/headphones-front.jpg,https://example.com/headphones-back.jpg"
+Nike Air Max 90 Trainers UK Size 10,,35.00,79.99,NIKE-AM90-UK10,used,1,15709,
