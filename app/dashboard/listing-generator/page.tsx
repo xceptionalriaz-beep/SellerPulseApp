@@ -416,7 +416,7 @@ export default function ListingGeneratorPage() {
     }
 
     // Called by BulkUploadModal when user clicks "Generate X listings"
-    const handleBulkConfirm = useCallback(async (parsedRows: ParsedRow[]) => {
+    const handleBulkConfirm = useCallback(async (parsedRows: ParsedRow[], templateId: string | null) => {
         if (parsedRows.length === 0) return
 
         // Initialise queue rows (all pending)
@@ -457,6 +457,7 @@ export default function ListingGeneratorPage() {
                         quantity: row.quantity,
                         category_id: row.category_id,
                         images: row.images,
+                        template_id: templateId ?? undefined,
                         _rowIndex: row._rowIndex,
                     }),
                 })
@@ -516,13 +517,13 @@ export default function ListingGeneratorPage() {
     }
 
     function handleBulkRetry(failedRows: QueueRow[]) {
-        // Re-queue only the failed rows — treat as a new confirm
+        // Re-queue only the failed rows — treat as a new confirm (no template re-pick on retry)
         const reparsed: ParsedRow[] = failedRows.map(r => ({
             ...r,
             _errors: [],
             _valid: true,
         }))
-        handleBulkConfirm(reparsed)
+        handleBulkConfirm(reparsed, null)
     }
 
     // ── Render ───────────────────────────────────────────────
