@@ -16,9 +16,13 @@
 import { useState, useRef, useCallback, DragEvent, ChangeEvent } from 'react'
 import {
     X, Upload, FileSpreadsheet, Download, AlertTriangle,
-    CheckCircle2, XCircle, ChevronRight, Loader2, ArrowLeft,
+    CheckCircle2, XCircle, ArrowLeft,
     Info, Sparkles,
 } from 'lucide-react'
+import {
+    parseFile, generateCSVTemplate, COLUMN_META,
+    applyPlanLimit,
+} from './BulkUploadParser'
 
 // ── Design tokens ─────────────────────────────────────────────
 const C = {
@@ -75,90 +79,18 @@ interface BulkUploadModalProps {
     planLimit: number   // max rows allowed by plan (0 = unlimited)
 }
 
-// ── CSV template columns ───────────────────────────────────────
-const TEMPLATE_HEADERS = [
-    'title', 'barcode', 'buy_price', 'sell_price',
-    'sku', 'condition', 'quantity', 'category_id', 'images',
-]
-
-const COLUMN_LABELS: Record<string, string> = {
-    title:       'Title',
-    barcode:     'Barcode (EAN/UPC)',
-    buy_price:   'Buy Price (£)',
-    sell_price:  'Sell Price (£)',
-    sku:         'SKU',
-    condition:   'Condition',
-    quantity:    'Quantity',
-    category_id: 'eBay Category ID',
-    images:      'Image URLs (comma-separated)',
-}
+// ── Column labels sourced from parser metadata ─────────────────
+const COLUMN_LABELS: Record<string, string> = Object.fromEntries(
+    COLUMN_META.map(c => [c.key, c.label])
+)
+const TEMPLATE_HEADERS = COLUMN_META.map(c => c.key)
 
 // ── Step type ─────────────────────────────────────────────────
 type Step = 'drop' | 'preview' | 'generating' | 'summary'
 
-// ── Parse CSV (no external lib — lightweight inline) ──────────
-function parseCSV(text: string): string[][] {
-    const rows: string[][] = []
-    const lines = text.split(/\r?\n/).filter(l => l.trim())
-    for (const line of lines) {
-        const cols: string[] = []
-        let cur = ''
-        let inQ  = false
-        for (let i = 0; i < line.length; i++) {
-            const ch = line[i]
-            if (ch === '"') {
-                if (inQ && line[i + 1] === '"') { cur += '"'; i++ }
-                else inQ = !inQ
-            } else if (ch === ',' && !inQ) {
-                cols.push(cur.trim()); cur = ''
-            } else {
-                cur += ch
-            }
-        }
-        cols.push(cur.trim())
-        rows.push(cols)
-    }
-    return rows
-}
-
-function csvToRows(text: string): BulkRow[] {
-    const matrix = parseCSV(text)
-    if (matrix.length < 2) return []
-    const headers = matrix[0].map(h => h.toLowerCase().replace(/\s+/g, '_'))
-    return matrix.slice(1).map((cols, i) => {
-        const row: BulkRow = { _rowIndex: i + 2 }
-        headers.forEach((h, ci) => {
-            if (TEMPLATE_HEADERS.includes(h)) {
-                (row as unknown as Record<string, string>)[h] = cols[ci] ?? ''
-            }
-        })
-        return row
-    })
-}
-
-function validateRow(row: BulkRow): ParsedRow {
-    const errors: string[] = []
-    const hasTitle   = typeof row.title   === 'string' && row.title.trim().length > 0
-    const hasBarcode = typeof row.barcode === 'string' && row.barcode.trim().length > 0
-    if (!hasTitle && !hasBarcode) errors.push('Needs a title or barcode')
-    const bp = parseFloat(row.buy_price  ?? '')
-    const sp = parseFloat(row.sell_price ?? '')
-    if (row.buy_price  && isNaN(bp)) errors.push('Buy price must be a number')
-    if (row.sell_price && isNaN(sp)) errors.push('Sell price must be a number')
-    const cond = row.condition?.toLowerCase()
-    if (cond && !['new', 'used', 'refurbished', ''].includes(cond)) {
-        errors.push('Condition must be: new, used, or refurbished')
-    }
-    return { ...row, _errors: errors, _valid: errors.length === 0 }
-}
-
 // ── Download template helper ──────────────────────────────────
 function downloadTemplate() {
-    const header = TEMPLATE_HEADERS.join(',')
-    const example = [
-        'Vintage Camera Lens 50mm','','12.50','34.99','CAM-001','used','3','','https://example.com/img1.jpg',
-    ].join(',')
-    const csv = `${header}\n${example}\n`
+    const csv  = generateCSVTemplate()
     const blob = new Blob([csv], { type: 'text/csv' })
     const url  = URL.createObjectURL(blob)
     const a    = document.createElement('a')
@@ -177,32 +109,26 @@ export function BulkUploadModal({ onClose, onConfirm, planLimit }: BulkUploadMod
     const [parseError,  setParseError]  = useState('')
     const fileInputRef = useRef<HTMLInputElement>(null)
 
-    const validRows   = rows.filter(r => r._valid)
-    const invalidRows = rows.filter(r => !r._valid)
-    const limitedRows = planLimit > 0 ? validRows.slice(0, planLimit) : validRows
-    const overLimit   = planLimit > 0 && validRows.length > planLimit
+    const invalidRows             = rows.filter(r => !r._valid)
+    const { allowed: limitedRows, blocked } = applyPlanLimit(rows, planLimit)
+    const validRows               = [...limitedRows, ...blocked]
+    const overLimit               = blocked.length > 0
 
     // ── File processing ───────────────────────────────────────
-    function processFile(file: File) {
+    async function processFile(file: File) {
         setParseError('')
-        if (!file.name.match(/\.(csv|txt)$/i)) {
-            setParseError('Only CSV files are supported right now. XLSX support coming soon.')
+        const result = await parseFile(file)
+        if (!result.ok) {
+            setParseError(result.error ?? 'Unknown error parsing file.')
             return
         }
-        const reader = new FileReader()
-        reader.onload = (e) => {
-            const text = e.target?.result as string
-            const raw  = csvToRows(text)
-            if (raw.length === 0) {
-                setParseError('No data rows found. Make sure your file has a header row and at least one data row.')
-                return
-            }
-            const validated = raw.map(validateRow)
-            setRows(validated)
-            setFileName(file.name)
-            setStep('preview')
+        if (result.rows.length === 0) {
+            setParseError('No data rows found. Make sure your file has a header row and at least one data row.')
+            return
         }
-        reader.readAsText(file)
+        setRows(result.rows)
+        setFileName(file.name)
+        setStep('preview')
     }
 
     // ── Drag events ───────────────────────────────────────────
