@@ -29,7 +29,7 @@ import {
     CheckCircle2, AlertTriangle, Pencil, Clock,
     Download, Trash2, ChevronLeft, ChevronRight,
     X, Package, TrendingUp, Circle, Zap, Copy, Check,
-    Columns, SlidersHorizontal, Filter, Star,
+    Columns, SlidersHorizontal, Filter, Star, Palette,
 } from 'lucide-react'
 import UrlImport from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImport'
 import UrlImportProcessing from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImportProcessing'
@@ -42,6 +42,7 @@ import ImageImportPreview from '@/app/dashboard/listing-generator/components/ai-
 import ImageImportFailed from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImportFailed'
 import BarcodeImport from '@/app/dashboard/listing-generator/components/ai-import/barcode-import/BarcodeImport'
 import TitleImport from '@/app/dashboard/listing-generator/components/ai-import/title-to-listing/TitleImport'
+import MyTemplatesGallery from './MyTemplatesGallery'
 import type { PlatformDetection, UrlImportResult, ImportedListingData } from '@/app/dashboard/listing-generator/types/url-import.types'
 import type { ImageImportData } from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImport'
 import type { ImageImportResult } from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImportProcessing'
@@ -74,7 +75,7 @@ const C = {
 type ListingStatus = 'published' | 'draft' | 'ended' | 'scheduled'
 type VeroStatus = 'clear' | 'warning' | 'flagged' | 'unchecked'
 type SellerType = 'own_stock' | 'wholesale' | 'retail_arb' | 'dropship' | 'pod' | 'reseller'
-type TabFilter = 'all' | 'published' | 'draft' | 'ended' | 'scheduled'
+type TabFilter = 'all' | 'published' | 'draft' | 'ended' | 'scheduled' | 'templates'
 
 interface Listing {
     id: string
@@ -845,6 +846,32 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                             )
                         })}
 
+                        {/* Templates tab — separate from listing filter tabs */}
+                        {(() => {
+                            const isActive = activeTab === 'templates'
+                            return (
+                                <button
+                                    onClick={() => { setActiveTab('templates'); setPage(1) }}
+                                    className="flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-semibold transition-all whitespace-nowrap"
+                                    style={{
+                                        color: isActive ? C.primary : C.secondary,
+                                        fontFamily: 'DM Sans, sans-serif',
+                                        backgroundColor: isActive ? '#ffffff' : 'transparent',
+                                        border: isActive ? `2px solid #7530fb` : '2px solid transparent',
+                                        borderBottom: isActive ? `2px solid #ffffff` : '2px solid transparent',
+                                        borderRadius: '8px 8px 0 0',
+                                        marginBottom: '-2px',
+                                        marginLeft: '4px',
+                                    }}
+                                >
+                                    <Palette size={12} />
+                                    Templates
+                                </button>
+                            )
+                        })()}
+
+                        {/* Search / Filter / View — hidden on Templates tab */}
+                        {activeTab !== 'templates' && (<>
                         <div className="flex-1" />
 
                         {/* Search */}
@@ -932,10 +959,20 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                 }} />
                             )}
                         </button>
+                        </>)}
                     </div>
                 </div>{/* end toolbar card */}
 
+                {/* MY TEMPLATES GALLERY — shown when Templates tab active */}
+                {activeTab === 'templates' && (
+                    <div className="flex-1 flex flex-col min-h-0 rounded-b-2xl overflow-hidden"
+                        style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, borderTop: 'none', boxShadow: '0 2px 12px rgba(117,48,251,0.06)' }}>
+                        <MyTemplatesGallery />
+                    </div>
+                )}
+
                 {/* TABLE CARD — one table, sticky thead, scrolling tbody */}
+                {activeTab !== 'templates' && (
                 <div className="flex-1 flex flex-col min-h-0 rounded-b-2xl overflow-hidden"
                     style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, borderTop: 'none', boxShadow: '0 2px 12px rgba(117,48,251,0.06)' }}>
 
@@ -1753,6 +1790,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                     )}
 
                 </div>
+                )}{/* end activeTab !== templates */}
 
             </div>{/* end toolbar+table */}
             </div>{/* end main column */}
