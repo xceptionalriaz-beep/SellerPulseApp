@@ -570,6 +570,11 @@ export default function ListingGeneratorPage() {
                             <LgStudio
                                 draftId={activeDraftId}
                                 onBack={handleBackFromWizard}
+                                atLimit={
+                                    (planLimits?.max_listing_generations ?? 0) > 0 &&
+                                    draftCount >= (planLimits?.max_listing_generations ?? 0)
+                                }
+                                onUpgrade={() => setUpgradeOpen(true)}
                             />
                         </div>
                     )}
