@@ -100,6 +100,8 @@ interface Listing {
     source_platform: string | null
     ebay_listing_id: string | null
     item_specifics: Record<string, string> | null
+    template_id: string | null
+    visual_templates: { name: string } | null
 }
 
 interface Metrics {
@@ -550,7 +552,8 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
           condition, sell_price, margin, net_profit, health_score,
           vero_status, quantity, out_of_stock_option, status,
           main_photo_url, photo_count, created_at, updated_at,
-          source_platform, ebay_listing_id, item_specifics
+          source_platform, ebay_listing_id, item_specifics,
+          template_id, visual_templates ( name )
         `)
                 .eq('user_id', user.id)
                 .order('created_at', { ascending: false })
@@ -1038,13 +1041,28 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                                         className="line-clamp-2">
                                                         {listing.title || listing.product_name || 'Untitled'}
                                                     </p>
-                                                    {listing.sku && (
-                                                        <span style={{ fontSize: 10, color: C.muted, fontFamily: 'DM Sans, sans-serif',
-                                                            backgroundColor: C.bg, border: `1px solid ${C.border}`,
-                                                            borderRadius: 4, padding: '1px 6px', display: 'inline-block', marginBottom: 8 }}>
-                                                            {listing.sku}
-                                                        </span>
-                                                    )}
+                                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 8 }}>
+                                                        {listing.sku && (
+                                                            <span style={{ fontSize: 10, color: C.muted, fontFamily: 'DM Sans, sans-serif',
+                                                                backgroundColor: C.bg, border: `1px solid ${C.border}`,
+                                                                borderRadius: 4, padding: '1px 6px', display: 'inline-block' }}>
+                                                                {listing.sku}
+                                                            </span>
+                                                        )}
+                                                        {listing.visual_templates?.name && (
+                                                            <span style={{
+                                                                display: 'inline-flex', alignItems: 'center', gap: 3,
+                                                                fontSize: 10, fontWeight: 600,
+                                                                padding: '1px 6px', borderRadius: 4,
+                                                                backgroundColor: C.primaryLight, color: C.primary,
+                                                                fontFamily: 'DM Sans, sans-serif',
+                                                                maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                                                            }} title={`Template: ${listing.visual_templates.name}`}>
+                                                                <Palette size={8} />
+                                                                {listing.visual_templates.name}
+                                                            </span>
+                                                        )}
+                                                    </div>
 
                                                     {/* Price row */}
                                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -1248,12 +1266,27 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                                             style={{ color: C.body, fontFamily: 'DM Sans, sans-serif' }}>
                                                             {listing.title || listing.product_name || 'Untitled'}
                                                         </p>
-                                                        {listing.sku && (
-                                                            <span className="text-[10px] px-1.5 py-0.5 rounded mt-0.5 inline-block"
-                                                                style={{ backgroundColor: C.bg, color: C.muted, fontFamily: 'DM Sans, sans-serif', border: `1px solid ${C.border}` }}>
-                                                                {listing.sku}
-                                                            </span>
-                                                        )}
+                                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 2 }}>
+                                                            {listing.sku && (
+                                                                <span className="text-[10px] px-1.5 py-0.5 rounded inline-block"
+                                                                    style={{ backgroundColor: C.bg, color: C.muted, fontFamily: 'DM Sans, sans-serif', border: `1px solid ${C.border}` }}>
+                                                                    {listing.sku}
+                                                                </span>
+                                                            )}
+                                                            {listing.visual_templates?.name && (
+                                                                <span style={{
+                                                                    display: 'inline-flex', alignItems: 'center', gap: 3,
+                                                                    fontSize: 10, fontWeight: 600,
+                                                                    padding: '1px 6px', borderRadius: 4,
+                                                                    backgroundColor: C.primaryLight, color: C.primary,
+                                                                    fontFamily: 'DM Sans, sans-serif',
+                                                                    maxWidth: 110, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                                                                }} title={`Template: ${listing.visual_templates.name}`}>
+                                                                    <Palette size={8} />
+                                                                    {listing.visual_templates.name}
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                     </td>
                                                 )
                                             case 'condition':
