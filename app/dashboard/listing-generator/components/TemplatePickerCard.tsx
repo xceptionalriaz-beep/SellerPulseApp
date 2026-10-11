@@ -4,11 +4,13 @@
 // Lets a seller pick one of their Design Studio visual templates
 // and attach it to the current listing draft.
 // Shows a mini gallery of cards (thumbnail + name + category).
+// Also shows an "Fill with AI" button when the selected template
+// has AI slot roles configured and a draftId is supplied.
 // ─────────────────────────────────────────────────────────────────
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
-import { Palette, Check, X, ExternalLink, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react'
+import { Palette, Check, X, ExternalLink, RefreshCw, ChevronDown, ChevronUp, Sparkles, Loader2, CheckCircle2 } from 'lucide-react'
 
 const C = {
     bg:           '#f8f7ff',
@@ -36,27 +38,69 @@ interface VisualTemplate {
     canvas_settings_json: any
 }
 
+interface TemplateSlot {
+    role:    string
+    blockId: string
+    label:   string
+}
+
 interface Props {
     templateId: string | null
     onChange:   (id: string | null) => void
+    /** ID of the current listing draft — enables the AI Fill button */
+    draftId?:   string
+    /** Called with the AI-filled description_html on success */
+    onFilled?:  (html: string) => void
 }
 
-export default function TemplatePickerCard({ templateId, onChange }: Props) {
+export default function TemplatePickerCard({ templateId, onChange, draftId, onFilled }: Props) {
     const supabase = createClient()
 
-    const [templates, setTemplates]   = useState<VisualTemplate[]>([])
-    const [loading, setLoading]       = useState(true)
-    const [expanded, setExpanded]     = useState(false)
-    const [selected, setSelected]     = useState<VisualTemplate | null>(null)
-    const [hoverId, setHoverId]       = useState<string | null>(null)
+    const [templates, setTemplates]       = useState<VisualTemplate[]>([])
+    const [loading, setLoading]           = useState(true)
+    const [expanded, setExpanded]         = useState(false)
+    const [selected, setSelected]         = useState<VisualTemplate | null>(null)
+    const [hoverId, setHoverId]           = useState<string | null>(null)
+
+    // AI Fill state
+    const [slots, setSlots]               = useState<TemplateSlot[]>([])
+    const [aiLoading, setAiLoading]       = useState(false)
+    const [aiFilled, setAiFilled]         = useState(false)
+    const [aiError, setAiError]           = useState<string | null>(null)
 
     useEffect(() => { loadTemplates() }, [])
 
     // When templateId prop changes (e.g. loading existing draft), sync selection
     useEffect(() => {
-        if (!templateId) { setSelected(null); return }
+        if (!templateId) { setSelected(null); setSlots([]); setAiFilled(false); setAiError(null); return }
         setSelected(prev => prev?.id === templateId ? prev : templates.find(t => t.id === templateId) ?? null)
     }, [templateId, templates])
+
+    // When selected changes, load its slots from listing_templates
+    const loadSlots = useCallback(async (id: string) => {
+        setSlots([])
+        setAiFilled(false)
+        setAiError(null)
+        try {
+            const { data } = await (supabase.from('listing_templates') as any)
+                .select('slots')
+                .eq('id', id)
+                .single()
+            if (data && Array.isArray(data.slots)) {
+                setSlots(data.slots as TemplateSlot[])
+            }
+        } catch { /* slots stay empty */ }
+    }, [supabase])
+
+    useEffect(() => {
+        if (selected?.id) {
+            loadSlots(selected.id)
+        } else {
+            setSlots([])
+            setAiFilled(false)
+            setAiError(null)
+        }
+    }, [selected?.id, loadSlots])
 
     async function loadTemplates() {
         setLoading(true)
@@ -75,7 +119,36 @@ export default function TemplatePickerCard({ templateId, onChange }: Props) {
 
     function clear() {
         setSelected(null)
+        setSlots([])
+        setAiFilled(false)
+        setAiError(null)
         onChange(null)
+    }
+
+    async function handleAiFill() {
+        if (!draftId || !selected || aiLoading) return
+        setAiLoading(true)
+        setAiError(null)
+        setAiFilled(false)
+        try {
+            const res = await fetch('/api/listing-generator/ai-fill', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ draftId }),
+            })
+            const data = await res.json()
+            if (!res.ok || !data.ok) {
+                setAiError(data.error ?? 'AI fill failed')
+            } else {
+                onFilled?.(data.filledHtml)
+                setAiFilled(true)
+                setTimeout(() => setAiFilled(false), 4000)
+            }
+        } catch {
+            setAiError('Network error — please try again')
+        } finally {
+            setAiLoading(false)
+        }
     }
 
     // ── Thumbnail: render first block preview or grey placeholder ──
@@ -156,6 +229,9 @@ export default function TemplatePickerCard({ templateId, onChange }: Props) {
             </div>
         )
     }
+
+    // Show AI fill button when: template selected + has slots + draftId supplied
+    const canAiFill = !!selected && slots.length > 0 && !!draftId && !!onFilled
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
@@ -303,6 +379,133 @@ export default function TemplatePickerCard({ templateId, onChange }: Props) {
                             </div>
                         )
                     })}
+                </div>
+            )}
+
+            {/* ── AI Fill panel — visible when template has slots + draftId supplied ── */}
+            {canAiFill && (
+                <div style={{
+                    marginTop: 10,
+                    border: `1px solid #c4b5fd`,
+                    borderRadius: 12,
+                    background: 'linear-gradient(135deg, #f3eeff 0%, #faf8ff 100%)',
+                    padding: '12px 14px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 8,
+                }}>
+                    {/* Header row */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{
+                            width: 28, height: 28, borderRadius: 8, flexShrink: 0,
+                            background: '#7530fb',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}>
+                            <Sparkles size={13} color="#b8fa33" />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{
+                                fontSize: 12, fontWeight: 700, color: '#1e1535',
+                                margin: 0, fontFamily: 'DM Sans, sans-serif',
+                            }}>
+                                AI Fill — {slots.length} slot{slots.length !== 1 ? 's' : ''} ready
+                            </p>
+                            <p style={{
+                                fontSize: 10, color: '#6b7280',
+                                margin: '1px 0 0', fontFamily: 'DM Sans, sans-serif',
+                            }}>
+                                {slots.map(s => s.label).join(' · ')}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Fill button */}
+                    <button
+                        onClick={handleAiFill}
+                        disabled={aiLoading}
+                        style={{
+                            width: '100%',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            gap: 7, padding: '9px 16px', borderRadius: 10, border: 'none',
+                            background: aiLoading
+                                ? '#9b59fb'
+                                : aiFilled
+                                    ? '#16a34a'
+                                    : 'linear-gradient(135deg, #7530fb 0%, #9b59fb 100%)',
+                            color: '#fff',
+                            fontSize: 12, fontWeight: 700, fontFamily: 'DM Sans, sans-serif',
+                            cursor: aiLoading ? 'wait' : 'pointer',
+                            transition: 'all 0.2s ease',
+                            boxShadow: aiLoading ? 'none' : '0 3px 10px rgba(117,48,251,0.35)',
+                        }}
+                    >
+                        {aiLoading ? (
+                            <>
+                                <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} />
+                                Generating content…
+                            </>
+                        ) : aiFilled ? (
+                            <>
+                                <CheckCircle2 size={13} />
+                                Filled! Check Description above ↑
+                            </>
+                        ) : (
+                            <>
+                                <Sparkles size={13} />
+                                Fill template with AI
+                            </>
+                        )}
+                    </button>
+
+                    {/* Error */}
+                    {aiError && (
+                        <p style={{
+                            fontSize: 10, color: '#ef4444',
+                            margin: 0, fontFamily: 'DM Sans, sans-serif',
+                            padding: '6px 8px', borderRadius: 6,
+                            background: '#fee2e2', border: '1px solid #fca5a5',
+                        }}>
+                            {aiError}
+                        </p>
+                    )}
+
+                    {/* Helper tip */}
+                    {!aiFilled && !aiError && (
+                        <p style={{
+                            fontSize: 10, color: '#9ca3af',
+                            margin: 0, fontFamily: 'DM Sans, sans-serif',
+                        }}>
+                            AI writes content for each tagged block using your listing data.
+                            The filled description will appear in the Description section above.
+                        </p>
+                    )}
+                </div>
+            )}
+
+            {/* ── No-slots hint — shown when template selected but has no slots ── */}
+            {selected && slots.length === 0 && draftId && (
+                <div style={{
+                    marginTop: 10,
+                    padding: '8px 12px', borderRadius: 10,
+                    border: `1px dashed #d4c8f5`,
+                    background: '#faf8ff',
+                    display: 'flex', alignItems: 'center', gap: 8,
+                }}>
+                    <Sparkles size={11} color="#9ca3af" />
+                    <p style={{
+                        fontSize: 10, color: '#9ca3af', margin: 0,
+                        fontFamily: 'DM Sans, sans-serif',
+                    }}>
+                        This template has no AI roles set.{' '}
+                        <a
+                            href={`/dashboard/design/visual-editor?id=${selected.id}`}
+                            target="_blank" rel="noopener noreferrer"
+                            style={{ color: '#7530fb', textDecoration: 'underline' }}
+                        >
+                            Open in Design Studio
+                        </a>
+                        {' '}and tag text blocks with AI roles to enable AI fill.
+                    </p>
                 </div>
             )}
         </div>

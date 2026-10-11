@@ -487,6 +487,8 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
                                 <TemplatePickerCard
                                     templateId={draft.template_id ?? null}
                                     onChange={id => onChange({ template_id: id })}
+                                    draftId={draft.id}
+                                    onFilled={html => onChange({ description_html: html })}
                                 />
                             </div>
                         </Section>
