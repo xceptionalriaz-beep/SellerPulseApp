@@ -820,7 +820,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                         {/* Status Tabs */}
                         {(Object.entries(tabCounts) as [TabFilter, number][]).map(([tab, count], index) => {
                             const labels: Record<TabFilter, string> = {
-                                all: 'All', published: 'Active', draft: 'Drafts', ended: 'Ended', scheduled: 'Scheduled'
+                                all: 'All', published: 'Active', draft: 'Drafts', ended: 'Ended', scheduled: 'Scheduled', templates: 'Templates'
                             }
                             const isActive = activeTab === tab
                             return (
