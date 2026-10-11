@@ -803,7 +803,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                 </div>
 
                 {/* TOOLBAR + TABLE — flex col, only tbody scrolls */}
-                <div className="flex-1 flex flex-col min-h-0 px-6 pb-6 pt-4">
+                <div className="flex-1 flex flex-col min-h-0 px-6 pt-4 pb-0">
 
                     {/* TOOLBAR CARD — fixed, never scrolls */}
                     <div className="rounded-t-2xl overflow-hidden shrink-0"
