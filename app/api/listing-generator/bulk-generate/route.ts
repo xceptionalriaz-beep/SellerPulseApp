@@ -17,7 +17,10 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient }              from '@supabase/supabase-js'
+import { createServerClient }        from '@supabase/ssr'
 import { cookies }                   from 'next/headers'
+
+export const maxDuration = 60   // bulk rows need more time than single imports
 
 // ── Admin client (service-role) — for AI keys + draft saves ─────────────────
 const supabaseAdmin = createClient(
@@ -302,26 +305,21 @@ function calcMargin(buyStr?: string, sellStr?: string): MarginStats {
 export async function POST(req: NextRequest) {
 
     // ── 1. Auth — validate user via Supabase session cookie ─────────────────
-    const cookieStore = await cookies()
-    const supabaseUser = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            auth: {
-                autoRefreshToken: false,
-                persistSession:   false,
-            },
-            global: {
-                headers: {
-                    cookie: cookieStore.toString(),
-                },
-            },
+    let userId: string
+    try {
+        const cookieStore = await cookies()
+        const supabaseUser = createServerClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            { cookies: { getAll() { return cookieStore.getAll() } } }
+        )
+        const { data: { user }, error } = await supabaseUser.auth.getUser()
+        if (error || !user) {
+            return NextResponse.json({ ok: false, error: 'Unauthorised' }, { status: 401 })
         }
-    )
-
-    const { data: { user }, error: authError } = await supabaseUser.auth.getUser()
-    if (authError || !user) {
-        return NextResponse.json({ ok: false, error: 'Unauthorised' }, { status: 401 })
+        userId = user.id
+    } catch {
+        return NextResponse.json({ ok: false, error: 'Auth check failed' }, { status: 401 })
     }
 
     // ── 2. Parse request body ────────────────────────────────────────────────
@@ -391,7 +389,7 @@ export async function POST(req: NextRequest) {
     const { data: draftData, error: draftError } = await supabaseAdmin
         .from('listing_drafts')
         .insert({
-            user_id:           user.id,
+            user_id:           userId,
             product_name:      resolvedTitle,
             title:             ebayTitle,
             title_score:       null,

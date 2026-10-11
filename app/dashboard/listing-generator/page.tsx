@@ -496,10 +496,10 @@ export default function ListingGeneratorPage() {
         setBulkRows([])
     }
 
-    function handleBulkDone() {
-        // BulkUploadQueue calls this when all rows settled — show summary
+    // Memoized so BulkUploadQueue's useEffect dep array stays stable
+    const handleBulkDone = useCallback(() => {
         setBulkView('summary')
-    }
+    }, [])
 
     function handleBulkSummaryClose() {
         setBulkView(null)

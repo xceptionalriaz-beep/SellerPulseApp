@@ -164,8 +164,10 @@ export function BulkUploadModal({ onClose, onConfirm, planLimit }: BulkUploadMod
     }
 
     function handleConfirm() {
+        // Do NOT call onClose() here — the parent drives the view transition
+        // to 'queue' inside onConfirm, so calling onClose() would race and
+        // reset bulkView to null before the queue component mounts.
         onConfirm(limitedRows)
-        onClose()
     }
 
     // ── Render ────────────────────────────────────────────────
@@ -432,7 +434,7 @@ export function BulkUploadModal({ onClose, onConfirm, planLimit }: BulkUploadMod
                                         { label: 'Total rows',  value: rows.length,        color: C.primary,  bg: C.primaryLight },
                                         { label: 'Valid',       value: validRows.length,    color: C.success,  bg: C.successBg   },
                                         { label: 'Errors',      value: invalidRows.length,  color: C.danger,   bg: C.dangerBg    },
-                                        ...(overLimit ? [{ label: `Over limit (${planLimit})`, value: validRows.length - planLimit, color: C.warning, bg: C.warningBg }] : []),
+                                        ...(overLimit ? [{ label: `Over limit (${planLimit})`, value: blocked.length, color: C.warning, bg: C.warningBg }] : []),
                                     ].map(stat => (
                                         <div key={stat.label} style={{
                                             padding: '8px 14px', borderRadius: 10,
