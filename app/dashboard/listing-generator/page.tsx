@@ -18,6 +18,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import KillSwitchGate from '@/components/KillSwitchGate'
+import { UpgradeBanner } from '@/components/UpgradeBanner'
+import { PlanUpgradeModal } from '@/components/PlanUpgradeModal'
 import { ListChecks, Sparkles, Loader2, Tag, Calculator, ShieldCheck } from 'lucide-react'
 import LgDashboard from './components/LgDashboard'
 import LgStudio from './components/LgStudio'
@@ -330,6 +332,8 @@ export default function ListingGeneratorPage() {
     const [activeDraftId, setActiveDraftId] = useState<string | null>(null)
     const [planLimits, setPlanLimits] = useState<any>(null)
     const [userId, setUserId] = useState<string | null>(null)
+    const [currentTier, setCurrentTier] = useState<string>('free')
+    const [upgradeOpen, setUpgradeOpen] = useState(false)
 
     // ── Bulk upload state ──────────────────────────────────────
     const [bulkView, setBulkView] = useState<BulkView>(null)
@@ -351,6 +355,7 @@ export default function ListingGeneratorPage() {
                     .eq('id', user.id)
                     .single()
                 const tier = (profile as any)?.subscription_tier ?? 'free'
+                setCurrentTier(tier)
 
                 // 3. Get plan limits for listing generator
                 const { data: limits } = await (supabase.from('plan_limits') as any)
@@ -533,6 +538,16 @@ export default function ListingGeneratorPage() {
             `}</style>
 
             <div className="flex flex-col h-full" style={{ backgroundColor: '#f8f7ff' }}>
+
+                {/* ── Plan limit banner ── shown above all views ─── */}
+                <UpgradeBanner
+                    tool="Listing Generator"
+                    limitType="listings"
+                    used={draftCount}
+                    limit={planLimits?.max_listing_generations ?? 0}
+                    onUpgrade={() => setUpgradeOpen(true)}
+                />
+
                 <div className="flex-1 overflow-hidden min-h-0 relative">
 
                     {view === 'loading' && <LoadingScreen />}
@@ -561,6 +576,14 @@ export default function ListingGeneratorPage() {
 
                 </div>
             </div>
+
+            {/* ── Plan Upgrade Modal ───────────────────────────── */}
+            {upgradeOpen && (
+                <PlanUpgradeModal
+                    currentTier={currentTier}
+                    onClose={() => setUpgradeOpen(false)}
+                />
+            )}
 
             {/* ── Bulk Upload Modal (step 1 + 2) ──────────────── */}
             {bulkView === 'modal' && (
