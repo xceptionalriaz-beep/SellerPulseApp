@@ -723,7 +723,6 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
             <div className="flex-1 flex flex-col h-full min-w-0">
 
             {/* ACTION BAR — above KPI cards */}
-            {!showTemplates && (
             <div className="flex items-center gap-3 px-6 pt-4 pb-0 shrink-0 flex-wrap">
                 {/* Bulk Upload */}
                 <button
@@ -788,7 +787,6 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                     My Templates
                 </button>
             </div>
-            )}
 
             {/* METRIC CARDS - fixed */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 px-6 pt-4 shrink-0">
@@ -922,8 +920,8 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                         })}
 
 
-                        {/* Search / Filter / View — hidden when gallery is open */}
-                        {!showTemplates && (<>
+                        {/* Search / Filter / View */}
+                        {(<>
                         <div className="flex-1" />
 
                         {/* Search */}
@@ -1015,16 +1013,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                     </div>
                 </div>{/* end toolbar card */}
 
-                {/* MY TEMPLATES GALLERY — shown when View Templates clicked */}
-                {showTemplates && (
-                    <div className="flex-1 flex flex-col min-h-0 rounded-b-2xl overflow-hidden"
-                        style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, borderTop: 'none', boxShadow: '0 2px 12px rgba(117,48,251,0.06)' }}>
-                        <MyTemplatesGallery onClose={() => setShowTemplates(false)} />
-                    </div>
-                )}
-
                 {/* TABLE CARD — one table, sticky thead, scrolling tbody */}
-                {!showTemplates && (
                 <div className="flex-1 flex flex-col min-h-0 rounded-b-2xl overflow-hidden"
                     style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, borderTop: 'none', boxShadow: '0 2px 12px rgba(117,48,251,0.06)' }}>
 
@@ -1871,11 +1860,41 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                         </div>
                     )}
 
-                </div>
-                )}{/* end activeTab !== templates */}
+                </div>{/* end table card */}
 
             </div>{/* end toolbar+table */}
             </div>{/* end main column */}
+
+            {/* ── MY TEMPLATES DRAWER — slides in from the right ───── */}
+            {showTemplates && (
+                <>
+                    {/* Backdrop */}
+                    <div
+                        onClick={() => setShowTemplates(false)}
+                        style={{
+                            position: 'fixed', inset: 0, zIndex: 40,
+                            background: 'rgba(30,21,53,0.35)',
+                            backdropFilter: 'blur(2px)',
+                            animation: 'fadeIn 0.2s ease',
+                        }}
+                    />
+                    {/* Drawer panel */}
+                    <div style={{
+                        position: 'fixed', top: 0, right: 0, bottom: 0,
+                        width: 'min(600px, 92vw)', zIndex: 50,
+                        background: C.surface,
+                        boxShadow: '-8px 0 40px rgba(117,48,251,0.18)',
+                        display: 'flex', flexDirection: 'column',
+                        animation: 'slideInRight 0.25s cubic-bezier(0.32,0.72,0,1)',
+                    }}>
+                        <MyTemplatesGallery onClose={() => setShowTemplates(false)} />
+                    </div>
+                    <style>{`
+                        @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+                        @keyframes slideInRight { from { transform:translateX(100%) } to { transform:translateX(0) } }
+                    `}</style>
+                </>
+            )}
 
             {/* ── Screen 1: URL paste modal ────────────────────────── */}
             {showUrlImport && (
