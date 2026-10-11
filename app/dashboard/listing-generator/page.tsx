@@ -18,7 +18,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import KillSwitchGate from '@/components/KillSwitchGate'
-import { UpgradeBanner } from '@/components/UpgradeBanner'
 import { PlanUpgradeModal } from '@/components/PlanUpgradeModal'
 import { ListChecks, Sparkles, Loader2, Tag, Calculator, ShieldCheck } from 'lucide-react'
 import LgDashboard from './components/LgDashboard'
@@ -538,15 +537,6 @@ export default function ListingGeneratorPage() {
             `}</style>
 
             <div className="flex flex-col h-full" style={{ backgroundColor: '#f8f7ff' }}>
-
-                {/* ── Plan limit banner ── shown above all views ─── */}
-                <UpgradeBanner
-                    tool="Listing Generator"
-                    limitType="listings"
-                    used={planLimits?.max_listing_generations ?? 5}
-                    limit={planLimits?.max_listing_generations ?? 5}
-                    onUpgrade={() => setUpgradeOpen(true)}
-                />
 
                 <div className="flex-1 overflow-hidden min-h-0 relative">
 
