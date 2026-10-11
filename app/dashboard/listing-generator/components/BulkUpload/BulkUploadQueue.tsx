@@ -22,7 +22,7 @@
 //   onDone       — called when every row has settled
 // ─────────────────────────────────────────────────────────────
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import {
     CheckCircle2, XCircle, Loader2, Clock,
     AlertTriangle, X, Sparkles,
@@ -90,6 +90,7 @@ interface BulkUploadQueueProps {
 export function BulkUploadQueue({ rows, onCancel, onDone }: BulkUploadQueueProps) {
     const listRef = useRef<HTMLDivElement>(null)
     const prevDoneRef = useRef(0)
+    const doneFiredRef = useRef(false)   // guard: fire onDone exactly once
 
     // ── Derived stats ─────────────────────────────────────────
     const total = rows.length
@@ -110,10 +111,13 @@ export function BulkUploadQueue({ rows, onCancel, onDone }: BulkUploadQueueProps
         }
     }, [done])
 
-    // ── Notify parent when all rows have settled ──────────────
+    // ── Notify parent when all rows have settled (fire exactly once) ──────────
     useEffect(() => {
-        if (isFinished) onDone()
-    }, [isFinished, onDone])
+        if (isFinished && !doneFiredRef.current) {
+            doneFiredRef.current = true
+            onDone()
+        }
+    }, [isFinished]) // intentionally omit onDone — guarded by ref above
 
     // ── Estimated time remaining ──────────────────────────────
     function etaLabel(): string {
