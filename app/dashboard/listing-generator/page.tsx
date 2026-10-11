@@ -18,7 +18,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import KillSwitchGate from '@/components/KillSwitchGate'
-import { UpgradeBanner } from '@/components/UpgradeBanner'
 import { PlanUpgradeModal } from '@/components/PlanUpgradeModal'
 import { ListChecks, Sparkles, Loader2, Tag, Calculator, ShieldCheck } from 'lucide-react'
 import LgDashboard from './components/LgDashboard'
@@ -409,6 +408,11 @@ export default function ListingGeneratorPage() {
     // ── Bulk upload handlers ────────────────────────────────────
 
     function handleOpenBulkModal() {
+        // Show upgrade popup instead of bulk modal (testing — remove when live)
+        setUpgradeOpen(true)
+        return
+
+        // eslint-disable-next-line no-unreachable
         cancelledRef.current = false
         setBulkRows([])
         setBulkView('modal')
@@ -539,15 +543,6 @@ export default function ListingGeneratorPage() {
 
             <div className="flex flex-col h-full" style={{ backgroundColor: '#f8f7ff' }}>
 
-                {/* ── Plan limit banner ── shown above all views ─── */}
-                <UpgradeBanner
-                    tool="Listing Generator"
-                    limitType="listings"
-                    used={draftCount}
-                    limit={planLimits?.max_listing_generations ?? 0}
-                    onUpgrade={() => setUpgradeOpen(true)}
-                />
-
                 <div className="flex-1 overflow-hidden min-h-0 relative">
 
                     {view === 'loading' && <LoadingScreen />}
@@ -570,10 +565,7 @@ export default function ListingGeneratorPage() {
                             <LgStudio
                                 draftId={activeDraftId}
                                 onBack={handleBackFromWizard}
-                                atLimit={
-                                    (planLimits?.max_listing_generations ?? 0) > 0 &&
-                                    draftCount >= (planLimits?.max_listing_generations ?? 0)
-                                }
+                                atLimit={true}
                                 onUpgrade={() => setUpgradeOpen(true)}
                             />
                         </div>
