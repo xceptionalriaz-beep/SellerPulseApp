@@ -31,6 +31,7 @@ import {
     Download, Trash2, ChevronLeft, ChevronRight,
     X, Package, TrendingUp, Circle, Zap, Copy, Check,
     Columns, SlidersHorizontal, Filter, Star, Palette, ExternalLink,
+    CopyPlus, StopCircle, RefreshCw, BarChart2, Eye, Edit3,
 } from 'lucide-react'
 import UrlImport from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImport'
 import UrlImportProcessing from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImportProcessing'
@@ -104,6 +105,10 @@ interface Listing {
     item_specifics: Record<string, string> | null
     template_id: string | null
     visual_templates: { name: string } | null
+    ebay_impressions: number | null
+    ebay_views: number | null
+    ebay_click_through_rate: number | null
+    ebay_analytics_synced_at: string | null
 }
 
 interface Metrics {
@@ -335,6 +340,18 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
     // Delete confirmation: id of listing pending deletion
     const [deletingId, setDeletingId] = useState<string | null>(null)
     const [deleteLoading, setDeleteLoading] = useState(false)
+
+    // ── New feature state ───────────────────────────────────────
+    const [duplicatingId, setDuplicatingId] = useState<string | null>(null)
+    const [endingId, setEndingId] = useState<string | null>(null)
+    const [relistingId, setRelistingId] = useState<string | null>(null)
+    const [analyticsLoading, setAnalyticsLoading] = useState(false)
+    const [analyticsError, setAnalyticsError] = useState<string | null>(null)
+    // Bulk edit modal
+    const [showBulkEdit, setShowBulkEdit] = useState(false)
+    const [bulkEditPrice, setBulkEditPrice] = useState('')
+    const [bulkEditQty, setBulkEditQty] = useState('')
+    const [bulkEditLoading, setBulkEditLoading] = useState(false)
 
     // ── eBay marketplace / store ────────────────────────────────
     const [ebayMarketplace, setEbayMarketplace] = useState<string>('EBAY_US')
@@ -580,7 +597,8 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
           vero_status, quantity, out_of_stock_option, status,
           main_photo_url, photo_count, created_at, updated_at,
           source_platform, ebay_listing_id, item_specifics,
-          template_id, visual_templates ( name )
+          template_id, visual_templates ( name ),
+          ebay_impressions, ebay_views, ebay_click_through_rate, ebay_analytics_synced_at
         `)
                 .eq('user_id', user.id)
                 .order('created_at', { ascending: false })
@@ -718,6 +736,145 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
         setTimeout(() => setCopiedId(null), 1500)
     }
 
+    // ── Duplicate listing ───────────────────────────────────────
+    async function duplicateListing(id: string) {
+        setDuplicatingId(id)
+        try {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) return
+            // Fetch the original
+            const { data: orig } = await (supabase.from('listing_drafts') as any)
+                .select('*')
+                .eq('id', id)
+                .eq('user_id', user.id)
+                .single()
+            if (!orig) return
+            // Build copy without id/timestamps/ebay ids/analytics
+            const { id: _id, created_at: _c, updated_at: _u,
+                ebay_listing_id: _eli, ebay_impressions: _ei,
+                ebay_views: _ev, ebay_click_through_rate: _ectr,
+                ebay_analytics_synced_at: _eas,
+                visual_templates: _vt,
+                ...rest } = orig
+            const copy = {
+                ...rest,
+                title: `Copy of ${orig.title || orig.product_name || 'Untitled'}`,
+                status: 'draft',
+                ebay_listing_id: null,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            }
+            const { data: newDraft, error } = await (supabase.from('listing_drafts') as any)
+                .insert(copy)
+                .select('id')
+                .single()
+            if (error) throw error
+            // Reload the list
+            await loadListings()
+        } catch (e) {
+            console.error('[LgDashboard] Duplicate error:', e)
+        }
+        setDuplicatingId(null)
+    }
+
+    // ── End eBay listing ────────────────────────────────────────
+    async function endListing(id: string) {
+        setEndingId(id)
+        try {
+            const res = await fetch('/api/ebay/end-listing', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ draftId: id }),
+            })
+            const json = await res.json()
+            if (!json.ok) throw new Error(json.error)
+            setListings(prev => prev.map(l => l.id === id ? { ...l, status: 'ended' } : l))
+        } catch (e: any) {
+            console.error('[LgDashboard] End listing error:', e)
+            alert(`Failed to end listing: ${e.message}`)
+        }
+        setEndingId(null)
+    }
+
+    // ── Relist eBay listing ─────────────────────────────────────
+    async function relistListing(id: string) {
+        setRelistingId(id)
+        try {
+            const res = await fetch('/api/ebay/relist-listing', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ draftId: id }),
+            })
+            const json = await res.json()
+            if (!json.ok) throw new Error(json.error)
+            setListings(prev => prev.map(l =>
+                l.id === id ? { ...l, status: 'published', ebay_listing_id: json.itemId } : l
+            ))
+        } catch (e: any) {
+            console.error('[LgDashboard] Relist error:', e)
+            alert(`Failed to relist: ${e.message}`)
+        }
+        setRelistingId(null)
+    }
+
+    // ── Sync analytics for all published listings ───────────────
+    async function syncAnalytics(draftIds?: string[]) {
+        setAnalyticsLoading(true)
+        setAnalyticsError(null)
+        try {
+            const body = draftIds ? { draftIds } : { syncAll: true }
+            const res = await fetch('/api/ebay/listing-analytics', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            })
+            const json = await res.json()
+            if (!json.ok) {
+                if (json.code === 'scope_missing') {
+                    setAnalyticsError('Analytics scope not granted — reconnect eBay in Settings to enable stats.')
+                } else {
+                    setAnalyticsError(json.error ?? 'Failed to sync analytics')
+                }
+            } else {
+                await loadListings()
+            }
+        } catch (e: any) {
+            setAnalyticsError(e.message ?? 'Failed to sync analytics')
+        }
+        setAnalyticsLoading(false)
+    }
+
+    // ── Bulk edit price / qty ───────────────────────────────────
+    async function bulkEditSave() {
+        if (!bulkEditPrice && !bulkEditQty) return
+        setBulkEditLoading(true)
+        try {
+            const ids = Array.from(selectedIds)
+            const patch: Record<string, unknown> = { updated_at: new Date().toISOString() }
+            if (bulkEditPrice !== '') patch.sell_price = parseFloat(bulkEditPrice)
+            if (bulkEditQty !== '') patch.quantity = parseInt(bulkEditQty)
+            const { error } = await (supabase.from('listing_drafts') as any)
+                .update(patch)
+                .in('id', ids)
+            if (error) throw error
+            setListings(prev => prev.map(l => {
+                if (!selectedIds.has(l.id)) return l
+                return {
+                    ...l,
+                    ...(bulkEditPrice !== '' ? { sell_price: parseFloat(bulkEditPrice) } : {}),
+                    ...(bulkEditQty !== '' ? { quantity: parseInt(bulkEditQty) } : {}),
+                }
+            }))
+            setShowBulkEdit(false)
+            setBulkEditPrice('')
+            setBulkEditQty('')
+            clearSelection()
+        } catch (e) {
+            console.error('[LgDashboard] Bulk edit error:', e)
+        }
+        setBulkEditLoading(false)
+    }
+
     // ── Tab counts ──────────────────────────────────────────────
     const tabCounts = {
         all: listings.length,
@@ -827,6 +984,19 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                     </div>
                 )}
 
+                {/* Sync Analytics button */}
+                <button
+                    onClick={() => syncAnalytics()}
+                    disabled={analyticsLoading}
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-[13px] font-semibold transition-all hover:opacity-80 disabled:opacity-60"
+                    style={{ backgroundColor: C.surface, color: C.secondary, border: `1px solid ${C.border}`, fontFamily: 'DM Sans, sans-serif' }}
+                    title="Sync views, impressions and CTR from eBay Analytics">
+                    {analyticsLoading
+                        ? <span className="w-3.5 h-3.5 rounded-full border-2 border-current/30 border-t-current animate-spin" />
+                        : <BarChart2 size={14} />}
+                    Sync Stats
+                </button>
+
                 {/* My Templates shortcut */}
                 <button
                     onClick={() => setShowTemplates(true)}
@@ -836,6 +1006,17 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                     My Templates
                 </button>
             </div>
+            {/* Analytics error toast */}
+            {analyticsError && (
+                <div className="mx-6 mt-2 flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-semibold shrink-0"
+                    style={{ backgroundColor: C.dangerBg, color: C.danger, border: `1px solid #fca5a5` }}>
+                    <AlertTriangle size={13} />
+                    <span style={{ flex: 1, fontFamily: 'DM Sans, sans-serif' }}>{analyticsError}</span>
+                    <button onClick={() => setAnalyticsError(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.danger }}>
+                        <X size={12} />
+                    </button>
+                </div>
+            )}
 
             {/* METRIC CARDS - fixed */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 px-6 pt-4 shrink-0">
@@ -1295,7 +1476,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                     })}
 
                                     {/* Fixed: actions */}
-                                    <th style={{ width: 140, color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }} className="px-3 py-2 text-left text-[12px] font-bold uppercase tracking-widest"></th>
+                                    <th style={{ width: 180, color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }} className="px-3 py-2 text-left text-[12px] font-bold uppercase tracking-widest"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1505,6 +1686,31 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                                                     eBay Live
                                                                 </a>
                                                             )}
+                                                            {/* Analytics mini stats */}
+                                                            {listing.ebay_analytics_synced_at && (
+                                                                <div className="flex items-center gap-2">
+                                                                    {listing.ebay_impressions != null && (
+                                                                        <span style={{ fontSize: 9, color: C.muted, fontFamily: 'DM Sans, sans-serif' }}
+                                                                            title="Impressions">
+                                                                            👁 {listing.ebay_impressions >= 1000
+                                                                                ? `${(listing.ebay_impressions / 1000).toFixed(1)}k`
+                                                                                : listing.ebay_impressions}
+                                                                        </span>
+                                                                    )}
+                                                                    {listing.ebay_views != null && (
+                                                                        <span style={{ fontSize: 9, color: C.muted, fontFamily: 'DM Sans, sans-serif' }}
+                                                                            title="Views">
+                                                                            <Eye size={8} style={{ display: 'inline', verticalAlign: 'middle' }} /> {listing.ebay_views}
+                                                                        </span>
+                                                                    )}
+                                                                    {listing.ebay_click_through_rate != null && (
+                                                                        <span style={{ fontSize: 9, color: C.success, fontFamily: 'DM Sans, sans-serif', fontWeight: 600 }}
+                                                                            title="Click-through rate">
+                                                                            {(listing.ebay_click_through_rate * 100).toFixed(1)}% CTR
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </td>
                                                 )
@@ -1693,22 +1899,51 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                                 ) : (
                                                     /* ── Normal action buttons ── */
                                                     <div className="flex items-center justify-end gap-1">
+                                                        {/* Edit */}
                                                         <button onClick={() => onEditDraft(listing.id)}
                                                             className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
                                                             style={{ backgroundColor: C.primaryLight }}
                                                             title="Edit in Wizard">
                                                             <Pencil size={13} style={{ color: C.primary }} />
                                                         </button>
-                                                        <button className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
+                                                        {/* Duplicate */}
+                                                        <button
+                                                            onClick={() => duplicateListing(listing.id)}
+                                                            disabled={duplicatingId === listing.id}
+                                                            className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80 disabled:opacity-50"
                                                             style={{ backgroundColor: C.bg }}
-                                                            title="View History">
-                                                            <Clock size={13} style={{ color: C.secondary }} />
+                                                            title="Duplicate listing">
+                                                            {duplicatingId === listing.id
+                                                                ? <span className="w-3 h-3 rounded-full border-2 border-gray-300 border-t-gray-600 animate-spin" />
+                                                                : <CopyPlus size={13} style={{ color: C.secondary }} />}
                                                         </button>
-                                                        <button className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
-                                                            style={{ backgroundColor: C.bg }}
-                                                            title="Export CSV">
-                                                            <Download size={13} style={{ color: C.secondary }} />
-                                                        </button>
+                                                        {/* End live listing */}
+                                                        {listing.status === 'published' && listing.ebay_listing_id && (
+                                                            <button
+                                                                onClick={() => endListing(listing.id)}
+                                                                disabled={endingId === listing.id}
+                                                                className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80 disabled:opacity-50"
+                                                                style={{ backgroundColor: C.warningBg }}
+                                                                title="End this eBay listing">
+                                                                {endingId === listing.id
+                                                                    ? <span className="w-3 h-3 rounded-full border-2 border-amber-300 border-t-amber-600 animate-spin" />
+                                                                    : <StopCircle size={13} style={{ color: C.warning }} />}
+                                                            </button>
+                                                        )}
+                                                        {/* Relist ended listing */}
+                                                        {listing.status === 'ended' && listing.ebay_listing_id && (
+                                                            <button
+                                                                onClick={() => relistListing(listing.id)}
+                                                                disabled={relistingId === listing.id}
+                                                                className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80 disabled:opacity-50"
+                                                                style={{ backgroundColor: C.successBg }}
+                                                                title="Relist on eBay">
+                                                                {relistingId === listing.id
+                                                                    ? <span className="w-3 h-3 rounded-full border-2 border-green-300 border-t-green-600 animate-spin" />
+                                                                    : <RefreshCw size={13} style={{ color: C.success }} />}
+                                                            </button>
+                                                        )}
+                                                        {/* Delete */}
                                                         <button
                                                             onClick={() => setDeletingId(listing.id)}
                                                             className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
@@ -1789,6 +2024,16 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                         ) : (
                                             /* ── Normal bulk actions ── */
                                             <>
+                                                {/* Bulk edit price/qty */}
+                                                <button onClick={() => { setBulkEditPrice(''); setBulkEditQty(''); setShowBulkEdit(true) }} style={{
+                                                    padding: '3px 10px', borderRadius: 6,
+                                                    border: `1px solid ${C.primary}`, background: C.primaryLight,
+                                                    color: C.primary, fontSize: 11, fontWeight: 600,
+                                                    cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                                                    display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0,
+                                                }}>
+                                                    <Edit3 size={11} /> Edit
+                                                </button>
                                                 <button onClick={() => bulkChangeStatus('published')} disabled={bulkLoading} style={{
                                                     padding: '3px 10px', borderRadius: 6,
                                                     border: `1px solid ${C.success}`, background: 'transparent',
@@ -1953,6 +2198,121 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
 
             </div>{/* end toolbar+table */}
             </div>{/* end main column */}
+
+            {/* ── BULK EDIT MODAL ──────────────────────────────────── */}
+            {showBulkEdit && (
+                <>
+                    <div onClick={() => setShowBulkEdit(false)} style={{
+                        position: 'fixed', inset: 0, zIndex: 50,
+                        background: 'rgba(30,21,53,0.4)', backdropFilter: 'blur(2px)',
+                    }} />
+                    <div style={{
+                        position: 'fixed', top: '50%', left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        zIndex: 51,
+                        width: 380,
+                        background: C.surface,
+                        borderRadius: 20,
+                        boxShadow: '0 20px 60px rgba(117,48,251,0.2)',
+                        border: `1px solid ${C.border}`,
+                        overflow: 'hidden',
+                    }}>
+                        {/* Header */}
+                        <div style={{ padding: '16px 20px 12px', borderBottom: `1px solid ${C.border}`, backgroundColor: C.primaryLight, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <div>
+                                <p style={{ fontSize: 14, fontWeight: 700, color: C.dark, fontFamily: 'Syne, sans-serif', margin: 0 }}>
+                                    Bulk Edit
+                                </p>
+                                <p style={{ fontSize: 11, color: C.muted, fontFamily: 'DM Sans, sans-serif', margin: '2px 0 0' }}>
+                                    Update {selectedIds.size} listing{selectedIds.size !== 1 ? 's' : ''}
+                                </p>
+                            </div>
+                            <button onClick={() => setShowBulkEdit(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.muted }}>
+                                <X size={16} />
+                            </button>
+                        </div>
+                        {/* Body */}
+                        <div style={{ padding: '20px' }}>
+                            <p style={{ fontSize: 11, color: C.secondary, fontFamily: 'DM Sans, sans-serif', marginBottom: 16 }}>
+                                Leave a field blank to keep existing values unchanged.
+                            </p>
+                            {/* Price */}
+                            <div style={{ marginBottom: 14 }}>
+                                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: C.dark, fontFamily: 'DM Sans, sans-serif', marginBottom: 5 }}>
+                                    New Price ({currencySymbol})
+                                </label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    placeholder="e.g. 14.99"
+                                    value={bulkEditPrice}
+                                    onChange={e => setBulkEditPrice(e.target.value)}
+                                    style={{
+                                        width: '100%', padding: '8px 12px',
+                                        border: `1px solid ${C.borderInput}`, borderRadius: 10,
+                                        fontSize: 13, fontFamily: 'DM Sans, sans-serif',
+                                        color: C.body, backgroundColor: C.bg, outline: 'none',
+                                        boxSizing: 'border-box',
+                                    }}
+                                    onFocus={e => e.target.style.borderColor = C.primary}
+                                    onBlur={e => e.target.style.borderColor = C.borderInput}
+                                />
+                            </div>
+                            {/* Qty */}
+                            <div style={{ marginBottom: 20 }}>
+                                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: C.dark, fontFamily: 'DM Sans, sans-serif', marginBottom: 5 }}>
+                                    New Quantity
+                                </label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    step="1"
+                                    placeholder="e.g. 10"
+                                    value={bulkEditQty}
+                                    onChange={e => setBulkEditQty(e.target.value)}
+                                    style={{
+                                        width: '100%', padding: '8px 12px',
+                                        border: `1px solid ${C.borderInput}`, borderRadius: 10,
+                                        fontSize: 13, fontFamily: 'DM Sans, sans-serif',
+                                        color: C.body, backgroundColor: C.bg, outline: 'none',
+                                        boxSizing: 'border-box',
+                                    }}
+                                    onFocus={e => e.target.style.borderColor = C.primary}
+                                    onBlur={e => e.target.style.borderColor = C.borderInput}
+                                />
+                            </div>
+                            {/* Actions */}
+                            <div style={{ display: 'flex', gap: 10 }}>
+                                <button onClick={() => setShowBulkEdit(false)} style={{
+                                    flex: 1, padding: '10px', borderRadius: 10,
+                                    border: `1px solid ${C.border}`, background: C.bg,
+                                    color: C.secondary, fontSize: 13, fontWeight: 600,
+                                    cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                                }}>
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={bulkEditSave}
+                                    disabled={bulkEditLoading || (!bulkEditPrice && !bulkEditQty)}
+                                    style={{
+                                        flex: 1, padding: '10px', borderRadius: 10,
+                                        border: 'none', background: C.primary,
+                                        color: '#fff', fontSize: 13, fontWeight: 700,
+                                        cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                                        opacity: bulkEditLoading || (!bulkEditPrice && !bulkEditQty) ? 0.6 : 1,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                                    }}>
+                                    {bulkEditLoading
+                                        ? <span style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff' }} className="animate-spin" />
+                                        : <Check size={14} />}
+                                    Apply to {selectedIds.size}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
 
             {/* ── MY TEMPLATES DRAWER — slides in from the right ───── */}
             {showTemplates && (
