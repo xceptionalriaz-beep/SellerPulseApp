@@ -54,8 +54,12 @@ export async function GET(req: NextRequest) {
     }
 
     const tokenData = await tokenRes.json()
-    const { access_token, refresh_token, expires_in } = tokenData
+    const { access_token, refresh_token, expires_in, refresh_token_expires_in } = tokenData
     const expiresAt = new Date(Date.now() + expires_in * 1000).toISOString()
+    // eBay refresh tokens last ~18 months (47304000 s). Store the exact expiry.
+    const refreshExpiresAt = refresh_token_expires_in
+      ? new Date(Date.now() + refresh_token_expires_in * 1000).toISOString()
+      : new Date(Date.now() + 47304000 * 1000).toISOString()
 
     // Get eBay username + userId from REST Identity API
     let ebayUsername = ''
@@ -118,6 +122,7 @@ export async function GET(req: NextRequest) {
         ebay_access_token: access_token,
         ebay_refresh_token: refresh_token,
         ebay_token_expires_at: expiresAt,
+        ebay_refresh_token_expires_at: refreshExpiresAt,
         ebay_username: ebayUsername,
         ebay_user_id: ebayUserId,
         ebay_marketplace: ebayMarketplace,
