@@ -26,6 +26,9 @@ import {
     Plus, Search, X, Copy, Trash2,
     Eye, Check, Loader2, Code2, Zap,
     Save, LayoutTemplate, Layers, Pencil, ChevronDown,
+    LayoutGrid, Smartphone, Monitor, Shirt, Gem, Heart,
+    Home, Sofa, Car, Wrench, Dumbbell, Gamepad2,
+    Archive, BookOpen, PawPrint, Briefcase, Tag,
 } from 'lucide-react'
 import { hydrateTemplateContent } from '@/lib/template-utils'
 import { sanitiseHtml } from '@/components/ui/EditorToolbar'
@@ -77,30 +80,54 @@ interface ListingTemplate {
     updated_at: string | null
 }
 
-// ── Category definitions ───────────────────────────────────────────────────
-const CATEGORIES = [
-    { id: 'all', label: 'All Templates', emoji: '🗂️' },
-    { id: 'electronics', label: 'Electronics', emoji: '📱' },
-    { id: 'computers', label: 'Computers & Tablets', emoji: '💻' },
-    { id: 'fashion', label: 'Fashion & Apparel', emoji: '👗' },
-    { id: 'clothing', label: 'Clothing', emoji: '👕' },
-    { id: 'jewelry', label: 'Jewellery & Watches', emoji: '💍' },
-    { id: 'health_beauty', label: 'Health & Beauty', emoji: '💄' },
-    { id: 'home', label: 'Home & Garden', emoji: '🏡' },
-    { id: 'furniture', label: 'Furniture', emoji: '🛋️' },
-    { id: 'auto', label: 'Auto Parts', emoji: '🚗' },
-    { id: 'motors_parts', label: 'Motors & Parts', emoji: '🔧' },
-    { id: 'sports', label: 'Sports & Outdoors', emoji: '⚽' },
-    { id: 'sporting_goods', label: 'Sporting Goods', emoji: '🏋️' },
-    { id: 'toys', label: 'Toys & Games', emoji: '🧸' },
-    { id: 'toys_hobbies', label: 'Toys & Hobbies', emoji: '🎮' },
-    { id: 'collectibles', label: 'Collectibles & Art', emoji: '🎨' },
-    { id: 'books_movies', label: 'Books & Media', emoji: '📚' },
-    { id: 'pets', label: 'Pet Supplies', emoji: '🐾' },
-    { id: 'pet_supplies', label: 'Pet Supplies (alt)', emoji: '🐶' },
-    { id: 'business', label: 'Business & Industrial', emoji: '🏭' },
-    { id: 'general', label: 'General', emoji: '📋' },
+// ── Category definitions ─────────────────────────────────────────────────────
+// IDs match the listing-generator's CATEGORY_MAP keys so Phase 3 matching is
+// direct. Filter logic also supports old Design-Studio slugs for backwards compat.
+import type { LucideIcon } from 'lucide-react'
+const CATEGORIES: { id: string; label: string; Icon: LucideIcon }[] = [
+    { id: 'all', label: 'All Templates', Icon: LayoutGrid },
+    { id: 'consumer_electronics', label: 'Consumer Electronics', Icon: Smartphone },
+    { id: 'computers', label: 'Computers & Tablets', Icon: Monitor },
+    { id: 'clothing', label: 'Clothing & Accessories', Icon: Shirt },
+    { id: 'jewelry', label: 'Jewellery & Watches', Icon: Gem },
+    { id: 'health_beauty', label: 'Health & Beauty', Icon: Heart },
+    { id: 'home_garden', label: 'Home & Garden', Icon: Home },
+    { id: 'furniture', label: 'Furniture', Icon: Sofa },
+    { id: 'toys_hobbies', label: 'Toys & Hobbies', Icon: Gamepad2 },
+    { id: 'sporting_goods', label: 'Sporting Goods', Icon: Dumbbell },
+    { id: 'collectibles', label: 'Collectibles & Art', Icon: Archive },
+    { id: 'books_movies', label: 'Books & Media', Icon: BookOpen },
+    { id: 'pet_supplies', label: 'Pet Supplies', Icon: PawPrint },
+    { id: 'motors_parts', label: 'Motors & Parts', Icon: Car },
+    { id: 'business', label: 'Business & Industrial', Icon: Briefcase },
+    { id: 'general', label: 'General / Other', Icon: Tag },
 ]
+
+// Maps new listing-category IDs → old Design-Studio slugs (backwards compat)
+const LEGACY_SLUGS: Record<string, string[]> = {
+    consumer_electronics: ['electronics'],
+    computers: ['electronics', 'computers'],
+    clothing: ['fashion', 'clothing'],
+    jewelry: ['fashion', 'jewelry', 'jewellery'],
+    health_beauty: ['fashion', 'health_beauty', 'health'],
+    home_garden: ['home', 'home_garden'],
+    furniture: ['home', 'furniture'],
+    toys_hobbies: ['toys', 'toys_hobbies'],
+    sporting_goods: ['sports', 'sporting_goods'],
+    pet_supplies: ['pets', 'pet_supplies'],
+    motors_parts: ['auto', 'motors_parts'],
+    books_movies: ['general', 'books_movies'],
+    collectibles: ['general', 'collectibles'],
+    business: ['general', 'business'],
+    general: ['general'],
+}
+
+function matchesCategoryFilter(templateCat: string | null, filterId: string): boolean {
+    if (!templateCat) return false
+    const tc = templateCat.toLowerCase()
+    if (tc === filterId) return true
+    return LEGACY_SLUGS[filterId]?.includes(tc) ?? false
+}
 
 // ── Sort options for ProDropdown ───────────────────────────────────────────
 const SORT_OPTIONS: DropdownOption[] = [
@@ -296,14 +323,14 @@ function DesignStudioInner() {
     const allVisible = activeTab === 'my-templates' ? myTemplates : templates
 
     const filtered = allVisible.filter(t => {
-        const matchCat = activeCategory === 'all' || t.category?.toLowerCase() === activeCategory
+        const matchCat = activeCategory === 'all' || matchesCategoryFilter(t.category, activeCategory)
         const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase()) ||
             (t.description || '').toLowerCase().includes(search.toLowerCase())
         return matchCat && matchSearch
     })
     // System templates only — sorted
     const sortedTemplates = templates.filter(t => {
-        const matchCat = activeCategory === 'all' || t.category?.toLowerCase() === activeCategory
+        const matchCat = activeCategory === 'all' || matchesCategoryFilter(t.category, activeCategory)
         const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase())
         return matchCat && matchSearch
     }).sort((a, b) => {
@@ -512,11 +539,13 @@ function DesignStudioInner() {
                                 fontWeight: 600,
                             }}
                         >
+                            {(() => {
+                                const found = CATEGORIES.find(c => c.id === activeCategory)
+                                const ActiveIcon = found?.Icon ?? LayoutGrid
+                                return <ActiveIcon size={13} style={{ flexShrink: 0, color: activeCategory !== 'all' ? C.primary : C.secondary }} />
+                            })()}
                             <span style={{ flex: 1, textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {(() => {
-                                    const found = CATEGORIES.find(c => c.id === activeCategory)
-                                    return found ? `${found.emoji} ${found.label}` : '🗂️ All Templates'
-                                })()}
+                                {CATEGORIES.find(c => c.id === activeCategory)?.label ?? 'All Templates'}
                             </span>
                             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0"
                                 style={{
@@ -525,7 +554,7 @@ function DesignStudioInner() {
                                 }}>
                                 {activeCategory === 'all'
                                     ? allVisible.length
-                                    : allVisible.filter(t => t.category?.toLowerCase() === activeCategory).length}
+                                    : allVisible.filter(t => matchesCategoryFilter(t.category, activeCategory)).length}
                             </span>
                             <ChevronDown size={13} style={{ flexShrink: 0, transition: 'transform 0.15s', transform: catDropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }} />
                         </button>
@@ -582,8 +611,9 @@ function DesignStudioInner() {
                                         ).map(cat => {
                                             const count = cat.id === 'all'
                                                 ? allVisible.length
-                                                : allVisible.filter(t => t.category?.toLowerCase() === cat.id).length
+                                                : allVisible.filter(t => matchesCategoryFilter(t.category, cat.id)).length
                                             const isActive = activeCategory === cat.id
+                                            const CatIcon = cat.Icon
                                             return (
                                                 <button
                                                     key={cat.id}
@@ -598,7 +628,7 @@ function DesignStudioInner() {
                                                     onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = C.bg }}
                                                     onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent' }}
                                                 >
-                                                    <span style={{ fontSize: 14, lineHeight: 1, flexShrink: 0 }}>{cat.emoji}</span>
+                                                    <CatIcon size={14} style={{ flexShrink: 0, color: isActive ? C.primary : C.secondary }} />
                                                     <span style={{
                                                         flex: 1, textAlign: 'left', fontSize: 12,
                                                         fontWeight: isActive ? 700 : 500,
