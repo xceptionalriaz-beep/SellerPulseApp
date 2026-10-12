@@ -1,11 +1,5 @@
 ﻿'use client'
 // app/dashboard/profile/tabs/EbayManagerTab.tsx
-// Converted from: lib/user_profile/tabs/ebay_manager_tab.dart
-//
-// Sections (same as Dart):
-//   - NOT CONNECTED: marketplace pills, feature grid, locked stats, connect CTA
-//   - CONNECTED: dark gradient card, stats, sync button, sync history
-//   - Coming Soon: Amazon, Shopify, Walmart, Etsy
 
 import { useState, useEffect, useCallback } from 'react'
 import {
@@ -18,51 +12,48 @@ import Spinner, { PageSpinner } from '@/components/ui/Spinner'
 import { createClient } from '@/lib/supabase'
 import { useToast } from '@/components/ui/AppToast'
 
-// â”€â”€ Color tokens â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Color tokens — Riazify v2 ─────────────────────────────────────────
 const C = {
-  lime: '#8fff00',
-  limeD: '#4a8f00',
-  limeTint: '#f4ffe6',
-  dark: '#0a0d08',
-  border: '#e8ede2',
-  muted: '#8a9e78',
+  primary: '#7530fb',
+  primaryHover: '#6020e0',
+  primaryLight: '#f3eeff',
+  accent: '#b8fa33',
+  dark: '#1e1535',
+  border: '#ede9fe',
   surface: '#ffffff',
-  bg: '#f9fdf4',
-  navy: '#0a0d08',
-  accent: '#8fff00',
-  txt1: '#0a0d08',
-  txt2: '#8a9e78',
-  txt3: '#8a9e78',
-  green: '#00C48C',
-  orange: '#FFB800',
-  red: '#FF4D6A',
-  blue: '#1D70F5',
+  bg: '#f8f7ff',
+  txt1: '#1e1535',
+  txt2: '#6b7280',
+  txt3: '#9ca3af',
+  green: '#16a34a',
+  orange: '#d97706',
+  red: '#ef4444',
+  blue: '#3b82f6',
 }
 
-// â”€â”€ Marketplaces (matches Dart kEbayMarketplaces) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Marketplaces ────────────────────────────────────────────────────────
 const MARKETPLACES = [
   { id: 'EBAY_US', code: 'us', label: 'United States', currencyCode: 'USD', currencySymbol: '$', signatureThreshold: 750, siteId: 0 },
-  { id: 'EBAY_UK', code: 'gb', label: 'United Kingdom', currencyCode: 'GBP', currencySymbol: 'Â£', signatureThreshold: 450, siteId: 3 },
-  { id: 'EBAY_DE', code: 'de', label: 'Germany', currencyCode: 'EUR', currencySymbol: 'â‚¬', signatureThreshold: 600, siteId: 77 },
+  { id: 'EBAY_UK', code: 'gb', label: 'United Kingdom', currencyCode: 'GBP', currencySymbol: '£', signatureThreshold: 450, siteId: 3 },
+  { id: 'EBAY_DE', code: 'de', label: 'Germany', currencyCode: 'EUR', currencySymbol: '€', signatureThreshold: 600, siteId: 77 },
   { id: 'EBAY_AU', code: 'au', label: 'Australia', currencyCode: 'AUD', currencySymbol: 'A$', signatureThreshold: 900, siteId: 15 },
   { id: 'EBAY_CA', code: 'ca', label: 'Canada', currencyCode: 'CAD', currencySymbol: 'C$', signatureThreshold: 800, siteId: 2 },
-  { id: 'EBAY_FR', code: 'fr', label: 'France', currencyCode: 'EUR', currencySymbol: 'â‚¬', signatureThreshold: 600, siteId: 71 },
-  { id: 'EBAY_IT', code: 'it', label: 'Italy', currencyCode: 'EUR', currencySymbol: 'â‚¬', signatureThreshold: 600, siteId: 101 },
-  { id: 'EBAY_ES', code: 'es', label: 'Spain', currencyCode: 'EUR', currencySymbol: 'â‚¬', signatureThreshold: 600, siteId: 186 },
-  { id: 'EBAY_IE', code: 'ie', label: 'Ireland', currencyCode: 'EUR', currencySymbol: 'â‚¬', signatureThreshold: 600, siteId: 205 },
-  { id: 'EBAY_NL', code: 'nl', label: 'Netherlands', currencyCode: 'EUR', currencySymbol: 'â‚¬', signatureThreshold: 600, siteId: 146 },
-  { id: 'EBAY_AT', code: 'at', label: 'Austria', currencyCode: 'EUR', currencySymbol: 'â‚¬', signatureThreshold: 600, siteId: 16 },
-  { id: 'EBAY_BE', code: 'be', label: 'Belgium', currencyCode: 'EUR', currencySymbol: 'â‚¬', signatureThreshold: 600, siteId: 123 },
+  { id: 'EBAY_FR', code: 'fr', label: 'France', currencyCode: 'EUR', currencySymbol: '€', signatureThreshold: 600, siteId: 71 },
+  { id: 'EBAY_IT', code: 'it', label: 'Italy', currencyCode: 'EUR', currencySymbol: '€', signatureThreshold: 600, siteId: 101 },
+  { id: 'EBAY_ES', code: 'es', label: 'Spain', currencyCode: 'EUR', currencySymbol: '€', signatureThreshold: 600, siteId: 186 },
+  { id: 'EBAY_IE', code: 'ie', label: 'Ireland', currencyCode: 'EUR', currencySymbol: '€', signatureThreshold: 600, siteId: 205 },
+  { id: 'EBAY_NL', code: 'nl', label: 'Netherlands', currencyCode: 'EUR', currencySymbol: '€', signatureThreshold: 600, siteId: 146 },
+  { id: 'EBAY_AT', code: 'at', label: 'Austria', currencyCode: 'EUR', currencySymbol: '€', signatureThreshold: 600, siteId: 16 },
+  { id: 'EBAY_BE', code: 'be', label: 'Belgium', currencyCode: 'EUR', currencySymbol: '€', signatureThreshold: 600, siteId: 123 },
   { id: 'EBAY_CH', code: 'ch', label: 'Switzerland', currencyCode: 'CHF', currencySymbol: 'CHF', signatureThreshold: 600, siteId: 193 },
-  { id: 'EBAY_PL', code: 'pl', label: 'Poland', currencyCode: 'PLN', currencySymbol: 'zÅ‚', signatureThreshold: 2000, siteId: 212 },
+  { id: 'EBAY_PL', code: 'pl', label: 'Poland', currencyCode: 'PLN', currencySymbol: 'zł', signatureThreshold: 2000, siteId: 212 },
   { id: 'EBAY_HK', code: 'hk', label: 'Hong Kong', currencyCode: 'HKD', currencySymbol: 'HK$', signatureThreshold: 5000, siteId: 201 },
   { id: 'EBAY_SG', code: 'sg', label: 'Singapore', currencyCode: 'SGD', currencySymbol: 'S$', signatureThreshold: 1000, siteId: 216 },
   { id: 'EBAY_MY', code: 'my', label: 'Malaysia', currencyCode: 'MYR', currencySymbol: 'RM', signatureThreshold: 3000, siteId: 207 },
-  { id: 'EBAY_PH', code: 'ph', label: 'Philippines', currencyCode: 'PHP', currencySymbol: 'â‚±', signatureThreshold: 40000, siteId: 211 },
-  { id: 'EBAY_IN', code: 'in', label: 'India', currencyCode: 'INR', currencySymbol: 'â‚¹', signatureThreshold: 60000, siteId: 203 },
+  { id: 'EBAY_PH', code: 'ph', label: 'Philippines', currencyCode: 'PHP', currencySymbol: '₱', signatureThreshold: 40000, siteId: 211 },
+  { id: 'EBAY_IN', code: 'in', label: 'India', currencyCode: 'INR', currencySymbol: '₹', signatureThreshold: 60000, siteId: 203 },
 ]
 
-// Flag image component using flagcdn.com (works on all browsers including Windows)
 function FlagImg({ code, size = 20 }: { code: string; size?: number }) {
   return (
     <img
@@ -78,7 +69,7 @@ function FlagImg({ code, size = 20 }: { code: string; size?: number }) {
 
 type Marketplace = typeof MARKETPLACES[0]
 
-// â”€â”€ Coming soon platforms â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Coming soon platforms ───────────────────────────────────────────────
 const PLATFORMS = [
   { name: 'Amazon Seller', icon: ShoppingCart, color: '#FF9900', feature: 'FBA inventory sync' },
   { name: 'Shopify', icon: Store, color: '#96BF48', feature: 'Multi-store management' },
@@ -86,7 +77,7 @@ const PLATFORMS = [
   { name: 'Etsy', icon: Scissors, color: '#F56400', feature: 'Handmade item tracking' },
 ]
 
-// â”€â”€ Info pill (matches Dart _infoPill) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Info pill ───────────────────────────────────────────────────────────
 function InfoPill({ icon: Icon, text, color }: { icon: React.ElementType; text: string; color: string }) {
   return (
     <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold border"
@@ -96,7 +87,7 @@ function InfoPill({ icon: Icon, text, color }: { icon: React.ElementType; text: 
   )
 }
 
-// â”€â”€ Feature row (matches Dart _featureRow) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Feature row ─────────────────────────────────────────────────────────
 function FeatureRow({ icon: Icon, text, color }: { icon: React.ElementType; text: string; color: string }) {
   return (
     <div className="flex items-center gap-2.5">
@@ -108,10 +99,10 @@ function FeatureRow({ icon: Icon, text, color }: { icon: React.ElementType; text
   )
 }
 
-// â”€â”€ Dark stat card (matches Dart _darkStat) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Dark stat card ──────────────────────────────────────────────────────
 function DarkStat({ label, value, icon: Icon, color }: { label: string; value: string; icon: React.ElementType; color: string }) {
   return (
-    <div className="flex-1 p-3 rounded-xl border" style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.08)' }}>
+    <div className="flex-1 p-3 rounded-xl border" style={{ backgroundColor: 'rgba(255,255,255,0.06)', borderColor: 'rgba(255,255,255,0.10)' }}>
       <Icon size={13} style={{ color }} />
       <p className="text-[14px] font-bold text-white mt-1.5 truncate" style={{ fontFamily: 'Inter, sans-serif' }}>{value}</p>
       <p className="text-[9px] text-gray-400 mt-0.5 truncate">{label}</p>
@@ -119,7 +110,7 @@ function DarkStat({ label, value, icon: Icon, color }: { label: string; value: s
   )
 }
 
-// â”€â”€ Warning banner (matches Dart _warningBanner) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Warning banner ──────────────────────────────────────────────────────
 function WarningBanner({ icon: Icon, color, message, action, onTap }: {
   icon: React.ElementType; color: string; message: string; action: string; onTap: () => void
 }) {
@@ -133,7 +124,7 @@ function WarningBanner({ icon: Icon, color, message, action, onTap }: {
   )
 }
 
-// â”€â”€ Coming soon card (matches Dart _comingSoonCard) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Coming soon card ────────────────────────────────────────────────────
 function ComingSoonCard({ name, icon: Icon, color, feature }: { name: string; icon: React.ElementType; color: string; feature: string }) {
   return (
     <div className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-white" style={{ borderColor: C.border }}>
@@ -145,14 +136,14 @@ function ComingSoonCard({ name, icon: Icon, color, feature }: { name: string; ic
         <p className="text-[10px] truncate" style={{ color: C.txt3 }}>{feature}</p>
       </div>
       <span className="px-2 py-1 rounded-lg text-[10px] font-semibold shrink-0"
-        style={{ backgroundColor: '#F1F5F9', color: C.txt3 }}>Soon</span>
+        style={{ backgroundColor: C.primaryLight, color: C.primary }}>Soon</span>
     </div>
   )
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ══════════════════════════════════════════════════════════════════
 // MAIN COMPONENT
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ══════════════════════════════════════════════════════════════════
 export default function EbayManagerTab() {
   const supabase = createClient()
   const toast = useToast()
@@ -167,7 +158,7 @@ export default function EbayManagerTab() {
   const [selectedMp, setSelectedMp] = useState(MARKETPLACES[0])
   const [showDisconnect, setShowDisconnect] = useState(false)
 
-  // â”€â”€ Load all data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Load all data ────────────────────────────────────────────────────
   const loadAll = useCallback(async () => {
     setIsLoading(true)
     try {
@@ -189,18 +180,15 @@ export default function EbayManagerTab() {
           syncStatus: 'ok', marketplace: profile.ebay_marketplace,
         })
 
-        // Sync history
         const { data: history } = await supabase
           .from('order_sync_logs').select('*').eq('user_id', user.id)
           .order('started_at', { ascending: false }).limit(3)
         setSyncHistory(history || [])
 
-        // Orders count
         const { count } = await supabase
           .from('protected_orders').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
         setConnData((prev: any) => ({ ...prev, ordersSynced: count || 0 }))
 
-        // Safe buyer %
         const { data: buyers } = await supabase.from('buyer_profiles').select('risk_level').eq('user_id', user.id)
         if (buyers && buyers.length > 0) {
           const low = buyers.filter((b: any) => (b.risk_level || '').toUpperCase() === 'LOW').length
@@ -217,20 +205,16 @@ export default function EbayManagerTab() {
 
   useEffect(() => { loadAll() }, [loadAll])
 
-  // â”€â”€ Connect â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Connect ──────────────────────────────────────────────────────────
   async function handleConnect() {
     setIsConnecting(true)
     try {
-      // Save selected marketplace to profile
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
-      // Store marketplace selection temporarily in localStorage
-      // Only saved to DB after OAuth completes successfully
       localStorage.setItem('riazify_pending_marketplace', selectedMp.id)
       localStorage.setItem('riazify_pending_currency_code', selectedMp.currencyCode)
       localStorage.setItem('riazify_pending_currency_symbol', selectedMp.currencySymbol)
 
-      // Build OAuth URL with user_id as state
       const clientId = process.env.NEXT_PUBLIC_EBAY_CLIENT_ID
       const redirectUri = encodeURIComponent(
         (process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin) + '/auth/ebay/callback'
@@ -253,10 +237,7 @@ export default function EbayManagerTab() {
         `&scope=${scope}` +
         `&state=${state}`
 
-      // Open OAuth popup
       const popup = window.open(oauthUrl, 'ebay_oauth', 'width=600,height=700')
-
-      // Poll for popup close â†’ reload profile
       const pollTimer = setInterval(async () => {
         if (popup?.closed) {
           clearInterval(pollTimer)
@@ -264,14 +245,13 @@ export default function EbayManagerTab() {
           setIsConnecting(false)
         }
       }, 1000)
-
     } catch (e: any) {
       toast.error(e.message || 'Connection failed')
       setIsConnecting(false)
     }
   }
 
-  // â”€â”€ Sync â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Sync ─────────────────────────────────────────────────────────────
   async function handleSync() {
     setIsSyncing(true)
     try {
@@ -294,7 +274,7 @@ export default function EbayManagerTab() {
     finally { setIsSyncing(false) }
   }
 
-  // â”€â”€ Disconnect â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Disconnect ───────────────────────────────────────────────────────
   async function handleDisconnect() {
     setShowDisconnect(false); setIsLoading(true)
     try {
@@ -306,7 +286,7 @@ export default function EbayManagerTab() {
     } catch (e: any) { toast.error(e.message) }
   }
 
-  // â”€â”€ Time ago â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Time ago ─────────────────────────────────────────────────────────
   function fmtTimeAgo(iso?: string): string {
     if (!iso) return ''
     const diff = Date.now() - new Date(iso).getTime()
@@ -317,7 +297,7 @@ export default function EbayManagerTab() {
     return `${Math.floor(h / 24)}d ago`
   }
 
-  // â”€â”€ Skeleton â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Skeleton ─────────────────────────────────────────────────────────
   if (isLoading) return (
     <div>
       <h1 className="text-[24px] font-bold mb-1.5" style={{ color: C.txt1, fontFamily: 'Inter, sans-serif' }}>Marketplace Integrations</h1>
@@ -335,18 +315,18 @@ export default function EbayManagerTab() {
         <p className="text-[14px]" style={{ color: C.txt2 }}>Connect your eBay store and select your marketplace.</p>
       </div>
 
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+      {/* ══════════════════════════════════════════════════════════
           NOT CONNECTED CARD
-      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      ══════════════════════════════════════════════════════════ */}
       {!connected ? (
-        <div className="rounded-2xl border bg-white shadow-[0_4px_16px_rgba(0,0,0,0.04)] overflow-hidden"
-          style={{ borderColor: C.border }}>
+        <div className="rounded-2xl border shadow-[0_4px_16px_rgba(117,48,251,0.06)] overflow-hidden"
+          style={{ backgroundColor: C.surface, borderColor: C.border }}>
           <div className="p-7">
             {/* Title row */}
             <div className="flex items-start gap-4 mb-6">
               <div className="w-[52px] h-[52px] rounded-[14px] border flex items-center justify-center shrink-0"
-                style={{ backgroundColor: '#F8FAFC', borderColor: C.border }}>
-                <ShoppingBag size={24} style={{ color: C.txt1 }} />
+                style={{ backgroundColor: C.primaryLight, borderColor: C.border }}>
+                <ShoppingBag size={24} style={{ color: C.primary }} />
               </div>
               <div className="flex-1 min-w-0">
                 <h2 className="text-[18px] font-bold mb-1" style={{ color: C.txt1, fontFamily: 'Inter, sans-serif' }}>eBay Seller Account</h2>
@@ -355,7 +335,7 @@ export default function EbayManagerTab() {
                 </p>
               </div>
               <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold shrink-0"
-                style={{ backgroundColor: '#F1F5F9', color: C.txt3 }}>Not Connected</span>
+                style={{ backgroundColor: C.primaryLight, color: C.primary }}>Not Connected</span>
             </div>
 
             {/* Marketplace pills */}
@@ -367,16 +347,16 @@ export default function EbayManagerTab() {
                   <button key={mp.id} onClick={() => setSelectedMp(mp)}
                     className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-[11px] font-medium transition-all"
                     style={{
-                      backgroundColor: isSel ? C.accent : '#F8FAFC',
-                      borderColor: isSel ? C.accent : C.border,
+                      backgroundColor: isSel ? C.primary : C.bg,
+                      borderColor: isSel ? C.primary : C.border,
                       borderWidth: isSel ? '2px' : '1px',
-                      color: isSel ? '#000' : C.txt1,
+                      color: isSel ? '#fff' : C.txt1,
                       fontWeight: isSel ? 800 : 500,
-                      boxShadow: isSel ? `0 0 6px ${C.accent}40` : undefined,
+                      boxShadow: isSel ? `0 0 8px ${C.primary}40` : undefined,
                     }}>
                     <span className="text-[13px]"><FlagImg code={mp.code} /></span>
                     {mp.label}
-                    <span style={{ color: isSel ? 'rgba(0,0,0,0.5)' : C.txt3 }}>{mp.currencySymbol}</span>
+                    <span style={{ color: isSel ? 'rgba(255,255,255,0.6)' : C.txt3 }}>{mp.currencySymbol}</span>
                   </button>
                 )
               })}
@@ -398,17 +378,17 @@ export default function EbayManagerTab() {
             </div>
 
             {/* Locked stats preview */}
-            <div className="p-4 rounded-xl border mb-6" style={{ backgroundColor: '#F8FAFC', borderColor: C.border }}>
+            <div className="p-4 rounded-xl border mb-6" style={{ backgroundColor: C.bg, borderColor: C.border }}>
               <div className="flex items-center gap-1.5 mb-4">
                 <Lock size={13} style={{ color: C.txt3 }} />
                 <span className="text-[12px] font-semibold" style={{ color: C.txt3 }}>Connect to unlock your full dashboard</span>
               </div>
               <div className="grid grid-cols-4 gap-2">
                 {[
-                  ['Orders Tracked', 'â€”'],
-                  ['Active Listings', 'â€”'],
-                  ['Safe Buyers', 'â€”'],
-                  ['Revenue', `${selectedMp.currencySymbol}â€”`],
+                  ['Orders Tracked', '—'],
+                  ['Active Listings', '—'],
+                  ['Safe Buyers', '—'],
+                  ['Revenue', `${selectedMp.currencySymbol}—`],
                 ].map(([label, value]) => (
                   <div key={label} className="text-center">
                     <p className="text-[18px] font-bold" style={{ color: C.txt3, fontFamily: 'Inter, sans-serif' }}>{value}</p>
@@ -420,11 +400,11 @@ export default function EbayManagerTab() {
 
             {/* Connect CTA */}
             <button onClick={handleConnect} disabled={isConnecting}
-              className="w-full flex items-center justify-center gap-2.5 py-4 rounded-[14px] text-black text-[15px] font-bold disabled:opacity-70 transition-all hover:opacity-90"
-              style={{ backgroundColor: C.accent }}>
+              className="w-full flex items-center justify-center gap-2.5 py-4 rounded-[14px] text-white text-[15px] font-bold disabled:opacity-70 transition-all hover:opacity-90"
+              style={{ backgroundColor: C.primary }}>
               {isConnecting ? (
                 <>
-                  <Spinner size={16} color="#000" />
+                  <Spinner size={16} color="#fff" />
                   Opening <FlagImg code={selectedMp.code} /> eBay...
                 </>
               ) : (
@@ -437,18 +417,17 @@ export default function EbayManagerTab() {
           </div>
         </div>
       ) : (
-        /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-            CONNECTED CARD â€” dark gradient (matches Dart exactly)
-        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+        /* ══════════════════════════════════════════════════════════
+            CONNECTED CARD — dark purple gradient
+        ══════════════════════════════════════════════════════════ */
         <div className="rounded-2xl overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
-            boxShadow: `0 8px 24px ${C.accent}26`,
+            background: `linear-gradient(135deg, ${C.dark} 0%, #2d1f5e 100%)`,
+            boxShadow: `0 8px 32px ${C.primary}30`,
           }}>
           <div className="p-7">
             {/* Header */}
             <div className="flex items-start gap-4 mb-6">
-              {/* Avatar */}
               <div className="w-14 h-14 rounded-full flex items-center justify-center text-[24px] border-2 shrink-0"
                 style={{ borderColor: C.accent, backgroundColor: '#fff' }}>
                 <FlagImg code={selectedMp.code} />
@@ -458,19 +437,19 @@ export default function EbayManagerTab() {
                   <h2 className="text-[20px] font-bold text-white" style={{ fontFamily: 'Inter, sans-serif' }}>
                     {connData?.ebayUsername || 'eBay Seller'}
                   </h2>
-                  <CheckCircle size={15} className="text-blue-400 shrink-0" />
+                  <CheckCircle size={15} style={{ color: C.accent }} className="shrink-0" />
                 </div>
                 {connData?.storeName && (
                   <p className="text-[12px] text-gray-400 mb-1">{connData.storeName}</p>
                 )}
                 <span className="inline-block px-2 py-1 rounded-md text-[11px] font-semibold border"
                   style={{ backgroundColor: C.accent + '26', borderColor: C.accent + '4D', color: C.accent }}>
-                  <FlagImg code={selectedMp.code} />  {selectedMp.label}  â€¢  {selectedMp.currencySymbol} {selectedMp.currencyCode}
+                  <FlagImg code={selectedMp.code} />  {selectedMp.label}  •  {selectedMp.currencySymbol} {selectedMp.currencyCode}
                 </span>
               </div>
               {/* Live badge */}
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border shrink-0"
-                style={{ backgroundColor: C.accent + '26', borderColor: C.accent + '66' }}>
+                style={{ backgroundColor: C.accent + '20', borderColor: C.accent + '55' }}>
                 <div className={`w-2 h-2 rounded-full ${isSyncing ? 'animate-pulse' : ''}`}
                   style={{ backgroundColor: isSyncing ? C.orange : C.accent }} />
                 <span className="text-[11px] font-bold" style={{ color: isSyncing ? C.orange : C.accent }}>
@@ -489,9 +468,9 @@ export default function EbayManagerTab() {
             {/* Stats grid */}
             <div className="flex gap-3 mb-5">
               <DarkStat label="Orders Synced" value={connData?.ordersSynced?.toString() || '0'} icon={ShoppingBag} color={C.blue} />
-              <DarkStat label="Safe Buyers" value={safeBuyerPct > 0 ? `${safeBuyerPct}%` : 'â€”'} icon={Shield} color={C.green} />
+              <DarkStat label="Safe Buyers" value={safeBuyerPct > 0 ? `${safeBuyerPct}%` : '—'} icon={Shield} color={C.green} />
               <DarkStat label="Last Sync" value={connData?.lastSyncText || 'Never'} icon={RefreshCw} color={C.accent} />
-              <DarkStat label="Token" value={connData?.expiryText || 'â€”'} icon={Key} color={connData?.daysUntilExpiry < 7 ? C.red : C.orange} />
+              <DarkStat label="Token" value={connData?.expiryText || '—'} icon={Key} color={connData?.daysUntilExpiry < 7 ? C.red : C.orange} />
             </div>
 
             <div className="border-t border-white/10 my-5" />
@@ -501,8 +480,9 @@ export default function EbayManagerTab() {
               <span className="text-gray-400">Orders this month</span>
               <span className="font-bold" style={{ color: C.accent }}>{connData?.ordersSynced || 0} synced</span>
             </div>
-            <div className="h-[5px] rounded-full bg-white/10 mb-1.5 overflow-hidden">
-              <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(100, ((connData?.ordersSynced || 0) / 500) * 100)}%`, backgroundColor: C.accent }} />
+            <div className="h-[5px] rounded-full overflow-hidden mb-1.5" style={{ backgroundColor: 'rgba(255,255,255,0.10)' }}>
+              <div className="h-full rounded-full transition-all"
+                style={{ width: `${Math.min(100, ((connData?.ordersSynced || 0) / 500) * 100)}%`, backgroundColor: C.accent }} />
             </div>
             <p className="text-[10px] text-gray-500">{connData?.ordersSynced || 0}/500 order limit</p>
 
@@ -517,13 +497,13 @@ export default function EbayManagerTab() {
               {/* Refresh */}
               <button onClick={loadAll}
                 className="w-11 h-11 rounded-[10px] flex items-center justify-center border"
-                style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)' }}>
+                style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.10)' }}>
                 <RefreshCw size={17} className="text-white/60" />
               </button>
               {/* Disconnect */}
               <button onClick={() => setShowDisconnect(true)}
                 className="w-11 h-11 rounded-[10px] flex items-center justify-center border"
-                style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)' }}>
+                style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.10)' }}>
                 <Link2Off size={17} style={{ color: C.red + 'B3' }} />
               </button>
             </div>
@@ -551,10 +531,12 @@ export default function EbayManagerTab() {
                   }
                   return (
                     <div key={i} className="flex items-center gap-2.5">
-                      {success ? <CheckCircle size={13} style={{ color: C.green }} /> : <AlertTriangle size={13} style={{ color: C.red }} />}
+                      {success
+                        ? <CheckCircle size={13} style={{ color: C.green }} />
+                        : <AlertTriangle size={13} style={{ color: C.red }} />}
                       <span className="flex-1 text-[12px]" style={{ color: success ? '#D1D5DB' : C.red }}>
                         {success
-                          ? `${found} orders â€¢ ${newOrds} new${duration ? ` â€¢ ${duration}` : ''}`
+                          ? `${found} orders • ${newOrds} new${duration ? ` • ${duration}` : ''}`
                           : `Sync failed${log.error_msg ? `: ${log.error_msg}` : ''}`}
                       </span>
                       <span className="text-[10px] text-gray-500">{timeAgo}</span>
@@ -567,11 +549,12 @@ export default function EbayManagerTab() {
         </div>
       )}
 
-      {/* â”€â”€ COMING SOON SECTION â”€â”€ */}
+      {/* ── COMING SOON SECTION ── */}
       <div>
         <div className="flex items-center gap-3 mb-4">
           <h2 className="text-[16px] font-bold" style={{ color: C.txt1, fontFamily: 'Inter, sans-serif' }}>Coming Soon</h2>
-          <span className="px-2.5 py-1 rounded-xl text-[11px] font-bold" style={{ backgroundColor: C.navy, color: C.accent }}>
+          <span className="px-2.5 py-1 rounded-xl text-[11px] font-bold"
+            style={{ backgroundColor: C.dark, color: C.accent }}>
             4 Platforms
           </span>
         </div>
@@ -586,16 +569,19 @@ export default function EbayManagerTab() {
       {showDisconnect && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
           onClick={e => e.target === e.currentTarget && setShowDisconnect(false)}>
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl">
+          <div className="rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl border"
+            style={{ backgroundColor: C.surface, borderColor: C.border }}>
             <h3 className="text-[17px] font-bold mb-2" style={{ color: C.txt1, fontFamily: 'Inter, sans-serif' }}>Disconnect eBay?</h3>
             <p className="text-[13px] mb-5" style={{ color: C.txt2 }}>Your synced orders and data will remain. You can reconnect anytime.</p>
             <div className="flex gap-3">
               <button onClick={() => setShowDisconnect(false)}
-                className="flex-1 h-10 rounded-lg border text-[13px] font-semibold" style={{ borderColor: C.border, color: C.txt2 }}>
+                className="flex-1 h-10 rounded-lg border text-[13px] font-semibold transition-all hover:opacity-80"
+                style={{ borderColor: C.border, color: C.txt2, backgroundColor: C.bg }}>
                 Cancel
               </button>
               <button onClick={handleDisconnect}
-                className="flex-1 h-10 rounded-lg text-white text-[13px] font-bold" style={{ backgroundColor: C.red }}>
+                className="flex-1 h-10 rounded-lg text-white text-[13px] font-bold transition-all hover:opacity-90"
+                style={{ backgroundColor: C.red }}>
                 Disconnect
               </button>
             </div>
