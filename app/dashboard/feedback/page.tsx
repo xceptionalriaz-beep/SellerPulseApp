@@ -57,6 +57,31 @@ interface FeedbackItem {
 type TabFilter = 'all' | 'Positive' | 'Negative' | 'Neutral' | 'disputed'
 
 // ── Helpers ───────────────────────────────────────────────────
+/** Extract up to 2 initials from an eBay username like "gadget_lover_99" → "GL" */
+function getInitials(username: string | null): string {
+    if (!username) return 'U'
+    const parts = username.replace(/[^a-zA-Z_]/g, '').split('_').filter(Boolean)
+    if (parts.length === 0) return username[0].toUpperCase()
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+    return (parts[0][0] + parts[1][0]).toUpperCase()
+}
+
+/** Deterministic soft background colour for an avatar, cycling through brand-safe hues */
+const AVATAR_PALETTES = [
+    { bg: '#f3eeff', color: '#7530fb' }, // primary
+    { bg: '#dcfce7', color: '#16a34a' }, // success
+    { bg: '#fef3c7', color: '#d97706' }, // warning
+    { bg: '#ede9fe', color: '#6020e0' }, // primaryHover
+    { bg: '#fee2e2', color: '#ef4444' }, // danger
+    { bg: '#e0f2fe', color: '#0284c7' }, // info blue
+]
+function avatarPalette(username: string | null) {
+    if (!username) return AVATAR_PALETTES[0]
+    let hash = 0
+    for (let i = 0; i < username.length; i++) hash = username.charCodeAt(i) + ((hash << 5) - hash)
+    return AVATAR_PALETTES[Math.abs(hash) % AVATAR_PALETTES.length]
+}
+
 function formatDate(iso: string | null) {
     if (!iso) return '—'
     const d = new Date(iso)
@@ -87,6 +112,8 @@ function ListRow({ item, selected, onClick }: {
 }) {
     const s = SENTIMENT[item.comment_type] ?? SENTIMENT.Neutral
     const Icon = s.icon
+    const av = avatarPalette(item.commenting_user)
+    const initials = getInitials(item.commenting_user)
 
     return (
         <button
@@ -101,7 +128,24 @@ function ListRow({ item, selected, onClick }: {
             {/* Sentiment stripe */}
             <div style={{ width: 3, backgroundColor: s.color, flexShrink: 0 }} />
 
-            <div className="flex-1 flex flex-col gap-0.5 px-3 py-3 min-w-0">
+            {/* Avatar */}
+            <div className="flex items-center pl-3 pr-2 py-3 shrink-0">
+                <div style={{
+                    width: 36, height: 36,
+                    borderRadius: '50%',
+                    backgroundColor: av.bg,
+                    color: av.color,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 13, fontWeight: 700,
+                    fontFamily: 'Syne, sans-serif',
+                    border: `1.5px solid ${av.color}33`,
+                    flexShrink: 0,
+                }}>
+                    {initials}
+                </div>
+            </div>
+
+            <div className="flex-1 flex flex-col gap-0.5 pr-3 py-3 min-w-0">
                 {/* Top row: buyer + date */}
                 <div className="flex items-center justify-between gap-2">
                     <span className="text-[12px] font-bold truncate"
@@ -144,7 +188,7 @@ function ListRow({ item, selected, onClick }: {
 
             {/* Selected arrow */}
             {selected && (
-                <div className="flex items-center pr-1">
+                <div className="flex items-center pr-2">
                     <ChevronRight size={12} style={{ color: C.primary }} />
                 </div>
             )}
@@ -657,7 +701,7 @@ export default function FeedbackPage() {
 
                 {/* ── LEFT: inbox list ───────────────────────── */}
                 <div className="flex flex-col shrink-0 overflow-hidden"
-                    style={{ width: 320, borderRight: `1px solid ${C.border}`, backgroundColor: C.surface }}>
+                    style={{ width: 380, borderRight: `1px solid ${C.border}`, backgroundColor: C.surface }}>
 
                     {/* Tabs + search */}
                     <div className="shrink-0 flex flex-col gap-2 px-3 pt-3 pb-2"
