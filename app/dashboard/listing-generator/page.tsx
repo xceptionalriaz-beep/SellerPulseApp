@@ -20,16 +20,17 @@ import { createClient } from '@/lib/supabase'
 import KillSwitchGate from '@/components/KillSwitchGate'
 import { PlanUpgradeModal } from '@/components/PlanUpgradeModal'
 import { UpgradeTeaser } from '@/components/UpgradeTeaser'
-import { ListChecks, Sparkles, Loader2, Tag, Calculator, ShieldCheck } from 'lucide-react'
+import { ListChecks, Sparkles, Loader2, Tag, Calculator, ShieldCheck, CalendarDays, ArrowLeft } from 'lucide-react'
 import LgDashboard from './components/LgDashboard'
 import LgStudio from './components/LgStudio'
+import ListingCalendar from './components/ListingCalendar'
 import { BulkUploadModal } from './components/BulkUpload/BulkUploadModal'
 import { BulkUploadQueue } from './components/BulkUpload/BulkUploadQueue'
 import { BulkUploadSummary } from './components/BulkUpload/BulkUploadSummary'
 import type { ParsedRow, QueueRow } from './components/BulkUpload/BulkUploadModal'
 
 // ── View types ────────────────────────────────────────────────
-type View = 'loading' | 'empty' | 'dashboard' | 'wizard'
+type View = 'loading' | 'empty' | 'dashboard' | 'wizard' | 'calendar'
 type BulkView = 'modal' | 'queue' | 'summary' | null
 
 // ── Bulk queue concurrency (max parallel AI calls) ────────────
@@ -559,6 +560,7 @@ export default function ListingGeneratorPage() {
                                     onNewListing={handleNewListing}
                                     onEditDraft={handleEditDraft}
                                     onBulkUpload={handleOpenBulkModal}
+                                    onShowCalendar={() => setView('calendar')}
                                 />
                             )}
                         </div>
@@ -572,6 +574,33 @@ export default function ListingGeneratorPage() {
                                 atLimit={true}
                                 onUpgrade={() => setUpgradeOpen(true)}
                             />
+                        </div>
+                    )}
+
+                    {view === 'calendar' && (
+                        <div key="calendar" className="absolute inset-0 anim-fade-scale overflow-y-auto"
+                            style={{ backgroundColor: '#f8f7ff' }}>
+                            <div className="max-w-5xl mx-auto px-4 py-6 flex flex-col gap-4">
+                                {/* Back bar */}
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        onClick={() => setView('dashboard')}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-semibold transition-all hover:opacity-80"
+                                        style={{ backgroundColor: '#ffffff', color: '#7530fb', border: '1px solid #ede9fe', fontFamily: 'DM Sans, sans-serif' }}>
+                                        <ArrowLeft size={13} />
+                                        Back to Dashboard
+                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        <CalendarDays size={16} style={{ color: '#7530fb' }} />
+                                        <p className="text-[15px] font-bold" style={{ color: '#1e1535', fontFamily: 'Syne, sans-serif' }}>
+                                            Listing Calendar
+                                        </p>
+                                    </div>
+                                </div>
+                                <ListingCalendar
+                                    onEditDraft={id => { handleEditDraft(id) }}
+                                />
+                            </div>
                         </div>
                     )}
 

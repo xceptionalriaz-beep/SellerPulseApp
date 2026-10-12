@@ -100,7 +100,7 @@ export interface DraftData {
     international_shipping: boolean
     dispatch_days: number
     returns_policy: string
-    scheduled_at: string
+    publish_at: string | null
     promoted_general: boolean
     promoted_general_rate: number | null
     promoted_priority: boolean
@@ -166,7 +166,7 @@ const INITIAL_DRAFT: DraftData = {
     international_shipping: false,
     dispatch_days: 1,
     returns_policy: '30_day_buyer_pays',
-    scheduled_at: '',
+    publish_at: null,
     promoted_general: false,
     promoted_general_rate: null,
     promoted_priority: false,
@@ -361,7 +361,7 @@ export default function LgStudio({ draftId, onBack, atLimit = false, onUpgrade }
                 pkg_height: draft.pkg_height,
                 irregular_package: draft.irregular_package,
                 international_shipping: draft.international_shipping,
-                scheduled_at: draft.scheduled_at,
+                publish_at: draft.publish_at ?? null,
                 promoted_general: draft.promoted_general,
                 promoted_general_rate: draft.promoted_general_rate,
                 promoted_priority: draft.promoted_priority,
