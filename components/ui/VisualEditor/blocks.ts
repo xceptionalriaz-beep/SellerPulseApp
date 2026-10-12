@@ -2988,35 +2988,20 @@ ${thumbCells}
             label: 'Video Placeholder',
             category: 'Media' as BlockCategory,
             icon: 'play',
-            description: 'YouTube thumbnail with play button overlay and clickable link',
+            description: 'Static video thumbnail with play button overlay (eBay-safe — no external links or CDNs)',
             defaultProps: {
                 ...DEFAULT_COMMON,
-                youtubeUrl: '',
+                thumbnailUrl: '',
                 videoCaption: 'Watch the product video',
             } as unknown as BlockProps,
             toHtml(props, id) {
-                const p = props as CommonProps & { youtubeUrl?: string; videoCaption?: string }
-                const url = p.youtubeUrl?.trim() || ''
+                const p = props as CommonProps & { thumbnailUrl?: string; videoCaption?: string }
+                // Use provided thumbnail (must be eBay-hosted or eBay-allowed CDN — no YouTube/external CDNs)
+                const thumbSrc = p.thumbnailUrl?.trim() || '{{VIDEO_THUMBNAIL_URL}}'
                 const caption = p.videoCaption?.trim() || 'Watch the product video'
 
-                // Extract YouTube video ID from various URL formats
-                let videoId = ''
-                if (url) {
-                    const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/)
-                    if (ytMatch) videoId = ytMatch[1]
-                }
-
-                const thumbSrc = videoId
-                    ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
-                    : '{{VIDEO_THUMBNAIL_URL}}'
-
-                const imgHtml = `<img src="${thumbSrc}" alt="Product Video" style="width:100%;height:auto;display:block;opacity:0.85;border-radius:8px;">`
-                const innerHtml = url
-                    ? `<a href="${url}" target="_blank" rel="noopener" style="display:block;text-decoration:none;">${imgHtml}</a>`
-                    : imgHtml
-
                 return wrapBlock('video_placeholder' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}text-align:center;"><div style="display:inline-block;width:100%;max-width:560px;background-color:#000;border-radius:8px;position:relative;">${innerHtml}<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;background:rgba(255,255,255,0.92);border-radius:50%;display:flex;align-items:center;justify-content:center;pointer-events:none;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><polygon points="8,5 19,12 8,19" fill="#1e1535"/></svg></div></div><p style="margin:8px 0 0;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;">&#9654; ${caption}</p></td></tr></table>`)
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}text-align:center;"><div style="display:inline-block;width:100%;max-width:560px;background-color:#000;border-radius:8px;position:relative;"><img src="${thumbSrc}" alt="Product Video" style="width:100%;height:auto;display:block;opacity:0.85;border-radius:8px;"></div><p style="margin:8px 0 0;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;">&#9654; ${caption}</p></td></tr></table>`)
             },
         },
 
