@@ -7021,15 +7021,15 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
         case 'video_placeholder':
             return (
                 <div style={{ padding: '8px 0' }}>
-                    <Section title="Video Link">
+                    <Section title="Video Thumbnail">
                         <TextInput
-                            label="YouTube URL"
-                            value={(props as any).youtubeUrl ?? ''}
-                            placeholder="https://www.youtube.com/watch?v=..."
-                            onChange={v => updateProps({ youtubeUrl: v } as any)}
+                            label="Thumbnail image URL"
+                            value={(props as any).thumbnailUrl ?? ''}
+                            placeholder="https://i.ebayimg.com/images/..."
+                            onChange={v => updateProps({ thumbnailUrl: v } as any)}
                         />
                         <InfoBox>
-                            Paste a YouTube URL — the thumbnail is auto-fetched and the image links to your video. Supports youtube.com, youtu.be, and Shorts.
+                            ⚠️ eBay blocks external CDN images (YouTube, Google, etc.) and outbound links in listing descriptions. Use an image already hosted on eBay's CDN (i.ebayimg.com) or upload via the Images tab and paste the URL here.
                         </InfoBox>
                         <TextInput
                             label="Caption text"
