@@ -25,7 +25,7 @@ import { createClient as createRawClient } from '@supabase/supabase-js'
 import {
     Plus, Search, X, Copy, Trash2,
     Eye, Check, Loader2, Code2, Zap,
-    Save, LayoutTemplate, Layers, Pencil,
+    Save, LayoutTemplate, Layers, Pencil, ChevronDown,
 } from 'lucide-react'
 import { hydrateTemplateContent } from '@/lib/template-utils'
 import { sanitiseHtml } from '@/components/ui/EditorToolbar'
@@ -79,15 +79,27 @@ interface ListingTemplate {
 
 // ── Category definitions ───────────────────────────────────────────────────
 const CATEGORIES = [
-    { id: 'all', label: 'All Templates' },
-    { id: 'electronics', label: 'Electronics' },
-    { id: 'fashion', label: 'Fashion & Beauty' },
-    { id: 'home', label: 'Home & Garden' },
-    { id: 'auto', label: 'Auto Parts' },
-    { id: 'pets', label: 'Pet Supplies' },
-    { id: 'sports', label: 'Sports & Outdoors' },
-    { id: 'toys', label: 'Toys & Games' },
-    { id: 'general', label: 'General' },
+    { id: 'all', label: 'All Templates', emoji: '🗂️' },
+    { id: 'electronics', label: 'Electronics', emoji: '📱' },
+    { id: 'computers', label: 'Computers & Tablets', emoji: '💻' },
+    { id: 'fashion', label: 'Fashion & Apparel', emoji: '👗' },
+    { id: 'clothing', label: 'Clothing', emoji: '👕' },
+    { id: 'jewelry', label: 'Jewellery & Watches', emoji: '💍' },
+    { id: 'health_beauty', label: 'Health & Beauty', emoji: '💄' },
+    { id: 'home', label: 'Home & Garden', emoji: '🏡' },
+    { id: 'furniture', label: 'Furniture', emoji: '🛋️' },
+    { id: 'auto', label: 'Auto Parts', emoji: '🚗' },
+    { id: 'motors_parts', label: 'Motors & Parts', emoji: '🔧' },
+    { id: 'sports', label: 'Sports & Outdoors', emoji: '⚽' },
+    { id: 'sporting_goods', label: 'Sporting Goods', emoji: '🏋️' },
+    { id: 'toys', label: 'Toys & Games', emoji: '🧸' },
+    { id: 'toys_hobbies', label: 'Toys & Hobbies', emoji: '🎮' },
+    { id: 'collectibles', label: 'Collectibles & Art', emoji: '🎨' },
+    { id: 'books_movies', label: 'Books & Media', emoji: '📚' },
+    { id: 'pets', label: 'Pet Supplies', emoji: '🐾' },
+    { id: 'pet_supplies', label: 'Pet Supplies (alt)', emoji: '🐶' },
+    { id: 'business', label: 'Business & Industrial', emoji: '🏭' },
+    { id: 'general', label: 'General', emoji: '📋' },
 ]
 
 // ── Sort options for ProDropdown ───────────────────────────────────────────
@@ -218,6 +230,8 @@ function DesignStudioInner() {
     const [myTemplates, setMyTemplates] = useState<ListingTemplate[]>([])
     const [loading, setLoading] = useState(true)
     const [activeCategory, setActiveCategory] = useState('all')
+    const [catDropdownOpen, setCatDropdownOpen] = useState(false)
+    const [catSearch, setCatSearch] = useState('')
     const [search, setSearch] = useState('')
     const [sort, setSort] = useState<'popular' | 'newest'>('popular')
     const [copiedId, setCopiedId] = useState<string | null>(null)
@@ -483,34 +497,140 @@ function DesignStudioInner() {
                 <div className="px-4 md:px-8 py-3 flex flex-col sm:flex-row sm:items-center gap-3"
                     style={{ backgroundColor: C.surface, borderBottom: `1px solid ${C.border}` }}>
 
-                    {/* Category pills — scrollable on mobile */}
-                    <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 flex-1" style={{ scrollbarWidth: 'none' }}>
-                        {CATEGORIES.map(cat => {
-                            const count = cat.id === 'all'
-                                ? allVisible.length
-                                : allVisible.filter(t => t.category?.toLowerCase() === cat.id).length
-                            return (
-                                <button
-                                    key={cat.id}
-                                    onClick={() => setActiveCategory(cat.id)}
-                                    className="whitespace-nowrap flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold shrink-0 transition-all"
-                                    style={{
-                                        backgroundColor: activeCategory === cat.id ? C.primary : C.bg,
-                                        color: activeCategory === cat.id ? '#fff' : C.secondary,
-                                        border: `1px solid ${activeCategory === cat.id ? C.primary : C.border}`,
-                                        fontFamily: 'DM Sans, sans-serif',
-                                    }}>
-                                    {cat.label}
-                                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold"
-                                        style={{
-                                            backgroundColor: activeCategory === cat.id ? 'rgba(255,255,255,0.25)' : C.border,
-                                            color: activeCategory === cat.id ? '#fff' : C.muted,
+                    {/* Category dropdown picker */}
+                    <div className="relative shrink-0" style={{ minWidth: 200 }}>
+                        {/* Trigger button */}
+                        <button
+                            onClick={() => { setCatDropdownOpen(o => !o); setCatSearch('') }}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all w-full"
+                            style={{
+                                border: `1px solid ${catDropdownOpen ? C.primary : C.borderInput}`,
+                                backgroundColor: activeCategory !== 'all' ? C.primaryLight : C.surface,
+                                color: activeCategory !== 'all' ? C.primary : C.secondary,
+                                fontFamily: 'DM Sans, sans-serif',
+                                fontSize: 12,
+                                fontWeight: 600,
+                            }}
+                        >
+                            <span style={{ flex: 1, textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {(() => {
+                                    const found = CATEGORIES.find(c => c.id === activeCategory)
+                                    return found ? `${found.emoji} ${found.label}` : '🗂️ All Templates'
+                                })()}
+                            </span>
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0"
+                                style={{
+                                    backgroundColor: activeCategory !== 'all' ? C.primary + '25' : C.border,
+                                    color: activeCategory !== 'all' ? C.primary : C.muted,
+                                }}>
+                                {activeCategory === 'all'
+                                    ? allVisible.length
+                                    : allVisible.filter(t => t.category?.toLowerCase() === activeCategory).length}
+                            </span>
+                            <ChevronDown size={13} style={{ flexShrink: 0, transition: 'transform 0.15s', transform: catDropdownOpen ? 'rotate(180deg)' : 'rotate(0)' }} />
+                        </button>
+
+                        {/* Dropdown panel */}
+                        {catDropdownOpen && (
+                            <>
+                                {/* Backdrop */}
+                                <div
+                                    style={{ position: 'fixed', inset: 0, zIndex: 40 }}
+                                    onClick={() => setCatDropdownOpen(false)}
+                                />
+                                <div style={{
+                                    position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 50,
+                                    width: 240,
+                                    backgroundColor: C.surface,
+                                    border: `1px solid ${C.border}`,
+                                    borderRadius: 12,
+                                    boxShadow: '0 8px 24px rgba(117,48,251,0.12)',
+                                    overflow: 'hidden',
+                                }}>
+                                    {/* Search input */}
+                                    <div style={{ padding: '10px 10px 6px', borderBottom: `1px solid ${C.border}` }}>
+                                        <div style={{
+                                            display: 'flex', alignItems: 'center', gap: 7,
+                                            border: `1px solid ${C.borderInput}`,
+                                            borderRadius: 8, padding: '6px 10px',
+                                            backgroundColor: C.bg,
                                         }}>
-                                        {count}
-                                    </span>
-                                </button>
-                            )
-                        })}
+                                            <Search size={12} color={C.muted} />
+                                            <input
+                                                autoFocus
+                                                value={catSearch}
+                                                onChange={e => setCatSearch(e.target.value)}
+                                                placeholder="Search categories…"
+                                                style={{
+                                                    flex: 1, fontSize: 12, border: 'none', outline: 'none',
+                                                    background: 'transparent', color: C.body,
+                                                    fontFamily: 'DM Sans, sans-serif',
+                                                }}
+                                            />
+                                            {catSearch && (
+                                                <button onClick={() => setCatSearch('')} style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 0, lineHeight: 1 }}>
+                                                    <X size={11} color={C.muted} />
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Category list (scrollable) */}
+                                    <div style={{ maxHeight: 280, overflowY: 'auto', padding: '6px 6px' }}>
+                                        {CATEGORIES.filter(cat =>
+                                            !catSearch || cat.label.toLowerCase().includes(catSearch.toLowerCase())
+                                        ).map(cat => {
+                                            const count = cat.id === 'all'
+                                                ? allVisible.length
+                                                : allVisible.filter(t => t.category?.toLowerCase() === cat.id).length
+                                            const isActive = activeCategory === cat.id
+                                            return (
+                                                <button
+                                                    key={cat.id}
+                                                    onClick={() => { setActiveCategory(cat.id); setCatDropdownOpen(false) }}
+                                                    style={{
+                                                        width: '100%', display: 'flex', alignItems: 'center', gap: 8,
+                                                        padding: '7px 10px', borderRadius: 8, border: 'none',
+                                                        backgroundColor: isActive ? C.primaryLight : 'transparent',
+                                                        cursor: 'pointer',
+                                                        transition: 'background 0.1s',
+                                                    }}
+                                                    onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = C.bg }}
+                                                    onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent' }}
+                                                >
+                                                    <span style={{ fontSize: 14, lineHeight: 1, flexShrink: 0 }}>{cat.emoji}</span>
+                                                    <span style={{
+                                                        flex: 1, textAlign: 'left', fontSize: 12,
+                                                        fontWeight: isActive ? 700 : 500,
+                                                        color: isActive ? C.primary : C.body,
+                                                        fontFamily: 'DM Sans, sans-serif',
+                                                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                                                    }}>
+                                                        {cat.label}
+                                                    </span>
+                                                    <span style={{
+                                                        fontSize: 10, fontWeight: 700,
+                                                        color: isActive ? C.primary : C.muted,
+                                                        fontFamily: 'DM Sans, sans-serif',
+                                                        flexShrink: 0,
+                                                    }}>
+                                                        {count}
+                                                    </span>
+                                                    {isActive && <Check size={11} color={C.primary} strokeWidth={3} style={{ flexShrink: 0 }} />}
+                                                </button>
+                                            )
+                                        })}
+                                        {CATEGORIES.filter(cat =>
+                                            !catSearch || cat.label.toLowerCase().includes(catSearch.toLowerCase())
+                                        ).length === 0 && (
+                                                <p style={{ textAlign: 'center', fontSize: 12, color: C.muted, padding: '12px 0', fontFamily: 'DM Sans, sans-serif' }}>
+                                                    No categories found
+                                                </p>
+                                            )}
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </div>
 
                     {/* Search + Sort */}

@@ -51,9 +51,38 @@ interface Props {
     draftId?: string
     /** Called with the AI-filled description_html on success */
     onFilled?: (html: string) => void
+    /** Draft's category key (e.g. "consumer_electronics") — enables category match badge */
+    draftCategory?: string
 }
 
-export default function TemplatePickerCard({ templateId, onChange, draftId, onFilled }: Props) {
+// ── Category match map ─────────────────────────────────────────
+// Maps listing draft category keys → Design Studio template category slugs
+const DRAFT_TO_TEMPLATE_CAT: Record<string, string> = {
+    consumer_electronics: 'electronics',
+    computers: 'electronics',
+    clothing: 'fashion',
+    jewelry: 'fashion',
+    health_beauty: 'fashion',
+    home_garden: 'home',
+    furniture: 'home',
+    toys_hobbies: 'toys',
+    sporting_goods: 'sports',
+    pet_supplies: 'pets',
+    motors_parts: 'auto',
+    books_movies: 'general',
+    collectibles: 'general',
+    business: 'general',
+    default: 'general',
+}
+
+function categoryMatch(templateCat: string, draftCat?: string): boolean {
+    if (!draftCat || !templateCat) return false
+    const mapped = DRAFT_TO_TEMPLATE_CAT[draftCat]
+    if (!mapped) return false
+    return templateCat.toLowerCase() === mapped.toLowerCase()
+}
+
+export default function TemplatePickerCard({ templateId, onChange, draftId, onFilled, draftCategory }: Props) {
     const supabase = createClient()
 
     const [templates, setTemplates] = useState<VisualTemplate[]>([])
@@ -233,6 +262,18 @@ export default function TemplatePickerCard({ templateId, onChange, draftId, onFi
     // Show AI fill button when: template selected + has slots + draftId supplied
     const canAiFill = !!selected && slots.length > 0 && !!draftId && !!onFilled
 
+    // Category match — does selected template's category align with the draft's category?
+    const isMatch = !!selected && categoryMatch(selected.category, draftCategory)
+
+    // Sort gallery: matching templates first
+    const sortedTemplates = draftCategory
+        ? [...templates].sort((a, b) => {
+            const aM = categoryMatch(a.category, draftCategory) ? 0 : 1
+            const bM = categoryMatch(b.category, draftCategory) ? 0 : 1
+            return aM - bM
+        })
+        : templates
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
 
@@ -262,13 +303,29 @@ export default function TemplatePickerCard({ templateId, onChange, draftId, onFi
                     </div>
                 )}
 
-                <div style={{ flex: 1, textAlign: 'left' }}>
+                <div style={{ flex: 1, textAlign: 'left', minWidth: 0 }}>
                     {selected ? (
                         <>
-                            <p style={{ fontSize: 13, fontWeight: 600, color: C.body, margin: 0 }}>
-                                {selected.name}
-                            </p>
-                            <p style={{ fontSize: 11, color: C.secondary, margin: '1px 0 0' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                                <p style={{ fontSize: 13, fontWeight: 600, color: C.body, margin: 0 }}>
+                                    {selected.name}
+                                </p>
+                                {isMatch && (
+                                    <span style={{
+                                        display: 'inline-flex', alignItems: 'center', gap: 3,
+                                        fontSize: 9, fontWeight: 700, fontFamily: 'DM Sans, sans-serif',
+                                        color: C.success,
+                                        background: C.successBg,
+                                        border: '1px solid #86efac',
+                                        borderRadius: 99, padding: '2px 7px',
+                                        flexShrink: 0,
+                                    }}>
+                                        <Check size={8} strokeWidth={3} />
+                                        Category match
+                                    </span>
+                                )}
+                            </div>
+                            <p style={{ fontSize: 11, color: C.secondary, margin: '2px 0 0' }}>
                                 {selected.category} · Used {selected.use_count} {selected.use_count === 1 ? 'time' : 'times'}
                             </p>
                         </>
@@ -314,9 +371,10 @@ export default function TemplatePickerCard({ templateId, onChange, draftId, onFi
                     maxHeight: 320,
                     overflowY: 'auto',
                 }}>
-                    {templates.map(t => {
+                    {sortedTemplates.map(t => {
                         const isActive = templateId === t.id
                         const isHovered = hoverId === t.id
+                        const tMatch = categoryMatch(t.category, draftCategory)
                         return (
                             <div
                                 key={t.id}
@@ -324,11 +382,11 @@ export default function TemplatePickerCard({ templateId, onChange, draftId, onFi
                                 onMouseEnter={() => setHoverId(t.id)}
                                 onMouseLeave={() => setHoverId(null)}
                                 style={{
-                                    border: `1.5px solid ${isActive ? C.primary : isHovered ? C.primary + '80' : C.border}`,
+                                    border: `1.5px solid ${isActive ? C.primary : tMatch ? '#86efac' : isHovered ? C.primary + '80' : C.border}`,
                                     borderRadius: 10,
                                     padding: '10px',
                                     cursor: 'pointer',
-                                    background: isActive ? C.primaryLight : isHovered ? C.bg : C.surface,
+                                    background: isActive ? C.primaryLight : tMatch ? '#f0fdf4' : isHovered ? C.bg : C.surface,
                                     transition: 'all 0.12s ease',
                                     display: 'flex', flexDirection: 'column', gap: 8,
                                     position: 'relative',
@@ -343,6 +401,22 @@ export default function TemplatePickerCard({ templateId, onChange, draftId, onFi
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                     }}>
                                         <Check size={10} color="#fff" strokeWidth={3} />
+                                    </div>
+                                )}
+
+                                {/* Category match badge */}
+                                {tMatch && !isActive && (
+                                    <div style={{
+                                        position: 'absolute', top: 6, left: 6,
+                                        display: 'flex', alignItems: 'center', gap: 3,
+                                        fontSize: 8, fontWeight: 700, fontFamily: 'DM Sans, sans-serif',
+                                        color: C.success,
+                                        background: C.successBg,
+                                        border: '1px solid #86efac',
+                                        borderRadius: 99, padding: '2px 5px',
+                                    }}>
+                                        <Check size={7} strokeWidth={3} />
+                                        Best match
                                     </div>
                                 )}
 

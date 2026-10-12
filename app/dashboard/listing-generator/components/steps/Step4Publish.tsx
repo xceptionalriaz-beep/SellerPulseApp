@@ -489,6 +489,7 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
                                     onChange={id => onChange({ template_id: id })}
                                     draftId={draft.id}
                                     onFilled={html => onChange({ description_html: html })}
+                                    draftCategory={draft.category ?? undefined}
                                 />
                             </div>
                         </Section>
