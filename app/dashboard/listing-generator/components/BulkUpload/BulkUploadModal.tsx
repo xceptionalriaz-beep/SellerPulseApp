@@ -70,8 +70,10 @@ export interface ParsedRow extends BulkRow {
 export type RowStatus = 'pending' | 'generating' | 'done' | 'error'
 
 export interface QueueRow extends ParsedRow {
-    _status:  RowStatus
-    _message: string
+    _status:     RowStatus
+    _message:    string
+    _draftId?:   string          // filled on success
+    _veroStatus?:string          // 'ok' | 'warning' | 'blocked' — filled on success
 }
 
 // Minimal template shape for the picker

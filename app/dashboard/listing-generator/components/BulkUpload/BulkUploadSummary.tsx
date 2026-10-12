@@ -17,8 +17,33 @@
 //   └─────────────────────────────────────────────────┘
 // ─────────────────────────────────────────────────────────────
 
-import { CheckCircle2, AlertTriangle, XCircle, X, Sparkles, RefreshCw } from 'lucide-react'
+import { CheckCircle2, AlertTriangle, XCircle, X, Sparkles, RefreshCw, Download, ExternalLink } from 'lucide-react'
 import type { QueueRow } from './BulkUploadModal'
+
+// ── CSV export helper ─────────────────────────────────────────
+function exportResultsCSV(rows: QueueRow[]) {
+    const header = ['Row', 'Title / Barcode', 'Status', 'VeRO', 'Draft ID', 'Message']
+    const lines: string[] = [header.join(',')]
+    for (const row of rows) {
+        const label = row.title || (row.barcode ? `Barcode: ${row.barcode}` : `Row ${row._rowIndex}`)
+        const cells = [
+            String(row._rowIndex),
+            `"${label.replace(/"/g, '""')}"`,
+            row._status,
+            row._veroStatus ?? (row._status === 'done' ? 'ok' : '—'),
+            row._draftId ?? '—',
+            `"${(row._message || '').replace(/"/g, '""')}"`,
+        ]
+        lines.push(cells.join(','))
+    }
+    const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' })
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href     = url
+    a.download = `bulk-results-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+}
 
 // ── Design tokens ─────────────────────────────────────────────
 const C = {
@@ -56,7 +81,11 @@ export function BulkUploadSummary({ rows, onClose, onRetry }: BulkUploadSummaryP
     // ── Derived ───────────────────────────────────────────────
     const created  = rows.filter(r => r._status === 'done')
     const failed   = rows.filter(r => r._status === 'error')
-    const warnings = created.filter(r => r._message.toLowerCase().includes('warn') || r._message.toLowerCase().includes('vero'))
+    // Use _veroStatus when available; fall back to message-string scan for backwards compat
+    const warnings = created.filter(r =>
+        (r._veroStatus && r._veroStatus !== 'ok') ||
+        (!r._veroStatus && (r._message.toLowerCase().includes('warn') || r._message.toLowerCase().includes('vero')))
+    )
     const clean    = created.filter(r => !warnings.some(w => w._rowIndex === r._rowIndex))
 
     const allGood    = failed.length === 0 && warnings.length === 0
@@ -253,6 +282,7 @@ export function BulkUploadSummary({ rows, onClose, onRetry }: BulkUploadSummaryP
                                         label={label(row)}
                                         message={row._message}
                                         color={C.danger}
+                                        draftId={row._draftId}
                                     />
                                 ))}
                             </Section>
@@ -276,6 +306,7 @@ export function BulkUploadSummary({ rows, onClose, onRetry }: BulkUploadSummaryP
                                         label={label(row)}
                                         message={row._message}
                                         color={C.warning}
+                                        draftId={row._draftId}
                                     />
                                 ))}
                             </Section>
@@ -294,30 +325,43 @@ export function BulkUploadSummary({ rows, onClose, onRetry }: BulkUploadSummaryP
                         background:     C.surface,
                         flexWrap:       'wrap',
                     }}>
-                        {/* Retry failed */}
-                        {partialFail ? (
+                        {/* Left side: retry + export */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                            {/* Retry failed */}
+                            {partialFail && (
+                                <button
+                                    onClick={() => onRetry(failed)}
+                                    style={{
+                                        display: 'flex', alignItems: 'center', gap: 6,
+                                        padding: '8px 14px', borderRadius: 10,
+                                        fontSize: 12, fontWeight: 600,
+                                        border: `1px solid ${C.danger}44`,
+                                        background: C.dangerBg, color: C.danger,
+                                        cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                                    }}
+                                >
+                                    <RefreshCw size={12} />
+                                    Retry {failed.length} failed
+                                </button>
+                            )}
+
+                            {/* Export CSV */}
                             <button
-                                onClick={() => onRetry(failed)}
+                                onClick={() => exportResultsCSV(rows)}
+                                title="Export results as CSV"
                                 style={{
                                     display: 'flex', alignItems: 'center', gap: 6,
-                                    padding: '8px 16px', borderRadius: 10,
-                                    fontSize: 13, fontWeight: 600,
-                                    border: `1px solid ${C.danger}44`,
-                                    background: C.dangerBg, color: C.danger,
+                                    padding: '8px 14px', borderRadius: 10,
+                                    fontSize: 12, fontWeight: 600,
+                                    border: `1px solid ${C.border}`,
+                                    background: C.bg, color: C.secondary,
                                     cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
                                 }}
                             >
-                                <RefreshCw size={13} />
-                                Retry {failed.length} failed
+                                <Download size={12} />
+                                Export CSV
                             </button>
-                        ) : (
-                            <div style={{ fontSize: 13, color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                                {created.length > 0
-                                    ? `${created.length} draft${created.length !== 1 ? 's' : ''} ready to publish`
-                                    : 'No listings were created'
-                                }
-                            </div>
-                        )}
+                        </div>
 
                         {/* View dashboard */}
                         <button
@@ -390,11 +434,12 @@ function Section({
 }
 
 // ── Single row line ───────────────────────────────────────────
-function RowLine({ index, label, message, color }: {
-    index:   number
-    label:   string
-    message: string
-    color:   string
+function RowLine({ index, label, message, color, draftId }: {
+    index:    number
+    label:    string
+    message:  string
+    color:    string
+    draftId?: string
 }) {
     return (
         <div style={{
@@ -414,11 +459,35 @@ function RowLine({ index, label, message, color }: {
             </span>
             <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{
-                    fontSize: 12, fontWeight: 500, color: '#1e1535',
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    fontFamily: 'DM Sans, sans-serif',
+                    display: 'flex', alignItems: 'center', gap: 6,
                 }}>
-                    {label}
+                    <div style={{
+                        fontSize: 12, fontWeight: 500, color: '#1e1535',
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        fontFamily: 'DM Sans, sans-serif', flex: 1, minWidth: 0,
+                    }}>
+                        {label}
+                    </div>
+                    {draftId && (
+                        <a
+                            href={`/dashboard/listing-generator?draft=${draftId}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            title="Open draft"
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: 3,
+                                fontSize: 10, fontWeight: 600,
+                                color: '#7530fb', background: '#f3eeff',
+                                border: '1px solid #ede9fe',
+                                borderRadius: 6, padding: '2px 7px',
+                                textDecoration: 'none', flexShrink: 0,
+                                fontFamily: 'DM Sans, sans-serif',
+                            }}
+                        >
+                            <ExternalLink size={9} />
+                            View
+                        </a>
+                    )}
                 </div>
                 {message && (
                     <div style={{ fontSize: 11, color, marginTop: 2, fontFamily: 'DM Sans, sans-serif' }}>
