@@ -25,12 +25,13 @@ import { createClient } from '@/lib/supabase'
 import { createClient as createRawClient } from '@supabase/supabase-js'
 import {
     ChevronLeft, Save, Check, Loader2,
-    Globe, LayoutTemplate, Code2, Download,
+    Globe, LayoutTemplate, Code2, Download, History,
 } from 'lucide-react'
 import VisualEditor from '@/components/ui/VisualEditor'
 import ProDropdown, { DropdownOption } from '@/components/ui/ProDropdown'
 import { auditHtml } from '@/components/ui/VisualEditor/audit'
 import type { TemplateSlot } from '@/app/dashboard/listing-generator/types/listing.types'
+import VersionHistoryPanel, { saveTemplateVersion } from '@/components/ui/VersionHistoryPanel'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -181,6 +182,7 @@ function VisualEditorInner() {
     const [publishStatus, setPublishStatus] = useState<'idle' | 'publishing' | 'published'>('idle')
     /** Phase 1 AI bridge — slot role map for this template */
     const [slots, setSlots] = useState<TemplateSlot[]>([])
+    const [showVersionHistory, setShowVersionHistory] = useState(false)
 
     // ── Close action menu on outside click ───────────────────────────────────
     useEffect(() => {
@@ -330,6 +332,8 @@ function VisualEditorInner() {
                         updated_at: new Date().toISOString(),
                     })
                     .eq('id', savedId)
+                // Save version snapshot (non-blocking)
+                saveTemplateVersion(savedId, user.id, html, name)
             } else {
                 const { data, error } = await (supabase as any)
                     .from('listing_templates')
@@ -350,6 +354,8 @@ function VisualEditorInner() {
                 if (!error && data) {
                     setSavedId(data.id)
                     window.history.replaceState(null, '', `?id=${data.id}`)
+                    // Save initial version snapshot
+                    saveTemplateVersion(data.id, user.id, html, name)
                 }
             }
             setSaved(true)
@@ -806,188 +812,225 @@ function VisualEditorInner() {
                     publishStatus={publishStatus}
                     onBack={() => router.push('/dashboard/design')}
                     toolbarSlot={
-                        <div style={{ position: 'relative' }} ref={actionMenuRef}>
-                            {/* Trigger button */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            {/* History button */}
                             <button
-                                onClick={() => setActionMenuOpen(o => !o)}
+                                onClick={() => setShowVersionHistory(v => !v)}
                                 style={{
                                     display: 'flex', alignItems: 'center', gap: 6,
-                                    padding: '6px 14px',
-                                    border: 'none', borderRadius: 8,
-                                    backgroundColor: published ? C.success : C.primary,
-                                    color: '#ffffff',
-                                    fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700,
+                                    padding: '6px 12px',
+                                    border: `1px solid ${showVersionHistory ? C.primary : C.border}`, borderRadius: 8,
+                                    backgroundColor: showVersionHistory ? C.primaryLight : C.surface,
+                                    color: showVersionHistory ? C.primary : C.secondary,
+                                    fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 600,
                                     cursor: 'pointer', transition: 'all 0.15s',
-                                    boxShadow: `0 2px 8px ${C.primary}44`,
                                 }}
-                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = published ? C.success : C.primaryHover }}
-                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = published ? C.success : C.primary }}
+                                title="View version history"
                             >
-                                {published ? <Check size={13} /> : <Globe size={13} />}
-                                {published ? 'Published!' : 'Publish'}
-                                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ opacity: 0.8, marginLeft: 2 }}>
-                                    <path d="M2 3.5L5 6.5L8 3.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
+                                <History size={13} />
+                                History
                             </button>
-                            {/* Dropdown panel — moved here from old top bar */}
-                            {actionMenuOpen && (
-                                <div style={{
-                                    position: 'absolute', top: 'calc(100% + 8px)', right: 0,
-                                    width: 260, backgroundColor: C.surface,
-                                    border: `1px solid ${C.border}`, borderRadius: 12,
-                                    boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
-                                    zIndex: 1000, overflow: 'hidden',
-                                }}>
-                                    {/* Category section */}
-                                    <div
-                                        onMouseDown={e => e.stopPropagation()}
-                                        style={{ padding: '12px 14px 10px', borderBottom: `1px solid ${C.border}` }}
-                                    >
-                                        <p style={{
-                                            margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif',
-                                            fontSize: 10, fontWeight: 700, color: C.muted,
-                                            textTransform: 'uppercase', letterSpacing: 0.8,
-                                        }}>
-                                            Category
-                                        </p>
-                                        <ProDropdown
-                                            prefix=""
-                                            currentValue={category}
-                                            options={CATEGORIES}
-                                            onChanged={(v) => {
-                                                dirtyRef.current = true
-                                                setCategory(v)
-                                            }}
-                                            width={232}
-                                        />
+                            {/* Standalone Download HTML button */}
+                            <button
+                                onClick={() => exportFnRef.current?.()}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: 6,
+                                    padding: '6px 12px',
+                                    border: `1px solid ${C.border}`, borderRadius: 8,
+                                    backgroundColor: C.surface, color: C.secondary,
+                                    fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 600,
+                                    cursor: 'pointer', transition: 'all 0.15s',
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = C.bg; e.currentTarget.style.borderColor = C.primary; (e.currentTarget as HTMLElement).style.color = C.primary }}
+                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = C.surface; e.currentTarget.style.borderColor = C.border; (e.currentTarget as HTMLElement).style.color = C.secondary }}
+                                title="Download ready-to-use eBay HTML"
+                            >
+                                <Download size={13} />
+                                Download HTML
+                            </button>
+                            <div style={{ position: 'relative' }} ref={actionMenuRef}>
+                                {/* Trigger button */}
+                                <button
+                                    onClick={() => setActionMenuOpen(o => !o)}
+                                    style={{
+                                        display: 'flex', alignItems: 'center', gap: 6,
+                                        padding: '6px 14px',
+                                        border: 'none', borderRadius: 8,
+                                        backgroundColor: published ? C.success : C.primary,
+                                        color: '#ffffff',
+                                        fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700,
+                                        cursor: 'pointer', transition: 'all 0.15s',
+                                        boxShadow: `0 2px 8px ${C.primary}44`,
+                                    }}
+                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = published ? C.success : C.primaryHover }}
+                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = published ? C.success : C.primary }}
+                                >
+                                    {published ? <Check size={13} /> : <Globe size={13} />}
+                                    {published ? 'Published!' : 'Publish'}
+                                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ opacity: 0.8, marginLeft: 2 }}>
+                                        <path d="M2 3.5L5 6.5L8 3.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                </button>
+                                {/* Dropdown panel — moved here from old top bar */}
+                                {actionMenuOpen && (
+                                    <div style={{
+                                        position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+                                        width: 260, backgroundColor: C.surface,
+                                        border: `1px solid ${C.border}`, borderRadius: 12,
+                                        boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+                                        zIndex: 1000, overflow: 'hidden',
+                                    }}>
+                                        {/* Category section */}
+                                        <div
+                                            onMouseDown={e => e.stopPropagation()}
+                                            style={{ padding: '12px 14px 10px', borderBottom: `1px solid ${C.border}` }}
+                                        >
+                                            <p style={{
+                                                margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif',
+                                                fontSize: 10, fontWeight: 700, color: C.muted,
+                                                textTransform: 'uppercase', letterSpacing: 0.8,
+                                            }}>
+                                                Category
+                                            </p>
+                                            <ProDropdown
+                                                prefix=""
+                                                currentValue={category}
+                                                options={CATEGORIES}
+                                                onChanged={(v) => {
+                                                    dirtyRef.current = true
+                                                    setCategory(v)
+                                                }}
+                                                width={232}
+                                            />
+                                        </div>
+                                        {/* Action buttons */}
+                                        <div style={{ padding: '8px 8px' }}>
+                                            <button
+                                                onClick={() => { handleSaveDraft(); setActionMenuOpen(false) }}
+                                                disabled={saving}
+                                                style={{
+                                                    width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                                                    padding: '9px 10px', border: 'none', borderRadius: 8,
+                                                    backgroundColor: saved ? C.successBg : 'transparent',
+                                                    color: saved ? C.success : C.body,
+                                                    fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 500,
+                                                    cursor: saving ? 'default' : 'pointer', textAlign: 'left',
+                                                    transition: 'background 0.12s',
+                                                }}
+                                                onMouseEnter={e => { if (!saving && !saved) e.currentTarget.style.backgroundColor = C.bg }}
+                                                onMouseLeave={e => { if (!saved) e.currentTarget.style.backgroundColor = 'transparent' }}
+                                            >
+                                                <span style={{
+                                                    width: 28, height: 28, borderRadius: 7,
+                                                    backgroundColor: saved ? '#dcfce7' : C.bg,
+                                                    border: `1px solid ${saved ? '#86efac' : C.border}`,
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                                                }}>
+                                                    {saving
+                                                        ? <Loader2 size={13} style={{ color: C.muted, animation: 'spin 1s linear infinite' }} />
+                                                        : saved
+                                                            ? <Check size={13} style={{ color: C.success }} />
+                                                            : <Save size={13} style={{ color: C.secondary }} />}
+                                                </span>
+                                                <div>
+                                                    <p style={{ margin: 0, fontWeight: 600, fontSize: 12 }}>
+                                                        {saved ? 'Draft Saved!' : 'Save Draft'}
+                                                    </p>
+                                                    <p style={{ margin: 0, fontSize: 10, color: C.muted }}>
+                                                        Save without publishing
+                                                    </p>
+                                                </div>
+                                            </button>
+                                            <button
+                                                onClick={() => { handleOpenInCodeEditor(); setActionMenuOpen(false) }}
+                                                style={{
+                                                    width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                                                    padding: '9px 10px', border: 'none', borderRadius: 8,
+                                                    backgroundColor: 'transparent', color: C.body,
+                                                    fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 500,
+                                                    cursor: 'pointer', textAlign: 'left', transition: 'background 0.12s',
+                                                }}
+                                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = C.bg }}
+                                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
+                                            >
+                                                <span style={{
+                                                    width: 28, height: 28, borderRadius: 7,
+                                                    backgroundColor: C.bg, border: `1px solid ${C.border}`,
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                                                }}>
+                                                    <Code2 size={13} style={{ color: C.secondary }} />
+                                                </span>
+                                                <div>
+                                                    <p style={{ margin: 0, fontWeight: 600, fontSize: 12 }}>Code Editor</p>
+                                                    <p style={{ margin: 0, fontSize: 10, color: C.muted }}>Fine-tune the raw HTML</p>
+                                                </div>
+                                            </button>
+                                            <button
+                                                onClick={() => { exportFnRef.current?.(); setActionMenuOpen(false) }}
+                                                style={{
+                                                    width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                                                    padding: '9px 10px', border: 'none', borderRadius: 8,
+                                                    backgroundColor: 'transparent', color: C.body,
+                                                    fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 500,
+                                                    cursor: 'pointer', textAlign: 'left', transition: 'background 0.12s',
+                                                }}
+                                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = C.bg }}
+                                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
+                                            >
+                                                <span style={{
+                                                    width: 28, height: 28, borderRadius: 7,
+                                                    backgroundColor: C.bg, border: `1px solid ${C.border}`,
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                                                }}>
+                                                    <Download size={13} style={{ color: C.secondary }} />
+                                                </span>
+                                                <div>
+                                                    <p style={{ margin: 0, fontWeight: 600, fontSize: 12 }}>Export HTML</p>
+                                                    <p style={{ margin: 0, fontSize: 10, color: C.muted }}>Download ready-to-use eBay HTML</p>
+                                                </div>
+                                            </button>
+                                        </div>
+                                        {/* Publish */}
+                                        <div style={{ padding: '8px', borderTop: `1px solid ${C.border}` }}>
+                                            <button
+                                                onClick={() => { handlePublish(); setActionMenuOpen(false) }}
+                                                disabled={publishing}
+                                                style={{
+                                                    width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                                                    padding: '10px 10px', border: 'none', borderRadius: 8,
+                                                    backgroundColor: published ? '#dcfce7' : C.primaryLight,
+                                                    color: published ? C.success : C.primary,
+                                                    fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 700,
+                                                    cursor: publishing ? 'default' : 'pointer', textAlign: 'left',
+                                                    transition: 'background 0.12s',
+                                                }}
+                                                onMouseEnter={e => { if (!publishing) e.currentTarget.style.opacity = '0.85' }}
+                                                onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
+                                            >
+                                                <span style={{
+                                                    width: 28, height: 28, borderRadius: 7,
+                                                    backgroundColor: published ? C.success : C.primary,
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                                                }}>
+                                                    {publishing
+                                                        ? <Loader2 size={13} style={{ color: '#fff', animation: 'spin 1s linear infinite' }} />
+                                                        : published
+                                                            ? <Check size={13} style={{ color: '#fff' }} />
+                                                            : <Globe size={13} style={{ color: '#fff' }} />}
+                                                </span>
+                                                <div>
+                                                    <p style={{ margin: 0, fontSize: 12 }}>
+                                                        {published ? 'Published!' : 'Publish Template'}
+                                                    </p>
+                                                    <p style={{ margin: 0, fontSize: 10, color: C.muted }}>
+                                                        Make visible to all users
+                                                    </p>
+                                                </div>
+                                            </button>
+                                        </div>
                                     </div>
-                                    {/* Action buttons */}
-                                    <div style={{ padding: '8px 8px' }}>
-                                        <button
-                                            onClick={() => { handleSaveDraft(); setActionMenuOpen(false) }}
-                                            disabled={saving}
-                                            style={{
-                                                width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                                                padding: '9px 10px', border: 'none', borderRadius: 8,
-                                                backgroundColor: saved ? C.successBg : 'transparent',
-                                                color: saved ? C.success : C.body,
-                                                fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 500,
-                                                cursor: saving ? 'default' : 'pointer', textAlign: 'left',
-                                                transition: 'background 0.12s',
-                                            }}
-                                            onMouseEnter={e => { if (!saving && !saved) e.currentTarget.style.backgroundColor = C.bg }}
-                                            onMouseLeave={e => { if (!saved) e.currentTarget.style.backgroundColor = 'transparent' }}
-                                        >
-                                            <span style={{
-                                                width: 28, height: 28, borderRadius: 7,
-                                                backgroundColor: saved ? '#dcfce7' : C.bg,
-                                                border: `1px solid ${saved ? '#86efac' : C.border}`,
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                                            }}>
-                                                {saving
-                                                    ? <Loader2 size={13} style={{ color: C.muted, animation: 'spin 1s linear infinite' }} />
-                                                    : saved
-                                                        ? <Check size={13} style={{ color: C.success }} />
-                                                        : <Save size={13} style={{ color: C.secondary }} />}
-                                            </span>
-                                            <div>
-                                                <p style={{ margin: 0, fontWeight: 600, fontSize: 12 }}>
-                                                    {saved ? 'Draft Saved!' : 'Save Draft'}
-                                                </p>
-                                                <p style={{ margin: 0, fontSize: 10, color: C.muted }}>
-                                                    Save without publishing
-                                                </p>
-                                            </div>
-                                        </button>
-                                        <button
-                                            onClick={() => { handleOpenInCodeEditor(); setActionMenuOpen(false) }}
-                                            style={{
-                                                width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                                                padding: '9px 10px', border: 'none', borderRadius: 8,
-                                                backgroundColor: 'transparent', color: C.body,
-                                                fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 500,
-                                                cursor: 'pointer', textAlign: 'left', transition: 'background 0.12s',
-                                            }}
-                                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = C.bg }}
-                                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
-                                        >
-                                            <span style={{
-                                                width: 28, height: 28, borderRadius: 7,
-                                                backgroundColor: C.bg, border: `1px solid ${C.border}`,
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                                            }}>
-                                                <Code2 size={13} style={{ color: C.secondary }} />
-                                            </span>
-                                            <div>
-                                                <p style={{ margin: 0, fontWeight: 600, fontSize: 12 }}>Code Editor</p>
-                                                <p style={{ margin: 0, fontSize: 10, color: C.muted }}>Fine-tune the raw HTML</p>
-                                            </div>
-                                        </button>
-                                        <button
-                                            onClick={() => { exportFnRef.current?.(); setActionMenuOpen(false) }}
-                                            style={{
-                                                width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                                                padding: '9px 10px', border: 'none', borderRadius: 8,
-                                                backgroundColor: 'transparent', color: C.body,
-                                                fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 500,
-                                                cursor: 'pointer', textAlign: 'left', transition: 'background 0.12s',
-                                            }}
-                                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = C.bg }}
-                                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
-                                        >
-                                            <span style={{
-                                                width: 28, height: 28, borderRadius: 7,
-                                                backgroundColor: C.bg, border: `1px solid ${C.border}`,
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                                            }}>
-                                                <Download size={13} style={{ color: C.secondary }} />
-                                            </span>
-                                            <div>
-                                                <p style={{ margin: 0, fontWeight: 600, fontSize: 12 }}>Export HTML</p>
-                                                <p style={{ margin: 0, fontSize: 10, color: C.muted }}>Download ready-to-use eBay HTML</p>
-                                            </div>
-                                        </button>
-                                    </div>
-                                    {/* Publish */}
-                                    <div style={{ padding: '8px', borderTop: `1px solid ${C.border}` }}>
-                                        <button
-                                            onClick={() => { handlePublish(); setActionMenuOpen(false) }}
-                                            disabled={publishing}
-                                            style={{
-                                                width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                                                padding: '10px 10px', border: 'none', borderRadius: 8,
-                                                backgroundColor: published ? '#dcfce7' : C.primaryLight,
-                                                color: published ? C.success : C.primary,
-                                                fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 700,
-                                                cursor: publishing ? 'default' : 'pointer', textAlign: 'left',
-                                                transition: 'background 0.12s',
-                                            }}
-                                            onMouseEnter={e => { if (!publishing) e.currentTarget.style.opacity = '0.85' }}
-                                            onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
-                                        >
-                                            <span style={{
-                                                width: 28, height: 28, borderRadius: 7,
-                                                backgroundColor: published ? C.success : C.primary,
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                                            }}>
-                                                {publishing
-                                                    ? <Loader2 size={13} style={{ color: '#fff', animation: 'spin 1s linear infinite' }} />
-                                                    : published
-                                                        ? <Check size={13} style={{ color: '#fff' }} />
-                                                        : <Globe size={13} style={{ color: '#fff' }} />}
-                                            </span>
-                                            <div>
-                                                <p style={{ margin: 0, fontSize: 12 }}>
-                                                    {published ? 'Published!' : 'Publish Template'}
-                                                </p>
-                                                <p style={{ margin: 0, fontSize: 10, color: C.muted }}>
-                                                    Make visible to all users
-                                                </p>
-                                            </div>
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
                     }
                     placeholders={PLACEHOLDER_GROUPS}
@@ -1014,6 +1057,19 @@ function VisualEditorInner() {
                     to   { transform: rotate(360deg); }
                 }
             `}</style>
+
+            {/* Version History panel */}
+            {showVersionHistory && (
+                <VersionHistoryPanel
+                    templateId={savedId}
+                    onRestore={(restoredHtml) => {
+                        setHtml(restoredHtml)
+                        dirtyRef.current = true
+                        setShowVersionHistory(false)
+                    }}
+                    onClose={() => setShowVersionHistory(false)}
+                />
+            )}
         </div>
     )
 }
