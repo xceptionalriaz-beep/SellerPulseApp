@@ -1127,29 +1127,6 @@ export default function PromotionsPage() {
           <div className="flex items-center justify-center h-40">
             <Loader2 size={24} className="animate-spin" style={{ color: C.primary }} />
           </div>
-        ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-4 h-64">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: C.primaryLight }}>
-              <Megaphone size={24} style={{ color: C.primary }} />
-            </div>
-            <div className="text-center">
-              <p className="text-[14px] font-bold mb-1" style={{ color: C.dark, fontFamily: 'Syne, sans-serif' }}>
-                {campaigns.length === 0 ? 'No campaigns yet' : 'No results'}
-              </p>
-              <p className="text-[12px] mb-3" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                {campaigns.length === 0
-                  ? 'Create your first Promoted Listings campaign to boost visibility on eBay.'
-                  : 'Try a different search or filter.'}
-              </p>
-              {campaigns.length === 0 && (
-                <button onClick={openCreate}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold mx-auto transition-all hover:opacity-90"
-                  style={{ backgroundColor: C.primary, color: '#fff', fontFamily: 'Syne, sans-serif' }}>
-                  <Plus size={13} /> New Campaign
-                </button>
-              )}
-            </div>
-          </div>
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', minWidth: visColDefs.reduce((s, c) => s + c.minW, 0) + 110 }}>
             <thead>
@@ -1182,7 +1159,31 @@ export default function PromotionsPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((c, i) => (
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={visColDefs.length + 1} style={{ padding: '64px 24px', textAlign: 'center', verticalAlign: 'middle' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+                      <div style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: C.primaryLight, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Megaphone size={22} style={{ color: C.primary }} />
+                      </div>
+                      <p style={{ fontSize: 13, fontWeight: 700, color: C.dark, fontFamily: 'Syne, sans-serif', margin: 0 }}>
+                        {campaigns.length === 0 ? 'No Rows To Show' : 'No Results'}
+                      </p>
+                      <p style={{ fontSize: 12, color: C.muted, fontFamily: 'DM Sans, sans-serif', margin: 0 }}>
+                        {campaigns.length === 0
+                          ? 'Create your first campaign to get started.'
+                          : 'Try a different search or filter.'}
+                      </p>
+                      {campaigns.length === 0 && (
+                        <button onClick={openCreate}
+                          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 16px', borderRadius: 10, fontSize: 12, fontWeight: 700, backgroundColor: C.primary, color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'Syne, sans-serif' }}>
+                          <Plus size={13} /> New Campaign
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ) : filtered.map((c, i) => (
                 <tr key={c.id}
                   style={{
                     borderBottom: `1px solid ${C.border}`,
