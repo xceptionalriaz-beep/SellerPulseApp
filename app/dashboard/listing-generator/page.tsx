@@ -30,7 +30,7 @@ import { BulkUploadSummary } from './components/BulkUpload/BulkUploadSummary'
 import type { ParsedRow, QueueRow } from './components/BulkUpload/BulkUploadModal'
 
 // ── View types ────────────────────────────────────────────────
-type View = 'loading' | 'empty' | 'dashboard' | 'wizard' | 'calendar'
+type View = 'loading' | 'empty' | 'dashboard' | 'wizard'
 type BulkView = 'modal' | 'queue' | 'summary' | null
 
 // ── Bulk queue concurrency (max parallel AI calls) ────────────
@@ -329,6 +329,7 @@ export default function ListingGeneratorPage() {
 
     // ── State ─────────────────────────────────────────────────
     const [view, setView] = useState<View>('loading')
+    const [showCalendar, setShowCalendar] = useState(false)
     const [draftCount, setDraftCount] = useState(0)
     const [activeDraftId, setActiveDraftId] = useState<string | null>(null)
     const [planLimits, setPlanLimits] = useState<any>(null)
@@ -560,7 +561,7 @@ export default function ListingGeneratorPage() {
                                     onNewListing={handleNewListing}
                                     onEditDraft={handleEditDraft}
                                     onBulkUpload={handleOpenBulkModal}
-                                    onShowCalendar={() => setView('calendar')}
+                                    onShowCalendar={() => setShowCalendar(true)}
                                 />
                             )}
                         </div>
@@ -577,34 +578,59 @@ export default function ListingGeneratorPage() {
                         </div>
                     )}
 
-                    {view === 'calendar' && (
-                        <div key="calendar" className="absolute inset-0 anim-fade-scale overflow-y-auto"
-                            style={{ backgroundColor: '#f8f7ff' }}>
-                            <div className="max-w-5xl mx-auto px-4 py-6 flex flex-col gap-4">
-                                {/* Back bar */}
-                                <div className="flex items-center gap-3">
-                                    <button
-                                        onClick={() => setView('dashboard')}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-semibold transition-all hover:opacity-80"
-                                        style={{ backgroundColor: '#ffffff', color: '#7530fb', border: '1px solid #ede9fe', fontFamily: 'DM Sans, sans-serif' }}>
-                                        <ArrowLeft size={13} />
-                                        Back to Dashboard
-                                    </button>
-                                    <div className="flex items-center gap-2">
-                                        <CalendarDays size={16} style={{ color: '#7530fb' }} />
-                                        <p className="text-[15px] font-bold" style={{ color: '#1e1535', fontFamily: 'Syne, sans-serif' }}>
-                                            Listing Calendar
-                                        </p>
-                                    </div>
-                                </div>
+                </div>
+
+                {/* ── Calendar side panel ───────────────────────── */}
+                <style>{`
+                    @keyframes slideInRight {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to   { transform: translateX(0);    opacity: 1; }
+                    }
+                    .anim-slide-right {
+                        animation: slideInRight 0.28s cubic-bezier(0.4,0,0.2,1) forwards;
+                    }
+                `}</style>
+                {showCalendar && (
+                    <>
+                        {/* Backdrop */}
+                        <div
+                            className="absolute inset-0 z-40"
+                            style={{ backgroundColor: 'rgba(30,21,53,0.35)', backdropFilter: 'blur(2px)' }}
+                            onClick={() => setShowCalendar(false)}
+                        />
+                        {/* Panel */}
+                        <div
+                            className="absolute top-0 right-0 bottom-0 z-50 flex flex-col anim-slide-right overflow-hidden"
+                            style={{
+                                width: 'min(560px, 96vw)',
+                                backgroundColor: '#f8f7ff',
+                                borderLeft: '1px solid #ede9fe',
+                                boxShadow: '-4px 0 32px rgba(117,48,251,0.12)',
+                            }}>
+                            {/* Panel header */}
+                            <div className="flex items-center gap-3 px-5 py-4 shrink-0"
+                                style={{ borderBottom: '1px solid #ede9fe', backgroundColor: '#ffffff' }}>
+                                <CalendarDays size={16} style={{ color: '#7530fb' }} />
+                                <p className="flex-1 text-[15px] font-bold"
+                                    style={{ color: '#1e1535', fontFamily: 'Syne, sans-serif' }}>
+                                    Listing Calendar
+                                </p>
+                                <button
+                                    onClick={() => setShowCalendar(false)}
+                                    className="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:opacity-70"
+                                    style={{ backgroundColor: '#f3eeff', color: '#7530fb' }}>
+                                    <ArrowLeft size={14} />
+                                </button>
+                            </div>
+                            {/* Panel body */}
+                            <div className="flex-1 overflow-y-auto px-5 py-4">
                                 <ListingCalendar
-                                    onEditDraft={id => { handleEditDraft(id) }}
+                                    onEditDraft={id => { setShowCalendar(false); handleEditDraft(id) }}
                                 />
                             </div>
                         </div>
-                    )}
-
-                </div>
+                    </>
+                )}
             </div>
 
             {/* ── Plan Upgrade Modal ───────────────────────────── */}
