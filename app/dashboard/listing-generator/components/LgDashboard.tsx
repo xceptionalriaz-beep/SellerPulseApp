@@ -31,7 +31,7 @@ import {
     Download, Trash2, ChevronLeft, ChevronRight,
     X, Package, TrendingUp, Circle, Zap, Copy, Check,
     Columns, SlidersHorizontal, Filter, Star, Palette, ExternalLink,
-    CopyPlus, StopCircle, RefreshCw, BarChart2, Eye, Edit3,
+    CopyPlus, StopCircle, RefreshCw, BarChart2, Eye, Edit3, TrendingDown,
 } from 'lucide-react'
 import UrlImport from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImport'
 import UrlImportProcessing from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImportProcessing'
@@ -48,6 +48,7 @@ import MyTemplatesGallery from './MyTemplatesGallery'
 import { AIButton, PrimaryButton } from '@/components/ui/Buttons'
 import EbayAccountSelector from './EbayAccountSelector'
 import LowStockAlertManager from '@/components/ui/LowStockAlertManager'
+import PriceDropRuleModal from '@/components/ui/PriceDropRuleModal'
 import type { PlatformDetection, UrlImportResult, ImportedListingData } from '@/app/dashboard/listing-generator/types/url-import.types'
 import type { ImageImportData } from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImport'
 import type { ImageImportResult } from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImportProcessing'
@@ -354,6 +355,29 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
     const [bulkEditPrice, setBulkEditPrice] = useState('')
     const [bulkEditQty, setBulkEditQty] = useState('')
     const [bulkEditLoading, setBulkEditLoading] = useState(false)
+
+    // ── Price Drop Rule modal ───────────────────────────────────
+    const [priceDropListing, setPriceDropListing] = useState<{
+        id: string; title: string; price: number | null
+    } | null>(null)
+    const [runningPriceDrops, setRunningPriceDrops] = useState(false)
+    const [priceDropResult, setPriceDropResult] = useState<string | null>(null)
+
+    async function runAllPriceDrops() {
+        setRunningPriceDrops(true)
+        setPriceDropResult(null)
+        try {
+            const res = await fetch('/api/inventory/apply-price-drops', { method: 'POST' })
+            const json = await res.json()
+            if (!res.ok) throw new Error(json.error ?? 'Failed')
+            setPriceDropResult(`✅ Checked ${json.checked} rules — ${json.dropped} price drop${json.dropped !== 1 ? 's' : ''} applied`)
+            if (json.dropped > 0) await loadListings()
+        } catch (e: any) {
+            setPriceDropResult(`❌ ${e.message}`)
+        }
+        setRunningPriceDrops(false)
+        setTimeout(() => setPriceDropResult(null), 6000)
+    }
 
     // ── eBay marketplace / store ────────────────────────────────
     const [ebayMarketplace, setEbayMarketplace] = useState<string>('EBAY_US')
@@ -988,7 +1012,34 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
 
                 {/* Low Stock Alerts — compact badge in toolbar */}
                 <LowStockAlertManager compact />
+
+                {/* Run Price Drops */}
+                <button
+                    onClick={runAllPriceDrops}
+                    disabled={runningPriceDrops}
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-[13px] font-semibold transition-all hover:opacity-80 disabled:opacity-60"
+                    style={{ backgroundColor: C.surface, color: C.primary, border: `1px solid ${C.border}`, fontFamily: 'DM Sans, sans-serif' }}
+                    title="Apply all enabled price-drop rules now">
+                    {runningPriceDrops
+                        ? <span className="w-3.5 h-3.5 rounded-full border-2 border-current/30 border-t-current animate-spin" />
+                        : <TrendingDown size={14} />}
+                    Price Drops
+                </button>
             </div>
+            {/* Price drop result toast */}
+            {priceDropResult && (
+                <div className="mx-6 mt-2 flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-semibold shrink-0"
+                    style={{
+                        backgroundColor: priceDropResult.startsWith('✅') ? C.successBg : C.dangerBg,
+                        color: priceDropResult.startsWith('✅') ? C.success : C.danger,
+                        border: `1px solid ${priceDropResult.startsWith('✅') ? '#86efac' : '#fca5a5'}`,
+                    }}>
+                    <span style={{ flex: 1, fontFamily: 'DM Sans, sans-serif' }}>{priceDropResult}</span>
+                    <button onClick={() => setPriceDropResult(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                        <X size={12} />
+                    </button>
+                </div>
+            )}
             {/* Analytics error toast */}
             {analyticsError && (
                 <div className="mx-6 mt-2 flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-semibold shrink-0"
@@ -1900,6 +1951,18 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                                                 ? <span className="w-3 h-3 rounded-full border-2 border-gray-300 border-t-gray-600 animate-spin" />
                                                                 : <CopyPlus size={13} style={{ color: C.secondary }} />}
                                                         </button>
+                                                        {/* Price Drop Rule */}
+                                                        <button
+                                                            onClick={() => setPriceDropListing({
+                                                                id: listing.id,
+                                                                title: listing.title || listing.product_name || 'Untitled',
+                                                                price: listing.sell_price,
+                                                            })}
+                                                            className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:opacity-80"
+                                                            style={{ backgroundColor: C.primaryLight }}
+                                                            title="Price Drop Rule">
+                                                            <TrendingDown size={13} style={{ color: C.primary }} />
+                                                        </button>
                                                         {/* End live listing */}
                                                         {listing.status === 'published' && listing.ebay_listing_id && (
                                                             <button
@@ -2674,6 +2737,18 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                 />
             )}
 
+            {/* ── Price Drop Rule Modal ─────────────────────────────── */}
+            {priceDropListing && (
+                <PriceDropRuleModal
+                    listingId={priceDropListing.id}
+                    listingTitle={priceDropListing.title}
+                    currentPrice={priceDropListing.price}
+                    onClose={() => setPriceDropListing(null)}
+                    onSaved={() => {
+                        setPriceDropListing(null)
+                    }}
+                />
+            )}
 
         </div>
     )
