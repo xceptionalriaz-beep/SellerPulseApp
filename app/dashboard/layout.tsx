@@ -40,7 +40,7 @@ import {
   ShieldAlert, LogOut, Bell, Menu, X, MessageCircle, ChevronDown,
   Users, Key, Power, Zap, Trophy, BarChart2, Mail, CreditCard, FileText, DollarSign, BookOpen, Wrench, Image, Briefcase, Eye, Lock, ListChecks,
   Globe, History, RotateCcw, Sparkles, Palette,
-  LayoutTemplate, User, Settings2, ChevronRight,
+  LayoutTemplate, User, Settings2, ChevronRight, Star,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { NotificationsPanelOverlay } from '@/components/NotificationsPanel'
@@ -70,6 +70,7 @@ const NAV_ITEMS = [
   { icon: Package, label: 'Inventory', href: '/dashboard/inventory' },
   { icon: Radar, label: 'Competitor Research', href: '/dashboard/competitor-research' },
   { icon: ShieldCheck, label: 'Orders', href: '/dashboard/orders' },
+  { icon: Star, label: 'Feedback', href: '/dashboard/feedback' },
 ]
 
 // -- Design Studio sub-sidebar tabs ----------------------------
