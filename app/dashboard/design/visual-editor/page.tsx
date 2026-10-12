@@ -25,12 +25,13 @@ import { createClient } from '@/lib/supabase'
 import { createClient as createRawClient } from '@supabase/supabase-js'
 import {
     ChevronLeft, Save, Check, Loader2,
-    Globe, LayoutTemplate, Code2, Download,
+    Globe, LayoutTemplate, Code2, Download, History,
 } from 'lucide-react'
 import VisualEditor from '@/components/ui/VisualEditor'
 import ProDropdown, { DropdownOption } from '@/components/ui/ProDropdown'
 import { auditHtml } from '@/components/ui/VisualEditor/audit'
 import type { TemplateSlot } from '@/app/dashboard/listing-generator/types/listing.types'
+import VersionHistoryPanel, { saveTemplateVersion } from '@/components/ui/VersionHistoryPanel'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -181,6 +182,7 @@ function VisualEditorInner() {
     const [publishStatus, setPublishStatus] = useState<'idle' | 'publishing' | 'published'>('idle')
     /** Phase 1 AI bridge — slot role map for this template */
     const [slots, setSlots] = useState<TemplateSlot[]>([])
+    const [showVersionHistory, setShowVersionHistory] = useState(false)
 
     // ── Close action menu on outside click ───────────────────────────────────
     useEffect(() => {
@@ -330,6 +332,8 @@ function VisualEditorInner() {
                         updated_at: new Date().toISOString(),
                     })
                     .eq('id', savedId)
+                // Save version snapshot (non-blocking)
+                saveTemplateVersion(savedId, user.id, html, name)
             } else {
                 const { data, error } = await (supabase as any)
                     .from('listing_templates')
@@ -350,6 +354,8 @@ function VisualEditorInner() {
                 if (!error && data) {
                     setSavedId(data.id)
                     window.history.replaceState(null, '', `?id=${data.id}`)
+                    // Save initial version snapshot
+                    saveTemplateVersion(data.id, user.id, html, name)
                 }
             }
             setSaved(true)
@@ -806,7 +812,43 @@ function VisualEditorInner() {
                     publishStatus={publishStatus}
                     onBack={() => router.push('/dashboard/design')}
                     toolbarSlot={
-                        <div style={{ position: 'relative' }} ref={actionMenuRef}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            {/* History button */}
+                            <button
+                                onClick={() => setShowVersionHistory(v => !v)}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: 6,
+                                    padding: '6px 12px',
+                                    border: `1px solid ${showVersionHistory ? C.primary : C.border}`, borderRadius: 8,
+                                    backgroundColor: showVersionHistory ? C.primaryLight : C.surface,
+                                    color: showVersionHistory ? C.primary : C.secondary,
+                                    fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 600,
+                                    cursor: 'pointer', transition: 'all 0.15s',
+                                }}
+                                title="View version history"
+                            >
+                                <History size={13} />
+                                History
+                            </button>
+                            {/* Standalone Download HTML button */}
+                            <button
+                                onClick={() => exportFnRef.current?.()}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: 6,
+                                    padding: '6px 12px',
+                                    border: `1px solid ${C.border}`, borderRadius: 8,
+                                    backgroundColor: C.surface, color: C.secondary,
+                                    fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 600,
+                                    cursor: 'pointer', transition: 'all 0.15s',
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = C.bg; e.currentTarget.style.borderColor = C.primary; (e.currentTarget as HTMLElement).style.color = C.primary }}
+                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = C.surface; e.currentTarget.style.borderColor = C.border; (e.currentTarget as HTMLElement).style.color = C.secondary }}
+                                title="Download ready-to-use eBay HTML"
+                            >
+                                <Download size={13} />
+                                Download HTML
+                            </button>
+                            <div style={{ position: 'relative' }} ref={actionMenuRef}>
                             {/* Trigger button */}
                             <button
                                 onClick={() => setActionMenuOpen(o => !o)}
@@ -988,6 +1030,7 @@ function VisualEditorInner() {
                                     </div>
                                 </div>
                             )}
+                            </div>
                         </div>
                     }
                     placeholders={PLACEHOLDER_GROUPS}
@@ -1014,6 +1057,19 @@ function VisualEditorInner() {
                     to   { transform: rotate(360deg); }
                 }
             `}</style>
+
+            {/* Version History panel */}
+            {showVersionHistory && (
+                <VersionHistoryPanel
+                    templateId={savedId}
+                    onRestore={(restoredHtml) => {
+                        setHtml(restoredHtml)
+                        dirtyRef.current = true
+                        setShowVersionHistory(false)
+                    }}
+                    onClose={() => setShowVersionHistory(false)}
+                />
+            )}
         </div>
     )
 }

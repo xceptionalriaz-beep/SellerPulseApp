@@ -9,10 +9,11 @@ import {
     ChevronLeft, Save, X,
     Search, Plus, Image, Link2, ChevronDown,
     Monitor, Tablet, Smartphone,
-    Maximize2, CheckCircle2,
+    Maximize2, CheckCircle2, Download, History,
 } from 'lucide-react'
 import ImageAssets from '@/components/ui/ImageAssets'
 import ImportUrl from '@/components/ui/ImportUrl'
+import VersionHistoryPanel, { saveTemplateVersion } from '@/components/ui/VersionHistoryPanel'
 
 // ── Design tokens ──────────────────────────────────────────────────────────
 const C = {
@@ -157,6 +158,7 @@ function HtmlEditorInner() {
     const [fullscreen, setFullscreen] = useState(false)
     const [testLoading, setTestLoading] = useState(false)
     const [previewHtml, setPreviewHtml] = useState('')
+    const [showVersionHistory, setShowVersionHistory] = useState(false)
 
     // Insert image tag at saved cursor
     function insertImage(_url: string, htmlTag: string) {
@@ -273,11 +275,13 @@ function HtmlEditorInner() {
                         user_id: user.id,
                         action: 'edit',
                     })
+                    // Save version snapshot (non-blocking)
+                    saveTemplateVersion(existingId, user.id, html, name)
                 }
             } else if (user) {
                 // Create new template
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                await (supabase as any).from('listing_templates').insert({
+                const { data: newTpl } = await (supabase as any).from('listing_templates').insert({
                     user_id: isAdmin ? null : user.id,
                     name,
                     description: isAdmin ? 'Admin template' : 'Custom template',
@@ -287,7 +291,13 @@ function HtmlEditorInner() {
                     is_shared: false,
                     use_count: 0,
                     created_at: new Date().toISOString(),
-                })
+                }).select('id').single()
+
+                if (newTpl?.id) {
+                    window.history.replaceState(null, '', `?id=${newTpl.id}`)
+                    // Save initial version snapshot
+                    saveTemplateVersion(newTpl.id, user.id, html, name)
+                }
             }
         } catch (e) {
             console.error('Save failed:', e)
@@ -305,6 +315,18 @@ function HtmlEditorInner() {
         } else {
             router.push('/dashboard/design?tab=my-templates')
         }
+    }
+
+    function downloadHtml() {
+        const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
+        const url  = URL.createObjectURL(blob)
+        const a    = document.createElement('a')
+        a.href     = url
+        a.download = `${name.replace(/[^a-z0-9]/gi, '-').toLowerCase() || 'template'}.html`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
     }
 
     // Test preview with real eBay data
@@ -368,6 +390,16 @@ function HtmlEditorInner() {
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
+                    <button onClick={() => setShowVersionHistory(v => !v)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all hover:opacity-80"
+                        style={{ backgroundColor: showVersionHistory ? C.primaryLight : C.bg, color: showVersionHistory ? C.primary : C.secondary, border: `1px solid ${showVersionHistory ? C.primary : C.border}`, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                        <History size={13} /> History
+                    </button>
+                    <button onClick={downloadHtml}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all hover:opacity-80"
+                        style={{ backgroundColor: C.bg, color: C.secondary, border: `1px solid ${C.border}`, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                        <Download size={13} /> Download HTML
+                    </button>
                     <button onClick={saveDraft}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all hover:opacity-80"
                         style={{ backgroundColor: C.dark, color: '#ffffff', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
@@ -886,6 +918,18 @@ function HtmlEditorInner() {
                     setName(importedName)
                 }}
             />
+
+            {/* Version History panel */}
+            {showVersionHistory && (
+                <VersionHistoryPanel
+                    templateId={existingId}
+                    onRestore={(restoredHtml) => {
+                        setHtml(restoredHtml)
+                        setShowVersionHistory(false)
+                    }}
+                    onClose={() => setShowVersionHistory(false)}
+                />
+            )}
         </div>
     )
 }

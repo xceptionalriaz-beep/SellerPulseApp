@@ -7021,10 +7021,23 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
         case 'video_placeholder':
             return (
                 <div style={{ padding: '8px 0' }}>
-                    <InfoBox>
-                        🎬 This block shows a fixed video placeholder — no editable attributes.
-                        Use the Styles tab to adjust colours and spacing.
-                    </InfoBox>
+                    <Section title="Video Link">
+                        <TextInput
+                            label="YouTube URL"
+                            value={(props as any).youtubeUrl ?? ''}
+                            placeholder="https://www.youtube.com/watch?v=..."
+                            onChange={v => updateProps({ youtubeUrl: v } as any)}
+                        />
+                        <InfoBox>
+                            Paste a YouTube URL — the thumbnail is auto-fetched and the image links to your video. Supports youtube.com, youtu.be, and Shorts.
+                        </InfoBox>
+                        <TextInput
+                            label="Caption text"
+                            value={(props as any).videoCaption ?? 'Watch the product video'}
+                            placeholder="Watch the product video"
+                            onChange={v => updateProps({ videoCaption: v } as any)}
+                        />
+                    </Section>
                 </div>
             )
 
