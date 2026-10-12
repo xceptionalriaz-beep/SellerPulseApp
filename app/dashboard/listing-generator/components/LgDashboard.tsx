@@ -14,6 +14,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
+import { getCurrencySymbol, getMarketplaceLabel, getFlagCode } from '@/lib/ebay-marketplace'
 import { useSegments }    from '../hooks/useSegments'
 import { useColumnConfig } from '../hooks/useColumnConfig'
 import { SegmentSidebar } from './segments/SegmentSidebar'
@@ -335,6 +336,29 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
     const [deletingId, setDeletingId] = useState<string | null>(null)
     const [deleteLoading, setDeleteLoading] = useState(false)
 
+    // ── eBay marketplace / store ────────────────────────────────
+    const [ebayMarketplace, setEbayMarketplace] = useState<string>('EBAY_US')
+    const [ebayUsername,    setEbayUsername]    = useState<string>('')
+
+    useEffect(() => {
+        async function loadProfile() {
+            try {
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) return
+                const { data } = await (supabase.from('profiles') as any)
+                    .select('ebay_marketplace, ebay_username')
+                    .eq('id', user.id)
+                    .single()
+                if (data?.ebay_marketplace) setEbayMarketplace(data.ebay_marketplace)
+                if (data?.ebay_username)    setEbayUsername(data.ebay_username)
+            } catch {}
+        }
+        loadProfile()
+    }, [])
+
+    // Derived: currency symbol for this user's marketplace
+    const currencySymbol = getCurrencySymbol(ebayMarketplace)
+
     // ── Segments ────────────────────────────────────────────────
     const {
         segments,
@@ -447,7 +471,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
     // ── Bulk: export CSV ────────────────────────────────────────
     function exportSelectedCsv() {
         const selected = listings.filter(l => selectedIds.has(l.id))
-        const headers = ['SKU', 'Title', 'Condition', 'Category', 'Price (£)', 'Margin %', 'Health', 'VeRO', 'Stock', 'Status', 'Created']
+        const headers = ['SKU', 'Title', 'Condition', 'Category', `Price (${currencySymbol})`, 'Margin %', 'Health', 'VeRO', 'Stock', 'Status', 'Created']
         const rows = selected.map(l => [
             l.sku ?? '',
             `"${(l.title || l.product_name || '').replace(/"/g, '""')}"`,
@@ -778,6 +802,31 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
 
                 <div className="flex-1" />
 
+                {/* eBay Store Badge — shows when connected */}
+                {ebayUsername && (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl"
+                        style={{ backgroundColor: C.surface, border: `1px solid ${C.border}` }}>
+                        {/* Country flag emoji */}
+                        <span style={{ fontSize: 18, lineHeight: 1 }}>
+                            {String.fromCodePoint(
+                                ...getFlagCode(ebayMarketplace).toUpperCase().split('').map(c => 0x1F1E6 + c.charCodeAt(0) - 65)
+                            )}
+                        </span>
+                        <div className="flex flex-col" style={{ lineHeight: 1.2 }}>
+                            <span className="text-[12px] font-bold" style={{ color: C.dark, fontFamily: 'DM Sans, sans-serif' }}>
+                                {ebayUsername}
+                            </span>
+                            <span className="text-[10px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                {getMarketplaceLabel(ebayMarketplace)}
+                            </span>
+                        </div>
+                        <span className="text-[11px] font-bold px-1.5 py-0.5 rounded"
+                            style={{ backgroundColor: '#dcfce7', color: '#16a34a', fontFamily: 'DM Sans, sans-serif' }}>
+                            {currencySymbol}
+                        </span>
+                    </div>
+                )}
+
                 {/* My Templates shortcut */}
                 <button
                     onClick={() => setShowTemplates(true)}
@@ -1105,7 +1154,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                                     {/* Price row */}
                                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                                                         <span style={{ fontSize: 18, fontWeight: 700, color: C.dark, fontFamily: 'Syne, sans-serif' }}>
-                                                            {listing.sell_price != null ? `£${listing.sell_price.toFixed(2)}` : '—'}
+                                                            {listing.sell_price != null ? `${currencySymbol}${listing.sell_price.toFixed(2)}` : '—'}
                                                         </span>
                                                         {listing.margin != null && (
                                                             <span style={{
@@ -1374,7 +1423,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                                 return (
                                                     <td key="price" className="px-3 py-1.5">
                                                         <span className="text-[14px] font-bold" style={{ color: '#6b7280', fontFamily: 'DM Sans, sans-serif' }}>
-                                                            £{listing.sell_price?.toFixed(2) ?? '—'}
+                                                            {listing.sell_price != null ? `${currencySymbol}${listing.sell_price.toFixed(2)}` : '—'}
                                                         </span>
                                                     </td>
                                                 )
@@ -1401,7 +1450,7 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                                         {listing.net_profit !== null ? (
                                                             <span className="text-[13px] font-semibold"
                                                                 style={{ color: listing.net_profit >= 0 ? C.success : C.danger, fontFamily: 'DM Sans, sans-serif' }}>
-                                                                £{listing.net_profit.toFixed(2)}
+                                                                {currencySymbol}{listing.net_profit.toFixed(2)}
                                                             </span>
                                                         ) : (
                                                             <span style={{ color: C.muted, fontSize: 12 }}>—</span>
