@@ -87,6 +87,7 @@ async function refreshEbayToken(userId: string, refreshToken: string): Promise<s
                 'https://api.ebay.com/oauth/api_scope/sell.account.readonly',
                 'https://api.ebay.com/oauth/api_scope/sell.inventory',
                 'https://api.ebay.com/oauth/api_scope/sell.account',
+                'https://api.ebay.com/oauth/api_scope/sell.marketing',
             ].join(' '),
         }).toString(),
         signal: AbortSignal.timeout(15_000),

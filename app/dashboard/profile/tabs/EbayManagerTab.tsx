@@ -241,6 +241,7 @@ export default function EbayManagerTab() {
         'https://api.ebay.com/oauth/api_scope/sell.inventory',
         'https://api.ebay.com/oauth/api_scope/sell.account',
         'https://api.ebay.com/oauth/api_scope/sell.analytics.readonly',
+        'https://api.ebay.com/oauth/api_scope/sell.marketing',
       ].join(' '))
       const state = user.id
 

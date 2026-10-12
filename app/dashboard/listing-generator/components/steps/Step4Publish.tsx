@@ -247,6 +247,36 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
                     itemId: data.itemId,
                     ebayUrl: data.ebayUrl,
                 })
+
+                // Auto-enroll in Promoted Listings Standard if enabled
+                if (draft.promoted_general && draft.promoted_general_rate && data.itemId) {
+                    // Find or create default campaign, then enroll (fire-and-forget)
+                    ; (async () => {
+                        try {
+                            // Get existing running CPS campaigns
+                            const campsRes = await fetch('/api/ebay/promotions/campaigns')
+                            const campsJson = await campsRes.json()
+                            const runningCPS = (campsJson.campaigns ?? []).find(
+                                (c: any) => c.campaign_type === 'PROMOTED_LISTINGS' && c.status === 'RUNNING'
+                            )
+                            const campaignId = runningCPS?.campaign_id
+
+                            if (campaignId) {
+                                await fetch('/api/ebay/promotions/enroll', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        campaignId,
+                                        listingId: data.itemId,
+                                        listingTitle: draft.title ?? undefined,
+                                        bidPercentage: draft.promoted_general_rate,
+                                    }),
+                                })
+                            }
+                            // If no running campaign exists, user can enroll manually from Promotions page
+                        } catch { /* silent — enroll failure must not block publish */ }
+                    })()
+                }
             } else if (data.notConnected) {
                 setPublishResult({
                     type: 'not_connected',
