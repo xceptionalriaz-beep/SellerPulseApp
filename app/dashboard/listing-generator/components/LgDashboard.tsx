@@ -32,6 +32,7 @@ import {
     X, Package, TrendingUp, Circle, Zap, Copy, Check,
     Columns, SlidersHorizontal, Filter, Star, Palette, ExternalLink,
     CopyPlus, StopCircle, RefreshCw, BarChart2, Eye, Edit3, TrendingDown,
+    CalendarDays,
 } from 'lucide-react'
 import UrlImport from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImport'
 import UrlImportProcessing from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImportProcessing'
@@ -129,6 +130,7 @@ interface Props {
     onNewListing: () => void
     onEditDraft: (id: string) => void
     onBulkUpload: () => void
+    onShowCalendar?: () => void
 }
 
 // ── Health Score Badge ────────────────────────────────────────
@@ -294,7 +296,7 @@ function detectGtinType(value: string): { label: string; color: string; bg: stri
 }
 
 // ── Main Dashboard Component ──────────────────────────────────
-export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraft, onBulkUpload: onBulkUploadProp }: Props) {
+export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraft, onBulkUpload: onBulkUploadProp, onShowCalendar }: Props) {
     const supabase = createClient()
 
     // ── State ───────────────────────────────────────────────────
@@ -1025,6 +1027,18 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                             : <TrendingDown size={14} />}
                         Price Drops
                     </button>
+
+                    {/* Calendar */}
+                    {onShowCalendar && (
+                        <button
+                            onClick={onShowCalendar}
+                            className="flex items-center gap-2 px-3 py-2 rounded-xl text-[13px] font-semibold transition-all hover:opacity-80"
+                            style={{ backgroundColor: C.surface, color: C.primary, border: `1px solid ${C.border}`, fontFamily: 'DM Sans, sans-serif' }}
+                            title="View scheduled listings calendar">
+                            <CalendarDays size={14} />
+                            Calendar
+                        </button>
+                    )}
                 </div>
                 {/* Price drop result toast */}
                 {priceDropResult && (

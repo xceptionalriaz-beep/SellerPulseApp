@@ -18,7 +18,7 @@ import {
     Truck, RotateCcw, MapPin, Globe,
     Megaphone, Lock, Users, Hash, Layers,
     TrendingUp, ArrowRight, Flame, Palette,
-    ExternalLink,
+    ExternalLink, Calendar,
 } from 'lucide-react'
 import type { DraftData } from '../LgStudio'
 import TemplatePickerCard from '../TemplatePickerCard'
@@ -755,21 +755,46 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
                                 </span>
                             </Row>
                             <Row label="Schedule">
-                                <input
-                                    type="datetime-local"
-                                    value={(draft as any).scheduled_at ?? ''}
-                                    onChange={e => onChange({ scheduled_at: e.target.value } as any)}
-                                    style={{
-                                        flex: 1, fontSize: 12, color: C.body,
-                                        fontFamily: 'DM Sans, sans-serif',
-                                        border: `1px solid ${C.borderInput}`,
-                                        borderRadius: 10, padding: '7px 10px',
-                                        backgroundColor: C.surface, outline: 'none',
-                                    }}
-                                    onFocus={e => e.target.style.borderColor = C.primary}
-                                    onBlur={e => e.target.style.borderColor = C.borderInput}
+                                <InlineToggle
+                                    checked={draft.status === 'scheduled'}
+                                    onChange={v => onChange({
+                                        status: v ? 'scheduled' : 'draft',
+                                        publish_at: v ? (draft.publish_at ?? '') : null,
+                                    })}
                                 />
+                                <span className="text-[12px]" style={{ color: draft.status === 'scheduled' ? C.primary : C.secondary, fontFamily: 'DM Sans, sans-serif', fontWeight: draft.status === 'scheduled' ? 600 : 400 }}>
+                                    {draft.status === 'scheduled' ? 'Scheduled for later' : 'Publish immediately'}
+                                </span>
                             </Row>
+                            {draft.status === 'scheduled' && (
+                                <div className="my-1 p-3 rounded-xl flex flex-col gap-2"
+                                    style={{ backgroundColor: C.primaryLight, border: `1px solid ${C.border}` }}>
+                                    <div className="flex items-center gap-1.5">
+                                        <Calendar size={13} style={{ color: C.primary }} />
+                                        <p className="text-[11px] font-bold" style={{ color: C.primary, fontFamily: 'Syne, sans-serif' }}>Go live at</p>
+                                    </div>
+                                    <input
+                                        type="datetime-local"
+                                        value={draft.publish_at ?? ''}
+                                        onChange={e => onChange({ publish_at: e.target.value || null })}
+                                        style={{
+                                            width: '100%', fontSize: 13, color: C.body,
+                                            fontFamily: 'DM Sans, sans-serif',
+                                            border: `1px solid ${C.borderInput}`,
+                                            borderRadius: 10, padding: '8px 12px',
+                                            backgroundColor: C.surface, outline: 'none',
+                                            boxSizing: 'border-box',
+                                        }}
+                                        onFocus={e => e.target.style.borderColor = C.primary}
+                                        onBlur={e => e.target.style.borderColor = C.borderInput}
+                                    />
+                                    {draft.publish_at && (
+                                        <p className="text-[11px] font-semibold" style={{ color: C.primary, fontFamily: 'DM Sans, sans-serif' }}>
+                                            📅 {new Date(draft.publish_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
                         </Section>
 
                         {/* ── 12. PROMOTIONS ───────────────────────── */}
