@@ -46,6 +46,7 @@ import BarcodeImport from '@/app/dashboard/listing-generator/components/ai-impor
 import TitleImport from '@/app/dashboard/listing-generator/components/ai-import/title-to-listing/TitleImport'
 import MyTemplatesGallery from './MyTemplatesGallery'
 import { AIButton, PrimaryButton } from '@/components/ui/Buttons'
+import EbayAccountSelector from './EbayAccountSelector'
 import type { PlatformDetection, UrlImportResult, ImportedListingData } from '@/app/dashboard/listing-generator/types/url-import.types'
 import type { ImageImportData } from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImport'
 import type { ImageImportResult } from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImportProcessing'
@@ -959,30 +960,8 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
 
                     <div className="flex-1" />
 
-                    {/* eBay Store Badge — shows when connected */}
-                    {ebayUsername && (
-                        <div className="flex items-center gap-2 px-3 py-2 rounded-xl"
-                            style={{ backgroundColor: C.surface, border: `1px solid ${C.border}` }}>
-                            {/* Country flag emoji */}
-                            <span style={{ fontSize: 18, lineHeight: 1 }}>
-                                {String.fromCodePoint(
-                                    ...getFlagCode(ebayMarketplace).toUpperCase().split('').map(c => 0x1F1E6 + c.charCodeAt(0) - 65)
-                                )}
-                            </span>
-                            <div className="flex flex-col" style={{ lineHeight: 1.2 }}>
-                                <span className="text-[12px] font-bold" style={{ color: C.dark, fontFamily: 'DM Sans, sans-serif' }}>
-                                    {ebayUsername}
-                                </span>
-                                <span className="text-[10px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                                    {getMarketplaceLabel(ebayMarketplace)}
-                                </span>
-                            </div>
-                            <span className="text-[11px] font-bold px-1.5 py-0.5 rounded"
-                                style={{ backgroundColor: '#dcfce7', color: '#16a34a', fontFamily: 'DM Sans, sans-serif' }}>
-                                {currencySymbol}
-                            </span>
-                        </div>
-                    )}
+                    {/* eBay Account Selector — always visible, shows connection status */}
+                    <EbayAccountSelector />
 
                     {/* Sync Analytics button */}
                     <button
