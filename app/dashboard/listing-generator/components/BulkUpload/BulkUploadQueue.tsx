@@ -25,9 +25,34 @@
 import { useEffect, useRef, useCallback } from 'react'
 import {
     CheckCircle2, XCircle, Loader2, Clock,
-    AlertTriangle, X, Sparkles,
+    AlertTriangle, X, Sparkles, Download,
 } from 'lucide-react'
 import type { QueueRow } from './BulkUploadModal'
+
+// ── CSV export helper ─────────────────────────────────────────
+function exportQueueCSV(rows: QueueRow[]) {
+    const header = ['Row', 'Title / Barcode', 'Status', 'VeRO', 'Draft ID', 'Message']
+    const lines: string[] = [header.join(',')]
+    for (const row of rows) {
+        const label = row.title || (row.barcode ? `Barcode: ${row.barcode}` : `Row ${row._rowIndex}`)
+        const cells = [
+            String(row._rowIndex),
+            `"${label.replace(/"/g, '""')}"`,
+            row._status,
+            row._veroStatus ?? (row._status === 'done' ? 'ok' : '—'),
+            row._draftId ?? '—',
+            `"${(row._message || '').replace(/"/g, '""')}"`,
+        ]
+        lines.push(cells.join(','))
+    }
+    const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `bulk-results-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+}
 
 // ── Design tokens ─────────────────────────────────────────────
 const C = {
@@ -379,15 +404,27 @@ export function BulkUploadQueue({ rows, onCancel, onDone }: BulkUploadQueueProps
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
-                            gap: 12,
+                            gap: 10,
                             background: C.surface,
+                            flexWrap: 'wrap',
                         }}>
-                            <div style={{ fontSize: 13, color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                                {failed > 0
-                                    ? `${failed} row${failed > 1 ? 's' : ''} failed — fix errors and re-upload`
-                                    : 'All listings saved as drafts'
-                                }
-                            </div>
+                            {/* Export CSV */}
+                            <button
+                                onClick={() => exportQueueCSV(rows)}
+                                title="Download results as CSV"
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: 6,
+                                    padding: '8px 14px', borderRadius: 10,
+                                    fontSize: 12, fontWeight: 600,
+                                    border: `1px solid ${C.border}`,
+                                    background: C.bg, color: C.secondary,
+                                    cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                                }}
+                            >
+                                <Download size={12} />
+                                Export CSV
+                            </button>
+
                             <button
                                 onClick={onCancel}
                                 style={{

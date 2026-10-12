@@ -470,7 +470,13 @@ export default function ListingGeneratorPage() {
 
                 setBulkRows(prev => {
                     const next = [...prev]
-                    next[idx] = { ...next[idx], _status: 'done', _message: json.message || 'Listing created' }
+                    next[idx] = {
+                        ...next[idx],
+                        _status: 'done',
+                        _message: json.message || 'Listing created',
+                        _draftId: json.draftId ?? undefined,
+                        _veroStatus: json.veroStatus ?? 'ok',
+                    }
                     return next
                 })
             } catch (err: unknown) {
