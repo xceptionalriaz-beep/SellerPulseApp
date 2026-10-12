@@ -39,8 +39,8 @@ import {
   Package, Radar, ShieldCheck, Settings,
   ShieldAlert, LogOut, Bell, Menu, X, MessageCircle, ChevronDown,
   Users, Key, Power, Zap, Trophy, BarChart2, Mail, CreditCard, FileText, DollarSign, BookOpen, Wrench, Image, Briefcase, Eye, Lock, ListChecks,
-  Globe, History, RotateCcw, Upload, Sparkles, Palette,
-  LayoutTemplate, User, Settings2, ChevronRight,
+  Globe, History, RotateCcw, Sparkles, Palette,
+  LayoutTemplate, User, Settings2, ChevronRight, Star,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { NotificationsPanelOverlay } from '@/components/NotificationsPanel'
@@ -56,7 +56,6 @@ import TeamSwitcherBanner from '@/components/TeamSwitcherBanner'
 import SupportModal from '@/components/dashboard/SupportModal'
 import SecurityTab from '@/app/dashboard/profile/tabs/SecurityTab'
 import AnnouncementBanner from '@/components/dashboard/AnnouncementBanner'
-import { AIButton, PrimaryButton } from '@/components/ui/Buttons'
 
 // -- Nav items (mirrors Dart sidebar exactly) -------------------
 const isInUserMode = typeof window !== 'undefined' && sessionStorage.getItem('riazify_usermode') === '1'
@@ -71,6 +70,7 @@ const NAV_ITEMS = [
   { icon: Package, label: 'Inventory', href: '/dashboard/inventory' },
   { icon: Radar, label: 'Competitor Research', href: '/dashboard/competitor-research' },
   { icon: ShieldCheck, label: 'Orders', href: '/dashboard/orders' },
+  { icon: Star, label: 'Feedback', href: '/dashboard/feedback' },
 ]
 
 // -- Design Studio sub-sidebar tabs ----------------------------
