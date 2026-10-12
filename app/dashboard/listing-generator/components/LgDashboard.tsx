@@ -47,6 +47,7 @@ import TitleImport from '@/app/dashboard/listing-generator/components/ai-import/
 import MyTemplatesGallery from './MyTemplatesGallery'
 import { AIButton, PrimaryButton } from '@/components/ui/Buttons'
 import EbayAccountSelector from './EbayAccountSelector'
+import LowStockAlertManager from '@/components/ui/LowStockAlertManager'
 import type { PlatformDetection, UrlImportResult, ImportedListingData } from '@/app/dashboard/listing-generator/types/url-import.types'
 import type { ImageImportData } from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImport'
 import type { ImageImportResult } from '@/app/dashboard/listing-generator/components/ai-import/image-to-listing/ImageImportProcessing'
@@ -984,6 +985,9 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                     <Palette size={14} />
                     My Templates
                 </button>
+
+                {/* Low Stock Alerts — compact badge in toolbar */}
+                <LowStockAlertManager compact />
             </div>
             {/* Analytics error toast */}
             {analyticsError && (

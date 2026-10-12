@@ -21,6 +21,7 @@ import Tooltip from '@/components/ui/Tooltip'
 import ProDropdown from '@/components/ui/ProDropdown'
 import { PrimaryButton, SecondaryButton } from '@/components/ui/Buttons'
 import SkuGeneratorModal from '../SkuGeneratorModal'
+import VariationBuilder from '@/components/ui/VariationBuilder'
 
 // ── Design tokens ─────────────────────────────────────────────
 const C = {
@@ -836,12 +837,6 @@ export default function Step1Product({ draft, onChange, onNext, onSave }: Props)
                                 <p className="text-[12px] mt-0.5" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
                                     List multiple sizes, colours or styles in one listing. Saves eBay fees and consolidates search rank.
                                 </p>
-                                {draft.has_variations && (
-                                    <p className="text-[11px] mt-1.5 flex items-center gap-1"
-                                        style={{ color: C.primary, fontFamily: 'DM Sans, sans-serif' }}>
-                                        <ChevronRight size={11} /> Variation details can be configured after publishing
-                                    </p>
-                                )}
                             </div>
                         </div>
                         {/* Toggle */}
@@ -862,6 +857,15 @@ export default function Step1Product({ draft, onChange, onNext, onSave }: Props)
                             </div>
                         </label>
                     </div>
+
+                    {/* ── Variation Builder (expanded when toggle is on) ── */}
+                    {draft.has_variations && (
+                        <VariationBuilder
+                            value={draft.variations_config ?? null}
+                            onChange={(config) => onChange({ variations_config: config })}
+                            basePrice={draft.sell_price ?? null}
+                        />
+                    )}
 
                     {/* ── SECTION: Item Specifics ───────────────── */}
                     <div className="flex flex-col gap-3">

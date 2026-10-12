@@ -5,12 +5,13 @@ import { useState, useEffect, useCallback } from 'react'
 import {
   ShoppingBag, Link, Link2Off, RefreshCw,
   Shield, Bell, TrendingUp, Key, History,
-  CheckCircle, AlertTriangle, Clock, Lock,
+  CheckCircle, AlertTriangle, Clock, Lock, Zap,
   ShoppingCart, Store, Warehouse, Scissors,
 } from 'lucide-react'
 import Spinner, { PageSpinner } from '@/components/ui/Spinner'
 import { createClient } from '@/lib/supabase'
 import { useToast } from '@/components/ui/AppToast'
+import { getTokenStatus } from '@/lib/ebay-refresh'
 
 // ── Color tokens — Riazify v2 ─────────────────────────────────────────
 const C = {
@@ -148,15 +149,16 @@ export default function EbayManagerTab() {
   const supabase = createClient()
   const toast    = useToast()
 
-  const [isLoading,      setIsLoading]      = useState(true)
-  const [isConnecting,   setIsConnecting]   = useState(false)
-  const [isSyncing,      setIsSyncing]      = useState(false)
-  const [connected,      setConnected]      = useState(false)
-  const [connData,       setConnData]       = useState<any>(null)
-  const [syncHistory,    setSyncHistory]    = useState<any[]>([])
-  const [safeBuyerPct,   setSafeBuyerPct]   = useState(0)
-  const [selectedMp,     setSelectedMp]     = useState(MARKETPLACES[0])
-  const [showDisconnect, setShowDisconnect] = useState(false)
+  const [isLoading,        setIsLoading]        = useState(true)
+  const [isConnecting,     setIsConnecting]     = useState(false)
+  const [isSyncing,        setIsSyncing]        = useState(false)
+  const [isRefreshing,     setIsRefreshing]     = useState(false)
+  const [connected,        setConnected]        = useState(false)
+  const [connData,         setConnData]         = useState<any>(null)
+  const [syncHistory,      setSyncHistory]      = useState<any[]>([])
+  const [safeBuyerPct,     setSafeBuyerPct]     = useState(0)
+  const [selectedMp,       setSelectedMp]       = useState(MARKETPLACES[0])
+  const [showDisconnect,   setShowDisconnect]   = useState(false)
 
   // ── Load all data ────────────────────────────────────────────────────
   const loadAll = useCallback(async () => {
@@ -166,17 +168,30 @@ export default function EbayManagerTab() {
       if (!user) return
 
       const { data: profile } = await supabase
-        .from('profiles').select('ebay_marketplace, ebay_username, ebay_access_token').eq('id', user.id).single() as any
+        .from('profiles')
+        .select('ebay_marketplace, ebay_username, ebay_access_token, ebay_token_expires_at, ebay_refresh_token_expires_at, ebay_connected_at')
+        .eq('id', user.id).single() as any
 
       if (profile?.ebay_marketplace && profile?.ebay_access_token) {
         const mp = MARKETPLACES.find(m => m.id === profile.ebay_marketplace) || MARKETPLACES[0]
         setSelectedMp(mp)
         setConnected(true)
+
+        // Calculate real token status using the refresh utility
+        const tokenStatus = getTokenStatus(
+          profile.ebay_token_expires_at,
+          profile.ebay_refresh_token_expires_at,
+          profile.ebay_connected_at
+        )
+
         setConnData({
           ebayUsername: profile.ebay_username || user.email?.split('@')[0] || 'eBay Seller',
           storeName: '', feedbackScore: '',
           ordersSynced: 0, lastSyncText: 'Never',
-          expiryText: '18d', daysUntilExpiry: 18,
+          expiryText: tokenStatus.label,
+          daysUntilExpiry: tokenStatus.daysLeft,
+          tokenIsExpired: tokenStatus.isExpired,
+          needsReconnect: tokenStatus.needsReconnect,
           syncStatus: 'ok', marketplace: profile.ebay_marketplace,
         })
 
@@ -249,6 +264,34 @@ export default function EbayManagerTab() {
       toast.error(e.message || 'Connection failed')
       setIsConnecting(false)
     }
+  }
+
+  // ── Refresh access token ─────────────────────────────────────────────
+  async function handleRefreshToken() {
+    setIsRefreshing(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/ebay/refresh-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
+      })
+      const json = await res.json()
+      if (res.ok) {
+        await loadAll()
+        toast.info('eBay access token refreshed successfully')
+      } else {
+        // If refresh fails (expired refresh token), they need to reconnect
+        if (json.error?.includes('expired') || json.error?.includes('reconnect')) {
+          toast.error('Refresh token expired — please reconnect your eBay account')
+        } else {
+          toast.error(json.error ?? 'Token refresh failed')
+        }
+      }
+    } catch (e: any) { toast.error(`Refresh failed: ${e.message}`) }
+    finally { setIsRefreshing(false) }
   }
 
   // ── Sync ─────────────────────────────────────────────────────────────
@@ -459,10 +502,15 @@ export default function EbayManagerTab() {
             </div>
 
             {/* Warning banners */}
-            {connData?.daysUntilExpiry < 7 && (
+            {connData?.tokenIsExpired && (
+              <WarningBanner icon={AlertTriangle} color={C.red}
+                message="eBay token has expired. Reconnect to restore full access."
+                action="Reconnect" onTap={handleConnect} />
+            )}
+            {!connData?.tokenIsExpired && connData?.needsReconnect && (
               <WarningBanner icon={AlertTriangle} color={C.orange}
-                message={`Token expires in ${connData.daysUntilExpiry}d. Reconnect soon.`}
-                action="Renew" onTap={handleConnect} />
+                message={`Token expires in ${connData.daysUntilExpiry}d. Reconnect soon to avoid disruption.`}
+                action="Reconnect" onTap={handleConnect} />
             )}
 
             {/* Stats grid */}
@@ -470,7 +518,7 @@ export default function EbayManagerTab() {
               <DarkStat label="Orders Synced"  value={connData?.ordersSynced?.toString() || '0'} icon={ShoppingBag} color={C.blue}    />
               <DarkStat label="Safe Buyers"    value={safeBuyerPct > 0 ? `${safeBuyerPct}%` : '—'}                  icon={Shield}     color={C.green}   />
               <DarkStat label="Last Sync"      value={connData?.lastSyncText || 'Never'}                            icon={RefreshCw}  color={C.accent}  />
-              <DarkStat label="Token"          value={connData?.expiryText || '—'}                                  icon={Key}        color={connData?.daysUntilExpiry < 7 ? C.red : C.orange} />
+              <DarkStat label="Token"          value={connData?.expiryText || '—'}                                  icon={Key}        color={connData?.tokenIsExpired ? C.red : connData?.needsReconnect ? C.orange : C.green} />
             </div>
 
             <div className="border-t border-white/10 my-5" />
@@ -494,7 +542,22 @@ export default function EbayManagerTab() {
                 {isSyncing ? <Spinner size={14} color="#000" /> : <RefreshCw size={15} />}
                 {isSyncing ? 'Syncing...' : 'Sync Now'}
               </button>
-              {/* Refresh */}
+              {/* Refresh Token */}
+              <button
+                onClick={handleRefreshToken}
+                disabled={isRefreshing || connData?.needsReconnect}
+                title={connData?.needsReconnect ? 'Token near expiry — reconnect instead' : 'Refresh eBay access token'}
+                className="w-11 h-11 rounded-[10px] flex items-center justify-center border transition-all"
+                style={{
+                  backgroundColor: 'rgba(255,255,255,0.05)',
+                  borderColor: 'rgba(255,255,255,0.10)',
+                  opacity: connData?.needsReconnect ? 0.4 : 1,
+                }}>
+                {isRefreshing
+                  ? <Spinner size={14} color="rgba(255,255,255,0.6)" />
+                  : <Zap size={17} style={{ color: C.accent + 'CC' }} />}
+              </button>
+              {/* Reload */}
               <button onClick={loadAll}
                 className="w-11 h-11 rounded-[10px] flex items-center justify-center border"
                 style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.10)' }}>

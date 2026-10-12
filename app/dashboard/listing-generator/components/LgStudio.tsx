@@ -66,6 +66,7 @@ export interface DraftData {
     listing_format: string
     auction_duration: string
     has_variations: boolean
+    variations_config: import('@/app/dashboard/listing-generator/types/listing.types').VariationConfig | null
     item_specifics: Record<string, string>
     main_photo_url: string
     photo_urls: string[]
@@ -131,6 +132,7 @@ const INITIAL_DRAFT: DraftData = {
     listing_format: 'buy_it_now',
     auction_duration: '7',
     has_variations: false,
+    variations_config: null,
     item_specifics: {},
     main_photo_url: '',
     photo_urls: [],
@@ -333,6 +335,7 @@ export default function LgStudio({ draftId, onBack, atLimit = false, onUpgrade }
                 listing_format: draft.listing_format,
                 auction_duration: draft.auction_duration,
                 has_variations: draft.has_variations,
+                variations_config: draft.variations_config ?? null,
                 // ── Photos ──────────────────────────────────────────
                 main_photo_url: draft.main_photo_url || '',
                 photo_urls: draft.photo_urls || [],

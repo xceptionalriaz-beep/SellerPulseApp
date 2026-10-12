@@ -249,6 +249,8 @@ export interface ListingDraft {
     condition: ItemCondition | null
     sku: string | null
     item_specifics: Record<string, string>
+    has_variations: boolean
+    variations_config: VariationConfig | null
 
     // STEP 2 — Title
     title: string | null
@@ -621,6 +623,31 @@ export interface DropshipStockAlert {
     resolved_at: string | null
     auto_actioned: boolean
     created_at: string
+}
+
+// ─────────────────────────────────────────────────────────────
+// VARIATION BUILDER
+// Used by #17 Variation Builder feature.
+// Stored in listing_drafts.variations_config (jsonb)
+// ─────────────────────────────────────────────────────────────
+
+export interface VariationDimension {
+    name: string    // e.g. "Size", "Colour", "Material"
+    values: string[]  // e.g. ["S", "M", "L", "XL"]
+}
+
+export interface VariationRow {
+    id: string
+    combo: Record<string, string>  // { Size: 'S', Colour: 'Red' }
+    price: number | null            // overrides listing sell_price if set
+    quantity: number                // stock for this combo
+    sku: string                     // optional seller SKU
+    enabled: boolean                // unchecked = won't be published
+}
+
+export interface VariationConfig {
+    dimensions: VariationDimension[]
+    rows: VariationRow[]
 }
 
 // ─────────────────────────────────────────────────────────────
