@@ -55,31 +55,33 @@ interface Props {
     draftCategory?: string
 }
 
-// ── Category match map ─────────────────────────────────────────
-// Maps listing draft category keys → Design Studio template category slugs
-const DRAFT_TO_TEMPLATE_CAT: Record<string, string> = {
-    consumer_electronics: 'electronics',
-    computers:            'electronics',
-    clothing:             'fashion',
-    jewelry:              'fashion',
-    health_beauty:        'fashion',
-    home_garden:          'home',
-    furniture:            'home',
-    toys_hobbies:         'toys',
-    sporting_goods:       'sports',
-    pet_supplies:         'pets',
-    motors_parts:         'auto',
-    books_movies:         'general',
-    collectibles:         'general',
-    business:             'general',
-    default:              'general',
+// ── Category match ─────────────────────────────────────────────
+// Handles both new unified IDs (consumer_electronics) and
+// legacy Design-Studio slugs (electronics, fashion, etc.)
+const LEGACY_SLUGS: Record<string, string[]> = {
+    consumer_electronics: ['electronics'],
+    computers:            ['electronics', 'computers'],
+    clothing:             ['fashion', 'clothing'],
+    jewelry:              ['fashion', 'jewelry', 'jewellery'],
+    health_beauty:        ['fashion', 'health_beauty', 'health'],
+    home_garden:          ['home', 'home_garden'],
+    furniture:            ['home', 'furniture'],
+    toys_hobbies:         ['toys', 'toys_hobbies'],
+    sporting_goods:       ['sports', 'sporting_goods'],
+    pet_supplies:         ['pets', 'pet_supplies'],
+    motors_parts:         ['auto', 'motors_parts'],
+    books_movies:         ['general', 'books_movies'],
+    collectibles:         ['general', 'collectibles'],
+    business:             ['general', 'business'],
+    default:              ['general'],
 }
 
 function categoryMatch(templateCat: string, draftCat?: string): boolean {
     if (!draftCat || !templateCat) return false
-    const mapped = DRAFT_TO_TEMPLATE_CAT[draftCat]
-    if (!mapped) return false
-    return templateCat.toLowerCase() === mapped.toLowerCase()
+    const tc = templateCat.toLowerCase()
+    const dc = draftCat.toLowerCase()
+    if (tc === dc) return true                              // direct match (new IDs)
+    return LEGACY_SLUGS[dc]?.includes(tc) ?? false         // old slug match
 }
 
 export default function TemplatePickerCard({ templateId, onChange, draftId, onFilled, draftCategory }: Props) {
