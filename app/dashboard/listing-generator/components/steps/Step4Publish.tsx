@@ -18,6 +18,7 @@ import {
     Truck, RotateCcw, MapPin, Globe,
     Megaphone, Lock, Users, Hash, Layers,
     TrendingUp, ArrowRight, Flame, Palette,
+    ExternalLink,
 } from 'lucide-react'
 import type { DraftData } from '../LgStudio'
 import TemplatePickerCard from '../TemplatePickerCard'
@@ -199,22 +200,72 @@ const CATEGORY_MAP: Record<string, string> = {
 }
 const CATEGORY_OPTIONS = Object.entries(CATEGORY_MAP).map(([val, label]) => ({ val, label, enabled: true }))
 
+// ── Publish result state ──────────────────────────────────────
+interface PublishResult {
+    type: 'success' | 'error' | 'not_connected'
+    message: string
+    itemId?: string
+    ebayUrl?: string
+}
+
 // ── Main component ────────────────────────────────────────────
 export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Props): JSX.Element {
     const [publishing, setPublishing] = useState(false)
-    const [showToast, setShowToast] = useState(false)
+    const [publishResult, setPublishResult] = useState<PublishResult | null>(null)
     const [showActions, setShowActions] = useState(false)
     const health = calcHealth(draft as any)
     const { score, label: scoreLabel, color: scoreColor } = health
 
+    // If already published from a previous session, restore the live link
+    const existingItemId = (draft as any).ebay_listing_id as string | null
 
     async function handlePublish() {
+        if (!draft.id) {
+            // Save first to get an ID
+            onSave?.()
+            setPublishResult({ type: 'error', message: 'Please save the draft first before publishing.' })
+            return
+        }
+
         setPublishing(true)
-        onSave?.()
-        await new Promise(r => setTimeout(r, 1200))
-        setPublishing(false)
-        setShowToast(true)
-        setTimeout(() => setShowToast(false), 4000)
+        setPublishResult(null)
+
+        try {
+            const res = await fetch('/api/ebay/publish-listing', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ draftId: draft.id }),
+            })
+            const data = await res.json()
+
+            if (data.ok) {
+                // Success — update draft with returned itemId so UI reflects live status
+                onChange({ ebay_listing_id: data.itemId, status: 'published' } as any)
+                setPublishResult({
+                    type: 'success',
+                    message: 'Listed on eBay! 🎉',
+                    itemId: data.itemId,
+                    ebayUrl: data.ebayUrl,
+                })
+            } else if (data.notConnected) {
+                setPublishResult({
+                    type: 'not_connected',
+                    message: data.error ?? 'eBay is not connected.',
+                })
+            } else {
+                setPublishResult({
+                    type: 'error',
+                    message: data.error ?? 'Publishing failed. Please try again.',
+                })
+            }
+        } catch (err) {
+            setPublishResult({
+                type: 'error',
+                message: 'Network error. Please check your connection and try again.',
+            })
+        } finally {
+            setPublishing(false)
+        }
     }
 
     const fmt = (n: number | null) => n ? `$${Number(n).toFixed(2)}` : '—'
@@ -999,13 +1050,53 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
 
 
 
-                        {showToast && (
+                        {/* ── Already published banner ─────────────── */}
+                        {existingItemId && !publishResult && (
+                            <div className="flex items-center gap-2 p-3 rounded-xl"
+                                style={{ backgroundColor: '#dcfce7', border: `1px solid #86efac` }}>
+                                <CheckCircle2 size={14} style={{ color: '#16a34a', flexShrink: 0 }} />
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[12px] font-bold" style={{ color: '#14532d', fontFamily: 'Syne, sans-serif' }}>Live on eBay</p>
+                                    <p className="text-[10px] truncate" style={{ color: '#16a34a', fontFamily: 'DM Sans, sans-serif' }}>Item #{existingItemId}</p>
+                                </div>
+                                <a href={`https://www.ebay.com/itm/${existingItemId}`} target="_blank" rel="noopener noreferrer"
+                                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all hover:opacity-80"
+                                    style={{ backgroundColor: '#16a34a', color: '#fff', fontFamily: 'DM Sans, sans-serif', textDecoration: 'none' }}>
+                                    <ExternalLink size={10} /> View
+                                </a>
+                            </div>
+                        )}
+
+                        {/* ── Publish result feedback ───────────────── */}
+                        {publishResult && (
                             <div className="flex items-start gap-2 p-3 rounded-xl"
-                                style={{ backgroundColor: C.primaryLight, border: `1px solid ${C.border}` }}>
-                                <Zap size={12} style={{ color: C.primary, flexShrink: 0, marginTop: 1 }} />
-                                <div>
-                                    <p className="text-[12px] font-bold" style={{ color: C.dark, fontFamily: 'DM Sans, sans-serif' }}>Draft saved!</p>
-                                    <p className="text-[10px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>eBay API integration coming soon.</p>
+                                style={{
+                                    backgroundColor: publishResult.type === 'success' ? '#dcfce7' : publishResult.type === 'not_connected' ? C.warningBg : C.dangerBg,
+                                    border: `1px solid ${publishResult.type === 'success' ? '#86efac' : publishResult.type === 'not_connected' ? '#fcd34d' : '#fca5a5'}`,
+                                }}>
+                                {publishResult.type === 'success'
+                                    ? <CheckCircle2 size={14} style={{ color: '#16a34a', flexShrink: 0, marginTop: 1 }} />
+                                    : publishResult.type === 'not_connected'
+                                        ? <AlertCircle size={14} style={{ color: C.warning, flexShrink: 0, marginTop: 1 }} />
+                                        : <XCircle size={14} style={{ color: C.danger, flexShrink: 0, marginTop: 1 }} />
+                                }
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[12px] font-bold" style={{
+                                        color: publishResult.type === 'success' ? '#14532d' : publishResult.type === 'not_connected' ? '#92400e' : '#991b1b',
+                                        fontFamily: 'Syne, sans-serif',
+                                    }}>{publishResult.message}</p>
+                                    {publishResult.type === 'success' && publishResult.ebayUrl && (
+                                        <a href={publishResult.ebayUrl} target="_blank" rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-1 mt-1 text-[11px] font-semibold underline"
+                                            style={{ color: '#16a34a', fontFamily: 'DM Sans, sans-serif' }}>
+                                            <ExternalLink size={10} /> View on eBay
+                                        </a>
+                                    )}
+                                    {publishResult.type === 'not_connected' && (
+                                        <p className="text-[10px] mt-0.5" style={{ color: '#92400e', fontFamily: 'DM Sans, sans-serif' }}>
+                                            Go to Settings → Profile → eBay Manager to connect your account.
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         )}

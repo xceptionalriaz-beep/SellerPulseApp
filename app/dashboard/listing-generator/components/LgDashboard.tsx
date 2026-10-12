@@ -29,7 +29,7 @@ import {
     CheckCircle2, AlertTriangle, Pencil, Clock,
     Download, Trash2, ChevronLeft, ChevronRight,
     X, Package, TrendingUp, Circle, Zap, Copy, Check,
-    Columns, SlidersHorizontal, Filter, Star, Palette,
+    Columns, SlidersHorizontal, Filter, Star, Palette, ExternalLink,
 } from 'lucide-react'
 import UrlImport from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImport'
 import UrlImportProcessing from '@/app/dashboard/listing-generator/components/ai-import/url-to-listing/UrlImportProcessing'
@@ -1443,7 +1443,30 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                                     case 'status':
                                                         return (
                                                             <td key="status" className="px-3 py-1.5">
-                                                                <StatusPill status={listing.status} />
+                                                                <div className="flex flex-col gap-1">
+                                                                    <StatusPill status={listing.status} />
+                                                                    {listing.ebay_listing_id && (
+                                                                        <a
+                                                                            href={`https://www.ebay.com/itm/${listing.ebay_listing_id}`}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            onClick={e => e.stopPropagation()}
+                                                                            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold transition-all hover:opacity-80"
+                                                                            style={{
+                                                                                backgroundColor: '#dcfce7',
+                                                                                color: '#16a34a',
+                                                                                border: '1px solid #86efac',
+                                                                                textDecoration: 'none',
+                                                                                width: 'fit-content',
+                                                                                fontFamily: 'DM Sans, sans-serif',
+                                                                            }}
+                                                                            title={`View on eBay: ${listing.ebay_listing_id}`}
+                                                                        >
+                                                                            <ExternalLink size={8} />
+                                                                            eBay Live
+                                                                        </a>
+                                                                    )}
+                                                                </div>
                                                             </td>
                                                         )
                                                     case 'date':
@@ -1511,20 +1534,37 @@ export default function LgDashboard({ onNewListing: onNewListingProp, onEditDraf
                                                                     {listing.ebay_listing_id ? (
                                                                         <div className="flex items-center gap-1 group/ebay">
                                                                             <span className="text-[9px] font-bold px-1 py-0.5 rounded"
-                                                                                style={{ backgroundColor: C.warningBg, color: C.warning, fontFamily: 'DM Sans, sans-serif' }}>
+                                                                                style={{ backgroundColor: '#dcfce7', color: '#16a34a', fontFamily: 'DM Sans, sans-serif' }}>
                                                                                 eBay
                                                                             </span>
-                                                                            <span className="text-[11px]"
-                                                                                style={{ color: C.body, fontFamily: 'monospace' }}>
+                                                                            <a
+                                                                                href={`https://www.ebay.com/itm/${listing.ebay_listing_id}`}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                onClick={e => e.stopPropagation()}
+                                                                                className="text-[11px] hover:underline"
+                                                                                style={{ color: '#16a34a', fontFamily: 'monospace', textDecoration: 'none' }}
+                                                                                title="View on eBay"
+                                                                            >
                                                                                 {listing.ebay_listing_id}
-                                                                            </span>
+                                                                            </a>
                                                                             <button
                                                                                 onClick={e => { e.stopPropagation(); copyToClipboard(listing.ebay_listing_id!, `ebay-${listing.id}`) }}
                                                                                 className="opacity-0 group-hover/ebay:opacity-100 transition-opacity p-0.5 rounded"
                                                                                 style={{ color: copiedId === `ebay-${listing.id}` ? C.success : C.muted }}
-                                                                                title="Copy">
+                                                                                title="Copy eBay Item ID">
                                                                                 {copiedId === `ebay-${listing.id}` ? <Check size={10} /> : <Copy size={10} />}
                                                                             </button>
+                                                                            <a
+                                                                                href={`https://www.ebay.com/itm/${listing.ebay_listing_id}`}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                onClick={e => e.stopPropagation()}
+                                                                                className="opacity-0 group-hover/ebay:opacity-100 transition-opacity p-0.5 rounded"
+                                                                                style={{ color: '#16a34a' }}
+                                                                                title="Open on eBay">
+                                                                                <ExternalLink size={10} />
+                                                                            </a>
                                                                         </div>
                                                                     ) : (
                                                                         <div className="flex items-center gap-1">

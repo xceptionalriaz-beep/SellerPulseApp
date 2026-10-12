@@ -112,6 +112,7 @@ export interface DraftData {
     photo_count: number
     template_id: string | null
     template_is_compliant: boolean      // fetched from listing_templates on load
+    ebay_listing_id: string | null      // set after successful eBay publish
 }
 
 const INITIAL_DRAFT: DraftData = {
@@ -176,6 +177,7 @@ const INITIAL_DRAFT: DraftData = {
     current_step: 1,
     template_id: null,
     template_is_compliant: false,
+    ebay_listing_id: null,
 }
 
 // ── Step config ───────────────────────────────────────────────
@@ -363,7 +365,8 @@ export default function LgStudio({ draftId, onBack, atLimit = false, onUpgrade }
                 promoted_priority_budget: draft.promoted_priority_budget,
                 item_disclosures: draft.item_disclosures,
                 template_id: draft.template_id ?? null,
-                status: 'draft',
+                // Preserve 'published' status — only reset to 'draft' if still unpublished
+                status: draft.ebay_listing_id ? 'published' : 'draft',
                 current_step: currentStep,
                 updated_at: new Date().toISOString(),
             }
