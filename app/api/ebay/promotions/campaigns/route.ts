@@ -2,6 +2,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // GET  — list campaigns (local DB + optional eBay refresh)
 // POST — create a new campaign on eBay + cache locally
+// PATCH — update local-only fields (notes, auto_enroll, etc.)
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -28,7 +29,6 @@ async function getUser() {
 }
 
 // ── GET /api/ebay/promotions/campaigns ───────────────────────────────────────
-// Returns locally-cached campaigns. Pass ?refresh=1 to re-sync from eBay first.
 export async function GET(req: NextRequest) {
   try {
     const user = await getUser()
@@ -36,7 +36,6 @@ export async function GET(req: NextRequest) {
     const refresh = req.nextUrl.searchParams.get('refresh') === '1'
 
     if (refresh) {
-      // Pull campaigns from eBay and upsert
       const token = await getEbayToken(user.id)
       let offset = 0
       const limit = 200
@@ -48,10 +47,8 @@ export async function GET(req: NextRequest) {
           { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } }
         )
         if (!res.ok) {
-          const err = await res.text()
-          // 403 means scope not granted — warn but don't crash, show existing local data
           if (res.status === 403) break
-          throw new Error(`eBay campaigns list failed (${res.status}): ${err}`)
+          throw new Error(`eBay campaigns list failed (${res.status}): ${await res.text()}`)
         }
         const json = await res.json()
         const campaigns = json.campaigns ?? []
@@ -95,7 +92,8 @@ export async function GET(req: NextRequest) {
 }
 
 // ── POST /api/ebay/promotions/campaigns ──────────────────────────────────────
-// Body: { name, type, bidPercentage?, dailyBudget?, marketplaceId? }
+// Body: { name, type, bidPercentage?, dailyBudget?, marketplaceId?,
+//         endDate?, notes?, adRateStrategy?, bidAdjustmentPct?, maxAdRate?, autoEnroll? }
 export async function POST(req: NextRequest) {
   try {
     const user  = await getUser()
@@ -104,10 +102,16 @@ export async function POST(req: NextRequest) {
 
     const {
       name,
-      type         = 'PROMOTED_LISTINGS',
+      type             = 'PROMOTED_LISTINGS',
       bidPercentage,
       dailyBudget,
-      marketplaceId = 'EBAY_US',
+      marketplaceId    = 'EBAY_US',
+      endDate,
+      notes,
+      adRateStrategy   = 'FIXED',
+      bidAdjustmentPct,
+      maxAdRate,
+      autoEnroll       = false,
     } = body
 
     if (!name?.trim()) {
@@ -118,11 +122,13 @@ export async function POST(req: NextRequest) {
 
     const isCPS = type === 'PROMOTED_LISTINGS'
     const payload: any = {
-      campaignName: name.trim(),
-      campaignType: type,
+      campaignName:  name.trim(),
+      campaignType:  type,
       marketplaceId,
-      startDate:    new Date().toISOString().replace(/\.\d{3}Z$/, '.000Z'),
+      startDate:     new Date().toISOString().replace(/\.\d{3}Z$/, '.000Z'),
     }
+
+    if (endDate) payload.endDate = endDate
 
     if (isCPS) {
       if (!bidPercentage || isNaN(Number(bidPercentage))) {
@@ -133,7 +139,6 @@ export async function POST(req: NextRequest) {
         fundingModel:  'COST_PER_SALE',
       }
     } else {
-      // Priority / CPC
       if (!dailyBudget || isNaN(Number(dailyBudget))) {
         return NextResponse.json({ error: 'Daily budget is required for Priority campaigns' }, { status: 400 })
       }
@@ -146,12 +151,9 @@ export async function POST(req: NextRequest) {
     }
 
     const res = await fetch(`${MARKETING_BASE}/ad_campaign`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
+      method:  'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
     })
 
     if (!res.ok) {
@@ -159,23 +161,33 @@ export async function POST(req: NextRequest) {
       throw new Error(`eBay create campaign failed (${res.status}): ${err}`)
     }
 
-    // eBay returns the campaign ID in the Location header
-    const location  = res.headers.get('location') ?? ''
+    const location   = res.headers.get('location') ?? ''
     const campaignId = location.split('/').pop() ?? ''
 
-    // Cache locally
     const row = {
-      user_id:        user.id,
-      campaign_id:    campaignId,
-      campaign_name:  payload.campaignName,
-      campaign_type:  type,
-      funding_model:  isCPS ? 'COST_PER_SALE' : 'COST_PER_CLICK',
-      status:         'RUNNING',
-      bid_percentage: isCPS ? Number(bidPercentage) : null,
-      daily_budget:   !isCPS ? Number(dailyBudget) : null,
-      marketplace_id: marketplaceId,
-      start_date:     payload.startDate,
-      synced_at:      new Date().toISOString(),
+      user_id:            user.id,
+      campaign_id:        campaignId,
+      campaign_name:      payload.campaignName,
+      campaign_type:      type,
+      funding_model:      isCPS ? 'COST_PER_SALE' : 'COST_PER_CLICK',
+      status:             'RUNNING',
+      bid_percentage:     isCPS ? Number(bidPercentage) : null,
+      daily_budget:       !isCPS ? Number(dailyBudget)  : null,
+      marketplace_id:     marketplaceId,
+      start_date:         payload.startDate,
+      end_date:           endDate ?? null,
+      notes:              notes?.trim() || null,
+      ad_rate_strategy:   adRateStrategy,
+      bid_adjustment_pct: bidAdjustmentPct ? Number(bidAdjustmentPct) : null,
+      max_ad_rate:        maxAdRate ? Number(maxAdRate) : null,
+      auto_enroll:        Boolean(autoEnroll),
+      impressions:        0,
+      clicks:             0,
+      items_sold:         0,
+      sales_amount:       0,
+      ad_fees_amount:     0,
+      roas:               null,
+      synced_at:          new Date().toISOString(),
     }
 
     const { data: inserted, error: dbErr } = await (sb.from('promotion_campaigns') as any)
@@ -188,6 +200,39 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ campaign: inserted, campaignId })
   } catch (e: any) {
     console.error('[promotions/campaigns POST]', e)
+    return NextResponse.json({ error: e.message }, { status: 500 })
+  }
+}
+
+// ── PATCH /api/ebay/promotions/campaigns ─────────────────────────────────────
+// Update local-only fields: notes, auto_enroll, max_ad_rate, bid_adjustment_pct
+// Body: { campaignId, notes?, autoEnroll?, maxAdRate?, bidAdjustmentPct?, adRateStrategy? }
+export async function PATCH(req: NextRequest) {
+  try {
+    const user = await getUser()
+    const sb   = supabase()
+    const { campaignId, ...fields } = await req.json()
+
+    if (!campaignId) return NextResponse.json({ error: 'campaignId required' }, { status: 400 })
+
+    const updates: Record<string, any> = { updated_at: new Date().toISOString() }
+    if (fields.notes           !== undefined) updates.notes              = fields.notes
+    if (fields.autoEnroll      !== undefined) updates.auto_enroll        = fields.autoEnroll
+    if (fields.maxAdRate       !== undefined) updates.max_ad_rate        = fields.maxAdRate
+    if (fields.bidAdjustmentPct !== undefined) updates.bid_adjustment_pct = fields.bidAdjustmentPct
+    if (fields.adRateStrategy  !== undefined) updates.ad_rate_strategy   = fields.adRateStrategy
+
+    const { data, error } = await (sb.from('promotion_campaigns') as any)
+      .update(updates)
+      .eq('user_id', user.id)
+      .eq('campaign_id', campaignId)
+      .select()
+      .single()
+
+    if (error) throw error
+    return NextResponse.json({ campaign: data })
+  } catch (e: any) {
+    console.error('[promotions/campaigns PATCH]', e)
     return NextResponse.json({ error: e.message }, { status: 500 })
   }
 }
