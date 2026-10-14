@@ -14,7 +14,7 @@ import AdjustTool  from './tools/AdjustTool'
 import FilterTool  from './tools/FilterTool'
 import CropTool    from './tools/CropTool'
 import ResizeTool  from './tools/ResizeTool'
-// import RotateTool  from './tools/RotateTool'
+import RotateTool  from './tools/RotateTool'
 // import DrawTool    from './tools/DrawTool'
 // import TextTool    from './tools/TextTool'
 // import FrameTool   from './tools/FrameTool'
@@ -197,6 +197,7 @@ export default function ImageEditorModal({
             case 'filter': return <FilterTool {...common} />
             case 'crop':   return <CropTool   {...common} />
             case 'resize': return <ResizeTool {...common} />
+            case 'rotate': return <RotateTool {...common} />
             default:
                 return <PlaceholderPanel tool={TOOLS.find(t => t.id === activeTool)!} />
         }
