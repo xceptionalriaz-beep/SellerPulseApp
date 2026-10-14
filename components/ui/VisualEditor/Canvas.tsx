@@ -708,7 +708,7 @@ function BlockCard({
                     : isSelected
                         ? `2px solid ${C.primary}`
                         : hovered
-                            ? `2px dashed ${C.primaryBorder}`
+                            ? `2px dashed ${C.primary}`
                             : '2px solid transparent',
                 outlineOffset: 0,
                 backgroundColor: 'transparent',
@@ -1164,6 +1164,7 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
       el.style.outline = '';
       el.style.cursor = '';
       el.style.borderRadius = '';
+      el.style.width = '';
       var newHtml = el.innerHTML || '';
       var newText = el.innerText || el.textContent || '';
       // If innerHTML has span/a tags (formatted), commit as HTML
@@ -1191,6 +1192,7 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
       el.style.outline = '';
       el.style.cursor = '';
       el.style.borderRadius = '';
+      el.style.width = '';
       el.innerText = originalText;
       activeEditable = null;
     }
@@ -1218,6 +1220,10 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
       el.style.outline = '2px solid #7530fb';
       el.style.borderRadius = '3px';
       el.style.cursor = 'text';
+      // Shrink outline to fit text length — skip table cells (breaks table layout)
+      if (el.tagName !== 'TD' && el.tagName !== 'TH') {
+        el.style.width = 'fit-content';
+      }
       el.focus();
       // No select-all: single-click places the cursor at the click position naturally.
       // (dblclick naturally selects a word; that behaviour was part of old double-click UX)
