@@ -88,6 +88,84 @@ const COUNTRIES: { code: string; name: string; fi: string }[] = [
   { code: 'ZA', name: 'South Africa',   fi: 'za' },
 ]
 
+// ── Country dropdown — ProDropdown style (pill list + flag-icons) ─────────────
+function CountryPill({ country, isSelected, onTap }: {
+  country: typeof COUNTRIES[0]; isSelected: boolean; onTap: () => void
+}) {
+  const [hover, setHover] = useState(false)
+  return (
+    <div
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      onClick={onTap}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 8,
+        padding: '9px 16px', borderRadius: 999, cursor: 'pointer',
+        backgroundColor: isSelected ? '#8FFF00' : 'transparent',
+        color: isSelected ? '#1a2410' : C.body,
+        fontWeight: isSelected ? 700 : 500,
+        fontSize: 13, fontFamily: 'DM Sans, sans-serif',
+        border: `1.5px solid ${!isSelected && hover ? '#8FFF00' : 'transparent'}`,
+        transition: 'all 0.12s', marginBottom: 2,
+      }}
+    >
+      <span className={`fi fi-${country.fi}`} style={{ borderRadius: 2, display: 'inline-block' }} />
+      {country.name}
+    </div>
+  )
+}
+
+function CountryDropdown({ value, onChange }: { value: string; onChange: (code: string) => void }) {
+  const [open, setOpen] = useState(false)
+  const selected = COUNTRIES.find(c => c.code === value) ?? COUNTRIES[0]
+
+  return (
+    <div style={{ position: 'relative' }}>
+      {/* Trigger */}
+      <button
+        type="button"
+        onClick={() => setOpen(v => !v)}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 8,
+          padding: '8px 12px', borderRadius: 8,
+          border: `1px solid ${open ? '#8FFF00' : C.borderInput}`,
+          backgroundColor: open ? '#f5ffe0' : C.surface,
+          color: C.body, fontSize: 13, fontWeight: 600,
+          cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+          transition: 'all 0.15s',
+        }}
+      >
+        <span className={`fi fi-${selected.fi}`} style={{ borderRadius: 2, display: 'inline-block' }} />
+        {selected.name}
+        <ChevronDown size={14} style={{ color: open ? '#8FFF00' : C.muted, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', marginLeft: 2 }} />
+      </button>
+
+      {open && <div style={{ position: 'fixed', inset: 0, zIndex: 40 }} onClick={() => setOpen(false)} />}
+
+      {open && (
+        <div style={{
+          position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 50,
+          width: 240, backgroundColor: C.surface,
+          border: `1px solid #E2E8F0`, borderRadius: 18,
+          boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
+          maxHeight: 320, overflowY: 'auto',
+        }}>
+          <div style={{ padding: 8, display: 'flex', flexDirection: 'column' }}>
+            {COUNTRIES.map(c => (
+              <CountryPill
+                key={c.code}
+                country={c}
+                isSelected={c.code === value}
+                onTap={() => { onChange(c.code); setOpen(false) }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 const DEFAULT_PRESETS: Preset[] = [
   { id: 'poly',   name: 'Poly Mailer', l: '12', w: '15', h: '0',  wLbs: '0', wOz: '4'  },
   { id: 'small',  name: 'Small Box',   l: '8',  w: '6',  h: '4',  wLbs: '1', wOz: '0'  },
@@ -455,15 +533,10 @@ export default function ShippingPage() {
                 {/* Country selector */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   <label style={lbl}>Country</label>
-                  <select
+                  <CountryDropdown
                     value={recipient.country}
-                    onChange={e => setRecipient(r => ({ ...r, country: e.target.value, state: e.target.value === 'US' ? 'NY' : '' }))}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: `1px solid ${C.borderInput}`, backgroundColor: C.surface, color: C.body, fontSize: 13, fontFamily: 'DM Sans, sans-serif', outline: 'none', cursor: 'pointer' }}
-                  >
-                    {COUNTRIES.map(c => (
-                      <option key={c.code} value={c.code}>{c.name}</option>
-                    ))}
-                  </select>
+                    onChange={code => setRecipient(r => ({ ...r, country: code, state: code === 'US' ? 'NY' : '' }))}
+                  />
                 </div>
 
                 {/* International shipping notice */}
