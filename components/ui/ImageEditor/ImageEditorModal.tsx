@@ -26,7 +26,7 @@ import {
 import { ToolId, ImageEditorState, DEFAULT_STATE } from './types'
 
 // ── Tool panel imports — add here as you build each one ────────────────
-// import AdjustTool  from './tools/AdjustTool'
+import AdjustTool  from './tools/AdjustTool'
 // import FilterTool  from './tools/FilterTool'
 // import CropTool    from './tools/CropTool'
 // import ResizeTool  from './tools/ResizeTool'
@@ -142,7 +142,7 @@ export default function ImageEditorModal({
         const common = { state: editorState, onChange: pushState, imageUrl }
         switch (activeTool) {
             // Uncomment as each tool is built:
-            // case 'adjust': return <AdjustTool {...common} />
+            case 'adjust': return <AdjustTool {...common} />
             // case 'filter': return <FilterTool {...common} />
             // case 'crop':   return <CropTool   {...common} />
             // case 'resize': return <ResizeTool {...common} />
