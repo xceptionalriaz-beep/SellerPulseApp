@@ -1213,7 +1213,12 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
     document.addEventListener('dblclick', function(e) {
       var target = e.target;
       if (!target) return;
-      if (target.closest('[data-canvas-dropzone]') || target.closest('[data-canvas-overlay]')) return;
+      // Never enter text-edit mode for overlay elements
+      if (target.closest('[data-canvas-overlay]')) return;
+      // Block text editing inside image dropzones (those containing img[data-slot]),
+      // but ALLOW text editing inside text/content layout dropzones (two_column, three_column etc.)
+      var dropzoneAncestor = target.closest('[data-canvas-dropzone]');
+      if (dropzoneAncestor && dropzoneAncestor.querySelector('img[data-slot]')) return;
 
       // Prefer inner text elements over outer container
       var el = target.closest('h1, h2, h3, h4, h5, h6, p, span, li, blockquote');
@@ -1371,12 +1376,16 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
         }
         var newHtml = target.innerHTML || '';
         var newText = target.innerText || target.textContent || '';
+        // Identify which slot/prop was edited via the closest dropzone ancestor
+        var formatZone = target.closest('[data-canvas-dropzone]');
+        var formatPropKey = formatZone ? formatZone.getAttribute('data-canvas-dropzone') : null;
         // Commit the result
         window.parent.postMessage({
           type: 'RIAZIFY_COMMIT_HTML_EDIT',
           blockId: BLOCK_ID,
           html: newHtml,
-          text: newText
+          text: newText,
+          propKey: formatPropKey
         }, '*');
         // Clean up
         target.contentEditable = 'false';
@@ -1513,8 +1522,7 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
         // because image blocks have no rich-text content to edit.
         // Text slots without content (.add-btn present) also fire SELECT_SLOT.
         // Only non-image slots that already have content fire EDIT_SLOT_CONTENT.
-        var hasImageSlot = zone.querySelector('img[data-slot]') !== null;
-        // hasContent: zone has a real image (data-slot img) → always open asset picker (SELECT_SLOT).
+        // hasImageSlot: zone has a real image (data-slot img) → always open asset picker (SELECT_SLOT).
         // Never open the rich-text EDIT_SLOT_CONTENT for image dropzones.
         var hasImageSlot = zone.querySelector('img[data-slot]') !== null;
         if (slot && window.parent) {
@@ -1638,7 +1646,7 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
         e.stopPropagation();
         var slot = overlay.getAttribute('data-canvas-overlay');
         if (slot && window.parent) {
-          window.parent.postMessage({ type: 'RIAZIFY_OPEN_ASSET_PICKER', propKey: slot }, '*');
+          window.parent.postMessage({ type: 'RIAZIFY_OPEN_ASSET_PICKER', propKey: slot, blockId: BLOCK_ID }, '*');
         }
       });
     });
@@ -1656,6 +1664,8 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
 
     // Auto-resize iframe to exact true content height
     const [height, setHeight] = React.useState(60)
+    // Track ResizeObserver to disconnect before each rewrite (prevents memory leak)
+    const roRef = React.useRef<ResizeObserver | null>(null)
 
     // Measure the exact tight content boundary (zero artificial padding)
     const measureHeight = React.useCallback(() => {
@@ -1708,10 +1718,16 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
                 })
 
                 // Observe the actual template root element for content changes
+                // Disconnect any previous observer before creating a new one (prevents leak)
+                if (roRef.current) {
+                    roRef.current.disconnect()
+                    roRef.current = null
+                }
                 if (doc.body && (window as any).ResizeObserver) {
                     const target = doc.body.firstElementChild || doc.body
                     const ro = new ResizeObserver(measureHeight)
                     ro.observe(target)
+                    roRef.current = ro
                 }
             }
         } catch (e) {
