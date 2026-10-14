@@ -531,30 +531,6 @@ function VisualEditorInner() {
                                 <History size={13} />
                                 History
                             </button>
-                            {/* Standalone Download HTML button */}
-                            <button
-                                onClick={() => {
-                                    if (exportFnRef.current) {
-                                        exportFnRef.current()
-                                    } else {
-                                        alert('Add at least one block to the canvas before exporting.')
-                                    }
-                                }}
-                                style={{
-                                    display: 'flex', alignItems: 'center', gap: 6,
-                                    padding: '6px 12px',
-                                    border: `1px solid ${C.border}`, borderRadius: 8,
-                                    backgroundColor: C.surface, color: C.secondary,
-                                    fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 600,
-                                    cursor: 'pointer', transition: 'all 0.15s',
-                                }}
-                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = C.bg; e.currentTarget.style.borderColor = C.primary; (e.currentTarget as HTMLElement).style.color = C.primary }}
-                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = C.surface; e.currentTarget.style.borderColor = C.border; (e.currentTarget as HTMLElement).style.color = C.secondary }}
-                                title="Download ready-to-use eBay HTML"
-                            >
-                                <Download size={13} />
-                                Download HTML
-                            </button>
                             <div style={{ position: 'relative' }} ref={actionMenuRef}>
                                 {/* Trigger button */}
                                 <button

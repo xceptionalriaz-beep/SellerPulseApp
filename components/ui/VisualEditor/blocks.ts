@@ -2822,14 +2822,28 @@ ${thumbCells}
                         .trim() || raw.trim()
                 }
 
-                const cells = rawBadges.map(raw => {
+                const safeId = (id || 'badge_row').replace(/[^a-zA-Z0-9_-]/g, '_')
+                const badgeItems = rawBadges.map(raw => {
                     const iconSvg = getBadgeIcon(raw, badgeText)
                     const label = cleanLabel(raw)
-                    return `<td align="center" style="width:${colWidth}%;padding:4px 6px;vertical-align:middle;"><div style="display:block;width:100%;box-sizing:border-box;padding:8px 10px;background-color:${badgeBg};color:${badgeText};font-family:Arial,sans-serif;font-size:12px;font-weight:700;line-height:16px;border-radius:100px;border:1px solid ${badgeBorder};text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${iconSvg}<span style="vertical-align:middle;">${label}</span></div></td>`
+                    return `<div class="badge-col-${safeId}" style="box-sizing:border-box;padding:4px 5px;flex:1 1 ${colWidth}%;width:${colWidth}%;max-width:100%;display:inline-block;vertical-align:middle;">` +
+                        `<div class="badge-pill-${safeId}" style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;box-sizing:border-box;padding:8px 10px;background-color:${badgeBg};color:${badgeText};font-family:Arial,sans-serif;font-size:12px;font-weight:700;line-height:16px;border-radius:100px;border:1px solid ${badgeBorder};text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">` +
+                        `${iconSvg}<span style="vertical-align:middle;overflow:hidden;text-overflow:ellipsis;">${label}</span>` +
+                        `</div></div>`
                 }).join('')
 
+                const responsiveCss = `<style>` +
+                    `.badge-wrap-${safeId}{display:flex;flex-wrap:wrap;align-items:stretch;justify-content:center;width:100%;box-sizing:border-box;}` +
+                    `@media only screen and (max-width: 600px){` +
+                    `.badge-pad-${safeId}{padding-left:8px !important;padding-right:8px !important;}` +
+                    `.badge-col-${safeId}{flex:0 0 50% !important;width:50% !important;max-width:50% !important;padding:3px 4px !important;box-sizing:border-box !important;}` +
+                    `.badge-pill-${safeId}{padding:6px 6px !important;font-size:11px !important;min-height:32px !important;gap:4px !important;}` +
+                    `.badge-pill-${safeId} svg{width:12px !important;height:12px !important;margin-right:4px !important;}` +
+                    `}` +
+                    `</style>`
+
                 return wrapBlock('badge_row' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#ffffff'};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;table-layout:fixed;"><tr>${cells}</tr></table></td></tr></table>`, p)
+                    `${responsiveCss}<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;border-collapse:collapse;"><tr><td class="badge-pad-${safeId}" style="background-color:${p.bgColor ?? '#ffffff'};${pad(p)}width:100%;"><div class="badge-wrap-${safeId}">${badgeItems}</div></td></tr></table>`, p)
             },
         },
 
