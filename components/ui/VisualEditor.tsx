@@ -1748,6 +1748,45 @@ export default function VisualEditor({
                                     persistent
                                 />
                             </div>
+                            {/* Undo / Redo — left of the eye icon */}
+                            <div style={{ display: 'flex', alignItems: 'center', borderLeft: '1px solid #e2e8f0' }}>
+                                <button
+                                    onClick={handleUndo}
+                                    disabled={undoStack.length === 0}
+                                    title={`Undo (Cmd+Z) · ${undoStack.length} step${undoStack.length !== 1 ? 's' : ''} available`}
+                                    style={{
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        gap: 2, padding: '0 8px', height: '100%', minHeight: 34,
+                                        border: 'none', backgroundColor: 'transparent',
+                                        color: undoStack.length > 0 ? '#64748b' : '#cbd5e1',
+                                        cursor: undoStack.length > 0 ? 'pointer' : 'default',
+                                        transition: 'all 0.15s',
+                                        fontSize: 11,
+                                    }}
+                                    onMouseEnter={e => { if (undoStack.length > 0) e.currentTarget.style.backgroundColor = '#f8fafc' }}
+                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
+                                >
+                                    <Undo2 size={13} />
+                                    {undoStack.length > 0 && <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: '#94a3b8' }}>{undoStack.length}</span>}
+                                </button>
+                                <button
+                                    onClick={handleRedo}
+                                    disabled={redoStack.length === 0}
+                                    title="Redo (Cmd+Shift+Z)"
+                                    style={{
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        padding: '0 8px', height: '100%', minHeight: 34,
+                                        border: 'none', backgroundColor: 'transparent',
+                                        color: redoStack.length > 0 ? '#64748b' : '#cbd5e1',
+                                        cursor: redoStack.length > 0 ? 'pointer' : 'default',
+                                        transition: 'all 0.15s',
+                                    }}
+                                    onMouseEnter={e => { if (redoStack.length > 0) e.currentTarget.style.backgroundColor = '#f8fafc' }}
+                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
+                                >
+                                    <Redo2 size={13} />
+                                </button>
+                            </div>
                             {/* Eye icon — sits at right end of BlockToolbar row */}
                             <button
                                 onClick={() => setLivePreview(p => !p)}
@@ -2256,20 +2295,6 @@ function EditorToolbar({
 
                 <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
 
-                <ToolbarButton onClick={onUndo} disabled={!canUndo} title={`Undo (Cmd+Z) · ${undoDepth} step${undoDepth !== 1 ? 's' : ''} available`}>
-                    <Undo2 size={14} />
-                </ToolbarButton>
-                {canUndo && (
-                    <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, marginLeft: -4 }}>
-                        {undoDepth}
-                    </span>
-                )}
-                <ToolbarButton onClick={onRedo} disabled={!canRedo} title="Redo (Cmd+Shift+Z)">
-                    <Redo2 size={14} />
-                </ToolbarButton>
-
-                <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
-
                 {/* Block count pill */}
                 <div style={{
                     display: 'flex', alignItems: 'center', gap: 5,
@@ -2378,17 +2403,36 @@ function EditorToolbar({
                         overflow: 'hidden', flexShrink: 0,
                     }}>
                         <div style={{
-                            display: 'flex', alignItems: 'center', gap: 5,
+                            display: 'flex', alignItems: 'center', gap: 6,
                             padding: '4px 10px',
                             fontFamily: 'DM Sans, sans-serif', fontSize: 11,
                             fontWeight: 600, color: C.primary,
-                            maxWidth: 180, overflow: 'hidden',
+                            maxWidth: 200, overflow: 'hidden',
                         }}>
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                            </svg>
+                            {linkedListing.main_photo_url ? (
+                                <img
+                                    src={linkedListing.main_photo_url}
+                                    alt=""
+                                    style={{
+                                        width: 22, height: 22, borderRadius: 4,
+                                        objectFit: 'cover', flexShrink: 0,
+                                        border: `1px solid ${C.primaryBorder ?? '#ddd6fe'}`,
+                                    }}
+                                />
+                            ) : (
+                                <div style={{
+                                    width: 22, height: 22, borderRadius: 4, flexShrink: 0,
+                                    backgroundColor: C.primaryBorder ?? '#ddd6fe',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                }}>
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                                        stroke={C.primary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                                        <circle cx="8.5" cy="8.5" r="1.5" />
+                                        <polyline points="21 15 16 10 5 21" />
+                                    </svg>
+                                </div>
+                            )}
                             <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                 {linkedListing.product_name || linkedListing.title || 'Listing'}
                             </span>
