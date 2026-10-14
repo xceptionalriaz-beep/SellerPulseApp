@@ -29,6 +29,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import { SLOT_SELECTION_CSS } from './slotSelection'
 import React, { useState, useRef, useCallback } from 'react'
+import { ImageEditorModal } from '@/components/ui/ImageEditor'
 import {
     Layout, Columns2, Columns3, Square,
     Heading, Pilcrow, List, Minus,
@@ -241,6 +242,11 @@ export default function Canvas({
         setReorderOver(null)
     }, [])
 
+    // ── Image editor modal state ──
+    const [imgEditorSrc, setImgEditorSrc] = React.useState<string | null>(null)
+    const [imgEditorPropKey, setImgEditorPropKey] = React.useState<string | null>(null)
+    const [imgEditorBlockId, setImgEditorBlockId] = React.useState<string | null>(null)
+
     // ── Listen for block selection clicks from inside iframes ──
     React.useEffect(() => {
         const handleIframeClick = (e: MessageEvent) => {
@@ -248,6 +254,12 @@ export default function Canvas({
                 if (!lockedIds.has(e.data.blockId)) {
                     onSelect(e.data.blockId)
                 }
+            }
+            // Open image editor modal when user clicks edit icon on a canvas image
+            if (e.data?.type === 'RIAZIFY_EDIT_IMAGE' && e.data.imageUrl) {
+                setImgEditorSrc(e.data.imageUrl)
+                setImgEditorPropKey(e.data.propKey || null)
+                setImgEditorBlockId(e.data.blockId || null)
             }
         }
         window.addEventListener('message', handleIframeClick)
@@ -397,6 +409,25 @@ export default function Canvas({
                     )}
                 </div>
             </div>{/* ── /zoom wrapper ── */}
+
+            {/* ── Image Editor Modal ── */}
+            {imgEditorSrc && (
+                <ImageEditorModal
+                    imageUrl={imgEditorSrc}
+                    imageName={imgEditorPropKey || 'image'}
+                    onSave={(_editedUrl, _state) => {
+                        // TODO: wire save back to block prop when filter/crop are implemented
+                        setImgEditorSrc(null)
+                        setImgEditorPropKey(null)
+                        setImgEditorBlockId(null)
+                    }}
+                    onClose={() => {
+                        setImgEditorSrc(null)
+                        setImgEditorPropKey(null)
+                        setImgEditorBlockId(null)
+                    }}
+                />
+            )}
         </div >
     )
 }
@@ -1147,7 +1178,20 @@ ${fontOverrideCss}${colorOverrideCss}${fontSizeOverrideCss}${fontWeightOverrideC
   div[data-canvas-dropzone]:hover div[data-canvas-overlay],
   div[data-canvas-dropzone] div[data-canvas-overlay]:hover { opacity: 1 !important; pointer-events: auto !important; }
 
-  /* Removed inline text editing hover indicator */
+  /* Image edit button overlay */
+  .riazify-img-wrap { position: relative; display: inline-block; }
+  .riazify-img-edit-btn {
+    position: absolute; top: 8px; right: 8px;
+    background: rgba(117,48,251,0.92); color: #fff;
+    border: none; border-radius: 8px;
+    padding: 5px 11px; font-size: 12px; font-weight: 600;
+    font-family: Arial, sans-serif;
+    cursor: pointer; display: flex; align-items: center; gap: 5px;
+    opacity: 0; transition: opacity 0.15s ease;
+    pointer-events: auto; z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+  .riazify-img-wrap:hover .riazify-img-edit-btn { opacity: 1; }
 </style>
 <script>
 (function() {
@@ -1687,6 +1731,60 @@ ${fontOverrideCss}${colorOverrideCss}${fontSizeOverrideCss}${fontWeightOverrideC
         }
       });
     });
+
+    // ── Image edit button overlay ──
+    // For every real <img> with a loaded src (not a placeholder token), wrap it
+    // in a .riazify-img-wrap and inject an "Edit" button.
+    function attachImageEditButtons() {
+      document.querySelectorAll('img').forEach(function(img) {
+        // Skip already-wrapped, tiny tracker pixels, and token placeholders
+        if (img.closest('.riazify-img-wrap')) return;
+        var src = img.getAttribute('src') || '';
+        if (!src || src.startsWith('data:image/svg+xml') || src.indexOf('{{') !== -1) return;
+        // Skip tiny images (likely spacers)
+        if ((img.naturalWidth && img.naturalWidth < 20) || (img.naturalHeight && img.naturalHeight < 20)) return;
+
+        // Figure out which propKey this image belongs to
+        var propKey = null;
+        var dropzone = img.closest('[data-canvas-dropzone]');
+        if (dropzone) propKey = dropzone.getAttribute('data-canvas-dropzone');
+        if (!propKey) {
+          var slotEl = img.closest('[data-slot]');
+          if (slotEl) propKey = slotEl.getAttribute('data-slot');
+        }
+
+        // Wrap the img in a relative-position span
+        var wrapper = document.createElement('span');
+        wrapper.className = 'riazify-img-wrap';
+        wrapper.style.cssText = 'position:relative;display:inline-block;line-height:0;';
+        img.parentNode.insertBefore(wrapper, img);
+        wrapper.appendChild(img);
+
+        // Build the edit button
+        var btn = document.createElement('button');
+        btn.className = 'riazify-img-edit-btn';
+        btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit Image';
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (window.parent) {
+            window.parent.postMessage({
+              type: 'RIAZIFY_EDIT_IMAGE',
+              imageUrl: img.src,
+              propKey: propKey,
+              blockId: BLOCK_ID
+            }, '*');
+          }
+        });
+        wrapper.appendChild(btn);
+      });
+    }
+
+    // Run once after DOM ready, then again after images load
+    attachImageEditButtons();
+    window.addEventListener('load', attachImageEditButtons);
+    // Also run after a short delay for dynamically updated images
+    setTimeout(attachImageEditButtons, 600);
 
   });
 })();
