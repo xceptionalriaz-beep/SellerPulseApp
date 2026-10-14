@@ -33,6 +33,55 @@ const C = {
     danger: '#ef4444',
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// BLOCK TOOLBAR CAPABILITIES MAP
+//
+// Controls which toolbar sections are visible per content block type.
+// Slot-edit mode always shows all caps (user is editing rich text directly).
+// Unknown block types default to showing everything.
+//
+// Caps keys:
+//   font       — font family picker
+//   bold       — bold / italic / underline / strikethrough
+//   blockquote — blockquote toggle
+//   link       — eBay link button
+//   clear      — clear formatting
+//   highlight  — text highlight colour picker
+//   level      — H2 / H3 / T heading level buttons
+//   list       — bullet / numbered list buttons
+//   align      — left / center / right alignment buttons
+//   size       — font size selector
+//   color      — text colour picker
+// ─────────────────────────────────────────────────────────────────────────────
+const BLOCK_TOOLBAR_CAPS: Record<string, ReadonlySet<string>> = {
+    heading:           new Set(['font', 'bold', 'link', 'clear', 'highlight', 'level', 'align', 'size', 'color']),
+    paragraph:         new Set(['font', 'bold', 'blockquote', 'link', 'clear', 'highlight', 'align', 'size', 'color']),
+    bullet_list:       new Set(['font', 'bold', 'clear', 'highlight', 'list', 'size', 'color']),
+    numbered_list:     new Set(['font', 'bold', 'clear', 'highlight', 'list', 'size', 'color']),
+    quote_block:       new Set(['font', 'bold', 'link', 'clear', 'highlight', 'align', 'size', 'color']),
+    warning_box:       new Set(['font', 'bold', 'size', 'color']),
+    info_box:          new Set(['font', 'bold', 'size', 'color']),
+    data_table:        new Set(['font', 'bold', 'size', 'color']),
+    faq_block:         new Set(['font', 'bold', 'size', 'color']),
+    faq_section:       new Set(['font', 'bold', 'size', 'color']),
+    testimonials:      new Set(['font', 'bold', 'size', 'color']),
+    testimonial_block: new Set(['font', 'bold', 'size', 'color']),
+    badge_row:         new Set(['font', 'size', 'color']),
+    divider:           new Set(['color']),
+}
+
+/**
+ * Returns true if the given capability should be shown for the current block.
+ * In slot-edit mode all capabilities are always visible.
+ */
+function hasCap(blockType: string | undefined, cap: string, isSlotEdit: boolean): boolean {
+    if (isSlotEdit) return true
+    if (!blockType) return true
+    const caps = BLOCK_TOOLBAR_CAPS[blockType]
+    if (!caps) return true // unknown block type → show everything
+    return caps.has(cap)
+}
+
 // 100+ fonts now loaded dynamically from ./fonts
 
 const miniBtn: React.CSSProperties = {
@@ -645,95 +694,112 @@ export default function BlockToolbar({
             </div>
             <div style={sepStyle} />
 
-            {/* Formatting */}
-            <button onClick={handleToggleBold} title="Bold (B)" style={{
-                ...miniBtn,
-                fontWeight: 'bold',
-                backgroundColor: activeProps.fontWeight === 'bold' || activeProps.fontWeight === '700' || activeProps.fontWeight === '800' || activeProps.fontWeight === '900' ? C.primary : 'transparent',
-                color: activeProps.fontWeight === 'bold' || activeProps.fontWeight === '700' || activeProps.fontWeight === '800' || activeProps.fontWeight === '900' ? '#ffffff' : '#1f1d2e',
-            }}>B</button>
-            <button onClick={handleToggleItalic} title="Italic (I)" style={{
-                ...miniBtn,
-                fontStyle: 'italic',
-                backgroundColor: activeProps.fontStyle === 'italic' ? C.primary : 'transparent',
-                color: activeProps.fontStyle === 'italic' ? '#ffffff' : '#1f1d2e',
-            }}>I</button>
-            <button onClick={handleToggleUnderline} title="Underline (U)" style={{
-                ...miniBtn,
-                textDecoration: 'underline',
-                backgroundColor: activeProps.textDecoration === 'underline' ? C.primary : 'transparent',
-                color: activeProps.textDecoration === 'underline' ? '#ffffff' : '#1f1d2e',
-            }}>U</button>
-            <button onClick={handleToggleStrikethrough} title="Strikethrough" style={{
-                ...miniBtn,
-                textDecoration: 'line-through',
-                backgroundColor: activeProps.textDecoration === 'line-through' ? C.primary : 'transparent',
-                color: activeProps.textDecoration === 'line-through' ? '#ffffff' : '#1f1d2e',
-            }}>S</button>
-            <button onClick={handleToggleBlockquote} title="Blockquote" style={{
-                ...miniBtn,
-                backgroundColor: safeProps.isBlockquote ? C.primary : 'transparent',
-                color: safeProps.isBlockquote ? '#ffffff' : '#1f1d2e',
-            }}>
-                <Quote size={14} />
-            </button>
-            <div style={{ position: 'relative', display: 'inline-flex' }}>
-                <button onClick={() => {
-                    if (isOwnUrlBlock) {
-                        setShowRedirectTooltip(true)
-                        setTimeout(() => setShowRedirectTooltip(false), 2800)
-                    } else {
-                        setLinkInput(currentLinkUrl)
-                        setLinkError(null)
-                        setShowLinkModal(true)
-                    }
-                }} title={isOwnUrlBlock ? 'Edit URL in Attributes tab' : 'Insert eBay Link'} style={{
+            {/* ── Formatting: Bold / Italic / Underline / Strikethrough ── */}
+            {hasCap(blockType, 'bold', !!slotEdit) && (
+                <>
+                    <button onClick={handleToggleBold} title="Bold (B)" style={{
+                        ...miniBtn,
+                        fontWeight: 'bold',
+                        backgroundColor: activeProps.fontWeight === 'bold' || activeProps.fontWeight === '700' || activeProps.fontWeight === '800' || activeProps.fontWeight === '900' ? C.primary : 'transparent',
+                        color: activeProps.fontWeight === 'bold' || activeProps.fontWeight === '700' || activeProps.fontWeight === '800' || activeProps.fontWeight === '900' ? '#ffffff' : '#1f1d2e',
+                    }}>B</button>
+                    <button onClick={handleToggleItalic} title="Italic (I)" style={{
+                        ...miniBtn,
+                        fontStyle: 'italic',
+                        backgroundColor: activeProps.fontStyle === 'italic' ? C.primary : 'transparent',
+                        color: activeProps.fontStyle === 'italic' ? '#ffffff' : '#1f1d2e',
+                    }}>I</button>
+                    <button onClick={handleToggleUnderline} title="Underline (U)" style={{
+                        ...miniBtn,
+                        textDecoration: 'underline',
+                        backgroundColor: activeProps.textDecoration === 'underline' ? C.primary : 'transparent',
+                        color: activeProps.textDecoration === 'underline' ? '#ffffff' : '#1f1d2e',
+                    }}>U</button>
+                    <button onClick={handleToggleStrikethrough} title="Strikethrough" style={{
+                        ...miniBtn,
+                        textDecoration: 'line-through',
+                        backgroundColor: activeProps.textDecoration === 'line-through' ? C.primary : 'transparent',
+                        color: activeProps.textDecoration === 'line-through' ? '#ffffff' : '#1f1d2e',
+                    }}>S</button>
+                </>
+            )}
+
+            {/* ── Blockquote ── */}
+            {hasCap(blockType, 'blockquote', !!slotEdit) && (
+                <button onClick={handleToggleBlockquote} title="Blockquote" style={{
                     ...miniBtn,
-                    backgroundColor: hasLink ? C.primary : 'transparent',
-                    color: hasLink ? '#ffffff' : '#1f1d2e',
+                    backgroundColor: safeProps.isBlockquote ? C.primary : 'transparent',
+                    color: safeProps.isBlockquote ? '#ffffff' : '#1f1d2e',
                 }}>
-                    <Link size={14} />
+                    <Quote size={14} />
                 </button>
-                {showRedirectTooltip && (
-                    <div style={{
-                        position: 'absolute',
-                        bottom: 'calc(100% + 8px)',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        background: '#1f1d2e',
-                        color: '#ffffff',
-                        fontSize: 12,
-                        fontWeight: 500,
-                        whiteSpace: 'nowrap',
-                        padding: '6px 12px',
-                        borderRadius: 20,
-                        boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
-                        zIndex: 9999,
-                        pointerEvents: 'none',
-                        animation: 'fadeInUp 0.18s ease',
+            )}
+
+            {/* ── Link ── */}
+            {hasCap(blockType, 'link', !!slotEdit) && (
+                <div style={{ position: 'relative', display: 'inline-flex' }}>
+                    <button onClick={() => {
+                        if (isOwnUrlBlock) {
+                            setShowRedirectTooltip(true)
+                            setTimeout(() => setShowRedirectTooltip(false), 2800)
+                        } else {
+                            setLinkInput(currentLinkUrl)
+                            setLinkError(null)
+                            setShowLinkModal(true)
+                        }
+                    }} title={isOwnUrlBlock ? 'Edit URL in Attributes tab' : 'Insert eBay Link'} style={{
+                        ...miniBtn,
+                        backgroundColor: hasLink ? C.primary : 'transparent',
+                        color: hasLink ? '#ffffff' : '#1f1d2e',
                     }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <Link size={11} color="#ffffff" />
-                            {isNavBlock ? 'Edit link URLs in the Attributes tab →' : 'Edit the button URL in the Attributes tab →'}
-                        </span>
+                        <Link size={14} />
+                    </button>
+                    {showRedirectTooltip && (
                         <div style={{
                             position: 'absolute',
-                            top: '100%',
+                            bottom: 'calc(100% + 8px)',
                             left: '50%',
                             transform: 'translateX(-50%)',
-                            width: 0, height: 0,
-                            borderLeft: '6px solid transparent',
-                            borderRight: '6px solid transparent',
-                            borderTop: '6px solid #1f1d2e',
-                        }} />
-                    </div>
-                )}
-            </div>
-            <button onClick={handleClearFormatting} title="Clear Formatting" style={miniBtn}>
-                <Eraser size={14} />
-            </button>
+                            background: '#1f1d2e',
+                            color: '#ffffff',
+                            fontSize: 12,
+                            fontWeight: 500,
+                            whiteSpace: 'nowrap',
+                            padding: '6px 12px',
+                            borderRadius: 20,
+                            boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+                            zIndex: 9999,
+                            pointerEvents: 'none',
+                            animation: 'fadeInUp 0.18s ease',
+                        }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                                <Link size={11} color="#ffffff" />
+                                {isNavBlock ? 'Edit link URLs in the Attributes tab →' : 'Edit the button URL in the Attributes tab →'}
+                            </span>
+                            <div style={{
+                                position: 'absolute',
+                                top: '100%',
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                width: 0, height: 0,
+                                borderLeft: '6px solid transparent',
+                                borderRight: '6px solid transparent',
+                                borderTop: '6px solid #1f1d2e',
+                            }} />
+                        </div>
+                    )}
+                </div>
+            )}
 
-            {/* Highlight picker */}
+            {/* ── Clear Formatting ── */}
+            {hasCap(blockType, 'clear', !!slotEdit) && (
+                <button onClick={handleClearFormatting} title="Clear Formatting" style={miniBtn}>
+                    <Eraser size={14} />
+                </button>
+            )}
+
+            {/* ── Highlight picker ── */}
+            {hasCap(blockType, 'highlight', !!slotEdit) && (
             <div ref={highlightRef} style={{ position: 'relative', display: 'inline-flex' }}>
                 <button
                     onClick={() => setShowHighlightPicker(p => !p)}
@@ -806,109 +872,127 @@ export default function BlockToolbar({
                     </div>
                 )}
             </div>
+            )}
+
+            {/* ── Separator before structural controls ── */}
+            {(hasCap(blockType, 'level', !!slotEdit) || hasCap(blockType, 'list', !!slotEdit) || hasCap(blockType, 'align', !!slotEdit)) && (
+                <div style={sepStyle} />
+            )}
+
+            {/* ── Headings: H2 / H3 / T ── */}
+            {hasCap(blockType, 'level', !!slotEdit) && (
+                <>
+                    <button onClick={() => handleHeading('h2')} title="Heading 2 (H2)" style={{
+                        ...miniBtn,
+                        fontSize: 11,
+                        fontWeight: 'bold',
+                        backgroundColor: safeProps.level === 'h2' ? C.primary : 'transparent',
+                        color: safeProps.level === 'h2' ? '#ffffff' : '#1f1d2e',
+                    }}>H2</button>
+                    <button onClick={() => handleHeading('h3')} title="Heading 3 (H3)" style={{
+                        ...miniBtn,
+                        fontSize: 10,
+                        fontWeight: 'bold',
+                        backgroundColor: safeProps.level === 'h3' ? C.primary : 'transparent',
+                        color: safeProps.level === 'h3' ? '#ffffff' : '#1f1d2e',
+                    }}>H3</button>
+                    <button onClick={() => handleHeading('p')} title="Paragraph (T)" style={{
+                        ...miniBtn,
+                        fontSize: 11,
+                        fontWeight: 'normal',
+                        backgroundColor: safeProps.level === 'p' ? C.primary : 'transparent',
+                        color: safeProps.level === 'p' ? '#ffffff' : '#1f1d2e',
+                    }}>T</button>
+                    {hasCap(blockType, 'list', !!slotEdit) && <div style={sepStyle} />}
+                </>
+            )}
+
+            {/* ── Lists: Bullet / Numbered ── */}
+            {hasCap(blockType, 'list', !!slotEdit) && (
+                <>
+                    <button onClick={() => handleList('bullet')} title="Bullet List" style={{
+                        ...miniBtn,
+                        backgroundColor: safeProps.listStyle === 'bullet' ? C.primary : 'transparent',
+                        color: safeProps.listStyle === 'bullet' ? '#ffffff' : '#1f1d2e',
+                    }}><List size={14} /></button>
+                    <button onClick={() => handleList('numbered')} title="Numbered List" style={{
+                        ...miniBtn,
+                        backgroundColor: safeProps.listStyle === 'numbered' ? C.primary : 'transparent',
+                        color: safeProps.listStyle === 'numbered' ? '#ffffff' : '#1f1d2e',
+                    }}><ListOrdered size={14} /></button>
+                </>
+            )}
+
+            {/* ── Alignment: Left / Center / Right ── */}
+            {hasCap(blockType, 'align', !!slotEdit) && (
+                <>
+                    {hasCap(blockType, 'list', !!slotEdit) && <div style={sepStyle} />}
+                    <button onClick={() => handleAlign('left')} title="Align Left" style={{
+                        ...miniBtn,
+                        backgroundColor: (activeProps.align ?? 'left') === 'left' ? C.primary : 'transparent',
+                        color: (activeProps.align ?? 'left') === 'left' ? '#ffffff' : '#1f1d2e',
+                    }}><AlignLeft size={14} /></button>
+                    <button onClick={() => handleAlign('center')} title="Align Centre" style={{
+                        ...miniBtn,
+                        backgroundColor: activeProps.align === 'center' ? C.primary : 'transparent',
+                        color: activeProps.align === 'center' ? '#ffffff' : '#1f1d2e',
+                    }}><AlignCenter size={14} /></button>
+                    <button onClick={() => handleAlign('right')} title="Align Right" style={{
+                        ...miniBtn,
+                        backgroundColor: activeProps.align === 'right' ? C.primary : 'transparent',
+                        color: activeProps.align === 'right' ? '#ffffff' : '#1f1d2e',
+                    }}><AlignRight size={14} /></button>
+                </>
+            )}
 
             <div style={sepStyle} />
 
-            {/* Headings */}
-            <button onClick={() => handleHeading('h2')} title="Heading 2 (H2)" style={{
-                ...miniBtn,
-                fontSize: 11,
-                fontWeight: 'bold',
-                backgroundColor: safeProps.level === 'h2' ? C.primary : 'transparent',
-                color: safeProps.level === 'h2' ? '#ffffff' : '#1f1d2e',
-            }}>H2</button>
-            <button onClick={() => handleHeading('h3')} title="Heading 3 (H3)" style={{
-                ...miniBtn,
-                fontSize: 10,
-                fontWeight: 'bold',
-                backgroundColor: safeProps.level === 'h3' ? C.primary : 'transparent',
-                color: safeProps.level === 'h3' ? '#ffffff' : '#1f1d2e',
-            }}>H3</button>
-            <button onClick={() => handleHeading('p')} title="Paragraph (T)" style={{
-                ...miniBtn,
-                fontSize: 11,
-                fontWeight: 'normal',
-                backgroundColor: safeProps.level === 'p' ? C.primary : 'transparent',
-                color: safeProps.level === 'p' ? '#ffffff' : '#1f1d2e',
-            }}>T</button>
+            {/* ── Font Size ── */}
+            {hasCap(blockType, 'size', !!slotEdit) && (
+                <>
+                    <select
+                        value={activeProps.fontSize ?? '14px'}
+                        onChange={e => {
+                            if (slotEdit) { handleFormatSlotProp('fontSize', e.target.value); return }
+                            onChange({ ...blockProps, fontSize: parseInt(e.target.value) })
+                        }}
+                        title="Font size"
+                        style={{
+                            backgroundColor: '#ffffff', color: '#1f1d2e',
+                            border: '1px solid #cbd5e1', borderRadius: 4,
+                            padding: '3px 4px', fontSize: 11, cursor: 'pointer', width: 52,
+                        }}
+                    >
+                        {['10px', '11px', '12px', '13px', '14px', '15px', '16px', '18px', '20px', '22px', '24px', '28px', '32px', '36px', '48px'].map(s => (
+                            <option key={s} value={s}>{s.replace('px', '')}</option>
+                        ))}
+                    </select>
+                    <div style={sepStyle} />
+                </>
+            )}
 
-            <div style={sepStyle} />
-
-            {/* Lists */}
-            <button onClick={() => handleList('bullet')} title="Bullet List" style={{
-                ...miniBtn,
-                backgroundColor: safeProps.listStyle === 'bullet' ? C.primary : 'transparent',
-                color: safeProps.listStyle === 'bullet' ? '#ffffff' : '#1f1d2e',
-            }}><List size={14} /></button>
-            <button onClick={() => handleList('numbered')} title="Numbered List" style={{
-                ...miniBtn,
-                backgroundColor: safeProps.listStyle === 'numbered' ? C.primary : 'transparent',
-                color: safeProps.listStyle === 'numbered' ? '#ffffff' : '#1f1d2e',
-            }}><ListOrdered size={14} /></button>
-
-            <div style={sepStyle} />
-
-            <div style={sepStyle} />
-
-            {/* Align */}
-            <button onClick={() => handleAlign('left')} title="Align Left" style={{
-                ...miniBtn,
-                backgroundColor: (activeProps.align ?? 'left') === 'left' ? C.primary : 'transparent',
-                color: (activeProps.align ?? 'left') === 'left' ? '#ffffff' : '#1f1d2e',
-            }}><AlignLeft size={14} /></button>
-            <button onClick={() => handleAlign('center')} title="Align Centre" style={{
-                ...miniBtn,
-                backgroundColor: activeProps.align === 'center' ? C.primary : 'transparent',
-                color: activeProps.align === 'center' ? '#ffffff' : '#1f1d2e',
-            }}><AlignCenter size={14} /></button>
-            <button onClick={() => handleAlign('right')} title="Align Right" style={{
-                ...miniBtn,
-                backgroundColor: activeProps.align === 'right' ? C.primary : 'transparent',
-                color: activeProps.align === 'right' ? '#ffffff' : '#1f1d2e',
-            }}><AlignRight size={14} /></button>
-
-            <div style={sepStyle} />
-
-            {/* Font size */}
-            <select
-                value={activeProps.fontSize ?? '14px'}
-                onChange={e => {
-                    if (slotEdit) { handleFormatSlotProp('fontSize', e.target.value); return }
-                    onChange({ ...blockProps, fontSize: parseInt(e.target.value) })
-                }}
-                title="Font size"
-                style={{
-                    backgroundColor: '#ffffff', color: '#1f1d2e',
-                    border: '1px solid #cbd5e1', borderRadius: 4,
-                    padding: '3px 4px', fontSize: 11, cursor: 'pointer', width: 52,
-                }}
-            >
-                {['10px', '11px', '12px', '13px', '14px', '15px', '16px', '18px', '20px', '22px', '24px', '28px', '32px', '36px', '48px'].map(s => (
-                    <option key={s} value={s}>{s.replace('px', '')}</option>
-                ))}
-            </select>
-
-            <div style={sepStyle} />
-
-            {/* Text colour */}
-            <label title="Text colour" style={{ display: 'flex', alignItems: 'center', gap: 3, cursor: 'pointer', padding: '0 4px' }}>
-                <span style={{ fontSize: 11, fontWeight: 700, color: '#1f1d2e', fontFamily: 'DM Sans, sans-serif' }}>A</span>
-                <div style={{ position: 'relative' }}>
-                    <input
-                        type="color"
-                        value={activeProps.color ?? '#1e1535'}
-                        onChange={e => handleTextColor(e.target.value)}
-                        style={{ width: 18, height: 18, padding: 0, border: 'none', cursor: 'pointer', borderRadius: 3 }}
-                        title="Text colour"
-                    />
-                    <div style={{
-                        position: 'absolute', bottom: -2, left: 0, right: 0, height: 3,
-                        backgroundColor: activeProps.color ?? '#1e1535', borderRadius: 2,
-                    }} />
-                </div>
-            </label>
-
-            <div style={sepStyle} />
+            {/* ── Text Colour ── */}
+            {hasCap(blockType, 'color', !!slotEdit) && (
+                <>
+                    <label title="Text colour" style={{ display: 'flex', alignItems: 'center', gap: 3, cursor: 'pointer', padding: '0 4px' }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: '#1f1d2e', fontFamily: 'DM Sans, sans-serif' }}>A</span>
+                        <div style={{ position: 'relative' }}>
+                            <input
+                                type="color"
+                                value={activeProps.color ?? '#1e1535'}
+                                onChange={e => handleTextColor(e.target.value)}
+                                style={{ width: 18, height: 18, padding: 0, border: 'none', cursor: 'pointer', borderRadius: 3 }}
+                                title="Text colour"
+                            />
+                            <div style={{
+                                position: 'absolute', bottom: -2, left: 0, right: 0, height: 3,
+                                backgroundColor: activeProps.color ?? '#1e1535', borderRadius: 2,
+                            }} />
+                        </div>
+                    </label>
+                    <div style={sepStyle} />
+                </>
+            )}
 
             {/* Live Preview toggle — eye icon only */}
             {onToggleLivePreview && (

@@ -1087,6 +1087,32 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
                 : ''
             const fontLinkTag = props.fontFamily ? getGoogleFontLinkHtml(props.fontFamily) : ''
 
+            // ── Text color override ─────────────────────────────────────────────────────
+            // Only applied when props.color is explicitly set.
+            // Blocks that hardcode their own colours (quote_block, warning_box, info_box,
+            // data_table, testimonials) do NOT set props.color in their defaultProps —
+            // so this override only fires when the user deliberately picks a colour from
+            // the toolbar, making it a safe global override for all block types.
+            const colorOverrideCss = props.color
+                ? `  /* Text color override — user-selected color from toolbar */\n  p, li, td, th, h1, h2, h3, h4, blockquote, span { color: ${props.color} !important; }\n`
+                : ''
+
+            // ── Font size override ──────────────────────────────────────────────────────
+            // Same principle: only applied when the prop is explicitly set.
+            // For blocks that read p.fontSize in toHtml, the inline style and this CSS
+            // override carry the same value — harmless. For hardcoded blocks, this only
+            // fires after a toolbar interaction.
+            const fontSizeRaw = (props as any).fontSize
+            const fontSizeOverrideCss = (fontSizeRaw !== undefined && fontSizeRaw !== null)
+                ? `  /* Font size override — user-selected size from toolbar */\n  p, li, td, th, h1, h2, h3, h4 { font-size: ${typeof fontSizeRaw === 'number' ? fontSizeRaw + 'px' : fontSizeRaw} !important; }\n`
+                : ''
+
+            // ── Font weight override ────────────────────────────────────────────────────
+            const fontWeightRaw = (props as any).fontWeight
+            const fontWeightOverrideCss = (fontWeightRaw && fontWeightRaw !== '400' && fontWeightRaw !== 'normal')
+                ? `  /* Font weight override — user-selected weight from toolbar */\n  p, li, td, th, h1, h2, h3, h4 { font-weight: ${fontWeightRaw} !important; }\n`
+                : ''
+
             return `<!DOCTYPE html>
 <html>
 <head>
@@ -1101,7 +1127,7 @@ ${fontLinkTag}
     overflow: hidden;
     width: ${previewWidth}px;
   }
-${fontOverrideCss}
+${fontOverrideCss}${colorOverrideCss}${fontSizeOverrideCss}${fontWeightOverrideCss}
   table { border-collapse: collapse; }
   img { border: 0; display: block; max-width: 100%; cursor: pointer; }
   a { text-decoration: none; }
