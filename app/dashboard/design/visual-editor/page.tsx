@@ -93,16 +93,23 @@ const PLACEHOLDER_GROUPS = [
     },
 ]
 
-// ── Category options ──────────────────────────────────────────────────────────
+// ── Category options — IDs match gallery page CATEGORIES for filter compatibility
 const CATEGORIES: DropdownOption[] = [
-    { val: 'general', label: 'General', enabled: true },
-    { val: 'electronics', label: 'Electronics', enabled: true },
-    { val: 'fashion', label: 'Fashion & Beauty', enabled: true },
-    { val: 'home', label: 'Home & Garden', enabled: true },
-    { val: 'auto', label: 'Auto Parts', enabled: true },
-    { val: 'pet', label: 'Pet Supplies', enabled: true },
-    { val: 'sports', label: 'Sports & Outdoors', enabled: true },
-    { val: 'toys', label: 'Toys & Games', enabled: true },
+    { val: 'general',              label: 'General / Other',          enabled: true },
+    { val: 'consumer_electronics', label: 'Consumer Electronics',     enabled: true },
+    { val: 'computers',            label: 'Computers & Tablets',      enabled: true },
+    { val: 'clothing',             label: 'Clothing & Accessories',   enabled: true },
+    { val: 'jewelry',              label: 'Jewellery & Watches',      enabled: true },
+    { val: 'health_beauty',        label: 'Health & Beauty',          enabled: true },
+    { val: 'home_garden',          label: 'Home & Garden',            enabled: true },
+    { val: 'furniture',            label: 'Furniture',                enabled: true },
+    { val: 'toys_hobbies',         label: 'Toys & Hobbies',           enabled: true },
+    { val: 'sporting_goods',       label: 'Sporting Goods',           enabled: true },
+    { val: 'collectibles',         label: 'Collectibles & Art',       enabled: true },
+    { val: 'books_movies',         label: 'Books & Media',            enabled: true },
+    { val: 'pet_supplies',         label: 'Pet Supplies',             enabled: true },
+    { val: 'motors_parts',         label: 'Motors & Parts',           enabled: true },
+    { val: 'business',             label: 'Business & Industrial',    enabled: true },
 ]
 
 // ── Supabase raw client (listing_templates not yet typed) ─────────────────────
@@ -156,7 +163,9 @@ function VisualEditorInner() {
     const supabase = createClient()
     const router = useRouter()
     const searchParams = useSearchParams()
-    const isAdmin = searchParams.get('admin') === 'true'
+    // isAdmin is always false — system templates are set server-side only.
+    // Never derive admin status from a URL param any user could append.
+    const isAdmin = false
 
     // templateId from query — if present, load existing template
     const templateId = searchParams.get('id')
@@ -168,9 +177,7 @@ function VisualEditorInner() {
     const [category, setCategory] = useState('general')
     const [savedId, setSavedId] = useState<string | null>(templateId)
     const [saving, setSaving] = useState(false)
-    const [publishing, setPublishing] = useState(false)
     const [saved, setSaved] = useState(false)
-    const [published, setPublished] = useState(false)
     const [autoSaveLabel, setAutoSaveLabel] = useState<'idle' | 'saving' | 'saved'>('idle')
     const [loading, setLoading] = useState(!!templateId)
     const [editingName, setEditingName] = useState(false)
@@ -179,7 +186,11 @@ function VisualEditorInner() {
     const [actionMenuOpen, setActionMenuOpen] = useState(false)
     const actionMenuRef = useRef<HTMLDivElement>(null)
     const exportFnRef = useRef<(() => void) | null>(null)
+    // Single source of truth for publish state — previously duplicated as
+    // published/publishing booleans AND publishStatus string (bug #8)
     const [publishStatus, setPublishStatus] = useState<'idle' | 'publishing' | 'published'>('idle')
+    const publishing = publishStatus === 'publishing'
+    const published  = publishStatus === 'published'
     /** Phase 1 AI bridge — slot role map for this template */
     const [slots, setSlots] = useState<TemplateSlot[]>([])
     const [showVersionHistory, setShowVersionHistory] = useState(false)
@@ -369,8 +380,6 @@ function VisualEditorInner() {
 
     // ── Publish ───────────────────────────────────────────────────────────────
     const handlePublish = useCallback(async () => {
-        setPublishing(true)
-        setPublished(false)
         setPublishStatus('publishing')
         try {
             const { data: { user } } = await supabase.auth.getUser()
@@ -384,7 +393,7 @@ function VisualEditorInner() {
                 slots,
                 is_shared: true,
                 is_system: isAdmin,
-                thumbnail_url: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?w=200&h=150&fit=crop',
+                thumbnail_url: null, // auto-generated or set later
             }
 
             if (savedId) {
@@ -395,9 +404,8 @@ function VisualEditorInner() {
                         updated_at: new Date().toISOString(),
                     })
                     .eq('id', savedId)
-                setPublished(true)
                 setPublishStatus('published')
-                setTimeout(() => { setPublished(false); setPublishStatus('idle') }, 3000)
+                setTimeout(() => setPublishStatus('idle'), 3000)
                 router.refresh()
             } else {
                 const { data, error } = await (supabase as any)
@@ -413,17 +421,14 @@ function VisualEditorInner() {
                 if (!error && data) {
                     setSavedId(data.id)
                     window.history.replaceState(null, '', `?id=${data.id}`)
-                    setPublished(true)
                     setPublishStatus('published')
-                    setTimeout(() => { setPublished(false); setPublishStatus('idle') }, 3000)
+                    setTimeout(() => setPublishStatus('idle'), 3000)
                     router.push('/dashboard/design?tab=templates')
                 }
             }
         } catch (err) {
             console.error('[visual-editor] publish error:', err)
             setPublishStatus('idle')
-        } finally {
-            setPublishing(false)
         }
     }, [savedId, name, category, html, slots, supabase, isAdmin])
 
@@ -490,312 +495,6 @@ function VisualEditorInner() {
             backgroundColor: C.bg,
         }}>
 
-            {/* ── TOP BAR REMOVED — back + name now live in EditorToolbar ── */}
-            <div style={{ display: 'none' }}>
-                {/* Left — back + name */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
-                    {/* Back button */}
-                    <button
-                        onClick={() => router.push('/dashboard/design')}
-                        title="Back to Design Studio"
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 5,
-                            padding: '5px 10px',
-                            border: `1px solid ${C.border}`,
-                            borderRadius: 8,
-                            backgroundColor: 'transparent',
-                            cursor: 'pointer',
-                            fontFamily: 'DM Sans, sans-serif',
-                            fontSize: 12,
-                            color: C.secondary,
-                            whiteSpace: 'nowrap',
-                            flexShrink: 0,
-                            transition: 'all 0.15s',
-                        }}
-                        onMouseEnter={e => {
-                            e.currentTarget.style.backgroundColor = C.bg
-                            e.currentTarget.style.color = C.dark
-                        }}
-                        onMouseLeave={e => {
-                            e.currentTarget.style.backgroundColor = 'transparent'
-                            e.currentTarget.style.color = C.secondary
-                        }}
-                    >
-                        <ChevronLeft size={13} />
-                        Design Studio
-                    </button>
-
-                    {/* Divider */}
-                    <div style={{ width: 1, height: 20, backgroundColor: C.border, flexShrink: 0 }} />
-
-                    {/* Page title */}
-                    <span style={{
-                        fontFamily: 'Syne, sans-serif',
-                        fontWeight: 700,
-                        fontSize: 14,
-                        color: C.primary,
-                        flexShrink: 0,
-                        whiteSpace: 'nowrap',
-                    }}>
-                        Visual Template Builder
-                    </span>
-
-                    {/* Divider */}
-                    <div style={{ width: 1, height: 20, backgroundColor: C.border, flexShrink: 0 }} />
-
-                    {/* Template name — click to edit */}
-                    {editingName ? (
-                        <input
-                            ref={nameInputRef}
-                            value={name}
-                            onChange={e => {
-                                dirtyRef.current = true
-                                setName(e.target.value)
-                            }}
-                            onBlur={commitName}
-                            onKeyDown={e => {
-                                if (e.key === 'Enter' || e.key === 'Escape') commitName()
-                            }}
-                            style={{
-                                fontFamily: 'DM Sans, sans-serif',
-                                fontSize: 13,
-                                fontWeight: 500,
-                                color: C.body,
-                                border: `1px solid ${C.primary}`,
-                                borderRadius: 6,
-                                padding: '3px 8px',
-                                outline: 'none',
-                                backgroundColor: C.surface,
-                                width: 220,
-                                boxShadow: `0 0 0 3px ${C.primary}22`,
-                            }}
-                            autoFocus
-                        />
-                    ) : (
-                        <button
-                            onClick={startEditingName}
-                            title="Click to rename"
-                            style={{
-                                fontFamily: 'DM Sans, sans-serif',
-                                fontSize: 13,
-                                fontWeight: 500,
-                                color: C.body,
-                                background: 'none',
-                                border: `1px solid transparent`,
-                                borderRadius: 6,
-                                padding: '3px 8px',
-                                cursor: 'text',
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                maxWidth: 200,
-                                transition: 'border-color 0.15s',
-                            }}
-                            onMouseEnter={e => e.currentTarget.style.borderColor = C.border}
-                            onMouseLeave={e => e.currentTarget.style.borderColor = 'transparent'}
-                        >
-                            {name}
-                        </button>
-                    )}
-
-                </div>
-
-                {/* Right — single action menu button */}
-                <div style={{ position: 'relative', flexShrink: 0 }} ref={actionMenuRef}>
-
-                    {/* Auto-save pill — only shows when active */}
-                    {autoSaveLabel !== 'idle' && (
-                        <span style={{
-                            position: 'absolute', top: -8, left: -100,
-                            display: 'flex', alignItems: 'center', gap: 4,
-                            padding: '2px 8px', borderRadius: 20,
-                            backgroundColor: autoSaveLabel === 'saved' ? C.successBg : C.bg,
-                            border: `1px solid ${autoSaveLabel === 'saved' ? '#86efac50' : C.border}`,
-                            fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 600,
-                            color: autoSaveLabel === 'saved' ? C.success : C.muted,
-                            whiteSpace: 'nowrap', pointerEvents: 'none',
-                        }}>
-                            {autoSaveLabel === 'saving'
-                                ? <Loader2 size={9} style={{ animation: 'spin 1s linear infinite' }} />
-                                : <Check size={9} />}
-                            {autoSaveLabel === 'saving' ? 'Auto-saving…' : 'Draft saved'}
-                        </span>
-                    )}
-
-                    {/* Dropdown panel */}
-                    {actionMenuOpen && (
-                        <div style={{
-                            position: 'absolute', top: 'calc(100% + 8px)', right: 0,
-                            width: 260, backgroundColor: C.surface,
-                            border: `1px solid ${C.border}`, borderRadius: 12,
-                            boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
-                            zIndex: 1000, overflow: 'hidden',
-                        }}>
-                            {/* Category section */}
-                            {/* onMouseDown stopPropagation prevents the portal-rendered
-                                ProDropdown menu clicks from reaching the document mousedown
-                                outside-click handler and closing this panel (#bug) */}
-                            <div
-                                onMouseDown={e => e.stopPropagation()}
-                                style={{ padding: '12px 14px 10px', borderBottom: `1px solid ${C.border}` }}
-                            >
-                                <p style={{
-                                    margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif',
-                                    fontSize: 10, fontWeight: 700, color: C.muted,
-                                    textTransform: 'uppercase', letterSpacing: 0.8,
-                                }}>
-                                    Category
-                                </p>
-                                <ProDropdown
-                                    prefix=""
-                                    currentValue={category}
-                                    options={CATEGORIES}
-                                    onChanged={(v) => {
-                                        dirtyRef.current = true
-                                        setCategory(v)
-                                    }}
-                                    width={232}
-                                />
-                            </div>
-
-                            {/* Action buttons */}
-                            <div style={{ padding: '8px 8px' }}>
-                                {/* Save Draft */}
-                                <button
-                                    onClick={() => { handleSaveDraft(); setActionMenuOpen(false) }}
-                                    disabled={saving}
-                                    style={{
-                                        width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                                        padding: '9px 10px', border: 'none', borderRadius: 8,
-                                        backgroundColor: saved ? C.successBg : 'transparent',
-                                        color: saved ? C.success : C.body,
-                                        fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 500,
-                                        cursor: saving ? 'default' : 'pointer', textAlign: 'left',
-                                        transition: 'background 0.12s',
-                                    }}
-                                    onMouseEnter={e => { if (!saving && !saved) e.currentTarget.style.backgroundColor = C.bg }}
-                                    onMouseLeave={e => { if (!saved) e.currentTarget.style.backgroundColor = 'transparent' }}
-                                >
-                                    <span style={{
-                                        width: 28, height: 28, borderRadius: 7,
-                                        backgroundColor: saved ? '#dcfce7' : C.bg,
-                                        border: `1px solid ${saved ? '#86efac' : C.border}`,
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                                    }}>
-                                        {saving
-                                            ? <Loader2 size={13} style={{ color: C.muted, animation: 'spin 1s linear infinite' }} />
-                                            : saved
-                                                ? <Check size={13} style={{ color: C.success }} />
-                                                : <Save size={13} style={{ color: C.secondary }} />}
-                                    </span>
-                                    <div>
-                                        <p style={{ margin: 0, fontWeight: 600, fontSize: 12 }}>
-                                            {saved ? 'Draft Saved!' : 'Save Draft'}
-                                        </p>
-                                        <p style={{ margin: 0, fontSize: 10, color: C.muted }}>
-                                            Save without publishing
-                                        </p>
-                                    </div>
-                                </button>
-
-                                {/* Open in Code Editor */}
-                                <button
-                                    onClick={() => { handleOpenInCodeEditor(); setActionMenuOpen(false) }}
-                                    style={{
-                                        width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                                        padding: '9px 10px', border: 'none', borderRadius: 8,
-                                        backgroundColor: 'transparent', color: C.body,
-                                        fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 500,
-                                        cursor: 'pointer', textAlign: 'left', transition: 'background 0.12s',
-                                    }}
-                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = C.bg }}
-                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
-                                >
-                                    <span style={{
-                                        width: 28, height: 28, borderRadius: 7,
-                                        backgroundColor: C.bg, border: `1px solid ${C.border}`,
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                                    }}>
-                                        <Code2 size={13} style={{ color: C.secondary }} />
-                                    </span>
-                                    <div>
-                                        <p style={{ margin: 0, fontWeight: 600, fontSize: 12 }}>Code Editor</p>
-                                        <p style={{ margin: 0, fontSize: 10, color: C.muted }}>Fine-tune the raw HTML</p>
-                                    </div>
-                                </button>
-
-                                {/* Export HTML */}
-                                <button
-                                    onClick={() => { exportFnRef.current?.(); setActionMenuOpen(false) }}
-                                    style={{
-                                        width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                                        padding: '9px 10px', border: 'none', borderRadius: 8,
-                                        backgroundColor: 'transparent', color: C.body,
-                                        fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 500,
-                                        cursor: 'pointer', textAlign: 'left', transition: 'background 0.12s',
-                                    }}
-                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = C.bg }}
-                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
-                                >
-                                    <span style={{
-                                        width: 28, height: 28, borderRadius: 7,
-                                        backgroundColor: C.bg, border: `1px solid ${C.border}`,
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                                    }}>
-                                        <Download size={13} style={{ color: C.secondary }} />
-                                    </span>
-                                    <div>
-                                        <p style={{ margin: 0, fontWeight: 600, fontSize: 12 }}>Export HTML</p>
-                                        <p style={{ margin: 0, fontSize: 10, color: C.muted }}>Download ready-to-use eBay HTML</p>
-                                    </div>
-                                </button>
-                            </div>
-
-                            {/* Publish — bottom section, highlighted */}
-                            <div style={{ padding: '8px', borderTop: `1px solid ${C.border}` }}>
-                                <button
-                                    onClick={() => { handlePublish(); setActionMenuOpen(false) }}
-                                    disabled={publishing}
-                                    style={{
-                                        width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                                        padding: '10px 10px', border: 'none', borderRadius: 8,
-                                        backgroundColor: published ? '#dcfce7' : C.primaryLight,
-                                        color: published ? C.success : C.primary,
-                                        fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 700,
-                                        cursor: publishing ? 'default' : 'pointer', textAlign: 'left',
-                                        transition: 'background 0.12s',
-                                    }}
-                                    onMouseEnter={e => { if (!publishing) e.currentTarget.style.opacity = '0.85' }}
-                                    onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
-                                >
-                                    <span style={{
-                                        width: 28, height: 28, borderRadius: 7,
-                                        backgroundColor: published ? C.success : C.primary,
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                                    }}>
-                                        {publishing
-                                            ? <Loader2 size={13} style={{ color: '#fff', animation: 'spin 1s linear infinite' }} />
-                                            : published
-                                                ? <Check size={13} style={{ color: '#fff' }} />
-                                                : <Globe size={13} style={{ color: '#fff' }} />}
-                                    </span>
-                                    <div>
-                                        <p style={{ margin: 0, fontSize: 12 }}>
-                                            {published ? 'Published!' : 'Publish Template'}
-                                        </p>
-                                        <p style={{ margin: 0, fontSize: 10, opacity: 0.7, fontWeight: 400 }}>
-                                            Make visible to all users
-                                        </p>
-                                    </div>
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-
             {/* ── VISUAL EDITOR — fills remaining height ────────────────── */}
             <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
                 <VisualEditor
@@ -813,26 +512,34 @@ function VisualEditorInner() {
                     onBack={() => router.push('/dashboard/design')}
                     toolbarSlot={
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            {/* History button */}
+                            {/* History button — disabled until template has been saved at least once */}
                             <button
-                                onClick={() => setShowVersionHistory(v => !v)}
+                                onClick={() => savedId ? setShowVersionHistory(v => !v) : undefined}
+                                disabled={!savedId}
                                 style={{
                                     display: 'flex', alignItems: 'center', gap: 6,
                                     padding: '6px 12px',
                                     border: `1px solid ${showVersionHistory ? C.primary : C.border}`, borderRadius: 8,
                                     backgroundColor: showVersionHistory ? C.primaryLight : C.surface,
-                                    color: showVersionHistory ? C.primary : C.secondary,
+                                    color: showVersionHistory ? C.primary : (savedId ? C.secondary : C.muted),
                                     fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 600,
-                                    cursor: 'pointer', transition: 'all 0.15s',
+                                    cursor: savedId ? 'pointer' : 'not-allowed', transition: 'all 0.15s',
+                                    opacity: savedId ? 1 : 0.5,
                                 }}
-                                title="View version history"
+                                title={savedId ? 'View version history' : 'Save the template first to enable version history'}
                             >
                                 <History size={13} />
                                 History
                             </button>
                             {/* Standalone Download HTML button */}
                             <button
-                                onClick={() => exportFnRef.current?.()}
+                                onClick={() => {
+                                    if (exportFnRef.current) {
+                                        exportFnRef.current()
+                                    } else {
+                                        alert('Add at least one block to the canvas before exporting.')
+                                    }
+                                }}
                                 style={{
                                     display: 'flex', alignItems: 'center', gap: 6,
                                     padding: '6px 12px',
@@ -1035,15 +742,26 @@ function VisualEditorInner() {
                     }
                     placeholders={PLACEHOLDER_GROUPS}
                     // Seed the canvas with the saved template's DB category so
-                    // its previews use category-matched sample data
-                    // (e.g. electronics → headphones, fashion → sneakers).
-                    // Falls back to 'pet' if category is unknown.
-                    initialCategory={
-                        (['pet', 'electronics', 'fashion', 'home', 'sports', 'auto', 'general'] as const)
-                            .includes(category as any)
-                            ? (category as any)
-                            : 'pet'
-                    }
+                    // its previews use category-matched sample data.
+                    // Maps new category IDs → VisualEditor's internal category keys.
+                    // Falls back to 'general' (not 'pet') so blank templates don't
+                    // show pet-supply sample content to non-pet sellers.
+                    initialCategory={(() => {
+                        const catMap: Record<string, string> = {
+                            consumer_electronics: 'electronics', computers: 'electronics',
+                            clothing: 'fashion', jewelry: 'fashion', health_beauty: 'fashion',
+                            home_garden: 'home', furniture: 'home',
+                            toys_hobbies: 'toys', sporting_goods: 'sports',
+                            pet_supplies: 'pet', motors_parts: 'auto',
+                            collectibles: 'general', books_movies: 'general',
+                            business: 'general', general: 'general',
+                        }
+                        const mapped = catMap[category] ?? category
+                        const valid = ['pet', 'electronics', 'fashion', 'home', 'sports', 'auto', 'toys', 'general'] as const
+                        return (valid as readonly string[]).includes(mapped)
+                            ? (mapped as typeof valid[number])
+                            : 'general'
+                    })()}
                     templateCategory={category}
                     slots={slots}
                     onSlotsChange={setSlots}
