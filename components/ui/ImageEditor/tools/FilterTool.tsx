@@ -166,14 +166,23 @@ function Section({ icon, title, children }: { icon: React.ReactNode; title: stri
 export default function FilterTool({ state, onChange, imageUrl }: ToolPanelProps) {
     const [hovReset, setHovReset] = React.useState(false)
 
+    // ── safe reads (new fields may be undefined on older saved states) ──
+    const gamma    = state.gamma           ?? 1
+    const vibrance = state.vibrance        ?? 0
+    const hue      = state.hue             ?? 0
+    const blur     = state.blur            ?? 0
+    const pixelate = state.pixelate        ?? 0
+    const noise    = state.noise           ?? 0
+    const intensity = state.filterIntensity ?? 100
+
     const hasFilter = state.activeFilter !== 'none'
     const hasAdjust =
-        state.gamma    !== 1  ||
-        state.vibrance !== 0  ||
-        state.hue      !== 0  ||
-        state.blur     !== 0  ||
-        state.pixelate !== 0  ||
-        state.noise    !== 0
+        gamma    !== 1  ||
+        vibrance !== 0  ||
+        hue      !== 0  ||
+        blur     !== 0  ||
+        pixelate !== 0  ||
+        noise    !== 0
 
     const allDirty = hasFilter || hasAdjust
 
@@ -343,7 +352,7 @@ export default function FilterTool({ state, onChange, imageUrl }: ToolPanelProps
                     }}>
                         <SliderRow
                             label="Intensity" hint="blend strength"
-                            value={state.filterIntensity} min={0} max={100} def={100}
+                            value={intensity} min={0} max={100} def={100}
                             onChange={v => onChange({ filterIntensity: v })}
                             onReset={() => onChange({ filterIntensity: 100 })}
                             format={v => `${v}%`}
@@ -356,10 +365,10 @@ export default function FilterTool({ state, onChange, imageUrl }: ToolPanelProps
             <Section icon={<Sun size={13} strokeWidth={2.2} />} title="Light">
                 <SliderRow
                     label="Gamma" hint="midtone"
-                    value={state.gamma} min={0.1} max={3} step={0.05} def={1}
+                    value={gamma} min={0.1} max={3} step={0.05} def={1}
                     onChange={v => onChange({ gamma: v })}
                     onReset={() => onChange({ gamma: 1 })}
-                    format={v => v.toFixed(2)}
+                    format={v => (v ?? 1).toFixed(2)}
                 />
             </Section>
 
@@ -367,16 +376,16 @@ export default function FilterTool({ state, onChange, imageUrl }: ToolPanelProps
             <Section icon={<Droplets size={13} strokeWidth={2.2} />} title="Color">
                 <SliderRow
                     label="Vibrance" hint="smart saturation"
-                    value={state.vibrance} min={-100} max={100}
+                    value={vibrance} min={-100} max={100}
                     onChange={v => onChange({ vibrance: v })}
                     onReset={() => onChange({ vibrance: 0 })}
                 />
                 <SliderRow
                     label="Hue" hint="color shift"
-                    value={state.hue} min={-180} max={180}
+                    value={hue} min={-180} max={180}
                     onChange={v => onChange({ hue: v })}
                     onReset={() => onChange({ hue: 0 })}
-                    format={v => `${v > 0 ? '+' : ''}${v}°`}
+                    format={v => `${(v ?? 0) > 0 ? '+' : ''}${v ?? 0}°`}
                 />
             </Section>
 
@@ -384,23 +393,23 @@ export default function FilterTool({ state, onChange, imageUrl }: ToolPanelProps
             <Section icon={<Zap size={13} strokeWidth={2.2} />} title="Effects">
                 <SliderRow
                     label="Blur" hint="gaussian"
-                    value={state.blur} min={0} max={20}
+                    value={blur} min={0} max={20}
                     onChange={v => onChange({ blur: v })}
                     onReset={() => onChange({ blur: 0 })}
-                    format={v => `${v}px`}
+                    format={v => `${v ?? 0}px`}
                 />
                 <SliderRow
                     label="Pixelate" hint="mosaic"
-                    value={state.pixelate} min={0} max={50}
+                    value={pixelate} min={0} max={50}
                     onChange={v => onChange({ pixelate: v })}
                     onReset={() => onChange({ pixelate: 0 })}
                 />
                 <SliderRow
                     label="Noise" hint="film grain"
-                    value={state.noise} min={0} max={100}
+                    value={noise} min={0} max={100}
                     onChange={v => onChange({ noise: v })}
                     onReset={() => onChange({ noise: 0 })}
-                    format={v => `${v}%`}
+                    format={v => `${v ?? 0}%`}
                 />
             </Section>
         </div>
