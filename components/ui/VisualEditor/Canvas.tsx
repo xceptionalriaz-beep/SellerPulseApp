@@ -1205,7 +1205,7 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
       originalStyles = {};
     }
 
-    document.addEventListener('click', function(e) {
+    document.addEventListener('dblclick', function(e) {
       var target = e.target;
       if (!target) return;
       if (target.closest('[data-canvas-dropzone]') || target.closest('[data-canvas-overlay]')) return;
