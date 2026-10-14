@@ -747,20 +747,21 @@ function VisualEditorInner() {
                     // Falls back to 'general' (not 'pet') so blank templates don't
                     // show pet-supply sample content to non-pet sellers.
                     initialCategory={(() => {
-                        const catMap: Record<string, string> = {
+                        // Map new DB category IDs → VisualEditor's CategoryId type.
+                        // 'toys' is NOT a CategoryId — toys_hobbies falls back to 'general'.
+                        const catMap: Record<string, import('@/components/ui/VisualEditor/sampleData').CategoryId> = {
                             consumer_electronics: 'electronics', computers: 'electronics',
                             clothing: 'fashion', jewelry: 'fashion', health_beauty: 'fashion',
                             home_garden: 'home', furniture: 'home',
-                            toys_hobbies: 'toys', sporting_goods: 'sports',
+                            toys_hobbies: 'general', sporting_goods: 'sports',
                             pet_supplies: 'pet', motors_parts: 'auto',
                             collectibles: 'general', books_movies: 'general',
                             business: 'general', general: 'general',
+                            // legacy slugs
+                            electronics: 'electronics', fashion: 'fashion',
+                            home: 'home', sports: 'sports', auto: 'auto', pet: 'pet',
                         }
-                        const mapped = catMap[category] ?? category
-                        const valid = ['pet', 'electronics', 'fashion', 'home', 'sports', 'auto', 'toys', 'general'] as const
-                        return (valid as readonly string[]).includes(mapped)
-                            ? (mapped as typeof valid[number])
-                            : 'general'
+                        return catMap[category] ?? 'general'
                     })()}
                     templateCategory={category}
                     slots={slots}
