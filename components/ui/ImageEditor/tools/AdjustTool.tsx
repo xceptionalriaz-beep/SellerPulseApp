@@ -1,113 +1,95 @@
 'use client'
 // components/ui/ImageEditor/tools/AdjustTool.tsx
-// ─────────────────────────────────────────────────────────────
-// Adjust tool — brightness, contrast, saturation, sharpness
-// ─────────────────────────────────────────────────────────────
 
 import React from 'react'
+import { Sun, Contrast, Droplets, ScanSearch } from 'lucide-react'
 import type { ToolPanelProps } from '../types'
 
-// ── Design tokens ─────────────────────────────────────────────
+// ── Tokens ────────────────────────────────────────────────────
 const C = {
     primary:      '#7530fb',
     primaryLight: '#f3eeff',
-    primaryHov:   '#6020e0',
     border:       '#ede9fe',
-    label:        '#374151',
+    borderMid:    '#e5e7eb',
+    label:        '#111827',
+    sub:          '#6b7280',
     muted:        '#9ca3af',
-    value:        '#7530fb',
-    reset:        '#6b7280',
-    resetHov:     '#374151',
-    track:        '#e5e7eb',
     surface:      '#ffffff',
     sectionBg:    '#fafafa',
+    danger:       '#ef4444',
+    dangerLight:  '#fef2f2',
+    dangerBorder: '#fca5a5',
 }
 
-// ── Types ─────────────────────────────────────────────────────
+// ── Slider row ────────────────────────────────────────────────
 interface SliderRowProps {
     label:    string
+    hint:     string
     value:    number
     min:      number
     max:      number
+    step?:    number
     onChange: (v: number) => void
     onReset:  () => void
     default?: number
 }
 
-// ── SliderRow sub-component ───────────────────────────────────
-function SliderRow({ label, value, min, max, onChange, onReset, default: def = 0 }: SliderRowProps) {
-    const [hovReset, setHovReset] = React.useState(false)
-
-    const pct = ((value - min) / (max - min)) * 100
-
-    const trackStyle: React.CSSProperties = {
-        WebkitAppearance: 'none',
-        appearance: 'none',
-        width: '100%',
-        height: 4,
-        borderRadius: 999,
-        outline: 'none',
-        cursor: 'pointer',
-        background: `linear-gradient(to right, ${C.primary} ${pct}%, ${C.track} ${pct}%)`,
-        border: 'none',
-    }
-
+function SliderRow({
+    label, hint, value, min, max, step = 1,
+    onChange, onReset, default: def = 0,
+}: SliderRowProps) {
+    const [hov, setHov] = React.useState(false)
     const isDirty = value !== def
+    const pct     = ((value - min) / (max - min)) * 100
 
     return (
-        <div style={{ marginBottom: 20 }}>
-            {/* Label row */}
-            <div style={{
-                display:        'flex',
-                justifyContent: 'space-between',
-                alignItems:     'center',
-                marginBottom:   8,
-            }}>
-                <span style={{
-                    fontSize:   13,
-                    fontWeight: 600,
-                    color:      C.label,
-                    letterSpacing: '0.01em',
-                }}>
-                    {label}
-                </span>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    {/* Numeric value badge */}
+        <div style={{ marginBottom: 18 }}>
+            {/* Label + value */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <div>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: C.label }}>{label}</span>
+                    <span style={{ fontSize: 11, color: C.muted, marginLeft: 6 }}>{hint}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{
-                        fontSize:        12,
-                        fontWeight:      700,
-                        color:           isDirty ? C.value : C.muted,
-                        background:      isDirty ? C.primaryLight : 'transparent',
-                        padding:         isDirty ? '2px 7px' : '2px 4px',
-                        borderRadius:    6,
-                        minWidth:        36,
-                        textAlign:       'right',
-                        transition:      'all 0.15s ease',
+                        fontSize:     12,
+                        fontWeight:   700,
+                        color:        isDirty ? C.primary : C.muted,
+                        background:   isDirty ? C.primaryLight : 'transparent',
+                        padding:      isDirty ? '1px 8px' : '1px 0',
+                        borderRadius: 5,
+                        minWidth:     34,
+                        textAlign:    'right',
+                        transition:   'all 0.15s',
+                        fontVariantNumeric: 'tabular-nums',
                     }}>
                         {value > 0 ? `+${value}` : value}
                     </span>
 
-                    {/* Reset button */}
                     {isDirty && (
                         <button
                             onClick={onReset}
-                            onMouseEnter={() => setHovReset(true)}
-                            onMouseLeave={() => setHovReset(false)}
-                            title="Reset to default"
+                            onMouseEnter={() => setHov(true)}
+                            onMouseLeave={() => setHov(false)}
+                            title="Reset"
                             style={{
-                                background:  'none',
-                                border:      'none',
-                                cursor:      'pointer',
-                                padding:     '2px 4px',
+                                display:      'flex',
+                                alignItems:   'center',
+                                justifyContent: 'center',
+                                width:        20,
+                                height:       20,
+                                background:   hov ? C.dangerLight : 'transparent',
+                                border:       `1px solid ${hov ? C.dangerBorder : C.border}`,
                                 borderRadius: 4,
-                                color:       hovReset ? C.resetHov : C.reset,
-                                fontSize:    10,
-                                fontWeight:  600,
-                                transition:  'color 0.1s',
+                                cursor:       'pointer',
+                                color:        hov ? C.danger : C.muted,
+                                fontSize:     13,
+                                lineHeight:   1,
+                                transition:   'all 0.12s',
+                                padding:      0,
                             }}
                         >
-                            ↺
+                            ×
                         </button>
                     )}
                 </div>
@@ -115,101 +97,120 @@ function SliderRow({ label, value, min, max, onChange, onReset, default: def = 0
 
             {/* Slider */}
             <style>{`
-                .riazify-slider::-webkit-slider-thumb {
-                    -webkit-appearance: none;
-                    appearance: none;
-                    width: 16px;
-                    height: 16px;
-                    border-radius: 50%;
-                    background: #7530fb;
-                    cursor: pointer;
-                    border: 2px solid #ffffff;
-                    box-shadow: 0 1px 4px rgba(117,48,251,0.35);
-                    transition: transform 0.1s ease;
-                }
-                .riazify-slider::-webkit-slider-thumb:hover {
-                    transform: scale(1.15);
-                }
-                .riazify-slider::-moz-range-thumb {
-                    width: 16px;
-                    height: 16px;
-                    border-radius: 50%;
-                    background: #7530fb;
-                    cursor: pointer;
-                    border: 2px solid #ffffff;
-                    box-shadow: 0 1px 4px rgba(117,48,251,0.35);
-                }
+                .rz-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 3px;
+                  border-radius: 999px; outline: none; cursor: pointer; border: none; display: block; }
+                .rz-slider::-webkit-slider-thumb {
+                  -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+                  background: #7530fb; border: 2px solid #fff;
+                  box-shadow: 0 1px 3px rgba(117,48,251,0.4); cursor: pointer;
+                  transition: transform 0.1s, box-shadow 0.1s; }
+                .rz-slider::-webkit-slider-thumb:hover { transform: scale(1.2);
+                  box-shadow: 0 2px 6px rgba(117,48,251,0.5); }
+                .rz-slider::-moz-range-thumb {
+                  width: 14px; height: 14px; border-radius: 50%;
+                  background: #7530fb; border: 2px solid #fff;
+                  box-shadow: 0 1px 3px rgba(117,48,251,0.4); cursor: pointer; }
             `}</style>
             <input
                 type="range"
-                className="riazify-slider"
-                min={min}
-                max={max}
-                value={value}
+                className="rz-slider"
+                min={min} max={max} step={step} value={value}
                 onChange={e => onChange(Number(e.target.value))}
-                style={trackStyle}
+                style={{
+                    background: `linear-gradient(to right, ${C.primary} ${pct}%, ${C.borderMid} ${pct}%)`,
+                }}
             />
 
-            {/* Min/max labels */}
-            <div style={{
-                display:        'flex',
-                justifyContent: 'space-between',
-                marginTop:      4,
-            }}>
+            {/* Min / mid / max */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 3 }}>
                 <span style={{ fontSize: 10, color: C.muted }}>{min}</span>
-                <span style={{ fontSize: 10, color: C.muted }}>0</span>
+                {min < 0 && <span style={{ fontSize: 10, color: C.muted }}>0</span>}
                 <span style={{ fontSize: 10, color: C.muted }}>{max}</span>
             </div>
         </div>
     )
 }
 
-// ── Main AdjustTool ───────────────────────────────────────────
+// ── Section wrapper ───────────────────────────────────────────
+function Section({ icon, title, children }: {
+    icon: React.ReactNode
+    title: string
+    children: React.ReactNode
+}) {
+    return (
+        <div style={{
+            background:   C.surface,
+            border:       `1px solid ${C.border}`,
+            borderRadius: 10,
+            marginBottom: 10,
+            overflow:     'hidden',
+        }}>
+            {/* Section header */}
+            <div style={{
+                display:     'flex',
+                alignItems:  'center',
+                gap:         7,
+                padding:     '10px 14px',
+                background:  C.sectionBg,
+                borderBottom:`1px solid ${C.border}`,
+            }}>
+                <span style={{ color: C.primary, display: 'flex', alignItems: 'center' }}>
+                    {icon}
+                </span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: C.label, letterSpacing: '0.03em' }}>
+                    {title}
+                </span>
+            </div>
+
+            {/* Section body */}
+            <div style={{ padding: '14px 14px 4px' }}>
+                {children}
+            </div>
+        </div>
+    )
+}
+
+// ── AdjustTool ────────────────────────────────────────────────
 export default function AdjustTool({ state, onChange }: ToolPanelProps) {
+    const [hovReset, setHovReset] = React.useState(false)
+
     const allDirty =
         state.brightness !== 0 ||
         state.contrast   !== 0 ||
         state.saturation !== 0 ||
         state.sharpness  !== 0
 
-    const [hovResetAll, setHovResetAll] = React.useState(false)
-
     return (
-        <div style={{ padding: '4px 0' }}>
-
-            {/* Header */}
+        <div>
+            {/* Panel header */}
             <div style={{
                 display:        'flex',
                 justifyContent: 'space-between',
                 alignItems:     'center',
-                marginBottom:   20,
-                paddingBottom:  14,
-                borderBottom:   `1px solid ${C.border}`,
+                marginBottom:   14,
             }}>
                 <div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#111827' }}>
-                        Adjustments
-                    </div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: C.label }}>Adjustments</div>
                     <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>
-                        Fine-tune light, color & clarity
+                        Fine-tune exposure, color &amp; clarity
                     </div>
                 </div>
 
                 {allDirty && (
                     <button
                         onClick={() => onChange({ brightness: 0, contrast: 0, saturation: 0, sharpness: 0 })}
-                        onMouseEnter={() => setHovResetAll(true)}
-                        onMouseLeave={() => setHovResetAll(false)}
+                        onMouseEnter={() => setHovReset(true)}
+                        onMouseLeave={() => setHovReset(false)}
                         style={{
-                            background:   hovResetAll ? '#fef2f2' : C.sectionBg,
-                            border:       `1px solid ${hovResetAll ? '#fca5a5' : C.border}`,
+                            background:   hovReset ? C.dangerLight : C.sectionBg,
+                            border:       `1px solid ${hovReset ? C.dangerBorder : C.border}`,
                             borderRadius: 6,
                             padding:      '4px 10px',
                             fontSize:     11,
                             fontWeight:   600,
-                            color:        hovResetAll ? '#dc2626' : C.reset,
+                            color:        hovReset ? C.danger : C.sub,
                             cursor:       'pointer',
-                            transition:   'all 0.15s ease',
+                            transition:   'all 0.15s',
                         }}
                     >
                         Reset all
@@ -217,97 +218,41 @@ export default function AdjustTool({ state, onChange }: ToolPanelProps) {
                 )}
             </div>
 
-            {/* ── Light section ──────────────────────────────── */}
-            <div style={{
-                background:   C.sectionBg,
-                border:       `1px solid ${C.border}`,
-                borderRadius: 10,
-                padding:      '14px 16px',
-                marginBottom: 12,
-            }}>
-                <div style={{
-                    fontSize:     10,
-                    fontWeight:   700,
-                    color:        C.primary,
-                    letterSpacing:'0.08em',
-                    textTransform:'uppercase',
-                    marginBottom: 14,
-                }}>
-                    ☀ Light
-                </div>
-
+            {/* Light */}
+            <Section icon={<Sun size={13} strokeWidth={2.2} />} title="Light">
                 <SliderRow
-                    label="Brightness"
-                    value={state.brightness}
-                    min={-100} max={100}
+                    label="Brightness" hint="exposure"
+                    value={state.brightness} min={-100} max={100}
                     onChange={v => onChange({ brightness: v })}
                     onReset={() => onChange({ brightness: 0 })}
                 />
                 <SliderRow
-                    label="Contrast"
-                    value={state.contrast}
-                    min={-100} max={100}
+                    label="Contrast" hint="range"
+                    value={state.contrast} min={-100} max={100}
                     onChange={v => onChange({ contrast: v })}
                     onReset={() => onChange({ contrast: 0 })}
                 />
-            </div>
+            </Section>
 
-            {/* ── Color section ──────────────────────────────── */}
-            <div style={{
-                background:   C.sectionBg,
-                border:       `1px solid ${C.border}`,
-                borderRadius: 10,
-                padding:      '14px 16px',
-                marginBottom: 12,
-            }}>
-                <div style={{
-                    fontSize:     10,
-                    fontWeight:   700,
-                    color:        C.primary,
-                    letterSpacing:'0.08em',
-                    textTransform:'uppercase',
-                    marginBottom: 14,
-                }}>
-                    🎨 Color
-                </div>
-
+            {/* Color */}
+            <Section icon={<Droplets size={13} strokeWidth={2.2} />} title="Color">
                 <SliderRow
-                    label="Saturation"
-                    value={state.saturation}
-                    min={-100} max={100}
+                    label="Saturation" hint="vibrance"
+                    value={state.saturation} min={-100} max={100}
                     onChange={v => onChange({ saturation: v })}
                     onReset={() => onChange({ saturation: 0 })}
                 />
-            </div>
+            </Section>
 
-            {/* ── Detail section ─────────────────────────────── */}
-            <div style={{
-                background:   C.sectionBg,
-                border:       `1px solid ${C.border}`,
-                borderRadius: 10,
-                padding:      '14px 16px',
-            }}>
-                <div style={{
-                    fontSize:     10,
-                    fontWeight:   700,
-                    color:        C.primary,
-                    letterSpacing:'0.08em',
-                    textTransform:'uppercase',
-                    marginBottom: 14,
-                }}>
-                    🔍 Detail
-                </div>
-
+            {/* Detail */}
+            <Section icon={<ScanSearch size={13} strokeWidth={2.2} />} title="Detail">
                 <SliderRow
-                    label="Sharpness"
-                    value={state.sharpness}
-                    min={0} max={100}
-                    default={0}
+                    label="Sharpness" hint="clarity"
+                    value={state.sharpness} min={0} max={100}
                     onChange={v => onChange({ sharpness: v })}
                     onReset={() => onChange({ sharpness: 0 })}
                 />
-            </div>
-
+            </Section>
         </div>
     )
 }
