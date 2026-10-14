@@ -87,6 +87,80 @@ const COUNTRIES: { code: string; name: string; flag: string; domestic?: boolean 
   { code: 'ZA', name: 'South Africa',         flag: '🇿🇦' },
 ]
 
+// ── Country dropdown component ────────────────────────────────────────────────
+function CountryDropdown({ value, onChange }: { value: string; onChange: (code: string) => void }) {
+  const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
+  const ref = React.useRef<HTMLDivElement>(null)
+  const selected = COUNTRIES.find(c => c.code === value) ?? COUNTRIES[0]
+  const filtered = search.trim()
+    ? COUNTRIES.filter(c => c.name.toLowerCase().includes(search.toLowerCase()) || c.code.toLowerCase().includes(search.toLowerCase()))
+    : COUNTRIES
+
+  // Close on outside click
+  useEffect(() => {
+    function handle(e: MouseEvent) { if (ref.current && !ref.current.contains(e.target as Node)) { setOpen(false); setSearch('') } }
+    document.addEventListener('mousedown', handle)
+    return () => document.removeEventListener('mousedown', handle)
+  }, [])
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      {/* Pill trigger */}
+      <button
+        type="button"
+        onClick={() => { setOpen(v => !v); setSearch('') }}
+        style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 13px 7px 8px', borderRadius: 50, border: `1.5px solid ${open ? C.primary : C.borderInput}`, backgroundColor: open ? C.primaryLight : C.surface, cursor: 'pointer', transition: 'all 0.15s', boxShadow: open ? `0 0 0 3px ${C.primaryLight}` : 'none', fontFamily: 'DM Sans, sans-serif' }}
+      >
+        <span style={{ fontSize: 20, lineHeight: 1, display: 'flex', alignItems: 'center', flexShrink: 0 }}>{selected.flag}</span>
+        <span style={{ fontSize: 13, fontWeight: 600, color: C.dark, whiteSpace: 'nowrap' }}>{selected.name}</span>
+        <ChevronDown size={13} style={{ color: C.muted, marginLeft: 2, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }} />
+      </button>
+
+      {/* Dropdown panel */}
+      {open && (
+        <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 200, width: 240, backgroundColor: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, boxShadow: '0 8px 32px rgba(117,48,251,0.12)', overflow: 'hidden' }}>
+          {/* Search */}
+          <div style={{ padding: '10px 12px', borderBottom: `1px solid ${C.border}` }}>
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search country…"
+              autoFocus
+              style={{ ...inp, padding: '7px 11px', fontSize: 12, borderRadius: 9 }}
+              onFocus={focusOn} onBlur={blurOn}
+            />
+          </div>
+          {/* List */}
+          <div style={{ maxHeight: 240, overflowY: 'auto', padding: '6px 0' }}>
+            {filtered.length === 0 && (
+              <p style={{ fontSize: 12, color: C.muted, textAlign: 'center', padding: '12px 0', margin: 0, fontFamily: 'DM Sans, sans-serif' }}>No results</p>
+            )}
+            {filtered.map(c => {
+              const isSelected = c.code === value
+              return (
+                <button
+                  key={c.code}
+                  type="button"
+                  onClick={() => { onChange(c.code); setOpen(false); setSearch('') }}
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 11, padding: '9px 14px', border: 'none', backgroundColor: isSelected ? C.primaryLight : 'transparent', cursor: 'pointer', textAlign: 'left', transition: 'background-color 0.1s', fontFamily: 'DM Sans, sans-serif' }}
+                  onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.backgroundColor = C.bg }}
+                  onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent' }}
+                >
+                  {/* Circle flag */}
+                  <span style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, flexShrink: 0, overflow: 'hidden', border: `1px solid ${C.border}` }}>{c.flag}</span>
+                  <span style={{ fontSize: 13, fontWeight: isSelected ? 700 : 500, color: isSelected ? C.primary : C.dark, flex: 1 }}>{c.name}</span>
+                  {isSelected && <Check size={13} style={{ color: C.primary, flexShrink: 0 }} />}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 const DEFAULT_PRESETS: Preset[] = [
   { id: 'poly',   name: 'Poly Mailer', l: '12', w: '15', h: '0',  wLbs: '0', wOz: '4'  },
   { id: 'small',  name: 'Small Box',   l: '8',  w: '6',  h: '4',  wLbs: '1', wOz: '0'  },
@@ -452,24 +526,13 @@ export default function ShippingPage() {
               <div style={{ padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 13 }}>
 
                 {/* Country selector */}
-                <Field label="Country">
-                  <div style={{ position: 'relative' }}>
-                    <select
-                      value={recipient.country}
-                      onChange={e => {
-                        const c = e.target.value
-                        setRecipient(r => ({ ...r, country: c, state: c === 'US' ? 'NY' : '' }))
-                      }}
-                      style={sel}
-                      onFocus={focusOn} onBlur={blurOn}
-                    >
-                      {COUNTRIES.map(c => (
-                        <option key={c.code} value={c.code}>{c.flag} {c.name}</option>
-                      ))}
-                    </select>
-                    <ChevronDown size={11} style={{ position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)', color: C.muted, pointerEvents: 'none' }} />
-                  </div>
-                </Field>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <label style={lbl}>Country</label>
+                  <CountryDropdown
+                    value={recipient.country}
+                    onChange={code => setRecipient(r => ({ ...r, country: code, state: code === 'US' ? 'NY' : '' }))}
+                  />
+                </div>
 
                 {/* International shipping notice */}
                 {recipient.country !== 'US' && (
