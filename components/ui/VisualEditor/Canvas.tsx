@@ -1110,13 +1110,7 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
   div[data-canvas-dropzone]:hover div[data-canvas-overlay],
   div[data-canvas-dropzone] div[data-canvas-overlay]:hover { opacity: 1 !important; pointer-events: auto !important; }
 
-  /* Single-click text editing — text cursor on hover signals "click to edit" */
-  h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover,
-  p:hover, li:hover, blockquote:hover {
-    cursor: text !important;
-  }
-  /* Active edit outline already set via JS; also prevent Chrome blue outline */
-  [contenteditable="true"] { outline: 2px solid #7530fb !important; border-radius: 3px !important; }
+  /* Removed inline text editing hover indicator */
 </style>
 <script>
 (function() {
@@ -1152,21 +1146,30 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
       }
     }, true);
 
-    // In-place text editing — activated on single click (professional design-tool UX)
+// ── CANVA TRUE AUTO-FIT TEXT ENGINE (Auto Grows & Shrinks As You Type) ──
     var editableSelectors = 'h1, h2, h3, h4, h5, h6, p, span, td, li, blockquote';
     var activeEditable = null;
     var originalText = '';
+    var originalStyles = {};
 
     function commitEdit(el) {
       if (!el || !el._riazifyEditing) return;
       el._riazifyEditing = false;
       el.contentEditable = 'false';
-      el.style.outline = '';
-      el.style.cursor = '';
-      el.style.borderRadius = '';
+
+      // Clean up Canva bounding box styles
+      el.style.display = originalStyles.display || '';
+      el.style.width = originalStyles.width || '';
+      el.style.maxWidth = originalStyles.maxWidth || '';
+      el.style.outline = originalStyles.outline || '';
+      el.style.boxShadow = originalStyles.boxShadow || '';
+      el.style.borderRadius = originalStyles.borderRadius || '';
+      el.style.cursor = originalStyles.cursor || '';
+      el.style.padding = originalStyles.padding || '';
+
       var newHtml = el.innerHTML || '';
       var newText = el.innerText || el.textContent || '';
-      // If innerHTML has span/a tags (formatted), commit as HTML
+
       if (/<[a-z][\s\S]*>/i.test(newHtml)) {
         window.parent.postMessage({
           type: 'RIAZIFY_COMMIT_HTML_EDIT',
@@ -1182,45 +1185,79 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
         }, '*');
       }
       activeEditable = null;
+      originalStyles = {};
     }
 
     function cancelEdit(el) {
       if (!el || !el._riazifyEditing) return;
       el._riazifyEditing = false;
       el.contentEditable = 'false';
-      el.style.outline = '';
-      el.style.cursor = '';
-      el.style.borderRadius = '';
+      el.style.display = originalStyles.display || '';
+      el.style.width = originalStyles.width || '';
+      el.style.maxWidth = originalStyles.maxWidth || '';
+      el.style.outline = originalStyles.outline || '';
+      el.style.boxShadow = originalStyles.boxShadow || '';
+      el.style.borderRadius = originalStyles.borderRadius || '';
+      el.style.cursor = originalStyles.cursor || '';
+      el.style.padding = originalStyles.padding || '';
       el.innerText = originalText;
       activeEditable = null;
+      originalStyles = {};
     }
 
-    // Single-click to edit — professional design-tool UX (hover → click → type)
-    // The RIAZIFY_SELECT_BLOCK message fires in capture phase first (already registered
-    // above) so the block is always selected even when this edit handler also runs.
-    document.addEventListener('click', function(e) {
+    document.addEventListener('dblclick', function(e) {
       var target = e.target;
       if (!target) return;
-      // Don't activate inside dropzones or overlays (they have their own click handlers)
       if (target.closest('[data-canvas-dropzone]') || target.closest('[data-canvas-overlay]')) return;
-      var el = target.closest(editableSelectors);
+
+      // Prefer inner text elements over outer container
+      var el = target.closest('h1, h2, h3, h4, h5, h6, p, span, li, blockquote');
+
+      // If clicked inside a table cell (like Bullet List or Numbered List)
+      if (!el && target.closest('td')) {
+        var td = target.closest('td');
+        el = td.querySelector('p, span, h1, h2, h3, h4, div') || td;
+      }
+      if (!el) el = target.closest(editableSelectors);
       if (!el) return;
-      // Already in edit mode for this element — let browser handle cursor placement
-      if (el._riazifyEditing) return;
+
       e.preventDefault();
       e.stopPropagation();
-      // Commit any previous edit before opening a new one
+
       if (activeEditable && activeEditable !== el) commitEdit(activeEditable);
       activeEditable = el;
       originalText = el.innerText || el.textContent || '';
+
+      // Backup styles
+      originalStyles = {
+        display: el.style.display,
+        width: el.style.width,
+        maxWidth: el.style.maxWidth,
+        outline: el.style.outline,
+        boxShadow: el.style.boxShadow,
+        borderRadius: el.style.borderRadius,
+        cursor: el.style.cursor,
+        padding: el.style.padding,
+      };
+
       el._riazifyEditing = true;
       el.contentEditable = 'true';
-      el.style.outline = '2px solid #7530fb';
-      el.style.borderRadius = '3px';
-      el.style.cursor = 'text';
+
+      // 💡 CANVA AUTO-FIT MODE:
+      // display: inline-block + width: fit-content causes the box to:
+      // 1. Hug the text tightly with ZERO empty space on the right
+      // 2. Automatically GROW as you type more words
+      // 3. Automatically SHRINK as you backspace/delete words
+      el.style.setProperty('display', 'inline-block', 'important');
+      el.style.setProperty('width', 'fit-content', 'important');
+      el.style.setProperty('max-width', '100%', 'important');
+      el.style.setProperty('outline', '2px solid #7530fb', 'important');
+      el.style.setProperty('box-shadow', '0 0 0 3px rgba(117, 48, 251, 0.18)', 'important');
+      el.style.setProperty('border-radius', '4px', 'important');
+      el.style.setProperty('padding', '2px 6px', 'important');
+      el.style.setProperty('cursor', 'text', 'important');
+
       el.focus();
-      // No select-all: single-click places the cursor at the click position naturally.
-      // (dblclick naturally selects a word; that behaviour was part of old double-click UX)
     });
 
     document.addEventListener('keydown', function(e) {
