@@ -1110,7 +1110,13 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
   div[data-canvas-dropzone]:hover div[data-canvas-overlay],
   div[data-canvas-dropzone] div[data-canvas-overlay]:hover { opacity: 1 !important; pointer-events: auto !important; }
 
-  /* Removed inline text editing hover indicator */
+  /* Single-click text editing — text cursor on hover signals "click to edit" */
+  h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover,
+  p:hover, li:hover, blockquote:hover {
+    cursor: text !important;
+  }
+  /* Active edit outline already set via JS; also prevent Chrome blue outline */
+  [contenteditable="true"] { outline: 2px solid #7530fb !important; border-radius: 3px !important; }
 </style>
 <script>
 (function() {
@@ -1146,7 +1152,7 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
       }
     }, true);
 
-    // In-place text editing on double click
+    // In-place text editing — activated on single click (professional design-tool UX)
     var editableSelectors = 'h1, h2, h3, h4, h5, h6, p, span, td, li, blockquote';
     var activeEditable = null;
     var originalText = '';
@@ -1189,16 +1195,21 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
       activeEditable = null;
     }
 
-    document.addEventListener('dblclick', function(e) {
+    // Single-click to edit — professional design-tool UX (hover → click → type)
+    // The RIAZIFY_SELECT_BLOCK message fires in capture phase first (already registered
+    // above) so the block is always selected even when this edit handler also runs.
+    document.addEventListener('click', function(e) {
       var target = e.target;
       if (!target) return;
-      // Don't activate inside dropzones or overlays
+      // Don't activate inside dropzones or overlays (they have their own click handlers)
       if (target.closest('[data-canvas-dropzone]') || target.closest('[data-canvas-overlay]')) return;
       var el = target.closest(editableSelectors);
       if (!el) return;
+      // Already in edit mode for this element — let browser handle cursor placement
+      if (el._riazifyEditing) return;
       e.preventDefault();
       e.stopPropagation();
-      // Commit any previous edit first
+      // Commit any previous edit before opening a new one
       if (activeEditable && activeEditable !== el) commitEdit(activeEditable);
       activeEditable = el;
       originalText = el.innerText || el.textContent || '';
@@ -1208,12 +1219,8 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
       el.style.borderRadius = '3px';
       el.style.cursor = 'text';
       el.focus();
-      // Select all text
-      var range = document.createRange();
-      range.selectNodeContents(el);
-      var sel = window.getSelection();
-      sel.removeAllRanges();
-      sel.addRange(range);
+      // No select-all: single-click places the cursor at the click position naturally.
+      // (dblclick naturally selects a word; that behaviour was part of old double-click UX)
     });
 
     document.addEventListener('keydown', function(e) {
