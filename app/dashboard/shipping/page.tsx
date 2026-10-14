@@ -10,6 +10,7 @@ import {
   Box, Copy, Download, CheckCircle2, RotateCcw, Sparkles,
   ExternalLink, FileText,
 } from 'lucide-react'
+import { ProDropdown, DropdownOption } from '@/app/dashboard/title-builder/components/TbTopBar'
 
 // ── Design tokens ──────────────────────────────────────────────────────────────
 const C = {
@@ -52,124 +53,43 @@ interface LabelResult {
 const US_STATES = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY']
 
 // Common eBay shipping destinations (domestic + top dropship markets)
-// flag-icons uses ISO 3166-1 alpha-2 lowercase codes (fi fi-us, fi fi-gb…)
-// HK / TW are not ISO 3166-1 states — flag-icons uses fi fi-hk / fi fi-tw via subdivision flags
-const COUNTRIES: { code: string; name: string; fi: string }[] = [
-  { code: 'US', name: 'United States',  fi: 'us' },
-  { code: 'CA', name: 'Canada',         fi: 'ca' },
-  { code: 'GB', name: 'United Kingdom', fi: 'gb' },
-  { code: 'AU', name: 'Australia',      fi: 'au' },
-  { code: 'DE', name: 'Germany',        fi: 'de' },
-  { code: 'FR', name: 'France',         fi: 'fr' },
-  { code: 'IT', name: 'Italy',          fi: 'it' },
-  { code: 'ES', name: 'Spain',          fi: 'es' },
-  { code: 'NL', name: 'Netherlands',    fi: 'nl' },
-  { code: 'JP', name: 'Japan',          fi: 'jp' },
-  { code: 'KR', name: 'South Korea',    fi: 'kr' },
-  { code: 'CN', name: 'China',          fi: 'cn' },
-  { code: 'SG', name: 'Singapore',      fi: 'sg' },
-  { code: 'HK', name: 'Hong Kong',      fi: 'hk' },
-  { code: 'TW', name: 'Taiwan',        fi: 'tw' },
-  { code: 'MX', name: 'Mexico',        fi: 'mx' },
-  { code: 'BR', name: 'Brazil',        fi: 'br' },
-  { code: 'IN', name: 'India',         fi: 'in' },
-  { code: 'AE', name: 'UAE',           fi: 'ae' },
-  { code: 'SA', name: 'Saudi Arabia',  fi: 'sa' },
-  { code: 'PH', name: 'Philippines',   fi: 'ph' },
-  { code: 'MY', name: 'Malaysia',      fi: 'my' },
-  { code: 'NZ', name: 'New Zealand',   fi: 'nz' },
-  { code: 'SE', name: 'Sweden',        fi: 'se' },
-  { code: 'CH', name: 'Switzerland',   fi: 'ch' },
-  { code: 'PL', name: 'Poland',        fi: 'pl' },
-  { code: 'NO', name: 'Norway',        fi: 'no' },
-  { code: 'DK', name: 'Denmark',       fi: 'dk' },
-  { code: 'BE', name: 'Belgium',       fi: 'be' },
-  { code: 'AT', name: 'Austria',       fi: 'at' },
-  { code: 'IL', name: 'Israel',        fi: 'il' },
-  { code: 'ZA', name: 'South Africa',  fi: 'za' },
+// Shaped as DropdownOption so we can pass directly to ProDropdown from TbTopBar.
+// flagCode uses ISO 3166-1 alpha-2 lowercase (flag-icons fi fi-XX classes).
+// HK / TW use subdivision flags supported by flag-icons.
+const COUNTRIES: DropdownOption[] = [
+  { val: 'US', label: 'United States',  enabled: true, flagCode: 'us' },
+  { val: 'CA', label: 'Canada',         enabled: true, flagCode: 'ca' },
+  { val: 'GB', label: 'United Kingdom', enabled: true, flagCode: 'gb' },
+  { val: 'AU', label: 'Australia',      enabled: true, flagCode: 'au' },
+  { val: 'DE', label: 'Germany',        enabled: true, flagCode: 'de' },
+  { val: 'FR', label: 'France',         enabled: true, flagCode: 'fr' },
+  { val: 'IT', label: 'Italy',          enabled: true, flagCode: 'it' },
+  { val: 'ES', label: 'Spain',          enabled: true, flagCode: 'es' },
+  { val: 'NL', label: 'Netherlands',    enabled: true, flagCode: 'nl' },
+  { val: 'JP', label: 'Japan',          enabled: true, flagCode: 'jp' },
+  { val: 'KR', label: 'South Korea',    enabled: true, flagCode: 'kr' },
+  { val: 'CN', label: 'China',          enabled: true, flagCode: 'cn' },
+  { val: 'SG', label: 'Singapore',      enabled: true, flagCode: 'sg' },
+  { val: 'HK', label: 'Hong Kong',      enabled: true, flagCode: 'hk' },
+  { val: 'TW', label: 'Taiwan',         enabled: true, flagCode: 'tw' },
+  { val: 'MX', label: 'Mexico',         enabled: true, flagCode: 'mx' },
+  { val: 'BR', label: 'Brazil',         enabled: true, flagCode: 'br' },
+  { val: 'IN', label: 'India',          enabled: true, flagCode: 'in' },
+  { val: 'AE', label: 'UAE',            enabled: true, flagCode: 'ae' },
+  { val: 'SA', label: 'Saudi Arabia',   enabled: true, flagCode: 'sa' },
+  { val: 'PH', label: 'Philippines',    enabled: true, flagCode: 'ph' },
+  { val: 'MY', label: 'Malaysia',       enabled: true, flagCode: 'my' },
+  { val: 'NZ', label: 'New Zealand',    enabled: true, flagCode: 'nz' },
+  { val: 'SE', label: 'Sweden',         enabled: true, flagCode: 'se' },
+  { val: 'CH', label: 'Switzerland',    enabled: true, flagCode: 'ch' },
+  { val: 'PL', label: 'Poland',         enabled: true, flagCode: 'pl' },
+  { val: 'NO', label: 'Norway',         enabled: true, flagCode: 'no' },
+  { val: 'DK', label: 'Denmark',        enabled: true, flagCode: 'dk' },
+  { val: 'BE', label: 'Belgium',        enabled: true, flagCode: 'be' },
+  { val: 'AT', label: 'Austria',        enabled: true, flagCode: 'at' },
+  { val: 'IL', label: 'Israel',         enabled: true, flagCode: 'il' },
+  { val: 'ZA', label: 'South Africa',   enabled: true, flagCode: 'za' },
 ]
-
-// ── Country dropdown — matches ProDropdown + DropdownPill in TbTopBar ────────
-// Uses flag-icons (fi fi-XX) already imported via globals.css
-function CountryPill({ country, isSelected, onClick }: {
-  country: typeof COUNTRIES[0]; isSelected: boolean; onClick: () => void
-}) {
-  const [hover, setHover] = useState(false)
-  return (
-    <div
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onClick={onClick}
-      style={{
-        display: 'flex', alignItems: 'center', gap: 9,
-        padding: '8px 16px', borderRadius: 50, cursor: 'pointer',
-        backgroundColor: isSelected ? C.accent : 'transparent',
-        color: isSelected ? C.dark : C.body,
-        fontWeight: isSelected ? 700 : 500,
-        fontFamily: 'DM Sans, sans-serif', fontSize: 13,
-        border: `1.5px solid ${hover && !isSelected ? C.accent : 'transparent'}`,
-        transition: 'all 0.12s', marginBottom: 2,
-      }}
-    >
-      <span className={`fi fi-${country.fi}`} style={{ borderRadius: 2, fontSize: 15 }} />
-      {country.name}
-    </div>
-  )
-}
-
-function CountryDropdown({ value, onChange }: { value: string; onChange: (code: string) => void }) {
-  const [open, setOpen] = useState(false)
-  const selected = COUNTRIES.find(c => c.code === value) ?? COUNTRIES[0]
-
-  return (
-    <div style={{ position: 'relative' }}>
-      {/* Trigger — matches ProDropdown button style */}
-      <button
-        type="button"
-        onClick={() => setOpen(v => !v)}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-          padding: '7px 12px', borderRadius: 10,
-          border: `1px solid ${open ? C.accent : C.borderInput}`,
-          backgroundColor: open ? '#f9ffe6' : C.surface,
-          color: C.body, fontSize: 13, fontWeight: 600,
-          cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
-          transition: 'all 0.15s',
-        }}
-      >
-        <span className={`fi fi-${selected.fi}`} style={{ borderRadius: 2, fontSize: 15 }} />
-        {selected.name}
-        {open
-          ? <ChevronDown size={14} style={{ color: C.accent, transform: 'rotate(180deg)', transition: 'transform 0.2s' }} />
-          : <ChevronDown size={14} style={{ color: C.muted, transition: 'transform 0.2s' }} />}
-      </button>
-
-      {/* Overlay to close */}
-      {open && <div style={{ position: 'fixed', inset: 0, zIndex: 40 }} onClick={() => setOpen(false)} />}
-
-      {/* Panel — matches ProDropdown panel */}
-      {open && (
-        <div style={{
-          position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 50,
-          width: 220, backgroundColor: C.surface,
-          border: `1px solid ${C.border}`, borderRadius: 18,
-          boxShadow: '0 8px 20px rgba(0,0,0,0.08)', overflow: 'hidden',
-        }}>
-          <div style={{ padding: 8, display: 'flex', flexDirection: 'column' }}>
-            {COUNTRIES.map(c => (
-              <CountryPill
-                key={c.code}
-                country={c}
-                isSelected={c.code === value}
-                onClick={() => { onChange(c.code); setOpen(false) }}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
 
 const DEFAULT_PRESETS: Preset[] = [
   { id: 'poly',   name: 'Poly Mailer', l: '12', w: '15', h: '0',  wLbs: '0', wOz: '4'  },
@@ -538,9 +458,12 @@ export default function ShippingPage() {
                 {/* Country selector */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   <label style={lbl}>Country</label>
-                  <CountryDropdown
-                    value={recipient.country}
-                    onChange={code => setRecipient(r => ({ ...r, country: code, state: code === 'US' ? 'NY' : '' }))}
+                  <ProDropdown
+                    prefix="Ship To:"
+                    currentValue={recipient.country}
+                    options={COUNTRIES}
+                    onChanged={code => setRecipient(r => ({ ...r, country: code, state: code === 'US' ? 'NY' : '' }))}
+                    width={260}
                   />
                 </div>
 
