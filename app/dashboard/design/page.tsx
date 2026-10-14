@@ -31,6 +31,7 @@ import {
     Archive, BookOpen, PawPrint, Briefcase, Tag,
 } from 'lucide-react'
 import { hydrateTemplateContent } from '@/lib/template-utils'
+import { assembleDocument } from '@/components/ui/VisualEditor/blocks'
 import { sanitiseHtml } from '@/components/ui/EditorToolbar'
 import { AIButton, IconButton } from '@/components/ui/Buttons'
 import ProDropdown from '@/components/ui/ProDropdown'
@@ -308,20 +309,26 @@ function DesignStudioInner() {
                     .select('id, user_id, name, category, updated_at, blocks_json, canvas_settings_json')
                     .order('updated_at', { ascending: false })
                 // Map visual_templates shape → ListingTemplate shape
-                own = ((ownData as any[]) || []).map((vt: any) => ({
-                    id: vt.id,
-                    user_id: vt.user_id,
-                    name: vt.name,
-                    description: 'Visual Builder template',   // signals getEditorRoute to use visual-editor
-                    category: vt.category || 'general',
-                    description_html: null,                   // no raw HTML; template opens in visual editor
-                    is_system: false,
-                    is_shared: false,
-                    thumbnail_url: null,
-                    use_count: 0,
-                    created_at: vt.updated_at,
-                    updated_at: vt.updated_at,
-                }))
+                // assembleDocument converts blocks_json → full HTML so preview modal shows real content
+                own = ((ownData as any[]) || []).map((vt: any) => {
+                    const blocks = Array.isArray(vt.blocks_json) ? vt.blocks_json : []
+                    const settings = vt.canvas_settings_json ?? undefined
+                    const html = blocks.length > 0 ? assembleDocument(blocks, settings) : null
+                    return {
+                        id: vt.id,
+                        user_id: vt.user_id,
+                        name: vt.name,
+                        description: 'Visual Builder template',   // signals getEditorRoute to use visual-editor
+                        category: vt.category || 'general',
+                        description_html: html,                   // real rendered HTML for preview
+                        is_system: false,
+                        is_shared: false,
+                        thumbnail_url: null,
+                        use_count: 0,
+                        created_at: vt.updated_at,
+                        updated_at: vt.updated_at,
+                    }
+                })
             }
 
             const sysTemplates = (sys as ListingTemplate[]) || []
