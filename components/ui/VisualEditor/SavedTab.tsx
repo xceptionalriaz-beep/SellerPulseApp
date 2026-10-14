@@ -52,12 +52,13 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 interface SavedTabProps {
     onLoad: (name: string, blocks: Block[], settings: CanvasSettings, id: string) => void
+    savedCount?: number   // increments on each successful save — triggers a re-fetch
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
-export default function SavedTab({ onLoad }: SavedTabProps) {
+export default function SavedTab({ onLoad, savedCount = 0 }: SavedTabProps) {
     const [templates, setTemplates] = useState<SavedTemplate[]>([])
     const [loading, setLoading] = useState(true)
     const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -88,6 +89,12 @@ export default function SavedTab({ onLoad }: SavedTabProps) {
     useEffect(() => {
         fetchTemplates()
     }, [fetchTemplates])
+
+    // Re-fetch whenever a new save completes
+    useEffect(() => {
+        if (savedCount > 0) fetchTemplates()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [savedCount])
 
     const handleDelete = useCallback(async (id: string) => {
         if (!window.confirm('Delete this template? This cannot be undone.')) return

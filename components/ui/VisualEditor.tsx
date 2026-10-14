@@ -284,6 +284,7 @@ export default function VisualEditor({
     // Set by handleLoadTemplate, consumed by handleSave (UPDATE vs INSERT).
     const [currentTemplateId, setCurrentTemplateId] = useState<string | null>(null)
     const [isDirty, setIsDirty] = useState(false)            // unsaved changes
+    const [savedCount, setSavedCount] = useState(0)          // increments after each successful save → triggers SavedTab refresh
     const [lockedIds, setLockedIds] = useState<Set<string>>(new Set()) // locked blocks
     const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set()) // hidden blocks
     const [canvasSearch, setCanvasSearch] = useState('')          // search blocks on canvas
@@ -827,6 +828,7 @@ export default function VisualEditor({
             }
 
             setIsDirty(false)
+            setSavedCount(n => n + 1)
             setSaveStatus('saved')
             setTimeout(() => setSaveStatus('idle'), 2500)
         } catch (e: any) {
@@ -1653,6 +1655,7 @@ export default function VisualEditor({
                     tokenFeedback={tokenFeedback}
                     selectedBlockLabel={selectedBlock ? (getDefinition(selectedBlock.type)?.label ?? null) : null}
                     onLoadTemplate={handleLoadTemplate}
+                    savedCount={savedCount}
                     selectedFeatureIndex={selectedFeatureIndex}
                     onIconSelect={(iconId) => {
                         // Find block by ID (supports Heading, Features, Divider, and all block types)
