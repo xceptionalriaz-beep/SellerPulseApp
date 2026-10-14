@@ -28,7 +28,7 @@ import { ToolId, ImageEditorState, DEFAULT_STATE } from './types'
 // ── Tool panel imports — add here as you build each one ────────────────
 import AdjustTool  from './tools/AdjustTool'
 import FilterTool  from './tools/FilterTool'
-// import CropTool    from './tools/CropTool'
+import CropTool    from './tools/CropTool'
 // import ResizeTool  from './tools/ResizeTool'
 // import RotateTool  from './tools/RotateTool'
 // import DrawTool    from './tools/DrawTool'
@@ -187,12 +187,16 @@ export default function ImageEditorModal({
 
     const cssTransform = useMemo(() => {
         const { rotation, flipH, flipV } = editorState
+        const straighten = editorState.straighten ?? 0
         const parts: string[] = []
-        if (rotation) parts.push(`rotate(${rotation}deg)`)
+        const totalRot = rotation + straighten
+        if (totalRot) parts.push(`rotate(${totalRot}deg)`)
         if (flipH)    parts.push('scaleX(-1)')
         if (flipV)    parts.push('scaleY(-1)')
         return parts.length ? parts.join(' ') : 'none'
     }, [editorState])
+
+    const cssCornerRadius = (editorState.cornerRadius ?? 0)
 
     // ── Render tool panel (slot — replace placeholders as tools are built) ─
     function renderToolPanel() {
@@ -201,7 +205,7 @@ export default function ImageEditorModal({
             // Uncomment as each tool is built:
             case 'adjust': return <AdjustTool {...common} />
             case 'filter': return <FilterTool {...common} />
-            // case 'crop':   return <CropTool   {...common} />
+            case 'crop':   return <CropTool   {...common} />
             // case 'resize': return <ResizeTool {...common} />
             // case 'rotate': return <RotateTool {...common} />
             // case 'draw':   return <DrawTool   {...common} />
@@ -347,7 +351,8 @@ export default function ImageEditorModal({
                                 maxHeight: '70vh',
                                 filter: cssFilter,
                                 transform: cssTransform,
-                                transition: 'filter 0.2s ease, transform 0.2s ease',
+                                borderRadius: cssCornerRadius > 0 ? cssCornerRadius : undefined,
+                                transition: 'filter 0.2s ease, transform 0.2s ease, border-radius 0.15s ease',
                                 userSelect: 'none',
                             }}
                         />
