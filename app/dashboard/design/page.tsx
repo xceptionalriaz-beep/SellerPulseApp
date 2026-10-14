@@ -761,8 +761,8 @@ function DesignStudioInner() {
                                     </div>
                                 )}
 
-                            {/* My Templates — has results */}
-                            {myTemplates.filter(t => {
+                            {/* My Templates — has results (only shown on my-templates tab) */}
+                            {activeTab === 'my-templates' && myTemplates.filter(t => {
                                 const matchCat = activeCategory === 'all' || t.category?.toLowerCase() === activeCategory
                                 const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase())
                                 return matchCat && matchSearch
