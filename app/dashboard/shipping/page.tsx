@@ -10,6 +10,7 @@ import {
   Box, Copy, Download, CheckCircle2, RotateCcw, Sparkles,
   ExternalLink, FileText,
 } from 'lucide-react'
+import ProDropdown, { DropdownOption } from '@/components/ui/ProDropdown'
 
 // ── Design tokens ──────────────────────────────────────────────────────────────
 const C = {
@@ -51,120 +52,41 @@ interface LabelResult {
 
 const US_STATES = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY']
 
-// Common eBay shipping destinations (domestic + top dropship markets)
-// fi = flag-icons ISO 3166-1 alpha-2 lowercase code (fi fi-XX)
-const COUNTRIES: { code: string; name: string; fi: string }[] = [
-  { code: 'US', name: 'United States',  fi: 'us' },
-  { code: 'CA', name: 'Canada',         fi: 'ca' },
-  { code: 'GB', name: 'United Kingdom', fi: 'gb' },
-  { code: 'AU', name: 'Australia',      fi: 'au' },
-  { code: 'DE', name: 'Germany',        fi: 'de' },
-  { code: 'FR', name: 'France',         fi: 'fr' },
-  { code: 'IT', name: 'Italy',          fi: 'it' },
-  { code: 'ES', name: 'Spain',          fi: 'es' },
-  { code: 'NL', name: 'Netherlands',    fi: 'nl' },
-  { code: 'JP', name: 'Japan',          fi: 'jp' },
-  { code: 'KR', name: 'South Korea',    fi: 'kr' },
-  { code: 'CN', name: 'China',          fi: 'cn' },
-  { code: 'SG', name: 'Singapore',      fi: 'sg' },
-  { code: 'HK', name: 'Hong Kong',      fi: 'hk' },
-  { code: 'TW', name: 'Taiwan',         fi: 'tw' },
-  { code: 'MX', name: 'Mexico',         fi: 'mx' },
-  { code: 'BR', name: 'Brazil',         fi: 'br' },
-  { code: 'IN', name: 'India',          fi: 'in' },
-  { code: 'AE', name: 'UAE',            fi: 'ae' },
-  { code: 'SA', name: 'Saudi Arabia',   fi: 'sa' },
-  { code: 'PH', name: 'Philippines',    fi: 'ph' },
-  { code: 'MY', name: 'Malaysia',       fi: 'my' },
-  { code: 'NZ', name: 'New Zealand',    fi: 'nz' },
-  { code: 'SE', name: 'Sweden',         fi: 'se' },
-  { code: 'CH', name: 'Switzerland',    fi: 'ch' },
-  { code: 'PL', name: 'Poland',         fi: 'pl' },
-  { code: 'NO', name: 'Norway',         fi: 'no' },
-  { code: 'DK', name: 'Denmark',        fi: 'dk' },
-  { code: 'BE', name: 'Belgium',        fi: 'be' },
-  { code: 'AT', name: 'Austria',        fi: 'at' },
-  { code: 'IL', name: 'Israel',         fi: 'il' },
-  { code: 'ZA', name: 'South Africa',   fi: 'za' },
+// Common eBay shipping destinations — shaped as DropdownOption for ProDropdown
+const COUNTRIES: DropdownOption[] = [
+  { val: 'US', label: 'United States',  enabled: true, flagCode: 'us' },
+  { val: 'CA', label: 'Canada',         enabled: true, flagCode: 'ca' },
+  { val: 'GB', label: 'United Kingdom', enabled: true, flagCode: 'gb' },
+  { val: 'AU', label: 'Australia',      enabled: true, flagCode: 'au' },
+  { val: 'DE', label: 'Germany',        enabled: true, flagCode: 'de' },
+  { val: 'FR', label: 'France',         enabled: true, flagCode: 'fr' },
+  { val: 'IT', label: 'Italy',          enabled: true, flagCode: 'it' },
+  { val: 'ES', label: 'Spain',          enabled: true, flagCode: 'es' },
+  { val: 'NL', label: 'Netherlands',    enabled: true, flagCode: 'nl' },
+  { val: 'JP', label: 'Japan',          enabled: true, flagCode: 'jp' },
+  { val: 'KR', label: 'South Korea',    enabled: true, flagCode: 'kr' },
+  { val: 'CN', label: 'China',          enabled: true, flagCode: 'cn' },
+  { val: 'SG', label: 'Singapore',      enabled: true, flagCode: 'sg' },
+  { val: 'HK', label: 'Hong Kong',      enabled: true, flagCode: 'hk' },
+  { val: 'TW', label: 'Taiwan',         enabled: true, flagCode: 'tw' },
+  { val: 'MX', label: 'Mexico',         enabled: true, flagCode: 'mx' },
+  { val: 'BR', label: 'Brazil',         enabled: true, flagCode: 'br' },
+  { val: 'IN', label: 'India',          enabled: true, flagCode: 'in' },
+  { val: 'AE', label: 'UAE',            enabled: true, flagCode: 'ae' },
+  { val: 'SA', label: 'Saudi Arabia',   enabled: true, flagCode: 'sa' },
+  { val: 'PH', label: 'Philippines',    enabled: true, flagCode: 'ph' },
+  { val: 'MY', label: 'Malaysia',       enabled: true, flagCode: 'my' },
+  { val: 'NZ', label: 'New Zealand',    enabled: true, flagCode: 'nz' },
+  { val: 'SE', label: 'Sweden',         enabled: true, flagCode: 'se' },
+  { val: 'CH', label: 'Switzerland',    enabled: true, flagCode: 'ch' },
+  { val: 'PL', label: 'Poland',         enabled: true, flagCode: 'pl' },
+  { val: 'NO', label: 'Norway',         enabled: true, flagCode: 'no' },
+  { val: 'DK', label: 'Denmark',        enabled: true, flagCode: 'dk' },
+  { val: 'BE', label: 'Belgium',        enabled: true, flagCode: 'be' },
+  { val: 'AT', label: 'Austria',        enabled: true, flagCode: 'at' },
+  { val: 'IL', label: 'Israel',         enabled: true, flagCode: 'il' },
+  { val: 'ZA', label: 'South Africa',   enabled: true, flagCode: 'za' },
 ]
-
-// ── Country dropdown — ProDropdown style (pill list + flag-icons) ─────────────
-function CountryPill({ country, isSelected, onTap }: {
-  country: typeof COUNTRIES[0]; isSelected: boolean; onTap: () => void
-}) {
-  const [hover, setHover] = useState(false)
-  return (
-    <div
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onClick={onTap}
-      style={{
-        display: 'flex', alignItems: 'center', gap: 8,
-        padding: '9px 16px', borderRadius: 999, cursor: 'pointer',
-        backgroundColor: isSelected ? '#8FFF00' : 'transparent',
-        color: isSelected ? '#1a2410' : C.body,
-        fontWeight: isSelected ? 700 : 500,
-        fontSize: 13, fontFamily: 'DM Sans, sans-serif',
-        border: `1.5px solid ${!isSelected && hover ? '#8FFF00' : 'transparent'}`,
-        transition: 'all 0.12s', marginBottom: 2,
-      }}
-    >
-      <span className={`fi fi-${country.fi}`} style={{ borderRadius: 2, display: 'inline-block' }} />
-      {country.name}
-    </div>
-  )
-}
-
-function CountryDropdown({ value, onChange }: { value: string; onChange: (code: string) => void }) {
-  const [open, setOpen] = useState(false)
-  const selected = COUNTRIES.find(c => c.code === value) ?? COUNTRIES[0]
-
-  return (
-    <div style={{ position: 'relative' }}>
-      {/* Trigger */}
-      <button
-        type="button"
-        onClick={() => setOpen(v => !v)}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-          padding: '8px 12px', borderRadius: 8,
-          border: `1px solid ${open ? '#8FFF00' : C.borderInput}`,
-          backgroundColor: open ? '#f5ffe0' : C.surface,
-          color: C.body, fontSize: 13, fontWeight: 600,
-          cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
-          transition: 'all 0.15s',
-        }}
-      >
-        <span className={`fi fi-${selected.fi}`} style={{ borderRadius: 2, display: 'inline-block' }} />
-        {selected.name}
-        <ChevronDown size={14} style={{ color: open ? '#8FFF00' : C.muted, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', marginLeft: 2 }} />
-      </button>
-
-      {open && <div style={{ position: 'fixed', inset: 0, zIndex: 40 }} onClick={() => setOpen(false)} />}
-
-      {open && (
-        <div style={{
-          position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 50,
-          width: 240, backgroundColor: C.surface,
-          border: `1px solid #E2E8F0`, borderRadius: 18,
-          boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
-          maxHeight: 320, overflowY: 'auto',
-        }}>
-          <div style={{ padding: 8, display: 'flex', flexDirection: 'column' }}>
-            {COUNTRIES.map(c => (
-              <CountryPill
-                key={c.code}
-                country={c}
-                isSelected={c.code === value}
-                onTap={() => { onChange(c.code); setOpen(false) }}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
 
 const DEFAULT_PRESETS: Preset[] = [
   { id: 'poly',   name: 'Poly Mailer', l: '12', w: '15', h: '0',  wLbs: '0', wOz: '4'  },
@@ -264,7 +186,7 @@ function MockLabel({ result, rate, recipient, from }: {
             <p style={{ fontSize: 11, color: '#374151', margin: 0, lineHeight: 1.5, fontFamily: 'DM Sans, sans-serif' }}>
               {recipient.addr1}{recipient.addr2 ? `, ${recipient.addr2}` : ''}<br />
               {recipient.city}{recipient.state ? `, ${recipient.state}` : ''} {recipient.zip}<br />
-              {recipient.country !== 'US' && (() => { const cc = COUNTRIES.find(c=>c.code===recipient.country); return cc ? <><span className={`fi fi-${cc.fi}`} style={{ borderRadius: 2, marginRight: 4 }} /><strong style={{ fontSize: 10, letterSpacing: '0.5px' }}>{cc.name}</strong></> : null })()}
+              {recipient.country !== 'US' && (() => { const cc = COUNTRIES.find(c=>c.val===recipient.country); return cc ? <><span className={`fi fi-${cc.flagCode}`} style={{ borderRadius: 2, marginRight: 4 }} /><strong style={{ fontSize: 10, letterSpacing: '0.5px' }}>{cc.label}</strong></> : null })()}
             </p>
           </div>
         </div>
@@ -533,9 +455,13 @@ export default function ShippingPage() {
                 {/* Country selector */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   <label style={lbl}>Country</label>
-                  <CountryDropdown
-                    value={recipient.country}
-                    onChange={code => setRecipient(r => ({ ...r, country: code, state: code === 'US' ? 'NY' : '' }))}
+                  <ProDropdown
+                    prefix=""
+                    currentValue={recipient.country}
+                    options={COUNTRIES}
+                    onChanged={code => setRecipient(r => ({ ...r, country: code, state: code === 'US' ? 'NY' : '' }))}
+                    width="full"
+                    maxItems={8}
                   />
                 </div>
 
@@ -703,7 +629,7 @@ export default function ShippingPage() {
               <div style={{ width: 1, height: 18, backgroundColor: C.border, flexShrink: 0 }} />
               <span style={{ fontSize: 11, color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
                 <strong style={{ color: C.dark }}>To:</strong> {recipient.name} · {recipient.city}{recipient.state ? `, ${recipient.state}` : ''} {recipient.zip}
-                {recipient.country !== 'US' && (() => { const cc = COUNTRIES.find(c => c.code === recipient.country); return cc ? <span style={{ marginLeft: 4, display: 'inline-flex', alignItems: 'center', gap: 4 }}><span className={`fi fi-${cc.fi}`} style={{ borderRadius: 2 }} /> {cc.name}</span> : null })()}
+                {recipient.country !== 'US' && (() => { const cc = COUNTRIES.find(c => c.val === recipient.country); return cc ? <span style={{ marginLeft: 4, display: 'inline-flex', alignItems: 'center', gap: 4 }}><span className={`fi fi-${cc.flagCode}`} style={{ borderRadius: 2 }} /> {cc.label}</span> : null })()}
               </span>
               <span style={{ fontSize: 11, color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}><strong style={{ color: C.dark }}>Pkg:</strong> {pkgType === 'box' ? `${length}×${width}×${height}${dimUnit}` : `${length}×${width}${dimUnit} mailer`} · {weightDisplay}</span>
               <button onClick={handleGetRates} style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, color: C.muted, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', flexShrink: 0 }}>
@@ -782,7 +708,7 @@ export default function ShippingPage() {
                 {[
                   { label: 'Carrier & Service', value: `${selectedRateObj.carrierName} ${selectedRateObj.serviceName}`, accent: true },
                   { label: 'Estimated Delivery', value: selectedRateObj.deliveryLabel },
-                  { label: 'Ship To', value: `${recipient.name} · ${recipient.addr1}${recipient.addr2 ? `, ${recipient.addr2}` : ''}, ${recipient.city}${recipient.state ? `, ${recipient.state}` : ''} ${recipient.zip}${recipient.country !== 'US' ? ` · ${COUNTRIES.find(c=>c.code===recipient.country)?.name ?? recipient.country}` : ''}` },
+                  { label: 'Ship To', value: `${recipient.name} · ${recipient.addr1}${recipient.addr2 ? `, ${recipient.addr2}` : ''}, ${recipient.city}${recipient.state ? `, ${recipient.state}` : ''} ${recipient.zip}${recipient.country !== 'US' ? ` · ${COUNTRIES.find(c=>c.val===recipient.country)?.label ?? recipient.country}` : ''}` },
                   { label: 'Package', value: pkgType === 'box' ? `${length}×${width}×${height} ${dimUnit} box · ${weightDisplay}` : `${length}×${width} ${dimUnit} mailer · ${weightDisplay}` },
                 ].map(({ label, value, accent }, i, arr) => (
                   <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, padding: '11px 0', borderBottom: i < arr.length - 1 ? `1px solid ${C.border}` : 'none' }}>
