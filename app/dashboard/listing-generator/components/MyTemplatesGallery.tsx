@@ -3,20 +3,14 @@
 // ─────────────────────────────────────────────────────────────────
 // "My Templates" gallery inside Listing Studio.
 // Shows the seller's Design Studio visual templates (from visual_templates).
-//   ✓ Thumbnail preview (scaled iframe from blocks_json)
-//   ✓ Name, category, last edited
-//   ✓ Open in Design Studio to edit
-//   ✓ Empty state with CTA to Design Studio
 // ─────────────────────────────────────────────────────────────────
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import {
     Palette, ExternalLink, RefreshCw, Plus,
     Clock, Search, X, LayoutTemplate,
 } from 'lucide-react'
-import { assembleDocument } from '@/components/ui/VisualEditor/blocks'
-import type { Block, CanvasSettings } from '@/components/ui/VisualEditor/blocks'
 
 const C = {
     bg: '#f8f7ff',
@@ -30,96 +24,56 @@ const C = {
     body: '#1f1d2e',
     secondary: '#6b7280',
     muted: '#9ca3af',
-    success: '#16a34a',
-    successBg: '#dcfce7',
-    accent: '#b8fa33',
 }
 
 interface VisualTemplate {
     id: string
     name: string
     category: string | null
-    blocks_json: Block[]
-    canvas_settings_json: CanvasSettings
     updated_at: string
+    blocks_json: unknown
 }
 
 interface Props {
     onClose?: () => void
 }
 
-// ── Mini thumbnail via a scaled iframe ───────────────────────────────────────
-function TemplateThumbnail({ t, height = 130 }: { t: VisualTemplate; height?: number }) {
-    const iframeRef = useRef<HTMLIFrameElement>(null)
-    const [ready, setReady] = useState(false)
+function timeAgo(iso: string) {
+    const diff = Date.now() - new Date(iso).getTime()
+    const d = Math.floor(diff / 86400000)
+    if (d === 0) return 'Today'
+    if (d === 1) return 'Yesterday'
+    if (d < 7) return `${d}d ago`
+    if (d < 30) return `${Math.floor(d / 7)}w ago`
+    return `${Math.floor(d / 30)}mo ago`
+}
 
-    useEffect(() => {
-        if (!iframeRef.current) return
-        try {
-            const html = assembleDocument(t.blocks_json ?? [], t.canvas_settings_json)
-            const doc = iframeRef.current.contentDocument
-            if (!doc) return
-            doc.open()
-            doc.write(html)
-            doc.close()
-            setReady(true)
-        } catch {
-            // fall through to placeholder
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [t.id])
-
-    const SCALE = height / 780   // treat iframe as 780px tall doc
-
+function Thumb({ name, size = 130 }: { name: string; size?: number }) {
+    // Generate a consistent color from the template name
+    const hue = name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360
     return (
-        <div style={{ width: '100%', height, position: 'relative', overflow: 'hidden', backgroundColor: '#f3eeff' }}>
-            {/* Scaled iframe */}
-            <iframe
-                ref={iframeRef}
-                title={t.name}
-                sandbox="allow-same-origin"
-                scrolling="no"
-                style={{
+        <div style={{
+            width: '100%', height: size,
+            background: `linear-gradient(135deg, hsl(${hue},60%,94%), hsl(${hue},50%,87%))`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            position: 'relative', overflow: 'hidden',
+        }}>
+            {[0, 1, 2, 3].map(i => (
+                <div key={i} style={{
                     position: 'absolute',
-                    top: 0, left: 0,
-                    width: `${100 / SCALE}%`,
-                    height: `${100 / SCALE}%`,
-                    transform: `scale(${SCALE})`,
-                    transformOrigin: 'top left',
-                    border: 'none',
-                    pointerEvents: 'none',
-                    opacity: ready ? 1 : 0,
-                    transition: 'opacity 0.3s ease',
-                }}
-            />
-            {/* Placeholder shown while iframe loads */}
-            {!ready && (
-                <div style={{
-                    position: 'absolute', inset: 0,
-                    background: `linear-gradient(135deg, #f3eeff, #e9d8fd)`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                    {[0, 1, 2, 3].map(i => (
-                        <div key={i} style={{
-                            position: 'absolute',
-                            top: `${12 + i * 20}%`,
-                            left: '10%', right: '10%',
-                            height: '10%',
-                            background: C.primary,
-                            opacity: 0.18 - i * 0.03,
-                            borderRadius: 4,
-                        }} />
-                    ))}
-                    <RefreshCw size={20} color={C.primary} style={{ opacity: 0.4, zIndex: 1 }} className="animate-spin" />
-                </div>
-            )}
+                    top: `${12 + i * 20}%`,
+                    left: '10%', right: '10%',
+                    height: '10%',
+                    background: `hsl(${hue},60%,55%)`,
+                    opacity: 0.18 - i * 0.03,
+                    borderRadius: 4,
+                }} />
+            ))}
+            <LayoutTemplate size={28} color={`hsl(${hue},60%,50%)`} style={{ opacity: 0.5, zIndex: 1 }} />
         </div>
     )
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// MAIN COMPONENT
-// ─────────────────────────────────────────────────────────────────────────────
 export default function MyTemplatesGallery({ onClose }: Props) {
     const [templates, setTemplates] = useState<VisualTemplate[]>([])
     const [loading, setLoading] = useState(true)
@@ -131,16 +85,16 @@ export default function MyTemplatesGallery({ onClose }: Props) {
     async function load() {
         setLoading(true)
         try {
+            // Must use the authenticated client — visual_templates RLS requires auth.uid()
             const supabase = createClient()
-            const { data: { user } } = await supabase.auth.getUser()
-            if (!user) { setLoading(false); return }
-
-            const { data } = await (supabase as any)
+            const { data, error } = await (supabase as any)
                 .from('visual_templates')
-                .select('id, name, category, blocks_json, canvas_settings_json, updated_at')
-                .eq('user_id', user.id)
+                .select('id, name, category, updated_at, blocks_json')
                 .order('updated_at', { ascending: false })
 
+            if (error) {
+                console.error('[MyTemplatesGallery] query error:', error)
+            }
             setTemplates((data as VisualTemplate[]) ?? [])
         } catch (err) {
             console.error('[MyTemplatesGallery] load error:', err)
@@ -155,17 +109,6 @@ export default function MyTemplatesGallery({ onClose }: Props) {
         (t.category ?? '').toLowerCase().includes(search.toLowerCase())
     )
 
-    function timeAgo(iso: string) {
-        const diff = Date.now() - new Date(iso).getTime()
-        const d = Math.floor(diff / 86400000)
-        if (d === 0) return 'Today'
-        if (d === 1) return 'Yesterday'
-        if (d < 7) return `${d}d ago`
-        if (d < 30) return `${Math.floor(d / 7)}w ago`
-        return `${Math.floor(d / 30)}mo ago`
-    }
-
-    // ── Loading ───────────────────────────────────────────────
     if (loading) {
         return (
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 40 }}>
@@ -174,7 +117,6 @@ export default function MyTemplatesGallery({ onClose }: Props) {
         )
     }
 
-    // ── Empty state ───────────────────────────────────────────
     if (templates.length === 0) {
         return (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 48, gap: 20 }}>
@@ -215,11 +157,10 @@ export default function MyTemplatesGallery({ onClose }: Props) {
         )
     }
 
-    // ── Main gallery ──────────────────────────────────────────
     return (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
 
-            {/* Header bar */}
+            {/* Header */}
             <div style={{
                 display: 'flex', alignItems: 'center', gap: 12,
                 padding: '14px 20px',
@@ -227,7 +168,6 @@ export default function MyTemplatesGallery({ onClose }: Props) {
                 background: C.surface,
                 flexShrink: 0,
             }}>
-                {/* Icon */}
                 <div style={{
                     width: 32, height: 32, borderRadius: 8,
                     background: C.primaryLight, flexShrink: 0,
@@ -247,7 +187,6 @@ export default function MyTemplatesGallery({ onClose }: Props) {
 
                 <div style={{ flex: 1 }} />
 
-                {/* Search */}
                 <div style={{ position: 'relative' }}>
                     <Search size={12} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: C.muted }} />
                     <input
@@ -261,7 +200,7 @@ export default function MyTemplatesGallery({ onClose }: Props) {
                             border: `1px solid ${C.borderInput}`,
                             background: C.bg, color: C.body,
                             fontFamily: 'DM Sans, sans-serif',
-                            width: 200, outline: 'none',
+                            width: 180, outline: 'none',
                         }}
                     />
                     {search && (
@@ -275,7 +214,6 @@ export default function MyTemplatesGallery({ onClose }: Props) {
                     )}
                 </div>
 
-                {/* Open Design Studio */}
                 <a
                     href="/dashboard/design"
                     target="_blank"
@@ -307,7 +245,7 @@ export default function MyTemplatesGallery({ onClose }: Props) {
                 ) : (
                     <div style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
                         gap: 16,
                     }}>
                         {filtered.map(t => {
@@ -328,19 +266,17 @@ export default function MyTemplatesGallery({ onClose }: Props) {
                                         transform: isHov ? 'translateY(-2px)' : 'none',
                                         transition: 'all 0.15s ease',
                                         display: 'flex', flexDirection: 'column',
+                                        cursor: 'pointer',
                                     }}
                                 >
                                     {/* Thumbnail */}
                                     <div style={{ position: 'relative', overflow: 'hidden' }}>
-                                        <TemplateThumbnail t={t} height={130} />
-
-                                        {/* Hover overlay with Edit button */}
+                                        <Thumb name={t.name} size={120} />
                                         {isHov && (
                                             <div style={{
                                                 position: 'absolute', inset: 0,
-                                                background: 'rgba(30,21,53,0.45)',
+                                                background: 'rgba(30,21,53,0.5)',
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                gap: 8,
                                             }}>
                                                 <a
                                                     href={`/dashboard/design/visual-editor?id=${t.id}&name=${encodeURIComponent(t.name)}`}
@@ -363,8 +299,7 @@ export default function MyTemplatesGallery({ onClose }: Props) {
                                     </div>
 
                                     {/* Info */}
-                                    <div style={{ padding: '12px 14px 14px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                                        {/* Name */}
+                                    <div style={{ padding: '10px 12px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
                                         <p style={{
                                             fontSize: 13, fontWeight: 700, color: C.body, margin: 0,
                                             fontFamily: 'DM Sans, sans-serif',
@@ -373,7 +308,6 @@ export default function MyTemplatesGallery({ onClose }: Props) {
                                             {t.name}
                                         </p>
 
-                                        {/* Category chip */}
                                         <span style={{
                                             display: 'inline-block', alignSelf: 'flex-start',
                                             fontSize: 10, fontWeight: 600,
@@ -384,7 +318,6 @@ export default function MyTemplatesGallery({ onClose }: Props) {
                                             {t.category || 'General'}
                                         </span>
 
-                                        {/* Last edited */}
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
                                             <Clock size={11} color={C.muted} />
                                             <span style={{ fontSize: 11, color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>

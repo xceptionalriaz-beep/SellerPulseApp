@@ -300,12 +300,12 @@ function DesignStudioInner() {
                 .order('use_count', { ascending: false })
 
             // User's own templates — from visual_templates (where Visual Builder saves)
+            // Must use the typed supabase client (not rawDb) — visual_templates RLS needs auth.uid()
             let own: ListingTemplate[] = []
             if (user) {
-                const { data: ownData } = await rawDb
+                const { data: ownData } = await (supabase as any)
                     .from('visual_templates')
                     .select('id, user_id, name, category, updated_at, blocks_json, canvas_settings_json')
-                    .eq('user_id', user.id)
                     .order('updated_at', { ascending: false })
                 // Map visual_templates shape → ListingTemplate shape
                 own = ((ownData as any[]) || []).map((vt: any) => ({
@@ -382,7 +382,7 @@ function DesignStudioInner() {
         if (isSystem) return
         setDeletingId(id)
         // Own templates live in visual_templates (saved by the Visual Builder)
-        await rawDb.from('visual_templates').delete().eq('id', id)
+        await (supabase as any).from('visual_templates').delete().eq('id', id)
         setMyTemplates((prev: ListingTemplate[]) => prev.filter((t: ListingTemplate) => t.id !== id))
         setDeletingId(null)
     }

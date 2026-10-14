@@ -2774,61 +2774,85 @@ ${thumbCells}
                 badgeBg: '#f3eeff',
                 badgeText: '#7530fb',
                 badgeBorder: '#ede9fe',
-                badges: ['Genuine', 'UK Stock', 'Top Rated', 'Easy Returns'],
+                badges: [
+                    { icon: 'shield', text: 'Genuine' },
+                    { icon: 'package', text: 'UK Stock' },
+                    { icon: 'star', text: 'Top Rated' },
+                    { icon: 'rotate-ccw', text: 'Easy Returns' },
+                ],
             } as unknown as BlockProps,
             toHtml(props, id) {
                 const p = props as CommonProps & { [key: string]: any }
-                const rawBadges: string[] = Array.isArray(p.badges) && p.badges.length > 0
+                const rawBadges: any[] = Array.isArray(p.badges) && p.badges.length > 0
                     ? p.badges
                     : (typeof p.badges === 'string' && p.badges.trim()
-                        ? p.badges.split('\n').filter((s: string) => s.trim())
-                        : ['Genuine', 'UK Stock', 'Top Rated', 'Easy Returns'])
+                        ? p.badges.split('\n').filter((s: string) => s.trim()).map(t => ({ icon: 'check', text: t }))
+                        : [
+                            { icon: 'shield', text: 'Genuine' },
+                            { icon: 'package', text: 'UK Stock' },
+                            { icon: 'star', text: 'Top Rated' },
+                            { icon: 'rotate-ccw', text: 'Easy Returns' },
+                        ])
 
                 const badgeBg = p.badgeBg ?? '#f3eeff'
                 const badgeText = p.badgeText ?? p.badgeColor ?? '#7530fb'
                 const badgeBorder = p.badgeBorder ?? '#ede9fe'
                 const colWidth = Math.max(10, Math.floor(100 / Math.max(1, rawBadges.length)))
 
-                const getBadgeIcon = (text: string, color: string) => {
-                    const s = text.toLowerCase()
-                    if (s.includes('stock') || s.includes('box') || s.includes('package') || s.includes('parcel') || s.includes('warehouse') || s.includes('128230') || s.includes('📦')) {
-                        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:6px;"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>`
+                const getBadgeIcon = (raw: any, color: string) => {
+                    const iconKey = (typeof raw === 'object' && raw !== null ? (raw.icon || '') : '').toLowerCase()
+                    const s = (typeof raw === 'object' && raw !== null ? (raw.text || raw.label || '') : String(raw)).toLowerCase()
+                    const isIcon = (k: string) => iconKey === k || iconKey.includes(k)
+
+                    if (isIcon('package') || isIcon('box') || s.includes('stock') || s.includes('box') || s.includes('package') || s.includes('parcel') || s.includes('warehouse') || s.includes('128230') || s.includes('📦')) {
+                        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>`
                     }
-                    if (s.includes('return') || s.includes('refund') || s.includes('undo') || s.includes('rotate') || s.includes('replace') || s.includes('128260') || s.includes('🔄')) {
-                        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:6px;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>`
+                    if (isIcon('rotate-ccw') || isIcon('refresh') || isIcon('rotate') || isIcon('undo') || s.includes('return') || s.includes('refund') || s.includes('undo') || s.includes('rotate') || s.includes('replace') || s.includes('128260') || s.includes('🔄')) {
+                        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>`
                     }
-                    if (s.includes('star') || s.includes('rated') || s.includes('top') || s.includes('review') || s.includes('rating') || s.includes('9733') || s.includes('★') || s.includes('⭐')) {
-                        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="${color}" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:6px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`
+                    if (isIcon('star') || s.includes('star') || s.includes('rated') || s.includes('top') || s.includes('review') || s.includes('rating') || s.includes('9733') || s.includes('★') || s.includes('⭐')) {
+                        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="${color}" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`
                     }
-                    if (s.includes('truck') || s.includes('ship') || s.includes('delivery') || s.includes('courier') || s.includes('post') || s.includes('freight')) {
-                        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:6px;"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-5l-3-4h-5v10"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>`
+                    if (isIcon('truck') || isIcon('plane') || s.includes('truck') || s.includes('ship') || s.includes('delivery') || s.includes('courier') || s.includes('post') || s.includes('freight')) {
+                        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-5l-3-4h-5v10"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>`
                     }
-                    if (s.includes('shield') || s.includes('warranty') || s.includes('secure') || s.includes('protect') || s.includes('safe') || s.includes('lock')) {
-                        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:6px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>`
+                    if (isIcon('shield') || isIcon('lock') || isIcon('badge-check') || s.includes('shield') || s.includes('warranty') || s.includes('secure') || s.includes('protect') || s.includes('safe') || s.includes('lock')) {
+                        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>`
                     }
-                    if (s.includes('clock') || s.includes('time') || s.includes('hour') || s.includes('same day') || s.includes('fast') || s.includes('instant') || s.includes('24h')) {
-                        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:6px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`
+                    if (isIcon('clock') || s.includes('clock') || s.includes('time') || s.includes('hour') || s.includes('same day') || s.includes('fast') || s.includes('instant') || s.includes('24h')) {
+                        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`
                     }
-                    if (s.includes('award') || s.includes('cert') || s.includes('quality') || s.includes('medal') || s.includes('trophy')) {
-                        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:6px;"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`
+                    if (isIcon('award') || isIcon('sparkles') || s.includes('award') || s.includes('cert') || s.includes('quality') || s.includes('medal') || s.includes('trophy')) {
+                        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`
                     }
-                    return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:6px;"><polyline points="20 6 9 17 4 12"/></svg>`
+                    if (isIcon('heart') || s.includes('heart') || s.includes('love')) {
+                        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`
+                    }
+                    if (isIcon('zap') || s.includes('zap') || s.includes('bolt') || s.includes('flash') || s.includes('power')) {
+                        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`
+                    }
+                    if (isIcon('tag') || isIcon('gift') || s.includes('tag') || s.includes('discount') || s.includes('deal')) {
+                        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><circle cx="7" cy="7" r=".5" fill="${color}"/></svg>`
+                    }
+                    return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg>`
                 }
 
-                const cleanLabel = (raw: string) => {
-                    return raw
+                const cleanLabel = (raw: any) => {
+                    const text = typeof raw === 'object' && raw !== null ? (raw.text ?? raw.label ?? '') : String(raw)
+                    return text
                         .replace(/&#\d+;/g, '')
                         .replace(/^[\u2000-\u3300\uD800-\uDBFF\uDC00-\uDFFF\u2700-\u27BF\u2600-\u26FF✓✔★☆📦🔄🚚🛡️🏆🔒✅\s]+/u, '')
-                        .trim() || raw.trim()
+                        .trim() || text.trim()
                 }
 
                 const safeId = (id || 'badge_row').replace(/[^a-zA-Z0-9_-]/g, '_')
-                const badgeItems = rawBadges.map(raw => {
+                const badgeItems = rawBadges.map((raw, idx) => {
                     const iconSvg = getBadgeIcon(raw, badgeText)
                     const label = cleanLabel(raw)
                     return `<div class="badge-col-${safeId}" style="box-sizing:border-box;padding:4px 5px;flex:1 1 ${colWidth}%;width:${colWidth}%;max-width:100%;display:inline-block;vertical-align:middle;">` +
                         `<div class="badge-pill-${safeId}" style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;box-sizing:border-box;padding:8px 10px;background-color:${badgeBg};color:${badgeText};font-family:Arial,sans-serif;font-size:12px;font-weight:700;line-height:16px;border-radius:100px;border:1px solid ${badgeBorder};text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">` +
-                        `${iconSvg}<span style="vertical-align:middle;overflow:hidden;text-overflow:ellipsis;">${label}</span>` +
+                        `<div data-feature-index="${idx}" data-icon-slot="true" style="display:inline-flex;align-items:center;justify-content:center;cursor:pointer;line-height:1;border-radius:6px;vertical-align:middle;">${iconSvg}</div>` +
+                        `<span style="vertical-align:middle;overflow:hidden;text-overflow:ellipsis;">${label}</span>` +
                         `</div></div>`
                 }).join('')
 
@@ -2838,7 +2862,7 @@ ${thumbCells}
                     `.badge-pad-${safeId}{padding-left:8px !important;padding-right:8px !important;}` +
                     `.badge-col-${safeId}{flex:0 0 50% !important;width:50% !important;max-width:50% !important;padding:3px 4px !important;box-sizing:border-box !important;}` +
                     `.badge-pill-${safeId}{padding:6px 6px !important;font-size:11px !important;min-height:32px !important;gap:4px !important;}` +
-                    `.badge-pill-${safeId} svg{width:12px !important;height:12px !important;margin-right:4px !important;}` +
+                    `.badge-pill-${safeId} svg{width:12px !important;height:12px !important;}` +
                     `}` +
                     `</style>`
 
