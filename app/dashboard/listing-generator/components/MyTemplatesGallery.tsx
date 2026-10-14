@@ -6,17 +6,11 @@
 // ─────────────────────────────────────────────────────────────────
 
 import { useState, useEffect } from 'react'
-import { createClient as createRawClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase'
 import {
     Palette, ExternalLink, RefreshCw, Plus,
     Clock, Search, X, LayoutTemplate,
 } from 'lucide-react'
-
-// Raw Supabase client (same pattern as original file)
-const rawDb = createRawClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 const C = {
     bg:           '#f8f7ff',
@@ -91,13 +85,11 @@ export default function MyTemplatesGallery({ onClose }: Props) {
     async function load() {
         setLoading(true)
         try {
-            const { data: { user } } = await rawDb.auth.getUser()
-            if (!user) { setLoading(false); return }
-
-            const { data, error } = await rawDb
+            // Must use the authenticated client — visual_templates RLS requires auth.uid()
+            const supabase = createClient()
+            const { data, error } = await (supabase as any)
                 .from('visual_templates')
                 .select('id, name, category, updated_at, blocks_json')
-                .eq('user_id', user.id)
                 .order('updated_at', { ascending: false })
 
             if (error) {
