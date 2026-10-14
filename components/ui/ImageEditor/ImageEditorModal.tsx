@@ -17,7 +17,7 @@ import ResizeTool  from './tools/ResizeTool'
 import RotateTool  from './tools/RotateTool'
 import DrawTool    from './tools/DrawTool'
 import TextTool    from './tools/TextTool'
-// import FrameTool   from './tools/FrameTool'
+import FrameTool   from './tools/FrameTool'
 
 // ── Design tokens ──────────────────────────────────────────────
 const C = {
@@ -189,6 +189,73 @@ export default function ImageEditorModal({
         }
     }, [editorState.resizeWidth, editorState.resizeHeight])
 
+    // ── CSS frame ──────────────────────────────────────────────
+    const cssFrame = useMemo(() => {
+        const { style, color, width: w, borderRadius: br } = editorState.frame
+        const baseRadius = cssCornerRadius > 0 ? cssCornerRadius : 2
+        const baseInner  = { borderRadius: baseRadius }
+        if (style === 'none') {
+            return {
+                outer: { boxShadow: '0 4px 32px rgba(0,0,0,0.16)' } as React.CSSProperties,
+                inner: baseInner,
+            }
+        }
+        switch (style) {
+            case 'solid':
+                return {
+                    outer: {
+                        border: `${w}px solid ${color}`,
+                        borderRadius: baseRadius + w,
+                        boxShadow: '0 4px 32px rgba(0,0,0,0.16)',
+                    } as React.CSSProperties,
+                    inner: baseInner,
+                }
+            case 'rounded':
+                return {
+                    outer: {
+                        border: `${w}px solid ${color}`,
+                        borderRadius: br + w,
+                        boxShadow: '0 4px 32px rgba(0,0,0,0.16)',
+                    } as React.CSSProperties,
+                    inner: { borderRadius: br },
+                }
+            case 'shadow':
+                return {
+                    outer: {
+                        border: `${w}px solid ${color}`,
+                        borderRadius: baseRadius + w,
+                        boxShadow: `${Math.round(w*0.6)}px ${Math.round(w*0.6)}px 0 #374151, ${Math.round(w*0.8)}px ${Math.round(w*0.8)}px ${w*2}px rgba(0,0,0,0.35)`,
+                    } as React.CSSProperties,
+                    inner: baseInner,
+                }
+            case 'polaroid':
+                return {
+                    outer: {
+                        background: color || '#ffffff',
+                        padding: `${w}px ${w}px ${Math.round(w * 3.2)}px ${w}px`,
+                        boxShadow: '0 4px 32px rgba(0,0,0,0.18)',
+                        borderRadius: 2,
+                    } as React.CSSProperties,
+                    inner: { borderRadius: 0 },
+                }
+            case 'film':
+                return {
+                    outer: {
+                        background: '#111111',
+                        padding: `${Math.round(w * 1.4)}px ${Math.round(w * 0.5)}px`,
+                        borderRadius: 3,
+                        boxShadow: '0 4px 32px rgba(0,0,0,0.35)',
+                    } as React.CSSProperties,
+                    inner: { borderRadius: 0 },
+                }
+            default:
+                return {
+                    outer: { boxShadow: '0 4px 32px rgba(0,0,0,0.16)' } as React.CSSProperties,
+                    inner: baseInner,
+                }
+        }
+    }, [editorState.frame, cssCornerRadius])
+
     // ── Render tool panel ──────────────────────────────────────
     function renderToolPanel() {
         const common = { state: editorState, onChange: pushState, imageUrl }
@@ -200,6 +267,7 @@ export default function ImageEditorModal({
             case 'rotate': return <RotateTool {...common} />
             case 'draw':   return <DrawTool   {...common} />
             case 'text':   return <TextTool   {...common} />
+            case 'frame':  return <FrameTool  {...common} />
             default:
                 return <PlaceholderPanel tool={TOOLS.find(t => t.id === activeTool)!} />
         }
@@ -280,17 +348,21 @@ export default function ImageEditorModal({
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     overflow: 'hidden',
                 }}>
-                    {/* Image wrapper — position:relative so CropOverlay can be absolute inside */}
+                    {/* Outer wrapper — zoom transform + frame visual (border/padding/shadow) */}
                     <div style={{
                         transform: `scale(${zoom / 100})`,
                         transformOrigin: 'center center',
                         transition: 'transform 0.18s ease',
-                        boxShadow: '0 4px 32px rgba(0,0,0,0.16)',
                         lineHeight: 0,
-                        position: 'relative',
-                        borderRadius: cssCornerRadius > 0 ? cssCornerRadius : 2,
-                        overflow: 'hidden',
+                        ...cssFrame.outer,
                     }}>
+                        {/* Inner wrapper — position:relative so overlays can be absolute inside */}
+                        <div style={{
+                            lineHeight: 0,
+                            position: 'relative',
+                            borderRadius: cssFrame.inner.borderRadius,
+                            overflow: 'hidden',
+                        }}>
                         <img
                             ref={imgCallbackRef}
                             src={imageUrl}
@@ -336,6 +408,7 @@ export default function ImageEditorModal({
                                 active={activeTool === 'draw'}
                             />
                         )}
+                        </div>
                     </div>
 
                     {/* Zoom pill */}
