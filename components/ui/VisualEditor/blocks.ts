@@ -2836,12 +2836,13 @@ ${thumbCells}
                 }
 
                 const safeId = (id || 'badge_row').replace(/[^a-zA-Z0-9_-]/g, '_')
-                const badgeItems = rawBadges.map(raw => {
+                const badgeItems = rawBadges.map((raw, idx) => {
                     const iconSvg = getBadgeIcon(raw, badgeText)
                     const label = cleanLabel(raw)
+                    const iconWrapper = `<span data-feature-index="${idx}" data-icon-slot="true" data-field="icon" style="display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:2px;border-radius:6px;vertical-align:middle;">${iconSvg}</span>`
                     return `<div class="badge-col-${safeId}" style="box-sizing:border-box;padding:4px 5px;flex:1 1 ${colWidth}%;width:${colWidth}%;max-width:100%;display:inline-block;vertical-align:middle;">` +
                         `<div class="badge-pill-${safeId}" style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;box-sizing:border-box;padding:8px 10px;background-color:${badgeBg};color:${badgeText};font-family:Arial,sans-serif;font-size:12px;font-weight:700;line-height:16px;border-radius:100px;border:1px solid ${badgeBorder};text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">` +
-                        `${iconSvg}<span style="vertical-align:middle;overflow:hidden;text-overflow:ellipsis;">${label}</span>` +
+                        `${iconWrapper}<span style="vertical-align:middle;overflow:hidden;text-overflow:ellipsis;">${label}</span>` +
                         `</div></div>`
                 }).join('')
 
