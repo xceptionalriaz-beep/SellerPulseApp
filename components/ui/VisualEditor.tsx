@@ -51,6 +51,7 @@ import LivePreview from './VisualEditor/LivePreview'
 import { EditorToolbar as RichEditorToolbar } from './EditorToolbar'
 import BlockToolbar from './VisualEditor/BlockToolbar'
 import ListingPickerModal, { type LinkedListing } from './VisualEditor/ListingPickerModal'
+import EbayAccountSelector from '@/app/dashboard/listing-generator/components/EbayAccountSelector'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -283,6 +284,7 @@ export default function VisualEditor({
     // Set by handleLoadTemplate, consumed by handleSave (UPDATE vs INSERT).
     const [currentTemplateId, setCurrentTemplateId] = useState<string | null>(null)
     const [isDirty, setIsDirty] = useState(false)            // unsaved changes
+    const [savedCount, setSavedCount] = useState(0)          // increments after each successful save → triggers SavedTab refresh
     const [lockedIds, setLockedIds] = useState<Set<string>>(new Set()) // locked blocks
     const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set()) // hidden blocks
     const [canvasSearch, setCanvasSearch] = useState('')          // search blocks on canvas
@@ -826,6 +828,7 @@ export default function VisualEditor({
             }
 
             setIsDirty(false)
+            setSavedCount(n => n + 1)
             setSaveStatus('saved')
             setTimeout(() => setSaveStatus('idle'), 2500)
         } catch (e: any) {
@@ -1652,6 +1655,7 @@ export default function VisualEditor({
                     tokenFeedback={tokenFeedback}
                     selectedBlockLabel={selectedBlock ? (getDefinition(selectedBlock.type)?.label ?? null) : null}
                     onLoadTemplate={handleLoadTemplate}
+                    savedCount={savedCount}
                     selectedFeatureIndex={selectedFeatureIndex}
                     onIconSelect={(iconId) => {
                         // Find block by ID (supports Heading, Features, Divider, and all block types)
@@ -1724,8 +1728,8 @@ export default function VisualEditor({
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
                     {/* ── BlockToolbar — only when not in live preview ── */}
                     {!livePreview && (
-                        <div style={{ display: 'flex', alignItems: 'stretch' }}>
-                            <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'stretch', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                            <div style={{ flex: 1, minWidth: 0, display: 'flex' }}>
                                 <BlockToolbar
                                     blockType={isLayoutBlock ? undefined : (selectedBlock?.type ?? undefined)}
                                     blockProps={isLayoutBlock ? (activeSlotEdit ? {} : null) : (selectedBlock?.props ?? null)}
@@ -1749,7 +1753,7 @@ export default function VisualEditor({
                                 />
                             </div>
                             {/* Undo / Redo — left of the eye icon */}
-                            <div style={{ display: 'flex', alignItems: 'center', borderLeft: '1px solid #e2e8f0' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', borderLeft: '1px solid #e2e8f0', flexShrink: 0 }}>
                                 <button
                                     onClick={handleUndo}
                                     disabled={undoStack.length === 0}
@@ -2317,6 +2321,11 @@ function EditorToolbar({
 
             {/* Right — zoom + focus + clear */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                {/* eBay connection status */}
+                <EbayAccountSelector />
+
+                <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
+
                 {/* Device width toggle */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '2px', backgroundColor: '#f1f5f9', borderRadius: 6 }}>
                     {([

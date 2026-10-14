@@ -95,6 +95,7 @@ interface SidebarPanelProps {
 
     // SavedTab props
     onLoadTemplate: (name: string, blocks: Block[], settings: CanvasSettings) => void
+    savedCount?: number
 
     // IconsPanel props
     selectedFeatureIndex: number | null
@@ -126,6 +127,7 @@ export default function SidebarPanel({
     tokenFeedback,
     selectedBlockLabel,
     onLoadTemplate,
+    savedCount,
     selectedFeatureIndex,
     onIconSelect,
 }: SidebarPanelProps) {
@@ -218,6 +220,7 @@ export default function SidebarPanel({
                     {activeTab === 'saved' && (
                         <SavedTab
                             onLoad={onLoadTemplate}
+                            savedCount={savedCount}
                         />
                     )}
 
