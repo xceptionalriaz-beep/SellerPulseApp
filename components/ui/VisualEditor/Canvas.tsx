@@ -1169,19 +1169,24 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
 
       var newHtml = el.innerHTML || '';
       var newText = el.innerText || el.textContent || '';
+      // Identify which slot/prop was edited via the closest dropzone ancestor
+      var zone = el.closest('[data-canvas-dropzone]');
+      var propKey = zone ? zone.getAttribute('data-canvas-dropzone') : null;
 
       if (/<[a-z][\s\S]*>/i.test(newHtml)) {
         window.parent.postMessage({
           type: 'RIAZIFY_COMMIT_HTML_EDIT',
           blockId: BLOCK_ID,
           html: newHtml,
-          text: newText
+          text: newText,
+          propKey: propKey
         }, '*');
       } else if (newText !== originalText) {
         window.parent.postMessage({
           type: 'RIAZIFY_COMMIT_TEXT_EDIT',
           blockId: BLOCK_ID,
-          text: newText
+          text: newText,
+          propKey: propKey
         }, '*');
       }
       activeEditable = null;
