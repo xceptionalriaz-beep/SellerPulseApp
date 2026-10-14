@@ -2,26 +2,21 @@
 // app/dashboard/listing-generator/components/MyTemplatesGallery.tsx
 // ─────────────────────────────────────────────────────────────────
 // "My Templates" gallery inside Listing Studio.
-// Shows the seller's Design Studio visual templates with:
-//   ✓ Thumbnail preview
-//   ✓ Name, category, use_count, last edited
+// Shows the seller's Design Studio visual templates (from visual_templates).
+//   ✓ Thumbnail preview (scaled iframe from blocks_json)
+//   ✓ Name, category, last edited
 //   ✓ Open in Design Studio to edit
-//   ✓ "Used by X listings" badge
 //   ✓ Empty state with CTA to Design Studio
 // ─────────────────────────────────────────────────────────────────
 
-import { useState, useEffect } from 'react'
-import { createClient as createRawClient } from '@supabase/supabase-js'
+import { useState, useEffect, useRef } from 'react'
+import { createClient } from '@/lib/supabase'
 import {
     Palette, ExternalLink, RefreshCw, Plus,
-    Clock, Layers, Search, X,
+    Clock, Search, X, LayoutTemplate,
 } from 'lucide-react'
-
-// Raw client — listing_templates is not in the typed schema yet
-const rawDb = createRawClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import { assembleDocument } from '@/components/ui/VisualEditor/blocks'
+import type { Block, CanvasSettings } from '@/components/ui/VisualEditor/blocks'
 
 const C = {
     bg:           '#f8f7ff',
@@ -40,23 +35,93 @@ const C = {
     accent:       '#b8fa33',
 }
 
-interface ListingTemplate {
-    id:            string
-    name:          string
-    category:      string
-    description:   string | null
-    thumbnail_url: string | null
-    use_count:     number
-    updated_at:    string
-    description_html: string | null
+interface VisualTemplate {
+    id:                   string
+    name:                 string
+    category:             string | null
+    blocks_json:          Block[]
+    canvas_settings_json: CanvasSettings
+    updated_at:           string
 }
 
 interface Props {
     onClose?: () => void
 }
 
+// ── Mini thumbnail via a scaled iframe ───────────────────────────────────────
+function TemplateThumbnail({ t, height = 130 }: { t: VisualTemplate; height?: number }) {
+    const iframeRef = useRef<HTMLIFrameElement>(null)
+    const [ready, setReady] = useState(false)
+
+    useEffect(() => {
+        if (!iframeRef.current) return
+        try {
+            const html = assembleDocument(t.blocks_json ?? [], t.canvas_settings_json)
+            const doc = iframeRef.current.contentDocument
+            if (!doc) return
+            doc.open()
+            doc.write(html)
+            doc.close()
+            setReady(true)
+        } catch {
+            // fall through to placeholder
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [t.id])
+
+    const SCALE = height / 780   // treat iframe as 780px tall doc
+
+    return (
+        <div style={{ width: '100%', height, position: 'relative', overflow: 'hidden', backgroundColor: '#f3eeff' }}>
+            {/* Scaled iframe */}
+            <iframe
+                ref={iframeRef}
+                title={t.name}
+                sandbox="allow-same-origin"
+                scrolling="no"
+                style={{
+                    position: 'absolute',
+                    top: 0, left: 0,
+                    width:  `${100 / SCALE}%`,
+                    height: `${100 / SCALE}%`,
+                    transform: `scale(${SCALE})`,
+                    transformOrigin: 'top left',
+                    border: 'none',
+                    pointerEvents: 'none',
+                    opacity: ready ? 1 : 0,
+                    transition: 'opacity 0.3s ease',
+                }}
+            />
+            {/* Placeholder shown while iframe loads */}
+            {!ready && (
+                <div style={{
+                    position: 'absolute', inset: 0,
+                    background: `linear-gradient(135deg, #f3eeff, #e9d8fd)`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                    {[0,1,2,3].map(i => (
+                        <div key={i} style={{
+                            position: 'absolute',
+                            top:    `${12 + i * 20}%`,
+                            left:   '10%', right: '10%',
+                            height: '10%',
+                            background: C.primary,
+                            opacity: 0.18 - i * 0.03,
+                            borderRadius: 4,
+                        }} />
+                    ))}
+                    <RefreshCw size={20} color={C.primary} style={{ opacity: 0.4, zIndex: 1 }} className="animate-spin" />
+                </div>
+            )}
+        </div>
+    )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MAIN COMPONENT
+// ─────────────────────────────────────────────────────────────────────────────
 export default function MyTemplatesGallery({ onClose }: Props) {
-    const [templates, setTemplates] = useState<ListingTemplate[]>([])
+    const [templates, setTemplates] = useState<VisualTemplate[]>([])
     const [loading, setLoading]     = useState(true)
     const [search, setSearch]       = useState('')
     const [hoverId, setHoverId]     = useState<string | null>(null)
@@ -66,17 +131,17 @@ export default function MyTemplatesGallery({ onClose }: Props) {
     async function load() {
         setLoading(true)
         try {
-            // Get current user first
-            const { data: { user } } = await rawDb.auth.getUser()
+            const supabase = createClient()
+            const { data: { user } } = await supabase.auth.getUser()
             if (!user) { setLoading(false); return }
 
-            const { data } = await rawDb
-                .from('listing_templates')
-                .select('id, name, category, description, thumbnail_url, use_count, updated_at, description_html')
+            const { data } = await (supabase as any)
+                .from('visual_templates')
+                .select('id, name, category, blocks_json, canvas_settings_json, updated_at')
                 .eq('user_id', user.id)
-                .eq('is_system', false)
                 .order('updated_at', { ascending: false })
-            setTemplates((data as ListingTemplate[]) ?? [])
+
+            setTemplates((data as VisualTemplate[]) ?? [])
         } catch (err) {
             console.error('[MyTemplatesGallery] load error:', err)
         } finally {
@@ -89,41 +154,6 @@ export default function MyTemplatesGallery({ onClose }: Props) {
         t.name.toLowerCase().includes(search.toLowerCase()) ||
         (t.category ?? '').toLowerCase().includes(search.toLowerCase())
     )
-
-    // ── Thumbnail ─────────────────────────────────────────────
-    function Thumb({ t, size = 120 }: { t: ListingTemplate; size?: number }) {
-        if (t.thumbnail_url) {
-            return (
-                <img
-                    src={t.thumbnail_url}
-                    alt={t.name}
-                    style={{ width: '100%', height: size, objectFit: 'cover' }}
-                />
-            )
-        }
-        // Fallback: show a styled preview placeholder
-        return (
-            <div style={{
-                width: '100%', height: size,
-                background: `linear-gradient(135deg, #f3eeff, #e9d8fd)`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                position: 'relative', overflow: 'hidden',
-            }}>
-                {[0,1,2,3].map(i => (
-                    <div key={i} style={{
-                        position: 'absolute',
-                        top:    `${12 + i * 20}%`,
-                        left:   '10%', right: '10%',
-                        height: '10%',
-                        background: C.primary,
-                        opacity: 0.18 - i * 0.03,
-                        borderRadius: 4,
-                    }} />
-                ))}
-                <Palette size={32} color={C.primary} style={{ opacity: 0.4, zIndex: 1 }} />
-            </div>
-        )
-    }
 
     function timeAgo(iso: string) {
         const diff = Date.now() - new Date(iso).getTime()
@@ -160,7 +190,7 @@ export default function MyTemplatesGallery({ onClose }: Props) {
                         No Design Studio templates yet
                     </p>
                     <p style={{ fontSize: 13, color: C.secondary, fontFamily: 'DM Sans, sans-serif', margin: 0, lineHeight: 1.6 }}>
-                        Build beautiful eBay listing templates in Design Studio. They'll appear here so you can attach them to any listing.
+                        Build beautiful eBay listing templates in Design Studio. They&apos;ll appear here so you can attach them to any listing.
                     </p>
                 </div>
                 <a
@@ -203,7 +233,7 @@ export default function MyTemplatesGallery({ onClose }: Props) {
                     background: C.primaryLight, flexShrink: 0,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                    <Palette size={15} color={C.primary} />
+                    <LayoutTemplate size={15} color={C.primary} />
                 </div>
 
                 <div>
@@ -271,7 +301,7 @@ export default function MyTemplatesGallery({ onClose }: Props) {
                 {filtered.length === 0 ? (
                     <div style={{ textAlign: 'center', paddingTop: 60 }}>
                         <p style={{ fontSize: 14, color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                            No templates match "{search}"
+                            No templates match &ldquo;{search}&rdquo;
                         </p>
                     </div>
                 ) : (
@@ -302,7 +332,7 @@ export default function MyTemplatesGallery({ onClose }: Props) {
                                 >
                                     {/* Thumbnail */}
                                     <div style={{ position: 'relative', overflow: 'hidden' }}>
-                                        <Thumb t={t} size={130} />
+                                        <TemplateThumbnail t={t} height={130} />
 
                                         {/* Hover overlay with Edit button */}
                                         {isHov && (
@@ -354,32 +384,13 @@ export default function MyTemplatesGallery({ onClose }: Props) {
                                             {t.category || 'General'}
                                         </span>
 
-                                        {/* Stats row */}
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4 }}>
-                                            {/* Use count */}
-                                            <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                                                <Layers size={11} color={C.muted} />
-                                                {t.use_count} listing{t.use_count !== 1 ? 's' : ''}
-                                            </span>
-
-                                            {/* Last edited */}
-                                            <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                                                <Clock size={11} color={C.muted} />
+                                        {/* Last edited */}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                                            <Clock size={11} color={C.muted} />
+                                            <span style={{ fontSize: 11, color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
                                                 {timeAgo(t.updated_at)}
                                             </span>
                                         </div>
-
-                                        {/* Description */}
-                                        {t.description && (
-                                            <p style={{
-                                                fontSize: 11, color: C.secondary, margin: 0,
-                                                fontFamily: 'DM Sans, sans-serif', lineHeight: 1.5,
-                                                display: '-webkit-box', WebkitLineClamp: 2,
-                                                WebkitBoxOrient: 'vertical', overflow: 'hidden',
-                                            }}>
-                                                {t.description}
-                                            </p>
-                                        )}
                                     </div>
                                 </div>
                             )
