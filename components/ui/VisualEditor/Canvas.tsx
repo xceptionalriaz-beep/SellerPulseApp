@@ -708,7 +708,7 @@ function BlockCard({
                     : isSelected
                         ? `2px solid ${C.primary}`
                         : hovered
-                            ? `2px dashed ${C.primary}`
+                            ? `2px dashed ${C.primaryBorder}`
                             : '2px solid transparent',
                 outlineOffset: 0,
                 backgroundColor: 'transparent',
@@ -1110,9 +1110,11 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
   div[data-canvas-dropzone]:hover div[data-canvas-overlay],
   div[data-canvas-dropzone] div[data-canvas-overlay]:hover { opacity: 1 !important; pointer-events: auto !important; }
 
-  /* Single-click text editing — text cursor on hover signals "click to edit" */
+  /* Hover over text elements → dashed selection border + text cursor (click to edit) */
   h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover,
   p:hover, li:hover, blockquote:hover {
+    outline: 1px dashed rgba(117, 48, 251, 0.5) !important;
+    border-radius: 2px !important;
     cursor: text !important;
   }
   /* Active edit outline already set via JS; also prevent Chrome blue outline */
