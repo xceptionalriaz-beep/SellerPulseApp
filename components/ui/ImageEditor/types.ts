@@ -110,7 +110,10 @@ export interface ImageEditorState {
 
     // ── Crop ───────────────────────────────────────────────────
     crop: CropRect | null   // null = no crop applied
-    aspectLock: string            // 'free' | '1:1' | '4:3' | '16:9' | '3:4' | '9:16'
+    aspectLock: string            // 'free'|'original'|'1:1'|'4:3'|'3:2'|'16:9'|'5:4'|'4:5'|'3:4'|'2:3'|'9:16'|'21:9'|'golden'|'custom'
+    straighten: number            // -45 → +45 deg fine rotation, default 0
+    cornerRadius: number            // 0 → 50px, default 0
+    cropGrid: 'none' | 'thirds' | 'golden'  // overlay grid type
 
     // ── Resize ─────────────────────────────────────────────────
     resizeWidth: number | null    // px, null = original
@@ -146,6 +149,9 @@ export const DEFAULT_STATE: ImageEditorState = {
     flipV: false,
     crop: null,
     aspectLock: 'free',
+    straighten: 0,
+    cornerRadius: 0,
+    cropGrid: 'none',
     resizeWidth: null,
     resizeHeight: null,
     resizeLockAR: true,
