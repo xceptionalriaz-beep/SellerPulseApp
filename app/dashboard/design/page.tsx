@@ -138,7 +138,7 @@ const SORT_OPTIONS: DropdownOption[] = [
 
 // ── Built-in system templates (shown when DB has none) ─────────────────────
 // ── Tiny HTML thumbnail preview ────────────────────────────────────────────
-function TemplateThumbnail({ html }: { html: string }) {
+function TemplateThumbnail({ html, hovered }: { html: string; hovered?: boolean }) {
     const hydrated = hydrateTemplateContent(html)
     const doc = hydrated.trim().toLowerCase().startsWith('<!doctype') || hydrated.trim().toLowerCase().startsWith('<html')
         ? hydrated
@@ -190,16 +190,17 @@ function TemplateThumbnail({ html }: { html: string }) {
                 sandbox="allow-same-origin"
                 style={{
                     position: 'absolute',
-                    top: 0,
+                    top: hovered ? '-420px' : '0',
                     left: 0,
                     width: '222%',
-                    height: '222%',
+                    height: '500%',
                     border: 'none',
                     pointerEvents: 'none',
                     backgroundColor: '#ffffff',
                     transform: 'scale(0.45)',
                     transformOrigin: 'top left',
                     overflow: 'hidden',
+                    transition: hovered ? 'top 4s ease-in-out' : 'top 0.6s ease',
                 }}
                 title="Template Preview"
             />
@@ -968,7 +969,7 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy
             {/* Thumbnail */}
             <div className="relative" style={{ cursor: 'pointer', height: 650, overflow: 'hidden' }} onClick={onPreview}>
                 {template.description_html
-                    ? <TemplateThumbnail html={template.description_html} />
+                    ? <TemplateThumbnail html={template.description_html} hovered={hovered} />
                     : <div className="w-full flex items-center justify-center" style={{ height: 650, backgroundColor: C.bg }}>
                         <LayoutTemplate size={28} style={{ color: C.border }} />
                     </div>
@@ -988,26 +989,26 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy
                     </div>
                 )}
 
-                {/* Hover overlay */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2"
+                {/* Hover actions — no dark overlay, just a soft bottom gradient + buttons */}
+                <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-4"
                     style={{
-                        backgroundColor: 'rgba(14,12,28,0.72)',
+                        background: 'linear-gradient(to bottom, transparent 0%, rgba(248,247,255,0.92) 60%, rgba(248,247,255,1) 100%)',
                         opacity: hovered ? 1 : 0,
-                        backdropFilter: hovered ? 'blur(2px)' : 'none',
                         transition: 'opacity 0.2s ease',
                         zIndex: 3,
+                        paddingTop: 32,
                     }}>
                     <div className="flex items-center gap-2">
                         <button
                             onClick={e => { e.stopPropagation(); onPreview() }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all hover:opacity-80"
-                            style={{ backgroundColor: '#fff', color: C.dark, border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold"
+                            style={{ backgroundColor: '#fff', color: C.dark, border: `1px solid ${C.border}`, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>
                             <Eye size={13} /> Preview
                         </button>
                         <button
                             onClick={e => { e.stopPropagation(); onEdit() }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all hover:opacity-90"
-                            style={{ backgroundColor: C.primary, color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold"
+                            style={{ backgroundColor: C.primary, color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', boxShadow: '0 2px 8px rgba(117,48,251,0.3)' }}>
                             <Pencil size={13} /> Edit
                         </button>
                     </div>
