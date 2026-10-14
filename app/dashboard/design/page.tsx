@@ -299,16 +299,29 @@ function DesignStudioInner() {
                 .eq('is_system', true)
                 .order('use_count', { ascending: false })
 
-            // User's own templates
+            // User's own templates — from visual_templates (where Visual Builder saves)
             let own: ListingTemplate[] = []
             if (user) {
                 const { data: ownData } = await rawDb
-                    .from('listing_templates')
-                    .select('id, user_id, name, description, category, description_html, is_system, is_shared, thumbnail_url, use_count, created_at, updated_at')
+                    .from('visual_templates')
+                    .select('id, user_id, name, category, updated_at, blocks_json, canvas_settings_json')
                     .eq('user_id', user.id)
-                    .eq('is_system', false)
-                    .order('created_at', { ascending: false })
-                own = (ownData as ListingTemplate[]) || []
+                    .order('updated_at', { ascending: false })
+                // Map visual_templates shape → ListingTemplate shape
+                own = ((ownData as any[]) || []).map((vt: any) => ({
+                    id: vt.id,
+                    user_id: vt.user_id,
+                    name: vt.name,
+                    description: 'Visual Builder template',   // signals getEditorRoute to use visual-editor
+                    category: vt.category || 'general',
+                    description_html: null,                   // no raw HTML; template opens in visual editor
+                    is_system: false,
+                    is_shared: false,
+                    thumbnail_url: null,
+                    use_count: 0,
+                    created_at: vt.updated_at,
+                    updated_at: vt.updated_at,
+                }))
             }
 
             const sysTemplates = (sys as ListingTemplate[]) || []
@@ -368,7 +381,8 @@ function DesignStudioInner() {
         const isSystem = [...templates].some(t => t.id === id)
         if (isSystem) return
         setDeletingId(id)
-        await rawDb.from('listing_templates').delete().eq('id', id)
+        // Own templates live in visual_templates (saved by the Visual Builder)
+        await rawDb.from('visual_templates').delete().eq('id', id)
         setMyTemplates((prev: ListingTemplate[]) => prev.filter((t: ListingTemplate) => t.id !== id))
         setDeletingId(null)
     }
