@@ -3051,9 +3051,9 @@ function BlockStyleProps({ block, props, updateProps }: {
                 <>
                     <Section title="Colours">
                         <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
-                        <ColorRow label="Badge background" value={props.badgeBg ?? '#7530fb'} onChange={v => updateProps({ badgeBg: v })} />
-                        <ColorRow label="Badge text" value={props.badgeText ?? '#ffffff'} onChange={v => updateProps({ badgeText: v })} />
-                        <ColorRow label="Badge border" value={props.badgeBorder ?? '#7530fb'} onChange={v => updateProps({ badgeBorder: v })} />
+                        <ColorRow label="Badge background" value={props.badgeBg ?? '#f3eeff'} onChange={v => updateProps({ badgeBg: v })} />
+                        <ColorRow label="Badge text" value={props.badgeText ?? props.badgeColor ?? '#7530fb'} onChange={v => updateProps({ badgeText: v, badgeColor: v })} />
+                        <ColorRow label="Badge border" value={props.badgeBorder ?? '#ede9fe'} onChange={v => updateProps({ badgeBorder: v })} />
                     </Section>
                 </>
             )
@@ -5535,15 +5535,16 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
         case 'badge_row':
             return (
                 <Section title="Badges">
-                    <InfoBox>One badge per line. Use emoji + text e.g. ✓ Genuine</InfoBox>
+                    <InfoBox>One badge per line. Smart icons are automatically assigned for Genuine, UK Stock, Top Rated, Easy Returns, Shipping, Warranty, etc.</InfoBox>
                     <TextareaInput
                         label="Badges (one per line)"
-                        value={Array.isArray(props.badges) ? props.badges.join('\n') : '✓ Genuine\n📦 UK Stock\n★ Top Rated\n🔄 Easy Returns'}
+                        value={Array.isArray(props.badges) ? props.badges.join('\n') : (typeof props.badges === 'string' ? props.badges : 'Genuine\nUK Stock\nTop Rated\nEasy Returns')}
                         rows={4}
                         onChange={v => updateProps({ badges: v.split('\n').filter((s: string) => s.trim()) })}
                     />
                     <ColorRow label="Badge background" value={props.badgeBg ?? '#f3eeff'} onChange={v => updateProps({ badgeBg: v })} />
-                    <ColorRow label="Badge text" value={props.badgeColor ?? '#7530fb'} onChange={v => updateProps({ badgeColor: v })} />
+                    <ColorRow label="Badge text" value={props.badgeText ?? props.badgeColor ?? '#7530fb'} onChange={v => updateProps({ badgeText: v, badgeColor: v })} />
+                    <ColorRow label="Badge border" value={props.badgeBorder ?? '#ede9fe'} onChange={v => updateProps({ badgeBorder: v })} />
                 </Section>
             )
 

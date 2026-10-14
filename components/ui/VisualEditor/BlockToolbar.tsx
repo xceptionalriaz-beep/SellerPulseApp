@@ -283,7 +283,12 @@ export default function BlockToolbar({
 
     const handleFormatSlotProp = (format: string, value: string) => {
         if (slotEdit) {
-            onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, format, value)
+            // Pass activeSelection so selection-scoped formats (fontFamily, fontSize, color…)
+            // apply only to the highlighted text when the user has something selected
+            const sel = (activeSelection && activeSelection.propKey === slotEdit.propKey)
+                ? activeSelection
+                : null
+            onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, format, value, sel)
         }
     }
 
@@ -515,10 +520,10 @@ export default function BlockToolbar({
                         top: 'calc(100% + 6px)',
                         left: 0,
                         zIndex: 9999,
-                        width: 260,
+                        width: 340,
                         backgroundColor: '#ffffff',
                         border: '1px solid #e2e8f0',
-                        borderRadius: 14,
+                        borderRadius: 12,
                         boxShadow: '0 16px 42px rgba(0,0,0,0.18)',
                         overflow: 'hidden',
                         display: 'flex',
@@ -533,7 +538,7 @@ export default function BlockToolbar({
                                 type="text"
                                 value={fontSearch}
                                 onChange={e => setFontSearch(e.target.value)}
-                                placeholder="Search fonts..."
+                                placeholder="Search 100+ fonts by name..."
                                 style={{
                                     width: '100%',
                                     border: 'none',
@@ -549,60 +554,34 @@ export default function BlockToolbar({
                             )}
                         </div>
 
-                        {/* 2-Row Category Tabs (3 Tabs per Row) for a Slim Layout */}
-                        <div style={{ padding: '7px 10px', borderBottom: '1px solid #f1f5f9', backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', gap: 5 }}>
-                            {/* Row 1: All, Sans, Serif */}
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 5 }}>
-                                {(['all', 'sans', 'serif'] as const).map(cat => (
-                                    <button
-                                        key={cat}
-                                        onClick={() => setSelectedCategory(cat)}
-                                        style={{
-                                            padding: '4px 0',
-                                            fontSize: 11,
-                                            fontWeight: 700,
-                                            borderRadius: 6,
-                                            border: `1px solid ${selectedCategory === cat ? '#7530fb' : '#ede9fe'}`,
-                                            backgroundColor: selectedCategory === cat ? '#7530fb' : '#f8f7ff',
-                                            color: selectedCategory === cat ? '#ffffff' : '#64748b',
-                                            cursor: 'pointer',
-                                            textTransform: 'capitalize',
-                                            textAlign: 'center',
-                                            transition: 'all 0.12s',
-                                        }}
-                                    >
-                                        {cat === 'all' ? 'All' : cat}
-                                    </button>
-                                ))}
-                            </div>
-                            {/* Row 2: Display, Mono, System */}
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 5 }}>
-                                {(['display', 'mono', 'system'] as const).map(cat => (
-                                    <button
-                                        key={cat}
-                                        onClick={() => setSelectedCategory(cat)}
-                                        style={{
-                                            padding: '4px 0',
-                                            fontSize: 11,
-                                            fontWeight: 700,
-                                            borderRadius: 6,
-                                            border: `1px solid ${selectedCategory === cat ? '#7530fb' : '#ede9fe'}`,
-                                            backgroundColor: selectedCategory === cat ? '#7530fb' : '#f8f7ff',
-                                            color: selectedCategory === cat ? '#ffffff' : '#64748b',
-                                            cursor: 'pointer',
-                                            textTransform: 'capitalize',
-                                            textAlign: 'center',
-                                            transition: 'all 0.12s',
-                                        }}
-                                    >
-                                        {cat}
-                                    </button>
-                                ))}
-                            </div>
+                        {/* Category Filter Tabs — All fit on one line with NO horizontal scroll */}
+                        <div style={{ display: 'flex', gap: 4, padding: '7px 10px', borderBottom: '1px solid #f1f5f9', backgroundColor: '#ffffff', justifyContent: 'space-between' }}>
+                            {(['all', 'sans', 'serif', 'display', 'mono', 'system'] as const).map(cat => (
+                                <button
+                                    key={cat}
+                                    onClick={() => setSelectedCategory(cat)}
+                                    style={{
+                                        flex: 1,
+                                        padding: '4px 0',
+                                        fontSize: 10,
+                                        fontWeight: 700,
+                                        borderRadius: 8,
+                                        border: `1px solid ${selectedCategory === cat ? '#7530fb' : '#ede9fe'}`,
+                                        backgroundColor: selectedCategory === cat ? '#7530fb' : '#f8f7ff',
+                                        color: selectedCategory === cat ? '#ffffff' : '#64748b',
+                                        cursor: 'pointer',
+                                        textTransform: 'capitalize',
+                                        textAlign: 'center',
+                                        transition: 'all 0.12s',
+                                    }}
+                                >
+                                    {cat === 'all' ? 'All' : cat}
+                                </button>
+                            ))}
                         </div>
 
-                        {/* Font List — Longer View (520px) showing 15+ fonts at once with clear large font size */}
-                        <div style={{ maxHeight: 520, overflowY: 'auto', padding: '6px 0' }}>
+                        {/* Font List — Taller view (420px) showing 12+ fonts at once */}
+                        <div style={{ maxHeight: 420, overflowY: 'auto', padding: '6px 0' }}>
                             {FONT_REGISTRY
                                 .filter(f => {
                                     const matchesCat = selectedCategory === 'all' || f.category === selectedCategory
@@ -633,7 +612,7 @@ export default function BlockToolbar({
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'space-between',
-                                                padding: '9px 14px',
+                                                padding: '7px 12px',
                                                 border: 'none',
                                                 backgroundColor: isCurrent ? '#f3eeff' : 'transparent',
                                                 cursor: 'pointer',
@@ -643,31 +622,20 @@ export default function BlockToolbar({
                                             onMouseOver={e => { if (!isCurrent) e.currentTarget.style.backgroundColor = '#f8fafc' }}
                                             onMouseOut={e => { if (!isCurrent) e.currentTarget.style.backgroundColor = 'transparent' }}
                                         >
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                                {/* Bigger, clearer font preview (16px) */}
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                                 <span style={{
                                                     fontFamily: `"${font.name}", ${font.fallback}`,
-                                                    fontSize: 16,
+                                                    fontSize: 13,
                                                     color: isCurrent ? '#7530fb' : '#1e1535',
                                                     fontWeight: isCurrent ? 700 : 500,
-                                                    lineHeight: 1.2,
                                                 }}>
                                                     {font.name}
                                                 </span>
-                                                <span style={{
-                                                    fontSize: 9.5,
-                                                    color: '#64748b',
-                                                    backgroundColor: '#f1f5f9',
-                                                    padding: '2px 6px',
-                                                    borderRadius: 4,
-                                                    fontWeight: 600,
-                                                    textTransform: 'uppercase',
-                                                    letterSpacing: '0.04em',
-                                                }}>
+                                                <span style={{ fontSize: 9, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 0.5 }}>
                                                     {font.category}
                                                 </span>
                                             </div>
-                                            {isCurrent && <Check size={16} color="#7530fb" strokeWidth={2.5} />}
+                                            {isCurrent && <Check size={13} color="#7530fb" />}
                                         </button>
                                     )
                                 })}

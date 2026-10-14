@@ -2768,13 +2768,68 @@ ${thumbCells}
             category: 'Content' as BlockCategory,
             icon: 'tag',
             description: 'Inline badges — Genuine · New · UK Stock',
-            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                bgColor: '#ffffff',
+                badgeBg: '#f3eeff',
+                badgeText: '#7530fb',
+                badgeBorder: '#ede9fe',
+                badges: ['Genuine', 'UK Stock', 'Top Rated', 'Easy Returns'],
+            } as unknown as BlockProps,
             toHtml(props, id) {
                 const p = props as CommonProps & { [key: string]: any }
-                const badges = ['&#10003; Genuine', '&#128230; UK Stock', '&#9733; Top Rated', '&#128260; Easy Returns']
-                const cells = badges.map(b => `<td style="padding:4px 6px;"><span style="display:inline-block;padding:4px 12px;background-color:${p.badgeBg ?? '#f3eeff'};color:${p.badgeText ?? '#7530fb'};font-family:Arial,sans-serif;font-size:12px;font-weight:700;border-radius:100px;border:1px solid ${p.badgeBorder ?? '#ede9fe'};">${b}</span></td>`).join('')
+                const rawBadges: string[] = Array.isArray(p.badges) && p.badges.length > 0
+                    ? p.badges
+                    : (typeof p.badges === 'string' && p.badges.trim()
+                        ? p.badges.split('\n').filter((s: string) => s.trim())
+                        : ['Genuine', 'UK Stock', 'Top Rated', 'Easy Returns'])
+
+                const badgeBg = p.badgeBg ?? '#f3eeff'
+                const badgeText = p.badgeText ?? p.badgeColor ?? '#7530fb'
+                const badgeBorder = p.badgeBorder ?? '#ede9fe'
+                const colWidth = Math.max(10, Math.floor(100 / Math.max(1, rawBadges.length)))
+
+                const getBadgeIcon = (text: string, color: string) => {
+                    const s = text.toLowerCase()
+                    if (s.includes('stock') || s.includes('box') || s.includes('package') || s.includes('parcel') || s.includes('warehouse') || s.includes('128230') || s.includes('📦')) {
+                        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:6px;"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>`
+                    }
+                    if (s.includes('return') || s.includes('refund') || s.includes('undo') || s.includes('rotate') || s.includes('replace') || s.includes('128260') || s.includes('🔄')) {
+                        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:6px;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>`
+                    }
+                    if (s.includes('star') || s.includes('rated') || s.includes('top') || s.includes('review') || s.includes('rating') || s.includes('9733') || s.includes('★') || s.includes('⭐')) {
+                        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="${color}" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:6px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`
+                    }
+                    if (s.includes('truck') || s.includes('ship') || s.includes('delivery') || s.includes('courier') || s.includes('post') || s.includes('freight')) {
+                        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:6px;"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-5l-3-4h-5v10"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>`
+                    }
+                    if (s.includes('shield') || s.includes('warranty') || s.includes('secure') || s.includes('protect') || s.includes('safe') || s.includes('lock')) {
+                        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:6px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>`
+                    }
+                    if (s.includes('clock') || s.includes('time') || s.includes('hour') || s.includes('same day') || s.includes('fast') || s.includes('instant') || s.includes('24h')) {
+                        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:6px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`
+                    }
+                    if (s.includes('award') || s.includes('cert') || s.includes('quality') || s.includes('medal') || s.includes('trophy')) {
+                        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:6px;"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>`
+                    }
+                    return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:6px;"><polyline points="20 6 9 17 4 12"/></svg>`
+                }
+
+                const cleanLabel = (raw: string) => {
+                    return raw
+                        .replace(/&#\d+;/g, '')
+                        .replace(/^[\u2000-\u3300\uD800-\uDBFF\uDC00-\uDFFF\u2700-\u27BF\u2600-\u26FF✓✔★☆📦🔄🚚🛡️🏆🔒✅\s]+/u, '')
+                        .trim() || raw.trim()
+                }
+
+                const cells = rawBadges.map(raw => {
+                    const iconSvg = getBadgeIcon(raw, badgeText)
+                    const label = cleanLabel(raw)
+                    return `<td align="center" style="width:${colWidth}%;padding:4px 6px;vertical-align:middle;"><div style="display:block;width:100%;box-sizing:border-box;padding:8px 10px;background-color:${badgeBg};color:${badgeText};font-family:Arial,sans-serif;font-size:12px;font-weight:700;line-height:16px;border-radius:100px;border:1px solid ${badgeBorder};text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${iconSvg}<span style="vertical-align:middle;">${label}</span></div></td>`
+                }).join('')
+
                 return wrapBlock('badge_row' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table cellpadding="0" cellspacing="4" border="0"><tr>${cells}</tr></table></td></tr></table>`)
+                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#ffffff'};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;table-layout:fixed;"><tr>${cells}</tr></table></td></tr></table>`, p)
             },
         },
 

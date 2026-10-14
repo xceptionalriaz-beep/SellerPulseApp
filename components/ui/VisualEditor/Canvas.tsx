@@ -50,6 +50,7 @@ import {
     BLOCK_DEFINITIONS,
 } from './blocks'
 import { renderForCanvas, extractTokens, type CategoryId, renderBannerForCanvas } from './sampleData'
+import { getGoogleFontLinkHtml } from './fonts'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -1078,9 +1079,38 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
                 )
             }
 
-            // Build a font override CSS rule if the block has a custom fontFamily prop
+            // Build font override CSS + Google Font <link> tag so the selected font
+            // is actually available inside the iframe (iframes are separate documents —
+            // fonts injected into the parent page via loadFont() are lost on remount).
             const fontOverrideCss = props.fontFamily
                 ? `  /* Font override — user-selected font from toolbar */\n  * { font-family: ${props.fontFamily} !important; }\n`
+                : ''
+            const fontLinkTag = props.fontFamily ? getGoogleFontLinkHtml(props.fontFamily) : ''
+
+            // ── Text color override ─────────────────────────────────────────────────────
+            // Only applied when props.color is explicitly set.
+            // Blocks that hardcode their own colours (quote_block, warning_box, info_box,
+            // data_table, testimonials) do NOT set props.color in their defaultProps —
+            // so this override only fires when the user deliberately picks a colour from
+            // the toolbar, making it a safe global override for all block types.
+            const colorOverrideCss = props.color
+                ? `  /* Text color override — user-selected color from toolbar */\n  p, li, td, th, h1, h2, h3, h4, blockquote, span { color: ${props.color} !important; }\n`
+                : ''
+
+            // ── Font size override ──────────────────────────────────────────────────────
+            // Same principle: only applied when the prop is explicitly set.
+            // For blocks that read p.fontSize in toHtml, the inline style and this CSS
+            // override carry the same value — harmless. For hardcoded blocks, this only
+            // fires after a toolbar interaction.
+            const fontSizeRaw = (props as any).fontSize
+            const fontSizeOverrideCss = (fontSizeRaw !== undefined && fontSizeRaw !== null)
+                ? `  /* Font size override — user-selected size from toolbar */\n  p, li, td, th, h1, h2, h3, h4 { font-size: ${typeof fontSizeRaw === 'number' ? fontSizeRaw + 'px' : fontSizeRaw} !important; }\n`
+                : ''
+
+            // ── Font weight override ────────────────────────────────────────────────────
+            const fontWeightRaw = (props as any).fontWeight
+            const fontWeightOverrideCss = (fontWeightRaw && fontWeightRaw !== '400' && fontWeightRaw !== 'normal')
+                ? `  /* Font weight override — user-selected weight from toolbar */\n  p, li, td, th, h1, h2, h3, h4 { font-weight: ${fontWeightRaw} !important; }\n`
                 : ''
 
             return `<!DOCTYPE html>
@@ -1088,6 +1118,7 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+${fontLinkTag}
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -1096,7 +1127,7 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
     overflow: hidden;
     width: ${previewWidth}px;
   }
-${fontOverrideCss}
+${fontOverrideCss}${colorOverrideCss}${fontSizeOverrideCss}${fontWeightOverrideCss}
   table { border-collapse: collapse; }
   img { border: 0; display: block; max-width: 100%; cursor: pointer; }
   a { text-decoration: none; }

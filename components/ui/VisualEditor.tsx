@@ -50,6 +50,7 @@ import PropertiesPanel from './VisualEditor/PropertiesPanel'
 import LivePreview from './VisualEditor/LivePreview'
 import { EditorToolbar as RichEditorToolbar } from './EditorToolbar'
 import BlockToolbar from './VisualEditor/BlockToolbar'
+import ListingPickerModal, { type LinkedListing } from './VisualEditor/ListingPickerModal'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -58,6 +59,7 @@ const C = {
     border: '#ede9fe',
     primary: '#7530fb',
     primaryLight: '#f3eeff',
+    primaryBorder: '#ddd6fe',
     dark: '#1e1535',
     body: '#1f1d2e',
     secondary: '#6b7280',
@@ -611,11 +613,18 @@ export default function VisualEditor({
                 if (outerAMatch) newHtml = outerAMatch[1]
             }
         } else if (format === 'fontFamily') {
-            // Replace all existing font-family declarations in the slot HTML
-            newHtml = newHtml.replace(/font-family:\s*[^;'"]+/gi, `font-family:${value}`)
-            // If no font-family was found, wrap the whole slot in a span that sets it
-            if (!/font-family/i.test(newHtml)) {
-                newHtml = `<span style="font-family:${value};">${newHtml}</span>`
+            if (selection?.selectedHtml && currentHtml.includes(selection.selectedHtml)) {
+                // Selection-scoped: wrap only the selected text with the new font
+                const wrapped = `<span style="font-family:${value};">${selection.selectedHtml}</span>`
+                newHtml = currentHtml.replace(selection.selectedHtml, wrapped)
+            } else {
+                // No selection — apply to the whole slot
+                // Replace any existing font-family declarations first
+                newHtml = newHtml.replace(/font-family:\s*[^;'"]+/gi, `font-family:${value}`)
+                // If still no font-family found, wrap the whole slot
+                if (!/font-family/i.test(newHtml)) {
+                    newHtml = `<span style="font-family:${value};">${newHtml}</span>`
+                }
             }
         }
 
@@ -746,6 +755,23 @@ export default function VisualEditor({
     // ── Save / Load state ─────────────────────────────────────────────────────
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
 
+    // ── Listing link state ────────────────────────────────────────────────────
+    const [linkedListing, setLinkedListing] = useState<LinkedListing | null>(null)
+    const [showListingPicker, setShowListingPicker] = useState(false)
+
+    const handleLinkListing = useCallback((listing: LinkedListing) => {
+        setLinkedListing(listing)
+        setShowListingPicker(false)
+        setTokenFeedback({ type: 'success', msg: `Linked to: ${listing.product_name || listing.title || 'Listing'}` })
+        setTimeout(() => setTokenFeedback(null), 2500)
+    }, [])
+
+    const handleUnlinkListing = useCallback(() => {
+        setLinkedListing(null)
+        setTokenFeedback({ type: 'success', msg: 'Listing unlinked' })
+        setTimeout(() => setTokenFeedback(null), 2000)
+    }, [])
+
     const handleSave = useCallback(async () => {
         if (blocks.length === 0) return
         setSaveStatus('saving')
@@ -785,6 +811,20 @@ export default function VisualEditor({
                 // Remember the new id so subsequent saves UPDATE in place
                 if (data?.id) setCurrentTemplateId(data.id)
             }
+            // ── Push HTML to linked listing if one is set ──
+            if (linkedListing) {
+                const assembledHtml = assembleDocument(blocks, canvasSettings)
+                await (supabase.from('listing_drafts') as any)
+                    .update({
+                        description_html: assembledHtml,
+                        template_id: currentTemplateId ?? undefined,
+                        updated_at: new Date().toISOString(),
+                    })
+                    .eq('id', linkedListing.id)
+                    .eq('user_id', user.id)
+                // Non-fatal — we don't throw even if listing update fails
+            }
+
             setIsDirty(false)
             setSaveStatus('saved')
             setTimeout(() => setSaveStatus('idle'), 2500)
@@ -795,7 +835,7 @@ export default function VisualEditor({
             setTokenFeedback({ type: 'error', msg: e?.message ?? 'Save failed — try again' })
             setTimeout(() => { setSaveStatus('idle'); setTokenFeedback(null) }, 4000)
         }
-    }, [blocks, canvasSettings, templateName, currentTemplateId])
+    }, [blocks, canvasSettings, templateName, currentTemplateId, linkedListing])
 
     const handleLoadTemplate = useCallback((
         name: string,
@@ -1519,7 +1559,19 @@ export default function VisualEditor({
                     if (blocks.length === 0) return
                     setShowClearConfirm(true)
                 }}
+                linkedListing={linkedListing}
+                onOpenListingPicker={() => setShowListingPicker(true)}
+                onUnlinkListing={handleUnlinkListing}
             />
+
+            {/* ── Listing Picker Modal ─────────────────────────────────────────────────── */}
+            {showListingPicker && (
+                <ListingPickerModal
+                    currentLinkedId={linkedListing?.id ?? null}
+                    onConfirm={handleLinkListing}
+                    onClose={() => setShowListingPicker(false)}
+                />
+            )}
 
             {/* ── Smart Clear All Confirmation ──────────────────────────────────────────── */}
             {showClearConfirm && (
@@ -2077,6 +2129,9 @@ interface EditorToolbarProps {
     publishStatus?: 'idle' | 'publishing' | 'published'
     toolbarSlot?: React.ReactNode
     onBack?: () => void
+    linkedListing?: LinkedListing | null
+    onOpenListingPicker?: () => void
+    onUnlinkListing?: () => void
 }
 
 function EditorToolbar({
@@ -2086,6 +2141,7 @@ function EditorToolbar({
     onUndo, onRedo, onToggleLivePreview, onToggleFocusMode,
     onZoomChange, onTemplateNameChange, onSave, saveStatus, onExport, onClearAll,
     onPublish, publishStatus = 'idle', toolbarSlot, onBack,
+    linkedListing, onOpenListingPicker, onUnlinkListing,
 }: EditorToolbarProps) {
     return (
         <div style={{
@@ -2309,6 +2365,83 @@ function EditorToolbar({
                     <Trash2 size={12} />
                     Clear all
                 </button>
+
+                <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
+
+                {/* Link to Listing button / linked chip */}
+                {linkedListing ? (
+                    /* Linked state — chip with listing name + unlink ✕ */
+                    <div style={{
+                        display: 'flex', alignItems: 'center', gap: 0,
+                        border: `1.5px solid ${C.primaryBorder ?? '#ddd6fe'}`,
+                        borderRadius: 8, backgroundColor: C.primaryLight,
+                        overflow: 'hidden', flexShrink: 0,
+                    }}>
+                        <div style={{
+                            display: 'flex', alignItems: 'center', gap: 5,
+                            padding: '4px 10px',
+                            fontFamily: 'DM Sans, sans-serif', fontSize: 11,
+                            fontWeight: 600, color: C.primary,
+                            maxWidth: 180, overflow: 'hidden',
+                        }}>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                            </svg>
+                            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {linkedListing.product_name || linkedListing.title || 'Listing'}
+                            </span>
+                        </div>
+                        <button
+                            onClick={onUnlinkListing}
+                            title="Unlink listing"
+                            style={{
+                                padding: '4px 7px', border: 'none',
+                                borderLeft: `1px solid ${C.primaryBorder ?? '#ddd6fe'}`,
+                                backgroundColor: 'transparent', cursor: 'pointer',
+                                color: C.primary, fontSize: 13, lineHeight: 1,
+                                display: 'flex', alignItems: 'center',
+                                transition: 'background 0.12s',
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#ede9fe' }}
+                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
+                        >×</button>
+                    </div>
+                ) : (
+                    /* Unlinked state — "Link to Listing" outline button */
+                    <button
+                        onClick={onOpenListingPicker}
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: 5,
+                            padding: '4px 11px',
+                            border: `1px solid ${C.border}`,
+                            borderRadius: 8, backgroundColor: 'transparent',
+                            color: C.secondary,
+                            fontFamily: 'DM Sans, sans-serif', fontSize: 11,
+                            fontWeight: 500, cursor: 'pointer',
+                            transition: 'all 0.12s', flexShrink: 0,
+                            whiteSpace: 'nowrap',
+                        }}
+                        onMouseEnter={e => {
+                            e.currentTarget.style.borderColor = C.primary
+                            e.currentTarget.style.color = C.primary
+                            e.currentTarget.style.backgroundColor = C.primaryLight
+                        }}
+                        onMouseLeave={e => {
+                            e.currentTarget.style.borderColor = C.border
+                            e.currentTarget.style.color = C.secondary
+                            e.currentTarget.style.backgroundColor = 'transparent'
+                        }}
+                    >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                        </svg>
+                        Link to Listing
+                    </button>
+                )}
 
                 <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
 
