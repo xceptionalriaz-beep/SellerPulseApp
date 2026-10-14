@@ -1337,11 +1337,60 @@ export default function VisualEditor({
                         slotBlockMapRef.current[`${target.id}__${propKey}`] = newBlock;
                     }
                 }
+            } else if (event.data?.type === 'RIAZIFY_SELECT_BLOCK') {
+                // Iframe signals that a block should be selected (e.g. click on wrapper)
+                const { blockId } = event.data;
+                if (blockId) {
+                    setSelectedId(blockId);
+                    setPanelOpen(true);
+                }
+            } else if (event.data?.type === 'RIAZIFY_OPEN_ASSET_PICKER') {
+                // Overlay click in iframe → open Images tab for this block+slot
+                const { propKey, blockId } = event.data;
+                if (blockId) {
+                    setSelectedId(blockId);
+                }
+                if (propKey) {
+                    setSelectedSubSlot(propKey);
+                    setActiveDropSlot({ blockId: blockId ?? selectedId ?? '', slot: propKey as any });
+                }
+                setActiveTab('images');
+                setPanelOpen(true);
+            } else if (event.data?.type === 'RIAZIFY_DROP_ASSET') {
+                // File or URL was dropped onto an image slot in the iframe
+                const { propKey, fileUrl, blockId } = event.data;
+                if (propKey && fileUrl) {
+                    const targetBlockId = blockId || activeDropSlot?.blockId || selectedId;
+                    const idx = blocks.findIndex(b => b.id === targetBlockId);
+                    if (idx >= 0) {
+                        const target = blocks[idx];
+                        const p = target.props as any;
+                        // Update the image prop directly with the URL
+                        if (p[propKey] !== undefined || propKey === 'leftImage' || propKey === 'src' || propKey.startsWith('thumb')) {
+                            const updatedProps = { ...p, [propKey]: fileUrl };
+                            const updatedBlock = { ...target, props: updatedProps };
+                            const newBlocks = [...blocks];
+                            newBlocks[idx] = updatedBlock;
+                            commitBlocks(newBlocks, blocks);
+                            setSelectedId(target.id);
+                            setSelectedSubSlot(propKey);
+                            setActiveDropSlot({ blockId: target.id, slot: propKey as any });
+                            setActiveTab('images');
+                            setPanelOpen(true);
+                        }
+                    }
+                }
+            } else if (event.data?.type === 'RIAZIFY_OPEN_URL') {
+                // Anchor click inside iframe — open URL in new tab safely
+                const { url } = event.data;
+                if (url && typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://'))) {
+                    window.open(url, '_blank', 'noopener,noreferrer');
+                }
             }
         };
         window.addEventListener('message', handler);
         return () => window.removeEventListener('message', handler);
-    }, [blocks, canvasSettings, commitBlocks]);
+    }, [blocks, canvasSettings, commitBlocks, selectedId, activeDropSlot]);
 
     // ── Active Slot Visual Feedback ─────────────────────────────────
     // Notify iframe(s) to highlight the active dropzone when a slot is selected,
