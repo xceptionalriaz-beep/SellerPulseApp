@@ -52,108 +52,118 @@ interface LabelResult {
 const US_STATES = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY']
 
 // Common eBay shipping destinations (domestic + top dropship markets)
-const COUNTRIES: { code: string; name: string; flag: string; domestic?: boolean }[] = [
-  { code: 'US', name: 'United States',        flag: '🇺🇸', domestic: true },
-  { code: 'CA', name: 'Canada',               flag: '🇨🇦' },
-  { code: 'GB', name: 'United Kingdom',       flag: '🇬🇧' },
-  { code: 'AU', name: 'Australia',            flag: '🇦🇺' },
-  { code: 'DE', name: 'Germany',              flag: '🇩🇪' },
-  { code: 'FR', name: 'France',               flag: '🇫🇷' },
-  { code: 'IT', name: 'Italy',                flag: '🇮🇹' },
-  { code: 'ES', name: 'Spain',                flag: '🇪🇸' },
-  { code: 'NL', name: 'Netherlands',          flag: '🇳🇱' },
-  { code: 'JP', name: 'Japan',                flag: '🇯🇵' },
-  { code: 'KR', name: 'South Korea',          flag: '🇰🇷' },
-  { code: 'CN', name: 'China',                flag: '🇨🇳' },
-  { code: 'SG', name: 'Singapore',            flag: '🇸🇬' },
-  { code: 'HK', name: 'Hong Kong',            flag: '🇭🇰' },
-  { code: 'TW', name: 'Taiwan',               flag: '🇹🇼' },
-  { code: 'MX', name: 'Mexico',               flag: '🇲🇽' },
-  { code: 'BR', name: 'Brazil',               flag: '🇧🇷' },
-  { code: 'IN', name: 'India',                flag: '🇮🇳' },
-  { code: 'AE', name: 'UAE',                  flag: '🇦🇪' },
-  { code: 'SA', name: 'Saudi Arabia',         flag: '🇸🇦' },
-  { code: 'PH', name: 'Philippines',          flag: '🇵🇭' },
-  { code: 'MY', name: 'Malaysia',             flag: '🇲🇾' },
-  { code: 'NZ', name: 'New Zealand',          flag: '🇳🇿' },
-  { code: 'SE', name: 'Sweden',               flag: '🇸🇪' },
-  { code: 'CH', name: 'Switzerland',          flag: '🇨🇭' },
-  { code: 'PL', name: 'Poland',               flag: '🇵🇱' },
-  { code: 'NO', name: 'Norway',               flag: '🇳🇴' },
-  { code: 'DK', name: 'Denmark',              flag: '🇩🇰' },
-  { code: 'BE', name: 'Belgium',              flag: '🇧🇪' },
-  { code: 'AT', name: 'Austria',              flag: '🇦🇹' },
-  { code: 'IL', name: 'Israel',               flag: '🇮🇱' },
-  { code: 'ZA', name: 'South Africa',         flag: '🇿🇦' },
+// flag-icons uses ISO 3166-1 alpha-2 lowercase codes (fi fi-us, fi fi-gb…)
+// HK / TW are not ISO 3166-1 states — flag-icons uses fi fi-hk / fi fi-tw via subdivision flags
+const COUNTRIES: { code: string; name: string; fi: string }[] = [
+  { code: 'US', name: 'United States',  fi: 'us' },
+  { code: 'CA', name: 'Canada',         fi: 'ca' },
+  { code: 'GB', name: 'United Kingdom', fi: 'gb' },
+  { code: 'AU', name: 'Australia',      fi: 'au' },
+  { code: 'DE', name: 'Germany',        fi: 'de' },
+  { code: 'FR', name: 'France',         fi: 'fr' },
+  { code: 'IT', name: 'Italy',          fi: 'it' },
+  { code: 'ES', name: 'Spain',          fi: 'es' },
+  { code: 'NL', name: 'Netherlands',    fi: 'nl' },
+  { code: 'JP', name: 'Japan',          fi: 'jp' },
+  { code: 'KR', name: 'South Korea',    fi: 'kr' },
+  { code: 'CN', name: 'China',          fi: 'cn' },
+  { code: 'SG', name: 'Singapore',      fi: 'sg' },
+  { code: 'HK', name: 'Hong Kong',      fi: 'hk' },
+  { code: 'TW', name: 'Taiwan',        fi: 'tw' },
+  { code: 'MX', name: 'Mexico',        fi: 'mx' },
+  { code: 'BR', name: 'Brazil',        fi: 'br' },
+  { code: 'IN', name: 'India',         fi: 'in' },
+  { code: 'AE', name: 'UAE',           fi: 'ae' },
+  { code: 'SA', name: 'Saudi Arabia',  fi: 'sa' },
+  { code: 'PH', name: 'Philippines',   fi: 'ph' },
+  { code: 'MY', name: 'Malaysia',      fi: 'my' },
+  { code: 'NZ', name: 'New Zealand',   fi: 'nz' },
+  { code: 'SE', name: 'Sweden',        fi: 'se' },
+  { code: 'CH', name: 'Switzerland',   fi: 'ch' },
+  { code: 'PL', name: 'Poland',        fi: 'pl' },
+  { code: 'NO', name: 'Norway',        fi: 'no' },
+  { code: 'DK', name: 'Denmark',       fi: 'dk' },
+  { code: 'BE', name: 'Belgium',       fi: 'be' },
+  { code: 'AT', name: 'Austria',       fi: 'at' },
+  { code: 'IL', name: 'Israel',        fi: 'il' },
+  { code: 'ZA', name: 'South Africa',  fi: 'za' },
 ]
 
-// ── Country dropdown component ────────────────────────────────────────────────
+// ── Country dropdown — matches ProDropdown + DropdownPill in TbTopBar ────────
+// Uses flag-icons (fi fi-XX) already imported via globals.css
+function CountryPill({ country, isSelected, onClick }: {
+  country: typeof COUNTRIES[0]; isSelected: boolean; onClick: () => void
+}) {
+  const [hover, setHover] = useState(false)
+  return (
+    <div
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      onClick={onClick}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 9,
+        padding: '8px 16px', borderRadius: 50, cursor: 'pointer',
+        backgroundColor: isSelected ? C.accent : 'transparent',
+        color: isSelected ? C.dark : C.body,
+        fontWeight: isSelected ? 700 : 500,
+        fontFamily: 'DM Sans, sans-serif', fontSize: 13,
+        border: `1.5px solid ${hover && !isSelected ? C.accent : 'transparent'}`,
+        transition: 'all 0.12s', marginBottom: 2,
+      }}
+    >
+      <span className={`fi fi-${country.fi}`} style={{ borderRadius: 2, fontSize: 15 }} />
+      {country.name}
+    </div>
+  )
+}
+
 function CountryDropdown({ value, onChange }: { value: string; onChange: (code: string) => void }) {
   const [open, setOpen] = useState(false)
-  const [search, setSearch] = useState('')
-  const ref = React.useRef<HTMLDivElement>(null)
   const selected = COUNTRIES.find(c => c.code === value) ?? COUNTRIES[0]
-  const filtered = search.trim()
-    ? COUNTRIES.filter(c => c.name.toLowerCase().includes(search.toLowerCase()) || c.code.toLowerCase().includes(search.toLowerCase()))
-    : COUNTRIES
-
-  // Close on outside click
-  useEffect(() => {
-    function handle(e: MouseEvent) { if (ref.current && !ref.current.contains(e.target as Node)) { setOpen(false); setSearch('') } }
-    document.addEventListener('mousedown', handle)
-    return () => document.removeEventListener('mousedown', handle)
-  }, [])
 
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
-      {/* Pill trigger */}
+    <div style={{ position: 'relative' }}>
+      {/* Trigger — matches ProDropdown button style */}
       <button
         type="button"
-        onClick={() => { setOpen(v => !v); setSearch('') }}
-        style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 13px 7px 8px', borderRadius: 50, border: `1.5px solid ${open ? C.primary : C.borderInput}`, backgroundColor: open ? C.primaryLight : C.surface, cursor: 'pointer', transition: 'all 0.15s', boxShadow: open ? `0 0 0 3px ${C.primaryLight}` : 'none', fontFamily: 'DM Sans, sans-serif' }}
+        onClick={() => setOpen(v => !v)}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 8,
+          padding: '7px 12px', borderRadius: 10,
+          border: `1px solid ${open ? C.accent : C.borderInput}`,
+          backgroundColor: open ? '#f9ffe6' : C.surface,
+          color: C.body, fontSize: 13, fontWeight: 600,
+          cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+          transition: 'all 0.15s',
+        }}
       >
-        <span style={{ fontSize: 20, lineHeight: 1, display: 'flex', alignItems: 'center', flexShrink: 0 }}>{selected.flag}</span>
-        <span style={{ fontSize: 13, fontWeight: 600, color: C.dark, whiteSpace: 'nowrap' }}>{selected.name}</span>
-        <ChevronDown size={13} style={{ color: C.muted, marginLeft: 2, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }} />
+        <span className={`fi fi-${selected.fi}`} style={{ borderRadius: 2, fontSize: 15 }} />
+        {selected.name}
+        {open
+          ? <ChevronDown size={14} style={{ color: C.accent, transform: 'rotate(180deg)', transition: 'transform 0.2s' }} />
+          : <ChevronDown size={14} style={{ color: C.muted, transition: 'transform 0.2s' }} />}
       </button>
 
-      {/* Dropdown panel */}
+      {/* Overlay to close */}
+      {open && <div style={{ position: 'fixed', inset: 0, zIndex: 40 }} onClick={() => setOpen(false)} />}
+
+      {/* Panel — matches ProDropdown panel */}
       {open && (
-        <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 200, width: 240, backgroundColor: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, boxShadow: '0 8px 32px rgba(117,48,251,0.12)', overflow: 'hidden' }}>
-          {/* Search */}
-          <div style={{ padding: '10px 12px', borderBottom: `1px solid ${C.border}` }}>
-            <input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search country…"
-              autoFocus
-              style={{ ...inp, padding: '7px 11px', fontSize: 12, borderRadius: 9 }}
-              onFocus={focusOn} onBlur={blurOn}
-            />
-          </div>
-          {/* List */}
-          <div style={{ maxHeight: 240, overflowY: 'auto', padding: '6px 0' }}>
-            {filtered.length === 0 && (
-              <p style={{ fontSize: 12, color: C.muted, textAlign: 'center', padding: '12px 0', margin: 0, fontFamily: 'DM Sans, sans-serif' }}>No results</p>
-            )}
-            {filtered.map(c => {
-              const isSelected = c.code === value
-              return (
-                <button
-                  key={c.code}
-                  type="button"
-                  onClick={() => { onChange(c.code); setOpen(false); setSearch('') }}
-                  style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 11, padding: '9px 14px', border: 'none', backgroundColor: isSelected ? C.primaryLight : 'transparent', cursor: 'pointer', textAlign: 'left', transition: 'background-color 0.1s', fontFamily: 'DM Sans, sans-serif' }}
-                  onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.backgroundColor = C.bg }}
-                  onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent' }}
-                >
-                  {/* Circle flag */}
-                  <span style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, flexShrink: 0, overflow: 'hidden', border: `1px solid ${C.border}` }}>{c.flag}</span>
-                  <span style={{ fontSize: 13, fontWeight: isSelected ? 700 : 500, color: isSelected ? C.primary : C.dark, flex: 1 }}>{c.name}</span>
-                  {isSelected && <Check size={13} style={{ color: C.primary, flexShrink: 0 }} />}
-                </button>
-              )
-            })}
+        <div style={{
+          position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 50,
+          width: 220, backgroundColor: C.surface,
+          border: `1px solid ${C.border}`, borderRadius: 18,
+          boxShadow: '0 8px 20px rgba(0,0,0,0.08)', overflow: 'hidden',
+        }}>
+          <div style={{ padding: 8, display: 'flex', flexDirection: 'column' }}>
+            {COUNTRIES.map(c => (
+              <CountryPill
+                key={c.code}
+                country={c}
+                isSelected={c.code === value}
+                onClick={() => { onChange(c.code); setOpen(false) }}
+              />
+            ))}
           </div>
         </div>
       )}
@@ -259,7 +269,7 @@ function MockLabel({ result, rate, recipient, from }: {
             <p style={{ fontSize: 11, color: '#374151', margin: 0, lineHeight: 1.5, fontFamily: 'DM Sans, sans-serif' }}>
               {recipient.addr1}{recipient.addr2 ? `, ${recipient.addr2}` : ''}<br />
               {recipient.city}{recipient.state ? `, ${recipient.state}` : ''} {recipient.zip}<br />
-              {recipient.country !== 'US' && <strong style={{ fontSize: 10, letterSpacing: '0.5px' }}>{COUNTRIES.find(c=>c.code===recipient.country)?.name ?? recipient.country}</strong>}
+              {recipient.country !== 'US' && (() => { const cc = COUNTRIES.find(c=>c.code===recipient.country); return cc ? <><span className={`fi fi-${cc.fi}`} style={{ borderRadius: 2, marginRight: 4 }} /><strong style={{ fontSize: 10, letterSpacing: '0.5px' }}>{cc.name}</strong></> : null })()}
             </p>
           </div>
         </div>
@@ -698,7 +708,7 @@ export default function ShippingPage() {
               <div style={{ width: 1, height: 18, backgroundColor: C.border, flexShrink: 0 }} />
               <span style={{ fontSize: 11, color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
                 <strong style={{ color: C.dark }}>To:</strong> {recipient.name} · {recipient.city}{recipient.state ? `, ${recipient.state}` : ''} {recipient.zip}
-                {recipient.country !== 'US' && <span style={{ marginLeft: 4 }}>{COUNTRIES.find(c => c.code === recipient.country)?.flag} {recipient.country}</span>}
+                {recipient.country !== 'US' && (() => { const cc = COUNTRIES.find(c => c.code === recipient.country); return cc ? <span style={{ marginLeft: 4, display: 'inline-flex', alignItems: 'center', gap: 4 }}><span className={`fi fi-${cc.fi}`} style={{ borderRadius: 2 }} /> {cc.name}</span> : null })()}
               </span>
               <span style={{ fontSize: 11, color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}><strong style={{ color: C.dark }}>Pkg:</strong> {pkgType === 'box' ? `${length}×${width}×${height}${dimUnit}` : `${length}×${width}${dimUnit} mailer`} · {weightDisplay}</span>
               <button onClick={handleGetRates} style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, color: C.muted, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', flexShrink: 0 }}>
@@ -777,7 +787,7 @@ export default function ShippingPage() {
                 {[
                   { label: 'Carrier & Service', value: `${selectedRateObj.carrierName} ${selectedRateObj.serviceName}`, accent: true },
                   { label: 'Estimated Delivery', value: selectedRateObj.deliveryLabel },
-                  { label: 'Ship To', value: `${recipient.name} · ${recipient.addr1}${recipient.addr2 ? `, ${recipient.addr2}` : ''}, ${recipient.city}${recipient.state ? `, ${recipient.state}` : ''} ${recipient.zip}${recipient.country !== 'US' ? ` · ${COUNTRIES.find(c=>c.code===recipient.country)?.flag ?? ''} ${COUNTRIES.find(c=>c.code===recipient.country)?.name ?? recipient.country}` : ''}` },
+                  { label: 'Ship To', value: `${recipient.name} · ${recipient.addr1}${recipient.addr2 ? `, ${recipient.addr2}` : ''}, ${recipient.city}${recipient.state ? `, ${recipient.state}` : ''} ${recipient.zip}${recipient.country !== 'US' ? ` · ${COUNTRIES.find(c=>c.code===recipient.country)?.name ?? recipient.country}` : ''}` },
                   { label: 'Package', value: pkgType === 'box' ? `${length}×${width}×${height} ${dimUnit} box · ${weightDisplay}` : `${length}×${width} ${dimUnit} mailer · ${weightDisplay}` },
                 ].map(({ label, value, accent }, i, arr) => (
                   <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, padding: '11px 0', borderBottom: i < arr.length - 1 ? `1px solid ${C.border}` : 'none' }}>
