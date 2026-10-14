@@ -1244,26 +1244,26 @@ export default function VisualEditor({
                     setTimeout(() => setActiveSelection(null), 300)
                 }
             } else if (event.data?.type === 'RIAZIFY_COMMIT_HTML_EDIT') {
-                const { blockId, html } = event.data;
+                const { blockId, html, propKey } = event.data;
                 if (blockId && typeof html === 'string') {
                     setSelectedId(blockId);
                     const idx = blocks.findIndex(b => b.id === blockId);
                     if (idx >= 0) {
                         const target = blocks[idx];
                         const p = target.props as any;
-                        // Find which prop holds the text and update with HTML
+                        // Use propKey from iframe if available, otherwise find first text prop
                         let targetKey = 'text';
-                        for (const k of TEXT_PROP_KEYS) {
-                            if (p[k] !== undefined && typeof p[k] === 'string') {
-                                targetKey = k;
-                                break;
+                        if (propKey && p[propKey] !== undefined) {
+                            targetKey = propKey;
+                        } else {
+                            for (const k of TEXT_PROP_KEYS) {
+                                if (p[k] !== undefined && typeof p[k] === 'string') {
+                                    targetKey = k;
+                                    break;
+                                }
                             }
                         }
-                        // For items array (bullet_list, numbered_list) find which item changed
-                        if (Array.isArray(p.items)) {
-                            // We can't know which item — store as-is for now
-                            // Future: pass itemIndex from iframe
-                        } else {
+                        if (!Array.isArray(p.items)) {
                             const updatedProps = { ...p, [targetKey]: html };
                             const updatedBlock = { ...target, props: updatedProps };
                             const newBlocks = [...blocks];
@@ -1273,7 +1273,7 @@ export default function VisualEditor({
                     }
                 }
             } else if (event.data?.type === 'RIAZIFY_COMMIT_TEXT_EDIT') {
-                const { blockId, text } = event.data;
+                const { blockId, text, propKey } = event.data;
                 if (blockId && typeof text === 'string') {
                     // Ensure block is selected and Content panel is open
                     setSelectedId(blockId);
@@ -1284,12 +1284,16 @@ export default function VisualEditor({
                     if (idx >= 0) {
                         const target = blocks[idx];
                         const p = target.props as any;
-                        // Find the first matching text-bearing key that exists on this block
+                        // Use propKey from iframe if available, otherwise find first text prop
                         let targetKey = 'text';
-                        for (const k of TEXT_PROP_KEYS) {
-                            if (p[k] !== undefined && typeof p[k] === 'string') {
-                                targetKey = k;
-                                break;
+                        if (propKey && p[propKey] !== undefined) {
+                            targetKey = propKey;
+                        } else {
+                            for (const k of TEXT_PROP_KEYS) {
+                                if (p[k] !== undefined && typeof p[k] === 'string') {
+                                    targetKey = k;
+                                    break;
+                                }
                             }
                         }
                         const updatedProps = { ...p, [targetKey]: text };
