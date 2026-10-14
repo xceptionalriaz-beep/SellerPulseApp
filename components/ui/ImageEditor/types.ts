@@ -1,0 +1,152 @@
+// components/ui/ImageEditor/types.ts
+// ─────────────────────────────────────────────────────────────
+// Shared types for the Image Editor modal and all tool panels.
+// ─────────────────────────────────────────────────────────────
+
+// ── Tool IDs ──────────────────────────────────────────────────
+export type ToolId =
+    | 'adjust'
+    | 'filter'
+    | 'crop'
+    | 'resize'
+    | 'rotate'
+    | 'draw'
+    | 'text'
+    | 'frame'
+
+// ── Filter presets ────────────────────────────────────────────
+export type FilterPreset =
+    | 'none'
+    | 'grayscale'
+    | 'sepia'
+    | 'invert'
+    | 'vintage'
+    | 'cool'
+    | 'warm'
+    | 'fade'
+
+// ── Crop state ────────────────────────────────────────────────
+export interface CropRect {
+    x: number   // 0–1 fraction of original width
+    y: number   // 0–1 fraction of original height
+    width: number   // 0–1 fraction
+    height: number   // 0–1 fraction
+}
+
+// ── Draw tool ─────────────────────────────────────────────────
+export type DrawMode = 'pen' | 'eraser'
+
+export interface DrawSettings {
+    mode: DrawMode
+    color: string   // hex
+    lineWidth: number   // px, 1–40
+    opacity: number   // 0–1
+}
+
+// ── Text overlay ──────────────────────────────────────────────
+export interface TextOverlay {
+    id: string
+    text: string
+    x: number   // 0–1 fraction
+    y: number   // 0–1 fraction
+    fontSize: number   // px
+    fontFamily: string
+    color: string   // hex
+    bold: boolean
+    italic: boolean
+    align: 'left' | 'center' | 'right'
+}
+
+// ── Frame/border ──────────────────────────────────────────────
+export type FrameStyle =
+    | 'none'
+    | 'solid'
+    | 'rounded'
+    | 'shadow'
+    | 'polaroid'
+    | 'film'
+
+export interface FrameSettings {
+    style: FrameStyle
+    color: string   // hex
+    width: number   // px, 0–60
+    borderRadius: number  // px, 0–40 (for 'rounded')
+}
+
+// ── Full editor state (all tools) ─────────────────────────────
+export interface ImageEditorState {
+    // ── Adjust ─────────────────────────────────────────────────
+    brightness: number   // -100 → +100, default 0
+    contrast: number   // -100 → +100, default 0
+    saturation: number   // -100 → +100, default 0
+    sharpness: number   //    0 → +100, default 0
+
+    // ── Filter ─────────────────────────────────────────────────
+    activeFilter: FilterPreset
+
+    // ── Rotate / flip ──────────────────────────────────────────
+    rotation: number    // 0 | 90 | 180 | 270
+    flipH: boolean
+    flipV: boolean
+
+    // ── Crop ───────────────────────────────────────────────────
+    crop: CropRect | null   // null = no crop applied
+    aspectLock: string            // 'free' | '1:1' | '4:3' | '16:9' | '3:4' | '9:16'
+
+    // ── Resize ─────────────────────────────────────────────────
+    resizeWidth: number | null    // px, null = original
+    resizeHeight: number | null    // px, null = original
+    resizeLockAR: boolean          // lock aspect ratio
+
+    // ── Draw ───────────────────────────────────────────────────
+    drawSettings: DrawSettings
+
+    // ── Text overlays ──────────────────────────────────────────
+    textOverlays: TextOverlay[]
+
+    // ── Frame ──────────────────────────────────────────────────
+    frame: FrameSettings
+}
+
+// ── Defaults ──────────────────────────────────────────────────
+export const DEFAULT_STATE: ImageEditorState = {
+    brightness: 0,
+    contrast: 0,
+    saturation: 0,
+    sharpness: 0,
+    activeFilter: 'none',
+    rotation: 0,
+    flipH: false,
+    flipV: false,
+    crop: null,
+    aspectLock: 'free',
+    resizeWidth: null,
+    resizeHeight: null,
+    resizeLockAR: true,
+    drawSettings: {
+        mode: 'pen',
+        color: '#7530fb',
+        lineWidth: 4,
+        opacity: 1,
+    },
+    textOverlays: [],
+    frame: {
+        style: 'none',
+        color: '#ffffff',
+        width: 20,
+        borderRadius: 12,
+    },
+}
+
+// ── Props every tool panel receives ───────────────────────────
+export interface ToolPanelProps {
+    state: ImageEditorState
+    onChange: (patch: Partial<ImageEditorState>) => void
+    imageUrl: string
+}
+
+// ── History entry (for undo/redo) ─────────────────────────────
+export interface HistoryEntry {
+    state: ImageEditorState
+    timestamp: number
+}
