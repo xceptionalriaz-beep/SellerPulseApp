@@ -1110,13 +1110,7 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
   div[data-canvas-dropzone]:hover div[data-canvas-overlay],
   div[data-canvas-dropzone] div[data-canvas-overlay]:hover { opacity: 1 !important; pointer-events: auto !important; }
 
-  /* Hover over text elements → text cursor signals they are single-click editable */
-  h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover,
-  p:hover, li:hover, blockquote:hover {
-    cursor: text !important;
-  }
-  /* Active edit outline already set via JS; also prevent Chrome blue outline */
-  [contenteditable="true"] { outline: 2px solid #7530fb !important; border-radius: 3px !important; }
+  /* Removed inline text editing hover indicator */
 </style>
 <script>
 (function() {
