@@ -1724,8 +1724,8 @@ export default function VisualEditor({
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
                     {/* ── BlockToolbar — only when not in live preview ── */}
                     {!livePreview && (
-                        <div style={{ display: 'flex', alignItems: 'stretch' }}>
-                            <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'stretch', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                            <div style={{ flex: 1, minWidth: 0, display: 'flex' }}>
                                 <BlockToolbar
                                     blockType={isLayoutBlock ? undefined : (selectedBlock?.type ?? undefined)}
                                     blockProps={isLayoutBlock ? (activeSlotEdit ? {} : null) : (selectedBlock?.props ?? null)}
@@ -1749,7 +1749,7 @@ export default function VisualEditor({
                                 />
                             </div>
                             {/* Undo / Redo — left of the eye icon */}
-                            <div style={{ display: 'flex', alignItems: 'center', borderLeft: '1px solid #e2e8f0' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', borderLeft: '1px solid #e2e8f0', flexShrink: 0 }}>
                                 <button
                                     onClick={handleUndo}
                                     disabled={undoStack.length === 0}
