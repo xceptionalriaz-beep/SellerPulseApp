@@ -1078,6 +1078,11 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
                 )
             }
 
+            // Build a font override CSS rule if the block has a custom fontFamily prop
+            const fontOverrideCss = props.fontFamily
+                ? `  /* Font override — user-selected font from toolbar */\n  * { font-family: ${props.fontFamily} !important; }\n`
+                : ''
+
             return `<!DOCTYPE html>
 <html>
 <head>
@@ -1091,6 +1096,7 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
     overflow: hidden;
     width: ${previewWidth}px;
   }
+${fontOverrideCss}
   table { border-collapse: collapse; }
   img { border: 0; display: block; max-width: 100%; cursor: pointer; }
   a { text-decoration: none; }

@@ -610,6 +610,13 @@ export default function VisualEditor({
                 const outerAMatch = newHtml.match(/^<a\s[^>]*>([\s\S]*)<\/a>$/i)
                 if (outerAMatch) newHtml = outerAMatch[1]
             }
+        } else if (format === 'fontFamily') {
+            // Replace all existing font-family declarations in the slot HTML
+            newHtml = newHtml.replace(/font-family:\s*[^;'"]+/gi, `font-family:${value}`)
+            // If no font-family was found, wrap the whole slot in a span that sets it
+            if (!/font-family/i.test(newHtml)) {
+                newHtml = `<span style="font-family:${value};">${newHtml}</span>`
+            }
         }
 
         const updatedBlock = {
