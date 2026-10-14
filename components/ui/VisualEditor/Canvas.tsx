@@ -29,8 +29,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import { SLOT_SELECTION_CSS } from './slotSelection'
 import React, { useState, useRef, useCallback } from 'react'
-import { ImageEditorModal } from '@/components/ui/ImageEditor'
-import type { ImageEditorState } from '@/components/ui/ImageEditor'
+import ImageEditorModal from '@/components/ui/ImageEditor/ImageEditorModal'
+import type { ImageEditorState } from '@/components/ui/ImageEditor/types'
 import {
     Layout, Columns2, Columns3, Square,
     Heading, Pilcrow, List, Minus,
