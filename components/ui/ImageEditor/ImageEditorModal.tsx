@@ -13,7 +13,7 @@ import { ToolId, ImageEditorState, DEFAULT_STATE, CropRect } from './types'
 import AdjustTool  from './tools/AdjustTool'
 import FilterTool  from './tools/FilterTool'
 import CropTool    from './tools/CropTool'
-// import ResizeTool  from './tools/ResizeTool'
+import ResizeTool  from './tools/ResizeTool'
 // import RotateTool  from './tools/RotateTool'
 // import DrawTool    from './tools/DrawTool'
 // import TextTool    from './tools/TextTool'
@@ -182,6 +182,7 @@ export default function ImageEditorModal({
             case 'adjust': return <AdjustTool {...common} />
             case 'filter': return <FilterTool {...common} />
             case 'crop':   return <CropTool   {...common} />
+            case 'resize': return <ResizeTool {...common} />
             default:
                 return <PlaceholderPanel tool={TOOLS.find(t => t.id === activeTool)!} />
         }
