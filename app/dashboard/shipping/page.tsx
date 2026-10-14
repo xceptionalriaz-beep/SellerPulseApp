@@ -10,7 +10,6 @@ import {
   Box, Copy, Download, CheckCircle2, RotateCcw, Sparkles,
   ExternalLink, FileText,
 } from 'lucide-react'
-import { ProDropdown, DropdownOption } from '@/app/dashboard/title-builder/components/TbTopBar'
 
 // ── Design tokens ──────────────────────────────────────────────────────────────
 const C = {
@@ -53,42 +52,39 @@ interface LabelResult {
 const US_STATES = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY']
 
 // Common eBay shipping destinations (domestic + top dropship markets)
-// Shaped as DropdownOption so we can pass directly to ProDropdown from TbTopBar.
-// flagCode uses ISO 3166-1 alpha-2 lowercase (flag-icons fi fi-XX classes).
-// HK / TW use subdivision flags supported by flag-icons.
-const COUNTRIES: DropdownOption[] = [
-  { val: 'US', label: 'United States',  enabled: true, flagCode: 'us' },
-  { val: 'CA', label: 'Canada',         enabled: true, flagCode: 'ca' },
-  { val: 'GB', label: 'United Kingdom', enabled: true, flagCode: 'gb' },
-  { val: 'AU', label: 'Australia',      enabled: true, flagCode: 'au' },
-  { val: 'DE', label: 'Germany',        enabled: true, flagCode: 'de' },
-  { val: 'FR', label: 'France',         enabled: true, flagCode: 'fr' },
-  { val: 'IT', label: 'Italy',          enabled: true, flagCode: 'it' },
-  { val: 'ES', label: 'Spain',          enabled: true, flagCode: 'es' },
-  { val: 'NL', label: 'Netherlands',    enabled: true, flagCode: 'nl' },
-  { val: 'JP', label: 'Japan',          enabled: true, flagCode: 'jp' },
-  { val: 'KR', label: 'South Korea',    enabled: true, flagCode: 'kr' },
-  { val: 'CN', label: 'China',          enabled: true, flagCode: 'cn' },
-  { val: 'SG', label: 'Singapore',      enabled: true, flagCode: 'sg' },
-  { val: 'HK', label: 'Hong Kong',      enabled: true, flagCode: 'hk' },
-  { val: 'TW', label: 'Taiwan',         enabled: true, flagCode: 'tw' },
-  { val: 'MX', label: 'Mexico',         enabled: true, flagCode: 'mx' },
-  { val: 'BR', label: 'Brazil',         enabled: true, flagCode: 'br' },
-  { val: 'IN', label: 'India',          enabled: true, flagCode: 'in' },
-  { val: 'AE', label: 'UAE',            enabled: true, flagCode: 'ae' },
-  { val: 'SA', label: 'Saudi Arabia',   enabled: true, flagCode: 'sa' },
-  { val: 'PH', label: 'Philippines',    enabled: true, flagCode: 'ph' },
-  { val: 'MY', label: 'Malaysia',       enabled: true, flagCode: 'my' },
-  { val: 'NZ', label: 'New Zealand',    enabled: true, flagCode: 'nz' },
-  { val: 'SE', label: 'Sweden',         enabled: true, flagCode: 'se' },
-  { val: 'CH', label: 'Switzerland',    enabled: true, flagCode: 'ch' },
-  { val: 'PL', label: 'Poland',         enabled: true, flagCode: 'pl' },
-  { val: 'NO', label: 'Norway',         enabled: true, flagCode: 'no' },
-  { val: 'DK', label: 'Denmark',        enabled: true, flagCode: 'dk' },
-  { val: 'BE', label: 'Belgium',        enabled: true, flagCode: 'be' },
-  { val: 'AT', label: 'Austria',        enabled: true, flagCode: 'at' },
-  { val: 'IL', label: 'Israel',         enabled: true, flagCode: 'il' },
-  { val: 'ZA', label: 'South Africa',   enabled: true, flagCode: 'za' },
+const COUNTRIES: { code: string; name: string }[] = [
+  { code: 'US', name: 'United States'  },
+  { code: 'CA', name: 'Canada'         },
+  { code: 'GB', name: 'United Kingdom' },
+  { code: 'AU', name: 'Australia'      },
+  { code: 'DE', name: 'Germany'        },
+  { code: 'FR', name: 'France'         },
+  { code: 'IT', name: 'Italy'          },
+  { code: 'ES', name: 'Spain'          },
+  { code: 'NL', name: 'Netherlands'    },
+  { code: 'JP', name: 'Japan'          },
+  { code: 'KR', name: 'South Korea'    },
+  { code: 'CN', name: 'China'          },
+  { code: 'SG', name: 'Singapore'      },
+  { code: 'HK', name: 'Hong Kong'      },
+  { code: 'TW', name: 'Taiwan'         },
+  { code: 'MX', name: 'Mexico'         },
+  { code: 'BR', name: 'Brazil'         },
+  { code: 'IN', name: 'India'          },
+  { code: 'AE', name: 'UAE'            },
+  { code: 'SA', name: 'Saudi Arabia'   },
+  { code: 'PH', name: 'Philippines'    },
+  { code: 'MY', name: 'Malaysia'       },
+  { code: 'NZ', name: 'New Zealand'    },
+  { code: 'SE', name: 'Sweden'         },
+  { code: 'CH', name: 'Switzerland'    },
+  { code: 'PL', name: 'Poland'         },
+  { code: 'NO', name: 'Norway'         },
+  { code: 'DK', name: 'Denmark'        },
+  { code: 'BE', name: 'Belgium'        },
+  { code: 'AT', name: 'Austria'        },
+  { code: 'IL', name: 'Israel'         },
+  { code: 'ZA', name: 'South Africa'   },
 ]
 
 const DEFAULT_PRESETS: Preset[] = [
@@ -458,13 +454,15 @@ export default function ShippingPage() {
                 {/* Country selector */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   <label style={lbl}>Country</label>
-                  <ProDropdown
-                    prefix="Ship To:"
-                    currentValue={recipient.country}
-                    options={COUNTRIES}
-                    onChanged={code => setRecipient(r => ({ ...r, country: code, state: code === 'US' ? 'NY' : '' }))}
-                    width={260}
-                  />
+                  <select
+                    value={recipient.country}
+                    onChange={e => setRecipient(r => ({ ...r, country: e.target.value, state: e.target.value === 'US' ? 'NY' : '' }))}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: `1px solid ${C.borderInput}`, backgroundColor: C.surface, color: C.body, fontSize: 13, fontFamily: 'DM Sans, sans-serif', outline: 'none', cursor: 'pointer' }}
+                  >
+                    {COUNTRIES.map(c => (
+                      <option key={c.code} value={c.code}>{c.name}</option>
+                    ))}
+                  </select>
                 </div>
 
                 {/* International shipping notice */}
