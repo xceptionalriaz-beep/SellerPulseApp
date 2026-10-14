@@ -1280,6 +1280,11 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
       if (!activeEditable.contains(e.target)) commitEdit(activeEditable);
     });
 
+    // Commit when user clicks OUTSIDE the iframe (focus leaves the frame)
+    window.addEventListener('blur', function() {
+      if (activeEditable) commitEdit(activeEditable);
+    });
+
     // ── Selection capture — Phase A ──────────────────────────────────
     // Fire RIAZIFY_SELECTION_CHANGE whenever the user lifts the mouse
     // after selecting text inside the iframe. The parent uses this to
