@@ -29,7 +29,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import { SLOT_SELECTION_CSS } from './slotSelection'
 import React, { useState, useRef, useCallback } from 'react'
-import { ImageEditorModal } from '@/components/ui/ImageEditor'
+import ImageEditorModal from '@/components/ui/ImageEditor/ImageEditorModal'
+import type { ImageEditorState } from '@/components/ui/ImageEditor/types'
 import {
     Layout, Columns2, Columns3, Square,
     Heading, Pilcrow, List, Minus,
@@ -415,7 +416,7 @@ export default function Canvas({
                 <ImageEditorModal
                     imageUrl={imgEditorSrc}
                     imageName={imgEditorPropKey || 'image'}
-                    onSave={(_editedUrl, _state) => {
+                    onSave={(_editedUrl: string, _state: ImageEditorState) => {
                         // TODO: wire save back to block prop when filter/crop are implemented
                         setImgEditorSrc(null)
                         setImgEditorPropKey(null)

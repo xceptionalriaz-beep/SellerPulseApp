@@ -24,6 +24,16 @@ export type FilterPreset =
     | 'cool'
     | 'warm'
     | 'fade'
+    | 'polaroid'
+    | 'chrome'
+    | 'kodachrome'
+    | 'technicolor'
+    | 'brownie'
+    | 'noir'
+    | 'vivid'
+    | 'matte'
+    | 'blueprint'
+    | 'emboss'
 
 // ── Crop state ────────────────────────────────────────────────
 export interface CropRect {
@@ -83,6 +93,15 @@ export interface ImageEditorState {
 
     // ── Filter ─────────────────────────────────────────────────
     activeFilter: FilterPreset
+    filterIntensity: number   // 0–100, how strongly preset applies
+
+    // ── Filter adjustments ─────────────────────────────────────
+    gamma: number   // 0.1–3.0, default 1
+    vibrance: number   // -100–100, default 0
+    hue: number   // -180–180, default 0
+    blur: number   // 0–20px, default 0
+    pixelate: number   // 0–50, default 0
+    noise: number   // 0–100, default 0
 
     // ── Rotate / flip ──────────────────────────────────────────
     rotation: number    // 0 | 90 | 180 | 270
@@ -115,6 +134,13 @@ export const DEFAULT_STATE: ImageEditorState = {
     saturation: 0,
     sharpness: 0,
     activeFilter: 'none',
+    filterIntensity: 100,
+    gamma: 1,
+    vibrance: 0,
+    hue: 0,
+    blur: 0,
+    pixelate: 0,
+    noise: 0,
     rotation: 0,
     flipH: false,
     flipV: false,
