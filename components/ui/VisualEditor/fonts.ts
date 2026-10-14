@@ -140,10 +140,12 @@ export function loadFont(fontName: string, targetDoc: Document = document) {
     if (!font || !font.google) return
 
     const fontKey = font.name.replace(/\s+/g, '+')
-    if (loadedFonts.has(fontKey)) return
 
     try {
         const linkId = `google-font-${fontKey}`
+        // Always check the TARGET document — iframes are separate documents and
+        // the global loadedFonts guard was causing fonts to never load into
+        // remounted iframes (they start fresh each time).
         if (!targetDoc.getElementById(linkId)) {
             const link = targetDoc.createElement('link')
             link.id = linkId
@@ -165,4 +167,21 @@ export function getFontStack(fontName: string): string {
     const font = FONT_REGISTRY.find(f => f.name.toLowerCase() === fontName.toLowerCase())
     if (!font) return `"${fontName}", Arial, sans-serif`
     return `"${font.name}", ${font.fallback}`
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// IFRAME HTML FONT LINK BUILDER
+// Returns a <link> tag string to embed directly inside an iframe's <head>
+// so the font is available immediately when the iframe mounts — no JS injection.
+// ─────────────────────────────────────────────────────────────────────────────
+export function getGoogleFontLinkHtml(fontStack: string): string {
+    if (!fontStack) return ''
+    // Extract font name from stack like '"Poppins", sans-serif' or 'Arial, Helvetica'
+    const match = fontStack.match(/^["']?([^"',]+)["']?/)
+    if (!match) return ''
+    const fontName = match[1].trim()
+    const font = FONT_REGISTRY.find(f => f.name.toLowerCase() === fontName.toLowerCase())
+    if (!font?.google) return '' // system fonts need no link
+    const fontKey = font.name.replace(/\s+/g, '+')
+    return `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=${fontKey}:wght@400;600;700;800;900&display=swap">`
 }

@@ -50,6 +50,7 @@ import {
     BLOCK_DEFINITIONS,
 } from './blocks'
 import { renderForCanvas, extractTokens, type CategoryId, renderBannerForCanvas } from './sampleData'
+import { getGoogleFontLinkHtml } from './fonts'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -1078,16 +1079,20 @@ function BlockPreview({ block, def, activeCategory, deviceWidth = 'desktop' }: {
                 )
             }
 
-            // Build a font override CSS rule if the block has a custom fontFamily prop
+            // Build font override CSS + Google Font <link> tag so the selected font
+            // is actually available inside the iframe (iframes are separate documents —
+            // fonts injected into the parent page via loadFont() are lost on remount).
             const fontOverrideCss = props.fontFamily
                 ? `  /* Font override — user-selected font from toolbar */\n  * { font-family: ${props.fontFamily} !important; }\n`
                 : ''
+            const fontLinkTag = props.fontFamily ? getGoogleFontLinkHtml(props.fontFamily) : ''
 
             return `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+${fontLinkTag}
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
