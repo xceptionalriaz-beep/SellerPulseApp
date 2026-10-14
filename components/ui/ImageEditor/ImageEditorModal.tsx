@@ -175,6 +175,20 @@ export default function ImageEditorModal({
 
     const cssCornerRadius = editorState.cornerRadius ?? 0
 
+    // ── CSS resize — applied directly to <img> ─────────────────
+    const cssResize = useMemo(() => {
+        const rw = editorState.resizeWidth
+        const rh = editorState.resizeHeight
+        if (!rw || !rh) return null
+        const ratio = rw / rh
+        return {
+            // Fit within 70vw × 70vh while keeping the target ratio
+            width: `min(${rw}px, 70vw, calc(${ratio.toFixed(6)} * 70vh))`,
+            aspectRatio: `${rw} / ${rh}`,
+            objectFit: 'fill' as const,
+        }
+    }, [editorState.resizeWidth, editorState.resizeHeight])
+
     // ── Render tool panel ──────────────────────────────────────
     function renderToolPanel() {
         const common = { state: editorState, onChange: pushState, imageUrl }
@@ -281,11 +295,11 @@ export default function ImageEditorModal({
                             draggable={false}
                             style={{
                                 display: 'block',
-                                maxWidth: '70vw',
-                                maxHeight: '70vh',
+                                // Apply resize dimensions if set, otherwise natural max constraints
+                                ...(cssResize ?? { maxWidth: '70vw', maxHeight: '70vh' }),
                                 filter: cssFilter,
                                 transform: cssTransform,
-                                transition: 'filter 0.2s ease, transform 0.2s ease',
+                                transition: 'filter 0.2s ease, transform 0.2s ease, width 0.2s ease, aspect-ratio 0.2s ease',
                                 userSelect: 'none',
                             }}
                         />
