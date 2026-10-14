@@ -51,6 +51,7 @@ import LivePreview from './VisualEditor/LivePreview'
 import { EditorToolbar as RichEditorToolbar } from './EditorToolbar'
 import BlockToolbar from './VisualEditor/BlockToolbar'
 import ListingPickerModal, { type LinkedListing } from './VisualEditor/ListingPickerModal'
+import EbayAccountSelector from '@/app/dashboard/listing-generator/components/EbayAccountSelector'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -2317,6 +2318,11 @@ function EditorToolbar({
 
             {/* Right — zoom + focus + clear */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                {/* eBay connection status */}
+                <EbayAccountSelector />
+
+                <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
+
                 {/* Device width toggle */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '2px', backgroundColor: '#f1f5f9', borderRadius: 6 }}>
                     {([
