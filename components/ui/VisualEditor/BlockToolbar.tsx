@@ -283,7 +283,12 @@ export default function BlockToolbar({
 
     const handleFormatSlotProp = (format: string, value: string) => {
         if (slotEdit) {
-            onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, format, value)
+            // Pass activeSelection so selection-scoped formats (fontFamily, fontSize, color…)
+            // apply only to the highlighted text when the user has something selected
+            const sel = (activeSelection && activeSelection.propKey === slotEdit.propKey)
+                ? activeSelection
+                : null
+            onFormatSlot?.(slotEdit.blockId, slotEdit.propKey, format, value, sel)
         }
     }
 
