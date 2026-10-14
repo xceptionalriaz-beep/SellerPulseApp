@@ -16,19 +16,19 @@ const C = {
 }
 
 // ── Option types ──────────────────────────────────────────────
-interface Option { val: string; label: string; enabled: boolean; flagCode?: string }
+export interface DropdownOption { val: string; label: string; enabled: boolean; flagCode?: string }
 
 // ── Flag icon (uses the flag-icons package already imported in globals.css,
 // but never actually used anywhere until now). More reliable than emoji
 // flags, which Windows renders as plain two-letter codes instead of a flag. ──
-function FlagIcon({ code }: { code: string }) {
+export function FlagIcon({ code }: { code: string }) {
   return <span className={`fi fi-${code}`} style={{ borderRadius: 2, display: 'inline-block' }} />
 }
 
 // ── ProDropdown (matches Dart ProDropdown + _DropdownPill) ────
-function ProDropdown({ prefix, currentValue, options, onChanged }: {
+export function ProDropdown({ prefix, currentValue, options, onChanged, width }: {
   prefix: string; currentValue: string
-  options: Option[]; onChanged: (v: string) => void
+  options: DropdownOption[]; onChanged: (v: string) => void; width?: number
 }) {
   const [open, setOpen] = useState(false)
 
@@ -58,7 +58,7 @@ function ProDropdown({ prefix, currentValue, options, onChanged }: {
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div className="absolute top-full mt-2 z-50 rounded-2xl border shadow-xl overflow-hidden"
             style={{
-              width: 220, backgroundColor: '#fff', borderColor: C.border,
+              width: width ?? 220, backgroundColor: '#fff', borderColor: C.border,
               boxShadow: '0 8px 20px rgba(0,0,0,0.08)'
             }}>
             <div className="p-2 flex flex-col gap-1">
@@ -78,8 +78,8 @@ function ProDropdown({ prefix, currentValue, options, onChanged }: {
 }
 
 // ── DropdownPill (matches Dart _DropdownPill) ─────────────────
-function DropdownPill({ option, isSelected, onTap }: {
-  option: Option; isSelected: boolean; onTap?: () => void
+export function DropdownPill({ option, isSelected, onTap }: {
+  option: DropdownOption; isSelected: boolean; onTap?: () => void
 }) {
   const [hover, setHover] = useState(false)
   const enabled = option.enabled
@@ -153,19 +153,19 @@ export default function TbTopBar({
   onExtract, onSearch, onOpenSettings,
 }: Props) {
 
-  const marketOptions: Option[] = [
+  const marketOptions: DropdownOption[] = [
     { val: 'eBay', label: 'eBay', enabled: true },
     { val: 'Amazon', label: 'Amazon (Coming Soon)', enabled: false },
     { val: 'Walmart', label: 'Walmart (Coming Soon)', enabled: false },
   ]
-  const locationOptions: Option[] = [
+  const locationOptions: DropdownOption[] = [
     { val: 'All', label: 'All Locations', enabled: true },
     { val: 'US', label: 'United States', enabled: true, flagCode: 'us' },
     { val: 'UK', label: 'United Kingdom', enabled: true, flagCode: 'gb' },
     { val: 'CA', label: 'Canada', enabled: true, flagCode: 'ca' },
     { val: 'AU', label: 'Australia', enabled: true, flagCode: 'au' },
   ]
-  const timeOptions: Option[] = [
+  const timeOptions: DropdownOption[] = [
     { val: '7D', label: 'Time: 7D', enabled: true },
     { val: '30D', label: 'Time: 30D', enabled: true },
     { val: '12M', label: 'Time: 12M', enabled: true },

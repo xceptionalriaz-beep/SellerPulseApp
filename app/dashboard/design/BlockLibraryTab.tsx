@@ -197,7 +197,7 @@ export default function BlockLibraryTab() {
             </div>
 
             {/* Grid + Preview panel */}
-            <div className="flex flex-1 min-h-0">
+            <div className="flex flex-1 min-h-0" style={{ position: 'relative' }}>
 
                 {/* Block grid */}
                 <div className="flex-1 overflow-y-auto px-6 py-5">
@@ -310,11 +310,12 @@ export default function BlockLibraryTab() {
                     )}
                 </div>
 
-                {/* Preview panel — fixed overlay */}
+                {/* Preview panel — absolute within the content column so it never
+                     overlaps the app sidebar nav or top header */}
                 {previewBlock && previewDef && (
                     <div className="flex flex-col shrink-0"
                         style={{
-                            position: 'fixed',
+                            position: 'absolute',
                             right: 0, top: 0, bottom: 0,
                             width: 340,
                             borderLeft: `1px solid ${C.border}`,

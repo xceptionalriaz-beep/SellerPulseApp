@@ -10,6 +10,7 @@ import {
     Box, Copy, Download, CheckCircle2, RotateCcw, Sparkles,
     ExternalLink, FileText,
 } from 'lucide-react'
+import ProDropdown, { DropdownOption } from '@/components/ui/ProDropdown'
 
 // ── Design tokens ──────────────────────────────────────────────────────────────
 const C = {
@@ -50,6 +51,42 @@ interface LabelResult {
 }
 
 const US_STATES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
+
+// Common eBay shipping destinations — shaped as DropdownOption for ProDropdown
+const COUNTRIES: DropdownOption[] = [
+    { val: 'US', label: 'United States', enabled: true, flagCode: 'us' },
+    { val: 'CA', label: 'Canada', enabled: true, flagCode: 'ca' },
+    { val: 'GB', label: 'United Kingdom', enabled: true, flagCode: 'gb' },
+    { val: 'AU', label: 'Australia', enabled: true, flagCode: 'au' },
+    { val: 'DE', label: 'Germany', enabled: true, flagCode: 'de' },
+    { val: 'FR', label: 'France', enabled: true, flagCode: 'fr' },
+    { val: 'IT', label: 'Italy', enabled: true, flagCode: 'it' },
+    { val: 'ES', label: 'Spain', enabled: true, flagCode: 'es' },
+    { val: 'NL', label: 'Netherlands', enabled: true, flagCode: 'nl' },
+    { val: 'JP', label: 'Japan', enabled: true, flagCode: 'jp' },
+    { val: 'KR', label: 'South Korea', enabled: true, flagCode: 'kr' },
+    { val: 'CN', label: 'China', enabled: true, flagCode: 'cn' },
+    { val: 'SG', label: 'Singapore', enabled: true, flagCode: 'sg' },
+    { val: 'HK', label: 'Hong Kong', enabled: true, flagCode: 'hk' },
+    { val: 'TW', label: 'Taiwan', enabled: true, flagCode: 'tw' },
+    { val: 'MX', label: 'Mexico', enabled: true, flagCode: 'mx' },
+    { val: 'BR', label: 'Brazil', enabled: true, flagCode: 'br' },
+    { val: 'IN', label: 'India', enabled: true, flagCode: 'in' },
+    { val: 'AE', label: 'UAE', enabled: true, flagCode: 'ae' },
+    { val: 'SA', label: 'Saudi Arabia', enabled: true, flagCode: 'sa' },
+    { val: 'PH', label: 'Philippines', enabled: true, flagCode: 'ph' },
+    { val: 'MY', label: 'Malaysia', enabled: true, flagCode: 'my' },
+    { val: 'NZ', label: 'New Zealand', enabled: true, flagCode: 'nz' },
+    { val: 'SE', label: 'Sweden', enabled: true, flagCode: 'se' },
+    { val: 'CH', label: 'Switzerland', enabled: true, flagCode: 'ch' },
+    { val: 'PL', label: 'Poland', enabled: true, flagCode: 'pl' },
+    { val: 'NO', label: 'Norway', enabled: true, flagCode: 'no' },
+    { val: 'DK', label: 'Denmark', enabled: true, flagCode: 'dk' },
+    { val: 'BE', label: 'Belgium', enabled: true, flagCode: 'be' },
+    { val: 'AT', label: 'Austria', enabled: true, flagCode: 'at' },
+    { val: 'IL', label: 'Israel', enabled: true, flagCode: 'il' },
+    { val: 'ZA', label: 'South Africa', enabled: true, flagCode: 'za' },
+]
 
 const DEFAULT_PRESETS: Preset[] = [
     { id: 'poly', name: 'Poly Mailer', l: '12', w: '15', h: '0', wLbs: '0', wOz: '4' },
@@ -148,7 +185,8 @@ function MockLabel({ result, rate, recipient, from }: {
                         <p style={{ fontSize: 13, fontWeight: 900, color: '#1e1535', margin: '0 0 2px', fontFamily: 'DM Sans, sans-serif' }}>{recipient.name}</p>
                         <p style={{ fontSize: 11, color: '#374151', margin: 0, lineHeight: 1.5, fontFamily: 'DM Sans, sans-serif' }}>
                             {recipient.addr1}{recipient.addr2 ? `, ${recipient.addr2}` : ''}<br />
-                            {recipient.city}, {recipient.state} {recipient.zip}
+                            {recipient.city}{recipient.state ? `, ${recipient.state}` : ''} {recipient.zip}<br />
+                            {recipient.country !== 'US' && (() => { const cc = COUNTRIES.find(c => c.val === recipient.country); return cc ? <><span className={`fi fi-${cc.flagCode}`} style={{ borderRadius: 2, marginRight: 4 }} /><strong style={{ fontSize: 10, letterSpacing: '0.5px' }}>{cc.label}</strong></> : null })()}
                         </p>
                     </div>
                 </div>
@@ -413,31 +451,73 @@ export default function ShippingPage() {
                                 </div>
                             </div>
                             <div style={{ padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 13 }}>
+
+                                {/* Country selector */}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                    <label style={lbl}>Country</label>
+                                    <ProDropdown
+                                        prefix=""
+                                        currentValue={recipient.country}
+                                        options={COUNTRIES}
+                                        onChanged={code => setRecipient(r => ({ ...r, country: code, state: code === 'US' ? 'NY' : '' }))}
+                                        width="full"
+                                        maxItems={8}
+                                    />
+                                </div>
+
+                                {/* International shipping notice */}
+                                {recipient.country !== 'US' && (
+                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '9px 12px', borderRadius: 10, backgroundColor: C.warningBg, border: `1px solid #fcd34d` }}>
+                                        <Info size={13} style={{ color: C.warning, flexShrink: 0, marginTop: 1 }} />
+                                        <p style={{ fontSize: 11, color: C.warning, margin: 0, fontFamily: 'DM Sans, sans-serif', lineHeight: 1.5 }}>
+                                            <strong>International shipment</strong> — eBay discounted rates apply for US-origin packages. Customs forms may be required.
+                                        </p>
+                                    </div>
+                                )}
+
                                 <Field label="Full Name">
                                     <input value={recipient.name} placeholder="e.g. John Smith" onChange={e => setRecipient(r => ({ ...r, name: e.target.value }))} style={inp} onFocus={focusOn} onBlur={blurOn} />
                                 </Field>
                                 <Field label="Street Address">
                                     <input value={recipient.addr1} placeholder="123 Main Street" onChange={e => setRecipient(r => ({ ...r, addr1: e.target.value }))} style={inp} onFocus={focusOn} onBlur={blurOn} />
                                 </Field>
-                                <Field label="Apt, Suite (optional)">
+                                <Field label="Apt, Suite, Unit (optional)">
                                     <input value={recipient.addr2} placeholder="Apt 4B" onChange={e => setRecipient(r => ({ ...r, addr2: e.target.value }))} style={inp} onFocus={focusOn} onBlur={blurOn} />
                                 </Field>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 72px 96px', gap: 10 }}>
-                                    <Field label="City">
-                                        <input value={recipient.city} placeholder="New York" onChange={e => setRecipient(r => ({ ...r, city: e.target.value }))} style={inp} onFocus={focusOn} onBlur={blurOn} />
-                                    </Field>
-                                    <Field label="State">
-                                        <div style={{ position: 'relative' }}>
-                                            <select value={recipient.state} onChange={e => setRecipient(r => ({ ...r, state: e.target.value }))} style={sel} onFocus={focusOn} onBlur={blurOn}>
-                                                {US_STATES.map(s => <option key={s}>{s}</option>)}
-                                            </select>
-                                            <ChevronDown size={11} style={{ position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)', color: C.muted, pointerEvents: 'none' }} />
+
+                                {/* City / State / ZIP — adapts for US vs international */}
+                                {recipient.country === 'US' ? (
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 72px 96px', gap: 10 }}>
+                                        <Field label="City">
+                                            <input value={recipient.city} placeholder="New York" onChange={e => setRecipient(r => ({ ...r, city: e.target.value }))} style={inp} onFocus={focusOn} onBlur={blurOn} />
+                                        </Field>
+                                        <Field label="State">
+                                            <div style={{ position: 'relative' }}>
+                                                <select value={recipient.state} onChange={e => setRecipient(r => ({ ...r, state: e.target.value }))} style={sel} onFocus={focusOn} onBlur={blurOn}>
+                                                    {US_STATES.map(s => <option key={s}>{s}</option>)}
+                                                </select>
+                                                <ChevronDown size={11} style={{ position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)', color: C.muted, pointerEvents: 'none' }} />
+                                            </div>
+                                        </Field>
+                                        <Field label="ZIP Code">
+                                            <input value={recipient.zip} placeholder="10001" maxLength={10} onChange={e => setRecipient(r => ({ ...r, zip: e.target.value }))} style={inp} onFocus={focusOn} onBlur={blurOn} />
+                                        </Field>
+                                    </div>
+                                ) : (
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                                        <Field label="City">
+                                            <input value={recipient.city} placeholder="London" onChange={e => setRecipient(r => ({ ...r, city: e.target.value }))} style={inp} onFocus={focusOn} onBlur={blurOn} />
+                                        </Field>
+                                        <Field label="Province / Region">
+                                            <input value={recipient.state} placeholder="e.g. Ontario" onChange={e => setRecipient(r => ({ ...r, state: e.target.value }))} style={inp} onFocus={focusOn} onBlur={blurOn} />
+                                        </Field>
+                                        <div style={{ gridColumn: '1 / -1' }}>
+                                            <Field label="Postal Code">
+                                                <input value={recipient.zip} placeholder="e.g. SW1A 1AA" maxLength={12} onChange={e => setRecipient(r => ({ ...r, zip: e.target.value }))} style={inp} onFocus={focusOn} onBlur={blurOn} />
+                                            </Field>
                                         </div>
-                                    </Field>
-                                    <Field label="ZIP">
-                                        <input value={recipient.zip} placeholder="10001" maxLength={10} onChange={e => setRecipient(r => ({ ...r, zip: e.target.value }))} style={inp} onFocus={focusOn} onBlur={blurOn} />
-                                    </Field>
-                                </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -547,7 +627,10 @@ export default function ShippingPage() {
                                 <ArrowLeft size={11} /> Edit
                             </button>
                             <div style={{ width: 1, height: 18, backgroundColor: C.border, flexShrink: 0 }} />
-                            <span style={{ fontSize: 11, color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}><strong style={{ color: C.dark }}>To:</strong> {recipient.name} · {recipient.city}, {recipient.state} {recipient.zip}</span>
+                            <span style={{ fontSize: 11, color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
+                                <strong style={{ color: C.dark }}>To:</strong> {recipient.name} · {recipient.city}{recipient.state ? `, ${recipient.state}` : ''} {recipient.zip}
+                                {recipient.country !== 'US' && (() => { const cc = COUNTRIES.find(c => c.val === recipient.country); return cc ? <span style={{ marginLeft: 4, display: 'inline-flex', alignItems: 'center', gap: 4 }}><span className={`fi fi-${cc.flagCode}`} style={{ borderRadius: 2 }} /> {cc.label}</span> : null })()}
+                            </span>
                             <span style={{ fontSize: 11, color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}><strong style={{ color: C.dark }}>Pkg:</strong> {pkgType === 'box' ? `${length}×${width}×${height}${dimUnit}` : `${length}×${width}${dimUnit} mailer`} · {weightDisplay}</span>
                             <button onClick={handleGetRates} style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, color: C.muted, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', flexShrink: 0 }}>
                                 <RefreshCw size={10} /> Refresh
@@ -625,7 +708,7 @@ export default function ShippingPage() {
                                 {[
                                     { label: 'Carrier & Service', value: `${selectedRateObj.carrierName} ${selectedRateObj.serviceName}`, accent: true },
                                     { label: 'Estimated Delivery', value: selectedRateObj.deliveryLabel },
-                                    { label: 'Ship To', value: `${recipient.name} · ${recipient.addr1}${recipient.addr2 ? `, ${recipient.addr2}` : ''}, ${recipient.city}, ${recipient.state} ${recipient.zip}` },
+                                    { label: 'Ship To', value: `${recipient.name} · ${recipient.addr1}${recipient.addr2 ? `, ${recipient.addr2}` : ''}, ${recipient.city}${recipient.state ? `, ${recipient.state}` : ''} ${recipient.zip}${recipient.country !== 'US' ? ` · ${COUNTRIES.find(c => c.val === recipient.country)?.label ?? recipient.country}` : ''}` },
                                     { label: 'Package', value: pkgType === 'box' ? `${length}×${width}×${height} ${dimUnit} box · ${weightDisplay}` : `${length}×${width} ${dimUnit} mailer · ${weightDisplay}` },
                                 ].map(({ label, value, accent }, i, arr) => (
                                     <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, padding: '11px 0', borderBottom: i < arr.length - 1 ? `1px solid ${C.border}` : 'none' }}>

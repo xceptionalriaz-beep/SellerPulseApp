@@ -25,14 +25,14 @@ import { createClient as createRawClient } from '@supabase/supabase-js'
 import {
     Plus, Search, X, Copy, Trash2,
     Eye, Check, Loader2, Code2, Zap,
-    Save, LayoutTemplate, Layers, Pencil, ChevronDown,
+    LayoutTemplate, Layers, Pencil, ChevronDown,
     LayoutGrid, Smartphone, Monitor, Shirt, Gem, Heart,
     Home, Sofa, Car, Wrench, Dumbbell, Gamepad2,
     Archive, BookOpen, PawPrint, Briefcase, Tag,
 } from 'lucide-react'
 import { hydrateTemplateContent } from '@/lib/template-utils'
 import { sanitiseHtml } from '@/components/ui/EditorToolbar'
-import { AIButton, PrimaryButton, SecondaryButton, GhostButton, IconButton } from '@/components/ui/Buttons'
+import { AIButton, IconButton } from '@/components/ui/Buttons'
 import ProDropdown from '@/components/ui/ProDropdown'
 import type { DropdownOption } from '@/components/ui/ProDropdown'
 import TemplatePreviewModal from '@/components/ui/TemplatePreviewModal'
@@ -209,6 +209,23 @@ function TemplateThumbnail({ html }: { html: string }) {
 // ── Category badge colours ─────────────────────────────────────────────────
 function CategoryBadge({ category }: { category: string | null }) {
     const map: Record<string, { bg: string; text: string }> = {
+        // ── New category IDs ───────────────────────────────────────────
+        consumer_electronics: { bg: '#dbeafe', text: '#1d4ed8' },
+        computers: { bg: '#dbeafe', text: '#1d4ed8' },
+        clothing: { bg: '#fce7f3', text: '#be185d' },
+        jewelry: { bg: '#fce7f3', text: '#be185d' },
+        health_beauty: { bg: '#fce7f3', text: '#be185d' },
+        home_garden: { bg: '#dcfce7', text: '#15803d' },
+        furniture: { bg: '#dcfce7', text: '#15803d' },
+        motors_parts: { bg: '#fef3c7', text: '#b45309' },
+        pet_supplies: { bg: '#f3e8ff', text: '#7e22ce' },
+        sporting_goods: { bg: '#e0f2fe', text: '#0369a1' },
+        toys_hobbies: { bg: '#fef9c3', text: '#a16207' },
+        collectibles: { bg: '#f1f5f9', text: '#475569' },
+        books_movies: { bg: '#f1f5f9', text: '#475569' },
+        business: { bg: '#f1f5f9', text: '#475569' },
+        general: { bg: '#f1f5f9', text: '#475569' },
+        // ── Legacy slugs (backwards compat) ───────────────────────────
         electronics: { bg: '#dbeafe', text: '#1d4ed8' },
         fashion: { bg: '#fce7f3', text: '#be185d' },
         home: { bg: '#dcfce7', text: '#15803d' },
@@ -216,7 +233,6 @@ function CategoryBadge({ category }: { category: string | null }) {
         pet: { bg: '#f3e8ff', text: '#7e22ce' },
         sports: { bg: '#e0f2fe', text: '#0369a1' },
         toys: { bg: '#fef9c3', text: '#a16207' },
-        general: { bg: '#f1f5f9', text: '#475569' },
     }
     const cat = (category || 'general').toLowerCase()
     const style = map[cat] || map.general
@@ -269,16 +285,6 @@ function DesignStudioInner() {
 
     // AI Generator modal
     const [showAiModal, setShowAiModal] = useState(false)
-
-    // Custom HTML Builder modal
-    const [showBuilderModal, setShowBuilderModal] = useState(false)
-    const [builderHtml, setBuilderHtml] = useState('')
-    const [builderName, setBuilderName] = useState('')
-    const [builderCategory, setBuilderCategory] = useState('general')
-    const [builderSaving, setBuilderSaving] = useState(false)
-    const [builderSaved, setBuilderSaved] = useState(false)
-    const [builderPreview, setBuilderPreview] = useState(false)
-
 
     // ── Load templates ─────────────────────────────────────────────────────
     const loadTemplates = useCallback(async () => {
@@ -338,11 +344,6 @@ function DesignStudioInner() {
         return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
     })
 
-    const sorted = [...filtered].sort((a, b) => {
-        if (sort === 'popular') return (b.use_count || 0) - (a.use_count || 0)
-        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
-    })
-
     // ── Copy HTML ──────────────────────────────────────────────────────────
     async function copyHtml(t: ListingTemplate) {
         if (!t.description_html) return
@@ -372,35 +373,12 @@ function DesignStudioInner() {
         setDeletingId(null)
     }
 
-    // ── AI Generate ────────────────────────────────────────────────────────
-
-
-    // ── Save custom HTML template ──────────────────────────────────────────
-    async function saveBuilderTemplate() {
-        if (!builderHtml || !builderName) return
-        setBuilderSaving(true)
-        try {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (!user) throw new Error('Not logged in')
-            const { data, error } = await rawDb.from('listing_templates').insert({
-                user_id: user.id,
-                name: builderName,
-                description: 'Custom HTML template',
-                category: builderCategory,
-                description_html: sanitiseHtml(builderHtml),
-                is_system: false,
-                is_shared: false,
-                use_count: 0,
-            }).select().single()
-            if (error) throw error
-            setMyTemplates((prev: ListingTemplate[]) => [data as ListingTemplate, ...prev])
-            setBuilderSaved(true)
-            setTimeout(() => { setShowBuilderModal(false); setBuilderSaved(false); setBuilderHtml(''); setBuilderName('') }, 1200)
-        } catch (err) {
-            console.error('[design] save builder template:', err)
-        } finally {
-            setBuilderSaving(false)
-        }
+    // ── Editor route helper ────────────────────────────────────────────────
+    // Templates saved by the Visual Builder carry "Visual Builder" in their
+    // description. Route everything else to the HTML editor.
+    function getEditorRoute(t: ListingTemplate) {
+        const isVisual = (t.description || '').toLowerCase().includes('visual builder')
+        return `/dashboard/design/${isVisual ? 'visual-editor' : 'html-editor'}?name=${encodeURIComponent(t.name)}&id=${t.id}`
     }
 
     // ── Render ─────────────────────────────────────────────────────────────
@@ -707,7 +685,7 @@ function DesignStudioInner() {
                             <p className="text-[13px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>Loading templates...</p>
                             <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
                         </div>
-                    ) : sorted.length === 0 ? (
+                    ) : sortedTemplates.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-24 gap-3">
                             <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: C.primaryLight }}>
                                 <LayoutTemplate size={24} style={{ color: C.primary }} />
@@ -799,7 +777,7 @@ function DesignStudioInner() {
                                                     onPreview={() => setPreviewTemplate(t)}
                                                     onCopy={() => copyHtml(t)}
                                                     onDelete={() => deleteTemplate(t.id)}
-                                                    onEdit={() => router.push(`/dashboard/design/html-editor?name=${encodeURIComponent(t.name)}&id=${t.id}`)}
+                                                    onEdit={() => router.push(getEditorRoute(t))}
                                                 />
                                             ))}
                                         </div>
@@ -880,7 +858,7 @@ function DesignStudioInner() {
                                                         onPreview={() => setPreviewTemplate(t)}
                                                         onCopy={() => copyHtml(t)}
                                                         onDelete={() => deleteTemplate(t.id)}
-                                                        onEdit={() => router.push(`/dashboard/design/html-editor?name=${encodeURIComponent(t.name)}&id=${t.id}`)}
+                                                        onEdit={() => router.push(getEditorRoute(t))}
                                                     />
                                                 ))}
                                             </div>
@@ -899,7 +877,7 @@ function DesignStudioInner() {
                 template={previewTemplate}
                 templates={[...myTemplates, ...templates]}
                 onClose={() => setPreviewTemplate(null)}
-                onEdit={t => router.push(`/dashboard/design/visual-editor?name=${encodeURIComponent(t.name)}&id=${t.id}`)}
+                onEdit={t => router.push(getEditorRoute(t as ListingTemplate))}
                 onCopy={t => copyHtml(t as ListingTemplate)}
                 copiedId={copiedId}
             />
@@ -918,118 +896,6 @@ function DesignStudioInner() {
                     router.push(`/dashboard/design/html-editor?name=${encodeURIComponent(name)}&from=ai`)
                 }}
             />
-
-            {/* Custom HTML Builder Modal */}
-            {showBuilderModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-                    style={{ backgroundColor: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)' }}
-                    onClick={() => { if (!builderSaving) setShowBuilderModal(false) }}>
-                    <div className="w-full max-w-3xl max-h-[90vh] rounded-2xl overflow-hidden shadow-2xl flex flex-col"
-                        style={{ backgroundColor: C.surface }}
-                        onClick={e => e.stopPropagation()}>
-
-                        {/* Header */}
-                        <div className="flex items-center justify-between px-5 py-4 shrink-0"
-                            style={{ borderBottom: `1px solid ${C.border}` }}>
-                            <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-                                    style={{ backgroundColor: C.primaryLight }}>
-                                    <Code2 size={15} style={{ color: C.primary }} />
-                                </div>
-                                <p className="text-[15px] font-bold" style={{ color: C.dark, fontFamily: 'Syne, sans-serif' }}>Custom HTML Builder</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <SecondaryButton
-                                    onClick={() => setBuilderPreview(v => !v)}
-                                    icon={<Eye size={12} />}>
-                                    {builderPreview ? 'Edit' : 'Preview'}
-                                </SecondaryButton>
-                                <IconButton
-                                    onClick={() => { if (!builderSaving) setShowBuilderModal(false) }}
-                                    icon={<X size={14} />}
-                                    tooltip="Close"
-                                    variant="ghost"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto flex flex-col">
-                            {/* Name + category */}
-                            <div className="flex gap-3 p-4 shrink-0" style={{ borderBottom: `1px solid ${C.border}` }}>
-                                <input
-                                    value={builderName}
-                                    onChange={e => setBuilderName(e.target.value)}
-                                    placeholder="Template name (required)..."
-                                    className="flex-1 text-[13px] px-3 py-2 rounded-lg outline-none"
-                                    style={{ border: `1px solid ${C.borderInput}`, backgroundColor: C.bg, color: C.body, fontFamily: 'DM Sans, sans-serif' }}
-                                />
-                                <select
-                                    value={builderCategory}
-                                    onChange={e => setBuilderCategory(e.target.value)}
-                                    className="text-[13px] px-3 py-2 rounded-lg outline-none"
-                                    style={{ border: `1px solid ${C.borderInput}`, backgroundColor: C.bg, color: C.body, fontFamily: 'DM Sans, sans-serif' }}>
-                                    {CATEGORIES.filter(c => c.id !== 'all').map(c => (
-                                        <option key={c.id} value={c.id}>{c.id}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* Editor / Preview */}
-                            <div className="flex-1 p-4">
-                                {builderPreview ? (
-                                    <div className="rounded-xl overflow-hidden" style={{ backgroundColor: '#f0f0f0', padding: 16, minHeight: 300 }}>
-                                        {builderHtml ? (
-                                            <div className="max-w-[560px] mx-auto rounded-xl overflow-hidden"
-                                                style={{ fontFamily: 'Arial, sans-serif', fontSize: 13 }}
-                                                dangerouslySetInnerHTML={{ __html: sanitiseHtml(builderHtml) }} />
-                                        ) : (
-                                            <div className="flex items-center justify-center h-48">
-                                                <p className="text-[13px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>Paste HTML to preview</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <textarea
-                                        value={builderHtml}
-                                        onChange={e => setBuilderHtml(e.target.value)}
-                                        placeholder={`Paste or write your eBay-safe HTML here...\n\nTips:\n• Use table-based layout\n• Inline CSS only\n• Use placeholders: [PRODUCT_NAME], [PRICE], [DESCRIPTION]`}
-                                        className="w-full text-[12px] p-3 rounded-xl outline-none resize-none font-mono"
-                                        style={{
-                                            border: `1px solid ${C.borderInput}`, backgroundColor: C.bg,
-                                            color: C.body, minHeight: 320,
-                                            lineHeight: 1.6,
-                                        }}
-                                        rows={18}
-                                    />
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Footer */}
-                        <div className="px-5 py-4 flex items-center justify-between shrink-0"
-                            style={{ borderTop: `1px solid ${C.border}` }}>
-                            <p className="text-[11px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                                {builderHtml.length.toLocaleString()} characters
-                            </p>
-                            <div className="flex items-center gap-2">
-                                <GhostButton onClick={() => setShowBuilderModal(false)}>
-                                    Cancel
-                                </GhostButton>
-                                {builderSaved
-                                    ? <SecondaryButton icon={<Check size={13} />}>Saved!</SecondaryButton>
-                                    : <PrimaryButton
-                                        onClick={saveBuilderTemplate}
-                                        disabled={!builderHtml || !builderName || builderSaved}
-                                        loading={builderSaving}
-                                        icon={<Save size={13} />}>
-                                        Save Template
-                                    </PrimaryButton>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             <style>{`
                 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
