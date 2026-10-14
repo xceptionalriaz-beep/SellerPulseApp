@@ -82,6 +82,14 @@ const DESIGN_STUDIO_TABS = [
   { id: 'settings', label: 'Studio Settings', icon: Settings2, description: 'Manage design preferences' },
 ]
 
+// -- Promotions sub-sidebar tabs --------------------------------
+const PROMOTIONS_TABS = [
+  { id: 'campaigns', label: 'Campaigns', icon: Megaphone, href: '/dashboard/promotions' },
+  { id: 'analytics', label: 'Analytics', icon: BarChart2, href: '/dashboard/promotions?tab=analytics' },
+  { id: 'automation', label: 'Automation', icon: Zap, href: '/dashboard/promotions?tab=automation' },
+  { id: 'settings', label: 'Settings', icon: Settings2, href: '/dashboard/promotions?tab=settings' },
+]
+
 // -- Kill switch ? nav label mapping ---------------------------
 // Maps kill_switches.title ? NAV_ITEMS label
 // When a switch is OFF ? that nav item is hidden from sidebar
@@ -587,14 +595,15 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
   )
   const isAdmin = profile?.role === 'admin' && !isUserMode
   const isDesignPage = pathname.startsWith('/dashboard/design')
+  const isPromotionsPage = pathname.startsWith('/dashboard/promotions')
   const profileLoaded = profile !== null
   const [cachedIsAdmin, setCachedIsAdmin] = useState(false)
   const [mounted, setMounted] = useState(false)
 
-  // Auto open sub-sidebar when on design page, close when leaving
+  // Auto open sub-sidebar when on design or promotions page, close when leaving
   useEffect(() => {
-    setSubSidebarOpen(isDesignPage)
-  }, [isDesignPage])
+    setSubSidebarOpen(isDesignPage || isPromotionsPage)
+  }, [isDesignPage, isPromotionsPage])
 
   useEffect(() => {
     setMounted(true)
@@ -915,31 +924,32 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
             </div>
             <div className="flex flex-col flex-1">
               {visibleNavItems.map((item) => {
-                if (item.label === 'Design Studio') {
-                  // Design Studio toggles the sub-sidebar; stays active when on design page
+                const hasSubSidebar = item.label === 'Design Studio' || item.label === 'Promotions'
+                const isThisPageActive = item.label === 'Design Studio' ? isDesignPage : item.label === 'Promotions' ? isPromotionsPage : false
+                if (hasSubSidebar) {
                   return (
                     <button
                       key={item.href}
                       title={item.label}
                       onClick={() => {
-                        if (!isDesignPage) router.push(item.href)
+                        if (!isThisPageActive) router.push(item.href)
                         setSubSidebarOpen(v => !v)
                       }}
                       className="relative flex items-center justify-center w-[60px] h-[52px] group"
                       style={{ background: 'none', border: 'none', cursor: 'pointer' }}
                     >
-                      {isDesignPage && (
+                      {isThisPageActive && (
                         <div className="absolute left-0 w-[3px] h-6 bg-accent rounded-r-[10px]" />
                       )}
                       <div className={cn(
                         'w-9 h-9 rounded-full flex items-center justify-center transition-all duration-250',
-                        isDesignPage
+                        isThisPageActive
                           ? 'bg-accent scale-100'
                           : 'bg-transparent group-hover:bg-white/10 scale-95 group-hover:scale-100'
                       )}>
                         <item.icon
-                          size={isDesignPage ? 20 : 19}
-                          className={cn(isDesignPage ? 'text-dark' : 'text-white group-hover:text-white')}
+                          size={isThisPageActive ? 20 : 19}
+                          className={cn(isThisPageActive ? 'text-dark' : 'text-white group-hover:text-white')}
                         />
                       </div>
                     </button>
@@ -963,6 +973,100 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
               </button>
             </div>
           </aside>
+        )}
+
+        {/* -- PROMOTIONS SUB-SIDEBAR -- */}
+        {isPromotionsPage && subSidebarOpen && (
+          <div
+            className="hidden lg:flex flex-col shrink-0 h-screen"
+            style={{
+              width: 200,
+              backgroundColor: '#ffffff',
+              borderRight: '1px solid #ede9fe',
+              boxShadow: '2px 0 12px rgba(117,48,251,0.06)',
+            }}
+          >
+            {/* Header */}
+            <div
+              className="flex items-center justify-between px-4 pt-5 pb-4 shrink-0"
+              style={{ borderBottom: '1px solid #f3eeff' }}
+            >
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: '#f3eeff' }}>
+                  <Megaphone size={13} style={{ color: '#7530fb' }} />
+                </div>
+                <span
+                  className="text-[15px] font-bold whitespace-nowrap"
+                  style={{ color: '#1e1535', fontFamily: 'Syne, sans-serif' }}
+                >
+                  Promotions
+                </span>
+              </div>
+              <button
+                onClick={() => setSubSidebarOpen(false)}
+                title="Close panel"
+                className="w-6 h-6 flex items-center justify-center rounded-full transition-all hover:opacity-70"
+                style={{ backgroundColor: '#f3eeff', border: '1px solid #ede9fe', cursor: 'pointer', flexShrink: 0 }}
+              >
+                <ChevronRight size={12} style={{ color: '#7530fb' }} />
+              </button>
+            </div>
+
+            {/* Tab list */}
+            <nav className="flex flex-col pt-2 flex-1 overflow-y-auto">
+              {PROMOTIONS_TABS.map(tab => {
+                const currentTab = searchParams.get('tab') || 'campaigns'
+                const isActive = currentTab === tab.id
+                const Icon = tab.icon
+                return (
+                  <Link
+                    key={tab.id}
+                    href={tab.href}
+                    className="relative flex items-center gap-2.5 px-4 py-2.5 transition-all"
+                    style={{
+                      textDecoration: 'none',
+                      backgroundColor: isActive ? '#f3eeff' : 'transparent',
+                    }}
+                  >
+                    {isActive && (
+                      <div
+                        className="absolute right-0 top-1/2 -translate-y-1/2 rounded-l-full"
+                        style={{ width: 3, height: 22, backgroundColor: '#7530fb' }}
+                      />
+                    )}
+                    <Icon
+                      size={15}
+                      style={{ flexShrink: 0, color: isActive ? '#7530fb' : '#9ca3af' }}
+                    />
+                    <span
+                      className="text-[13px] whitespace-nowrap truncate"
+                      style={{
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontWeight: isActive ? 700 : 500,
+                        color: isActive ? '#7530fb' : '#1f1d2e',
+                      }}
+                    >
+                      {tab.label}
+                    </span>
+                    {(tab.id === 'analytics' || tab.id === 'automation' || tab.id === 'settings') && (
+                      <span className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full shrink-0"
+                        style={{ backgroundColor: '#fef3c7', color: '#d97706' }}>
+                        Soon
+                      </span>
+                    )}
+                  </Link>
+                )
+              })}
+            </nav>
+
+            {/* Footer hint */}
+            <div className="px-4 py-3 shrink-0" style={{ borderTop: '1px solid #f3eeff' }}>
+              <p className="text-[10px]" style={{ color: '#9ca3af', fontFamily: 'DM Sans, sans-serif' }}>
+                eBay Promoted Listings
+              </p>
+            </div>
+          </div>
         )}
 
         {/* -- DESIGN STUDIO SUB-SIDEBAR -- */}

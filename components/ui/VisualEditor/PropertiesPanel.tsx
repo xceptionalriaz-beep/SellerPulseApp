@@ -1003,10 +1003,9 @@ function StylesTab({
                 {/* ── Block-specific style props ── */}
                 <BlockStyleProps block={block} props={props} updateProps={updateProps} />
 
-                {/* ── Universal: Border + Shadow + Typography ── */}
+                {/* ── Universal: Border + Shadow ── */}
                 <UniversalBorder props={props as any} updateProps={p => updateProps(p as any)} />
                 <UniversalShadow props={props as any} updateProps={p => updateProps(p as any)} />
-                <UniversalTypography props={props as any} updateProps={p => updateProps(p as any)} />
             </div>
         </div>
     )
@@ -8131,32 +8130,6 @@ function UniversalShadow({
                     <SliderInput label="Y offset" value={p.shadowY ?? 4} min={-30} max={30} suffix="px" onChange={v => updateProps({ shadowY: v })} />
                 </>
             )}
-        </Section>
-    )
-}
-
-function UniversalTypography({
-    props, updateProps
-}: {
-    props: Record<string, unknown>
-    updateProps: (p: Record<string, unknown>) => void
-}) {
-    const p = props as any
-    return (
-        <Section title="Font family">
-            <SelectInput
-                label="Font"
-                value={p.fontFamily ?? 'Arial, Helvetica, sans-serif'}
-                options={[
-                    { v: 'Arial, Helvetica, sans-serif', l: 'Arial' },
-                    { v: 'Georgia, Times New Roman, serif', l: 'Georgia' },
-                    { v: 'Verdana, Geneva, sans-serif', l: 'Verdana' },
-                    { v: "'Trebuchet MS', Helvetica, sans-serif", l: 'Trebuchet' },
-                    { v: "'Times New Roman', Times, serif", l: 'Times New Roman' },
-                    { v: "'Courier New', Courier, monospace", l: 'Courier New' },
-                ]}
-                onChange={v => updateProps({ fontFamily: v })}
-            />
         </Section>
     )
 }

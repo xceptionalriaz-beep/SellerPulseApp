@@ -2758,7 +2758,7 @@ ${thumbCells}
                     `<tr style="background-color:${i % 2 === 0 ? (p.rowAltBg ?? '#f8f7ff') : (p.headerBg ? '#fff' : '#fff')};"><td style="padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:${p.headerText ?? '#1e1535'};border:1px solid ${p.borderColor ?? '#ede9fe'};width:40%;">${r[0]}</td><td style="padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;color:${p.textColor ?? '#6b7280'};border:1px solid ${p.borderColor ?? '#ede9fe'};">${r[1]}</td></tr>`
                 ).join('')
                 return wrapBlock('data_table' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0">${rowHtml}</table></td></tr></table>`)
+                    `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;margin:0;border-collapse:collapse;"><tr><td style="background-color:${p.bgColor};${pad(p)}width:100%;"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;">${rowHtml}</table></td></tr></table>`, p)
             },
         },
 

@@ -11,6 +11,7 @@ import {
     ShoppingBag, Percent, StickyNote, Sparkles,
     ToggleLeft, ToggleRight, ArrowUpRight,
     ChevronUp, ChevronDown, ArrowUpDown, SlidersHorizontal,
+    Store,
 } from 'lucide-react'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
@@ -79,6 +80,15 @@ interface Ad {
 type TabFilter = 'all' | 'RUNNING' | 'PAUSED' | 'ENDED'
 type AdRateStrategy = 'FIXED' | 'DYNAMIC_NO_ADJUST' | 'DYNAMIC_HIGHER' | 'DYNAMIC_LOWER'
 type DrawerMode = 'none' | 'create' | 'detail'
+
+interface EbayAccount {
+    id: string
+    username: string
+    marketplace: string
+    flag: string
+    short: string
+    label: string
+}
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 function fmtDate(iso: string | null) {
@@ -348,6 +358,24 @@ function CreateCampaignForm({ onCreated, onCancel }: {
     const [saving, setSaving] = useState(false)
     const [err, setErr] = useState<string | null>(null)
 
+    // Channel / account selector
+    const [accounts, setAccounts] = useState<EbayAccount[]>([])
+    const [selectedAcct, setSelectedAcct] = useState<EbayAccount | null>(null)
+    const [acctLoading, setAcctLoading] = useState(true)
+    const [acctOpen, setAcctOpen] = useState(false)
+
+    useEffect(() => {
+        fetch('/api/ebay/accounts')
+            .then(r => r.json())
+            .then(j => {
+                const list: EbayAccount[] = j.accounts ?? []
+                setAccounts(list)
+                if (list.length > 0) setSelectedAcct(list[0])
+            })
+            .catch(() => { })
+            .finally(() => setAcctLoading(false))
+    }, [])
+
     async function submit() {
         if (!name.trim()) { setErr('Campaign name is required'); return }
         setSaving(true); setErr(null)
@@ -358,6 +386,7 @@ function CreateCampaignForm({ onCreated, onCancel }: {
                 body: JSON.stringify({
                     name: name.trim(),
                     type,
+                    marketplaceId: selectedAcct?.marketplace ?? 'EBAY_US',
                     bidPercentage: type === 'PROMOTED_LISTINGS' ? bidPct : undefined,
                     dailyBudget: type === 'PROMOTED_LISTINGS_PRIORITY' ? daily : undefined,
                     endDate: endDate || undefined,
@@ -390,6 +419,93 @@ function CreateCampaignForm({ onCreated, onCancel }: {
             </div>
 
             <div className="flex flex-col gap-5 px-6 py-5">
+
+                {/* Channel selector */}
+                <div style={{ position: 'relative' }}>
+                    <label style={lbl}>Channel</label>
+                    <button
+                        type="button"
+                        onClick={() => accounts.length > 1 && setAcctOpen(v => !v)}
+                        style={{
+                            ...inp,
+                            display: 'flex', alignItems: 'center', gap: 10,
+                            cursor: accounts.length > 1 ? 'pointer' : 'default',
+                            textAlign: 'left',
+                            backgroundColor: acctLoading ? C.bg : C.surface,
+                        }}
+                    >
+                        {acctLoading ? (
+                            <span style={{ color: C.muted, fontSize: 12 }}>Loading accounts…</span>
+                        ) : selectedAcct ? (
+                            <>
+                                {/* eBay logo chip */}
+                                <span style={{
+                                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                    width: 26, height: 26, borderRadius: 8, flexShrink: 0,
+                                    backgroundColor: '#f0f0f0', fontSize: 14,
+                                }}>
+                                    {selectedAcct.flag}
+                                </span>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <p style={{ fontSize: 13, fontWeight: 700, color: C.dark, fontFamily: 'DM Sans, sans-serif', margin: 0, lineHeight: 1.3 }}>
+                                        {selectedAcct.username}
+                                    </p>
+                                    <p style={{ fontSize: 10, color: C.muted, fontFamily: 'DM Sans, sans-serif', margin: 0 }}>
+                                        eBay {selectedAcct.short} · {selectedAcct.marketplace}
+                                    </p>
+                                </div>
+                                {/* eBay "e" badge */}
+                                <span style={{
+                                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                    width: 22, height: 22, borderRadius: 6, flexShrink: 0,
+                                    background: 'linear-gradient(135deg, #e53238 0%, #0064d2 50%, #f5af02 75%, #86b817 100%)',
+                                    fontSize: 11, fontWeight: 900, color: '#fff', letterSpacing: '-0.5px',
+                                    fontFamily: 'serif',
+                                }}>
+                                    e
+                                </span>
+                                {accounts.length > 1 && (
+                                    <ChevronDown size={14} style={{ color: C.muted, flexShrink: 0, transform: acctOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                                )}
+                            </>
+                        ) : (
+                            <span style={{ color: C.warning, fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}>
+                                No eBay account connected
+                            </span>
+                        )}
+                    </button>
+
+                    {/* Dropdown for multi-account */}
+                    {acctOpen && accounts.length > 1 && (
+                        <div style={{
+                            position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50, marginTop: 4,
+                            backgroundColor: C.surface, border: `1px solid ${C.border}`, borderRadius: 12,
+                            boxShadow: '0 8px 24px rgba(0,0,0,0.10)', overflow: 'hidden',
+                        }}>
+                            {accounts.map(acct => (
+                                <button key={acct.id} type="button"
+                                    onClick={() => { setSelectedAcct(acct); setAcctOpen(false) }}
+                                    style={{
+                                        width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                                        padding: '10px 14px', textAlign: 'left',
+                                        backgroundColor: selectedAcct?.id === acct.id ? C.primaryLight : C.surface,
+                                        borderBottom: `1px solid ${C.border}`,
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    <span style={{ fontSize: 16 }}>{acct.flag}</span>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <p style={{ fontSize: 13, fontWeight: 700, color: C.dark, fontFamily: 'DM Sans, sans-serif', margin: 0 }}>{acct.username}</p>
+                                        <p style={{ fontSize: 10, color: C.muted, fontFamily: 'DM Sans, sans-serif', margin: 0 }}>eBay {acct.short}</p>
+                                    </div>
+                                    {selectedAcct?.id === acct.id && (
+                                        <CheckCircle2 size={14} style={{ color: C.primary, flexShrink: 0 }} />
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
 
                 {/* Type picker */}
                 <div>
