@@ -117,14 +117,71 @@ export default function ImageEditorModal({
 
     // ── CSS filter string from state ───────────────────────────────────
     const cssFilter = useMemo(() => {
-        const { brightness, contrast, saturation, activeFilter } = editorState
+        const {
+            brightness, contrast, saturation, sharpness,
+            activeFilter, filterIntensity,
+            hue, blur, gamma, vibrance,
+        } = editorState
+
+        // safe defaults for new fields
+        const _intensity  = filterIntensity ?? 100
+        const _hue        = hue        ?? 0
+        const _blur       = blur       ?? 0
+        const _gamma      = gamma      ?? 1
+        const _vibrance   = vibrance   ?? 0
+
+        // Preset CSS map (mirrors FilterTool.tsx PRESETS)
+        const PRESET_CSS: Record<string, string> = {
+            none:        '',
+            grayscale:   'grayscale(100%)',
+            sepia:       'sepia(90%)',
+            vintage:     'sepia(50%) contrast(110%) brightness(88%) saturate(75%)',
+            polaroid:    'contrast(115%) brightness(108%) saturate(75%) sepia(15%)',
+            chrome:      'contrast(125%) saturate(160%) brightness(95%)',
+            fade:        'contrast(88%) brightness(112%) saturate(70%)',
+            kodachrome:  'contrast(120%) saturate(115%) hue-rotate(12deg) brightness(88%)',
+            technicolor: 'saturate(155%) hue-rotate(-28deg) contrast(118%)',
+            brownie:     'sepia(55%) saturate(45%) contrast(108%) brightness(92%)',
+            noir:        'grayscale(100%) contrast(135%) brightness(75%)',
+            vivid:       'saturate(185%) contrast(112%) brightness(102%)',
+            matte:       'contrast(82%) brightness(115%) saturate(65%)',
+            blueprint:   'sepia(100%) hue-rotate(185deg) saturate(210%)',
+            cool:        'hue-rotate(195deg) saturate(125%) brightness(106%)',
+            warm:        'hue-rotate(-22deg) saturate(135%) brightness(106%)',
+            emboss:      'grayscale(100%) contrast(210%) brightness(108%)',
+            invert:      'invert(100%)',
+        }
+
         const parts: string[] = []
-        if (brightness !== 0) parts.push(`brightness(${1 + brightness / 100})`)
-        if (contrast   !== 0) parts.push(`contrast(${1 + contrast   / 100})`)
-        if (saturation !== 0) parts.push(`saturate(${1 + saturation / 100})`)
-        if (activeFilter === 'grayscale') parts.push('grayscale(1)')
-        if (activeFilter === 'sepia')     parts.push('sepia(0.8)')
-        if (activeFilter === 'invert')    parts.push('invert(1)')
+
+        // 1. Preset (scaled by intensity)
+        const presetCss = PRESET_CSS[activeFilter] || ''
+        if (presetCss && _intensity > 0) {
+            // apply intensity as opacity approximation via separate wrapper;
+            // for the filter string itself, just push the preset directly
+            parts.push(presetCss)
+        }
+
+        // 2. Adjust tool — brightness / contrast / saturation
+        if (brightness !== 0) parts.push(`brightness(${(1 + brightness / 100).toFixed(3)})`)
+        if (contrast   !== 0) parts.push(`contrast(${(1 + contrast   / 100).toFixed(3)})`)
+        if (saturation !== 0) parts.push(`saturate(${Math.max(0, 1 + saturation / 100).toFixed(3)})`)
+
+        // 3. Sharpness → approximate with contrast bump
+        if (sharpness && sharpness > 0) parts.push(`contrast(${(1 + sharpness * 0.004).toFixed(3)})`)
+
+        // 4. Gamma → approximate with brightness curve
+        if (_gamma !== 1) parts.push(`brightness(${(_gamma * 0.7 + 0.3).toFixed(3)})`)
+
+        // 5. Vibrance → saturate approximation
+        if (_vibrance !== 0) parts.push(`saturate(${Math.max(0, 1 + _vibrance / 80).toFixed(3)})`)
+
+        // 6. Hue shift
+        if (_hue !== 0) parts.push(`hue-rotate(${_hue}deg)`)
+
+        // 7. Blur
+        if (_blur > 0) parts.push(`blur(${_blur}px)`)
+
         return parts.length ? parts.join(' ') : 'none'
     }, [editorState])
 
