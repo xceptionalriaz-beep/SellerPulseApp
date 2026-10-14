@@ -14,9 +14,9 @@ import AdjustTool from './tools/AdjustTool'
 import FilterTool from './tools/FilterTool'
 import CropTool from './tools/CropTool'
 import ResizeTool from './tools/ResizeTool'
-// import RotateTool  from './tools/RotateTool'
-// import DrawTool    from './tools/DrawTool'
-// import TextTool    from './tools/TextTool'
+import RotateTool from './tools/RotateTool'
+import DrawTool from './tools/DrawTool'
+import TextTool from './tools/TextTool'
 // import FrameTool   from './tools/FrameTool'
 
 // ── Design tokens ──────────────────────────────────────────────
@@ -197,6 +197,9 @@ export default function ImageEditorModal({
             case 'filter': return <FilterTool {...common} />
             case 'crop': return <CropTool   {...common} />
             case 'resize': return <ResizeTool {...common} />
+            case 'rotate': return <RotateTool {...common} />
+            case 'draw': return <DrawTool   {...common} />
+            case 'text': return <TextTool   {...common} />
             default:
                 return <PlaceholderPanel tool={TOOLS.find(t => t.id === activeTool)!} />
         }
@@ -312,6 +315,25 @@ export default function ImageEditorModal({
                                 aspectLock={editorState.aspectLock ?? 'free'}
                                 cropGrid={editorState.cropGrid ?? 'none'}
                                 onChange={crop => pushState({ crop })}
+                            />
+                        )}
+
+                        {/* Text overlays — always mounted so positions persist */}
+                        {imgEl && (
+                            <TextOverlayLayer
+                                imgEl={imgEl}
+                                overlays={editorState.textOverlays}
+                                active={activeTool === 'text'}
+                                onChange={textOverlays => pushState({ textOverlays })}
+                            />
+                        )}
+
+                        {/* Draw canvas — always mounted so strokes persist between tool switches */}
+                        {imgEl && (
+                            <DrawCanvas
+                                imgEl={imgEl}
+                                drawSettings={editorState.drawSettings}
+                                active={activeTool === 'draw'}
                             />
                         )}
                     </div>
@@ -660,5 +682,277 @@ function ZoomPillButton({ children, onClick, disabled }: {
             cursor: disabled ? 'not-allowed' : 'pointer',
             color: disabled ? '#d1d5db' : '#374151',
         }}>{children}</button>
+    )
+}
+
+// ── DrawCanvas ─────────────────────────────────────────────────
+// Sits absolutely over the image; captures pointer events only when active.
+// Persists strokes when the user switches to another tool and back.
+import type { DrawSettings, TextOverlay } from './types'
+
+function DrawCanvas({ imgEl, drawSettings, active }: {
+    imgEl: HTMLImageElement
+    drawSettings: DrawSettings
+    active: boolean
+}) {
+    const canvasRef = useRef<HTMLCanvasElement>(null)
+    const paintingRef = useRef(false)
+    const [size, setSize] = useState({ w: 0, h: 0 })
+
+    // Track display size of the image element
+    useEffect(() => {
+        const sync = () => setSize({ w: imgEl.offsetWidth, h: imgEl.offsetHeight })
+        if (imgEl.complete && imgEl.naturalWidth) sync()
+        else imgEl.addEventListener('load', sync)
+        const ro = new ResizeObserver(sync)
+        ro.observe(imgEl)
+        return () => { imgEl.removeEventListener('load', sync); ro.disconnect() }
+    }, [imgEl])
+
+    // Resize canvas buffer when display size changes (preserves content via temp copy)
+    useEffect(() => {
+        const canvas = canvasRef.current
+        if (!canvas || !size.w || !size.h) return
+        if (canvas.width === size.w && canvas.height === size.h) return
+        // Copy existing content
+        const tmp = document.createElement('canvas')
+        tmp.width = canvas.width; tmp.height = canvas.height
+        tmp.getContext('2d')?.drawImage(canvas, 0, 0)
+        canvas.width = size.w
+        canvas.height = size.h
+        canvas.getContext('2d')?.drawImage(tmp, 0, 0)
+    }, [size])
+
+    // Listen for clear event dispatched from DrawTool panel
+    useEffect(() => {
+        const handler = () => {
+            const canvas = canvasRef.current
+            if (!canvas) return
+            canvas.getContext('2d')?.clearRect(0, 0, canvas.width, canvas.height)
+        }
+        window.addEventListener('draw:clear', handler)
+        return () => window.removeEventListener('draw:clear', handler)
+    }, [])
+
+    // ── Drawing helpers ──────────────────────────────────────────
+    const dsRef = useRef(drawSettings)
+    useEffect(() => { dsRef.current = drawSettings }, [drawSettings])
+
+    function getPos(e: React.PointerEvent<HTMLCanvasElement>) {
+        const r = canvasRef.current!.getBoundingClientRect()
+        return { x: e.clientX - r.left, y: e.clientY - r.top }
+    }
+
+    function startCtx(ctx: CanvasRenderingContext2D) {
+        const ds = dsRef.current
+        ctx.lineCap = 'round'
+        ctx.lineJoin = 'round'
+        ctx.lineWidth = ds.lineWidth
+        if (ds.mode === 'eraser') {
+            ctx.globalCompositeOperation = 'destination-out'
+            ctx.globalAlpha = 1
+            ctx.strokeStyle = 'rgba(0,0,0,1)'
+        } else {
+            ctx.globalCompositeOperation = 'source-over'
+            ctx.globalAlpha = ds.opacity
+            ctx.strokeStyle = ds.color
+        }
+    }
+
+    function onPointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
+        if (!active) return
+        e.currentTarget.setPointerCapture(e.pointerId)
+        paintingRef.current = true
+        const ctx = canvasRef.current?.getContext('2d')
+        if (!ctx) return
+        startCtx(ctx)
+        const { x, y } = getPos(e)
+        ctx.beginPath()
+        ctx.moveTo(x, y)
+        // Draw a dot on single click
+        ctx.lineTo(x + 0.01, y + 0.01)
+        ctx.stroke()
+    }
+
+    function onPointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
+        if (!active || !paintingRef.current) return
+        const ctx = canvasRef.current?.getContext('2d')
+        if (!ctx) return
+        startCtx(ctx)
+        const { x, y } = getPos(e)
+        ctx.lineTo(x, y)
+        ctx.stroke()
+    }
+
+    function onPointerUp() {
+        paintingRef.current = false
+        const ctx = canvasRef.current?.getContext('2d')
+        if (ctx) ctx.beginPath()
+    }
+
+    if (!size.w || !size.h) return null
+
+    return (
+        <canvas
+            ref={canvasRef}
+            width={size.w}
+            height={size.h}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerLeave={onPointerUp}
+            style={{
+                position: 'absolute',
+                top: 0, left: 0,
+                width: size.w,
+                height: size.h,
+                cursor: active
+                    ? drawSettings.mode === 'eraser' ? 'cell' : 'crosshair'
+                    : 'default',
+                pointerEvents: active ? 'auto' : 'none',
+                touchAction: 'none',
+                zIndex: 10,
+            }}
+        />
+    )
+}
+
+// ── TextOverlayLayer ───────────────────────────────────────────
+// Renders draggable text overlays as positioned divs over the image.
+// Active (text tool): pointer events on, click canvas bg to add, drag to move.
+// Inactive: pointer events off — overlays still visible but non-interactive.
+function TextOverlayLayer({ imgEl, overlays, active, onChange }: {
+    imgEl: HTMLImageElement
+    overlays: TextOverlay[]
+    active: boolean
+    onChange: (overlays: TextOverlay[]) => void
+}) {
+    const [size, setSize] = useState({ w: 0, h: 0 })
+    const [focusId, setFocusId] = useState<string | null>(null)
+    const dragRef = useRef<{ id: string; ox: number; oy: number } | null>(null)
+    const overlaysRef = useRef(overlays)
+    const onChangeRef = useRef(onChange)
+    useEffect(() => { overlaysRef.current = overlays }, [overlays])
+    useEffect(() => { onChangeRef.current = onChange }, [onChange])
+
+    // Sync display size
+    useEffect(() => {
+        const sync = () => setSize({ w: imgEl.offsetWidth, h: imgEl.offsetHeight })
+        if (imgEl.complete && imgEl.naturalWidth) sync()
+        else imgEl.addEventListener('load', sync)
+        const ro = new ResizeObserver(sync)
+        ro.observe(imgEl)
+        return () => { imgEl.removeEventListener('load', sync); ro.disconnect() }
+    }, [imgEl])
+
+    // Listen for panel → focus event
+    useEffect(() => {
+        const h = (e: Event) => setFocusId((e as CustomEvent<{ id: string }>).detail?.id ?? null)
+        window.addEventListener('text:focus', h)
+        return () => window.removeEventListener('text:focus', h)
+    }, [])
+
+    // Click on layer background → add new overlay at click position
+    function onBgClick(e: React.MouseEvent<HTMLDivElement>) {
+        if (!active) return
+        if ((e.target as HTMLElement) !== e.currentTarget) return
+        const r = e.currentTarget.getBoundingClientRect()
+        const x = (e.clientX - r.left) / r.width
+        const y = (e.clientY - r.top) / r.height
+        const uid = Math.random().toString(36).slice(2, 10)
+        const next: TextOverlay = {
+            id: uid, text: 'Your text here',
+            x, y, fontSize: 36,
+            fontFamily: 'Arial, sans-serif',
+            color: '#ffffff', bold: false, italic: false, align: 'center',
+        }
+        onChangeRef.current([...overlaysRef.current, next])
+        setFocusId(uid)
+        window.dispatchEvent(new CustomEvent('text:select', { detail: { id: uid } }))
+    }
+
+    // Drag handlers
+    function onOverlayPointerDown(e: React.PointerEvent<HTMLDivElement>, id: string) {
+        if (!active) return
+        e.stopPropagation()
+        e.currentTarget.setPointerCapture(e.pointerId)
+        setFocusId(id)
+        window.dispatchEvent(new CustomEvent('text:select', { detail: { id } }))
+        const ov = overlaysRef.current.find(o => o.id === id)!
+        const r = (e.currentTarget.parentElement as HTMLElement).getBoundingClientRect()
+        dragRef.current = {
+            id,
+            ox: e.clientX / r.width - ov.x,
+            oy: e.clientY / r.height - ov.y,
+        }
+    }
+
+    function onOverlayPointerMove(e: React.PointerEvent<HTMLDivElement>) {
+        if (!dragRef.current) return
+        const { id, ox, oy } = dragRef.current
+        const r = (e.currentTarget.parentElement as HTMLElement).getBoundingClientRect()
+        const nx = Math.max(0, Math.min(1, e.clientX / r.width - ox))
+        const ny = Math.max(0, Math.min(1, e.clientY / r.height - oy))
+        onChangeRef.current(overlaysRef.current.map(o =>
+            o.id === id ? { ...o, x: nx, y: ny } : o
+        ))
+    }
+
+    function onOverlayPointerUp() { dragRef.current = null }
+
+    if (!size.w || !size.h) return null
+
+    return (
+        <div
+            onClick={onBgClick}
+            style={{
+                position: 'absolute', top: 0, left: 0,
+                width: size.w, height: size.h,
+                pointerEvents: active ? 'auto' : 'none',
+                cursor: active ? 'crosshair' : 'default',
+                zIndex: 9,
+            }}
+        >
+            {overlays.map(ov => {
+                const isFocused = ov.id === focusId && active
+                return (
+                    <div
+                        key={ov.id}
+                        onPointerDown={e => onOverlayPointerDown(e, ov.id)}
+                        onPointerMove={onOverlayPointerMove}
+                        onPointerUp={onOverlayPointerUp}
+                        style={{
+                            position: 'absolute',
+                            left: `${ov.x * 100}%`,
+                            top: `${ov.y * 100}%`,
+                            transform: 'translate(-50%, -50%)',
+                            cursor: active ? 'move' : 'default',
+                            userSelect: 'none',
+                            touchAction: 'none',
+                            padding: isFocused ? '4px 6px' : '4px 6px',
+                            borderRadius: 4,
+                            border: isFocused
+                                ? '1.5px dashed rgba(117,48,251,0.8)'
+                                : '1.5px dashed transparent',
+                            boxShadow: isFocused
+                                ? '0 0 0 1px rgba(117,48,251,0.2)'
+                                : 'none',
+                            whiteSpace: 'pre-wrap',
+                            textAlign: ov.align,
+                            fontFamily: ov.fontFamily,
+                            fontSize: ov.fontSize,
+                            fontWeight: ov.bold ? 700 : 400,
+                            fontStyle: ov.italic ? 'italic' : 'normal',
+                            color: ov.color,
+                            lineHeight: 1.2,
+                            textShadow: '0 1px 3px rgba(0,0,0,0.6)',
+                            maxWidth: size.w * 0.9,
+                        }}
+                    >
+                        {ov.text || ''}
+                    </div>
+                )
+            })}
+        </div>
     )
 }
