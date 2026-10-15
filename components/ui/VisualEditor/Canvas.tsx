@@ -419,21 +419,15 @@ export default function Canvas({
                     onSave={(editedUrl: string, _state: ImageEditorState) => {
                         // Post the edited image URL back to VisualEditor so it can
                         // update the block prop via commitBlocks (same pattern as RIAZIFY_DROP_ASSET).
-                        // Also pass the bgColor from the editor so the block's TABLE background
-                        // is updated to match — this is what actually shows in the canvas preview
-                        // for variants like fullwidth/lifestyle whose default bgColor is black.
+                        // The bgColor is already baked into the exported JPEG by exportToCanvas,
+                        // so we do NOT pass it here — doing so would change the entire TABLE
+                        // background (including text columns), which is not what we want.
                         if (imgEditorBlockId && imgEditorPropKey) {
-                            const editorBgColor = _state.background?.bgColor
                             window.postMessage({
                                 type: 'RIAZIFY_IMAGE_EDITED',
                                 blockId: imgEditorBlockId,
                                 propKey: imgEditorPropKey,
                                 fileUrl: editedUrl,
-                                // Only propagate a solid color (not 'transparent') so the
-                                // template TABLE gets an explicit background-color.
-                                ...(editorBgColor && editorBgColor !== 'transparent'
-                                    ? { bgColor: editorBgColor }
-                                    : {}),
                             }, '*')
                         }
                         setImgEditorSrc(null)

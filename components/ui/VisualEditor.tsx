@@ -1432,10 +1432,9 @@ export default function VisualEditor({
                 }
             } else if (event.data?.type === 'RIAZIFY_IMAGE_EDITED') {
                 // Image editor Save — baked data URL comes back; update the block prop.
-                // bgColor (if provided) is also applied to the block's bgColor prop so the
-                // template TABLE's background-color matches — this fixes the black background
-                // on fullwidth/lifestyle variants whose default bgColor is #000000.
-                const { propKey, fileUrl, blockId, bgColor } = event.data;
+                // The bgColor is already baked into the JPEG by exportToCanvas, so we
+                // only need to update the image src prop — not the block's bgColor.
+                const { propKey, fileUrl, blockId } = event.data;
                 if (propKey && fileUrl && blockId) {
                     const idx = blocks.findIndex(b => b.id === blockId);
                     if (idx >= 0) {
@@ -1443,9 +1442,6 @@ export default function VisualEditor({
                         const updatedProps = {
                             ...(target.props as any),
                             [propKey]: fileUrl,
-                            // Sync the block's bgColor with the Image Editor choice so the
-                            // TABLE background-color in the template shows the right color.
-                            ...(bgColor ? { bgColor } : {}),
                         } as Block['props'];
                         const updatedBlock: Block = { ...target, props: updatedProps };
                         const newBlocks = [...blocks];
