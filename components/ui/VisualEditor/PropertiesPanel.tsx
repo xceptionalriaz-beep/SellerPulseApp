@@ -1964,13 +1964,41 @@ function BlockStyleProps({ block, props, updateProps }: {
                                 onChange={v => updateProps({ colAlign: v })}
                             />
                         </Section>
-                        <Section title="Column padding">
-                            <SliderInput label="Left col padding" value={props.leftPadding ?? 0} min={0} max={48} suffix="px" onChange={v => updateProps({ leftPadding: v })} />
-                            <SliderInput label="Right col padding" value={props.rightPadding ?? 0} min={0} max={48} suffix="px" onChange={v => updateProps({ rightPadding: v })} />
+                        <Section title="Left column — spacing & style">
+                            <SliderInput label="Padding top" value={props.lPadTop ?? 0} min={0} max={60} suffix="px" onChange={v => updateProps({ lPadTop: v })} />
+                            <SliderInput label="Padding right" value={props.lPadRight ?? 0} min={0} max={60} suffix="px" onChange={v => updateProps({ lPadRight: v })} />
+                            <SliderInput label="Padding bottom" value={props.lPadBottom ?? 0} min={0} max={60} suffix="px" onChange={v => updateProps({ lPadBottom: v })} />
+                            <SliderInput label="Padding left" value={props.lPadLeft ?? 0} min={0} max={60} suffix="px" onChange={v => updateProps({ lPadLeft: v })} />
+                            <SliderInput label="Border radius" value={props.leftRadius ?? 0} min={0} max={40} suffix="px" onChange={v => updateProps({ leftRadius: v })} />
+                            <SliderInput label="Min height" value={props.leftMinHeight ?? 0} min={0} max={500} suffix="px" onChange={v => updateProps({ leftMinHeight: v || undefined })} />
+                            <ToggleRow label="Add border" value={(props.leftBorderWidth ?? 0) > 0} onChange={v => updateProps({ leftBorderWidth: v ? 1 : 0 })} />
+                            {(props.leftBorderWidth ?? 0) > 0 && (
+                                <>
+                                    <ColorRow label="Border colour" value={props.leftBorderColor ?? '#ede9fe'} onChange={v => updateProps({ leftBorderColor: v })} />
+                                    <SliderInput label="Border width" value={props.leftBorderWidth ?? 1} min={1} max={8} suffix="px" onChange={v => updateProps({ leftBorderWidth: v })} />
+                                    <SelectInput label="Border style" value={props.leftBorderStyle ?? 'solid'}
+                                        options={[{ v: 'solid', l: 'Solid' }, { v: 'dashed', l: 'Dashed' }, { v: 'dotted', l: 'Dotted' }]}
+                                        onChange={v => updateProps({ leftBorderStyle: v })} />
+                                </>
+                            )}
                         </Section>
-                        <Section title="Column border radius">
-                            <SliderInput label="Left col radius" value={props.leftRadius ?? 0} min={0} max={24} suffix="px" onChange={v => updateProps({ leftRadius: v })} />
-                            <SliderInput label="Right col radius" value={props.rightRadius ?? 0} min={0} max={24} suffix="px" onChange={v => updateProps({ rightRadius: v })} />
+                        <Section title="Right column — spacing & style">
+                            <SliderInput label="Padding top" value={props.rPadTop ?? 0} min={0} max={60} suffix="px" onChange={v => updateProps({ rPadTop: v })} />
+                            <SliderInput label="Padding right" value={props.rPadRight ?? 0} min={0} max={60} suffix="px" onChange={v => updateProps({ rPadRight: v })} />
+                            <SliderInput label="Padding bottom" value={props.rPadBottom ?? 0} min={0} max={60} suffix="px" onChange={v => updateProps({ rPadBottom: v })} />
+                            <SliderInput label="Padding left" value={props.rPadLeft ?? 0} min={0} max={60} suffix="px" onChange={v => updateProps({ rPadLeft: v })} />
+                            <SliderInput label="Border radius" value={props.rightRadius ?? 0} min={0} max={40} suffix="px" onChange={v => updateProps({ rightRadius: v })} />
+                            <SliderInput label="Min height" value={props.rightMinHeight ?? 0} min={0} max={500} suffix="px" onChange={v => updateProps({ rightMinHeight: v || undefined })} />
+                            <ToggleRow label="Add border" value={(props.rightBorderWidth ?? 0) > 0} onChange={v => updateProps({ rightBorderWidth: v ? 1 : 0 })} />
+                            {(props.rightBorderWidth ?? 0) > 0 && (
+                                <>
+                                    <ColorRow label="Border colour" value={props.rightBorderColor ?? '#ede9fe'} onChange={v => updateProps({ rightBorderColor: v })} />
+                                    <SliderInput label="Border width" value={props.rightBorderWidth ?? 1} min={1} max={8} suffix="px" onChange={v => updateProps({ rightBorderWidth: v })} />
+                                    <SelectInput label="Border style" value={props.rightBorderStyle ?? 'solid'}
+                                        options={[{ v: 'solid', l: 'Solid' }, { v: 'dashed', l: 'Dashed' }, { v: 'dotted', l: 'Dotted' }]}
+                                        onChange={v => updateProps({ rightBorderStyle: v })} />
+                                </>
+                            )}
                         </Section>
                         <Section title="Divider">
                             <ToggleRow label="Show column divider" value={props.showDivider ?? false} onChange={v => updateProps({ showDivider: v })} />
@@ -1978,6 +2006,19 @@ function BlockStyleProps({ block, props, updateProps }: {
                                 <>
                                     <ColorRow label="Divider colour" value={props.dividerColor ?? '#ede9fe'} onChange={v => updateProps({ dividerColor: v })} />
                                     <SliderInput label="Divider width" value={props.dividerWidth ?? 1} min={1} max={8} suffix="px" onChange={v => updateProps({ dividerWidth: v })} />
+                                </>
+                            )}
+                        </Section>
+                        <Section title="Container border">
+                            <ToggleRow label="Add container border" value={(props.containerBorderWidth ?? 0) > 0} onChange={v => updateProps({ containerBorderWidth: v ? 1 : 0 })} />
+                            {(props.containerBorderWidth ?? 0) > 0 && (
+                                <>
+                                    <ColorRow label="Border colour" value={props.containerBorderColor ?? '#e5e7eb'} onChange={v => updateProps({ containerBorderColor: v })} />
+                                    <SliderInput label="Border width" value={props.containerBorderWidth ?? 1} min={1} max={8} suffix="px" onChange={v => updateProps({ containerBorderWidth: v })} />
+                                    <SelectInput label="Border style" value={props.containerBorderStyle ?? 'solid'}
+                                        options={[{ v: 'solid', l: 'Solid' }, { v: 'dashed', l: 'Dashed' }, { v: 'dotted', l: 'Dotted' }]}
+                                        onChange={v => updateProps({ containerBorderStyle: v })} />
+                                    <SliderInput label="Border radius" value={props.containerBorderRadius ?? 0} min={0} max={40} suffix="px" onChange={v => updateProps({ containerBorderRadius: v })} />
                                 </>
                             )}
                         </Section>
@@ -2027,11 +2068,54 @@ function BlockStyleProps({ block, props, updateProps }: {
                                 onChange={v => updateProps({ colAlign: v })}
                             />
                         </Section>
-                        <Section title="Column padding">
-                            <SliderInput label="Inner padding (all cols)" value={props.colPadding ?? 0} min={0} max={48} suffix="px" onChange={v => updateProps({ colPadding: v })} />
+                        <Section title="Uniform padding & radius">
+                            <SliderInput label="Padding (all cols)" value={props.colPadding ?? 0} min={0} max={48} suffix="px" onChange={v => updateProps({ colPadding: v })} />
+                            <SliderInput label="Border radius (all cols)" value={props.colRadius ?? 0} min={0} max={40} suffix="px" onChange={v => updateProps({ colRadius: v })} />
                         </Section>
-                        <Section title="Column border radius">
-                            <SliderInput label="Border radius (all cols)" value={props.colRadius ?? 0} min={0} max={24} suffix="px" onChange={v => updateProps({ colRadius: v })} />
+                        <Section title="Column 1 — individual style">
+                            <SliderInput label="Padding override" value={props.col1Padding ?? props.colPadding ?? 0} min={0} max={60} suffix="px" onChange={v => updateProps({ col1Padding: v })} />
+                            <SliderInput label="Radius override" value={props.col1Radius ?? props.colRadius ?? 0} min={0} max={40} suffix="px" onChange={v => updateProps({ col1Radius: v })} />
+                            <SliderInput label="Min height" value={props.col1MinHeight ?? 0} min={0} max={500} suffix="px" onChange={v => updateProps({ col1MinHeight: v || undefined })} />
+                            <ToggleRow label="Add border" value={(props.col1BorderWidth ?? 0) > 0} onChange={v => updateProps({ col1BorderWidth: v ? 1 : 0 })} />
+                            {(props.col1BorderWidth ?? 0) > 0 && (
+                                <>
+                                    <ColorRow label="Border colour" value={props.col1BorderColor ?? '#ede9fe'} onChange={v => updateProps({ col1BorderColor: v })} />
+                                    <SliderInput label="Border width" value={props.col1BorderWidth ?? 1} min={1} max={8} suffix="px" onChange={v => updateProps({ col1BorderWidth: v })} />
+                                    <SelectInput label="Border style" value={props.col1BorderStyle ?? 'solid'}
+                                        options={[{ v: 'solid', l: 'Solid' }, { v: 'dashed', l: 'Dashed' }, { v: 'dotted', l: 'Dotted' }]}
+                                        onChange={v => updateProps({ col1BorderStyle: v })} />
+                                </>
+                            )}
+                        </Section>
+                        <Section title="Column 2 — individual style">
+                            <SliderInput label="Padding override" value={props.col2Padding ?? props.colPadding ?? 0} min={0} max={60} suffix="px" onChange={v => updateProps({ col2Padding: v })} />
+                            <SliderInput label="Radius override" value={props.col2Radius ?? props.colRadius ?? 0} min={0} max={40} suffix="px" onChange={v => updateProps({ col2Radius: v })} />
+                            <SliderInput label="Min height" value={props.col2MinHeight ?? 0} min={0} max={500} suffix="px" onChange={v => updateProps({ col2MinHeight: v || undefined })} />
+                            <ToggleRow label="Add border" value={(props.col2BorderWidth ?? 0) > 0} onChange={v => updateProps({ col2BorderWidth: v ? 1 : 0 })} />
+                            {(props.col2BorderWidth ?? 0) > 0 && (
+                                <>
+                                    <ColorRow label="Border colour" value={props.col2BorderColor ?? '#ede9fe'} onChange={v => updateProps({ col2BorderColor: v })} />
+                                    <SliderInput label="Border width" value={props.col2BorderWidth ?? 1} min={1} max={8} suffix="px" onChange={v => updateProps({ col2BorderWidth: v })} />
+                                    <SelectInput label="Border style" value={props.col2BorderStyle ?? 'solid'}
+                                        options={[{ v: 'solid', l: 'Solid' }, { v: 'dashed', l: 'Dashed' }, { v: 'dotted', l: 'Dotted' }]}
+                                        onChange={v => updateProps({ col2BorderStyle: v })} />
+                                </>
+                            )}
+                        </Section>
+                        <Section title="Column 3 — individual style">
+                            <SliderInput label="Padding override" value={props.col3Padding ?? props.colPadding ?? 0} min={0} max={60} suffix="px" onChange={v => updateProps({ col3Padding: v })} />
+                            <SliderInput label="Radius override" value={props.col3Radius ?? props.colRadius ?? 0} min={0} max={40} suffix="px" onChange={v => updateProps({ col3Radius: v })} />
+                            <SliderInput label="Min height" value={props.col3MinHeight ?? 0} min={0} max={500} suffix="px" onChange={v => updateProps({ col3MinHeight: v || undefined })} />
+                            <ToggleRow label="Add border" value={(props.col3BorderWidth ?? 0) > 0} onChange={v => updateProps({ col3BorderWidth: v ? 1 : 0 })} />
+                            {(props.col3BorderWidth ?? 0) > 0 && (
+                                <>
+                                    <ColorRow label="Border colour" value={props.col3BorderColor ?? '#ede9fe'} onChange={v => updateProps({ col3BorderColor: v })} />
+                                    <SliderInput label="Border width" value={props.col3BorderWidth ?? 1} min={1} max={8} suffix="px" onChange={v => updateProps({ col3BorderWidth: v })} />
+                                    <SelectInput label="Border style" value={props.col3BorderStyle ?? 'solid'}
+                                        options={[{ v: 'solid', l: 'Solid' }, { v: 'dashed', l: 'Dashed' }, { v: 'dotted', l: 'Dotted' }]}
+                                        onChange={v => updateProps({ col3BorderStyle: v })} />
+                                </>
+                            )}
                         </Section>
                         <Section title="Dividers">
                             <ToggleRow label="Show column dividers" value={props.showDivider ?? false} onChange={v => updateProps({ showDivider: v })} />
@@ -2042,8 +2126,29 @@ function BlockStyleProps({ block, props, updateProps }: {
                                 </>
                             )}
                         </Section>
+                        <Section title="Container border">
+                            <ToggleRow label="Add container border" value={(props.containerBorderWidth ?? 0) > 0} onChange={v => updateProps({ containerBorderWidth: v ? 1 : 0 })} />
+                            {(props.containerBorderWidth ?? 0) > 0 && (
+                                <>
+                                    <ColorRow label="Border colour" value={props.containerBorderColor ?? '#e5e7eb'} onChange={v => updateProps({ containerBorderColor: v })} />
+                                    <SliderInput label="Border width" value={props.containerBorderWidth ?? 1} min={1} max={8} suffix="px" onChange={v => updateProps({ containerBorderWidth: v })} />
+                                    <SelectInput label="Border style" value={props.containerBorderStyle ?? 'solid'}
+                                        options={[{ v: 'solid', l: 'Solid' }, { v: 'dashed', l: 'Dashed' }, { v: 'dotted', l: 'Dotted' }]}
+                                        onChange={v => updateProps({ containerBorderStyle: v })} />
+                                    <SliderInput label="Border radius" value={props.containerBorderRadius ?? 0} min={0} max={40} suffix="px" onChange={v => updateProps({ containerBorderRadius: v })} />
+                                </>
+                            )}
+                        </Section>
                         <Section title="Mobile">
                             <ToggleRow label="Stack columns on mobile" value={props.stackMobile ?? true} onChange={v => updateProps({ stackMobile: v })} />
+                            {props.stackMobile && (
+                                <SelectInput
+                                    label="Stack order"
+                                    value={props.stackOrder ?? '1-2-3'}
+                                    options={[{ v: '1-2-3', l: 'Col 1 → 2 → 3' }, { v: '3-2-1', l: 'Col 3 → 2 → 1' }, { v: '2-1-3', l: 'Col 2 → 1 → 3' }]}
+                                    onChange={v => updateProps({ stackOrder: v })}
+                                />
+                            )}
                         </Section>
                     </AdvancedSection>
                 </>
@@ -2082,11 +2187,91 @@ function BlockStyleProps({ block, props, updateProps }: {
                                 onChange={v => updateProps({ colAlign: v })}
                             />
                         </Section>
-                        <Section title="Column padding">
-                            <SliderInput label="Inner padding (all cols)" value={props.colPadding ?? 0} min={0} max={40} suffix="px" onChange={v => updateProps({ colPadding: v })} />
+                        <Section title="Uniform padding & radius">
+                            <SliderInput label="Padding (all cols)" value={props.colPadding ?? 0} min={0} max={48} suffix="px" onChange={v => updateProps({ colPadding: v })} />
+                            <SliderInput label="Border radius (all cols)" value={props.colRadius ?? 0} min={0} max={40} suffix="px" onChange={v => updateProps({ colRadius: v })} />
                         </Section>
-                        <Section title="Column border radius">
-                            <SliderInput label="Border radius (all cols)" value={props.colRadius ?? 0} min={0} max={24} suffix="px" onChange={v => updateProps({ colRadius: v })} />
+                        <Section title="Column 1 — individual style">
+                            <SliderInput label="Padding override" value={props.col1Padding ?? props.colPadding ?? 0} min={0} max={60} suffix="px" onChange={v => updateProps({ col1Padding: v })} />
+                            <SliderInput label="Radius override" value={props.col1Radius ?? props.colRadius ?? 0} min={0} max={40} suffix="px" onChange={v => updateProps({ col1Radius: v })} />
+                            <SliderInput label="Min height" value={props.col1MinHeight ?? 0} min={0} max={500} suffix="px" onChange={v => updateProps({ col1MinHeight: v || undefined })} />
+                            <ToggleRow label="Add border" value={(props.col1BorderWidth ?? 0) > 0} onChange={v => updateProps({ col1BorderWidth: v ? 1 : 0 })} />
+                            {(props.col1BorderWidth ?? 0) > 0 && (
+                                <>
+                                    <ColorRow label="Border colour" value={props.col1BorderColor ?? '#ede9fe'} onChange={v => updateProps({ col1BorderColor: v })} />
+                                    <SliderInput label="Border width" value={props.col1BorderWidth ?? 1} min={1} max={8} suffix="px" onChange={v => updateProps({ col1BorderWidth: v })} />
+                                    <SelectInput label="Border style" value={props.col1BorderStyle ?? 'solid'}
+                                        options={[{ v: 'solid', l: 'Solid' }, { v: 'dashed', l: 'Dashed' }, { v: 'dotted', l: 'Dotted' }]}
+                                        onChange={v => updateProps({ col1BorderStyle: v })} />
+                                </>
+                            )}
+                        </Section>
+                        <Section title="Column 2 — individual style">
+                            <SliderInput label="Padding override" value={props.col2Padding ?? props.colPadding ?? 0} min={0} max={60} suffix="px" onChange={v => updateProps({ col2Padding: v })} />
+                            <SliderInput label="Radius override" value={props.col2Radius ?? props.colRadius ?? 0} min={0} max={40} suffix="px" onChange={v => updateProps({ col2Radius: v })} />
+                            <SliderInput label="Min height" value={props.col2MinHeight ?? 0} min={0} max={500} suffix="px" onChange={v => updateProps({ col2MinHeight: v || undefined })} />
+                            <ToggleRow label="Add border" value={(props.col2BorderWidth ?? 0) > 0} onChange={v => updateProps({ col2BorderWidth: v ? 1 : 0 })} />
+                            {(props.col2BorderWidth ?? 0) > 0 && (
+                                <>
+                                    <ColorRow label="Border colour" value={props.col2BorderColor ?? '#ede9fe'} onChange={v => updateProps({ col2BorderColor: v })} />
+                                    <SliderInput label="Border width" value={props.col2BorderWidth ?? 1} min={1} max={8} suffix="px" onChange={v => updateProps({ col2BorderWidth: v })} />
+                                    <SelectInput label="Border style" value={props.col2BorderStyle ?? 'solid'}
+                                        options={[{ v: 'solid', l: 'Solid' }, { v: 'dashed', l: 'Dashed' }, { v: 'dotted', l: 'Dotted' }]}
+                                        onChange={v => updateProps({ col2BorderStyle: v })} />
+                                </>
+                            )}
+                        </Section>
+                        <Section title="Column 3 — individual style">
+                            <SliderInput label="Padding override" value={props.col3Padding ?? props.colPadding ?? 0} min={0} max={60} suffix="px" onChange={v => updateProps({ col3Padding: v })} />
+                            <SliderInput label="Radius override" value={props.col3Radius ?? props.colRadius ?? 0} min={0} max={40} suffix="px" onChange={v => updateProps({ col3Radius: v })} />
+                            <SliderInput label="Min height" value={props.col3MinHeight ?? 0} min={0} max={500} suffix="px" onChange={v => updateProps({ col3MinHeight: v || undefined })} />
+                            <ToggleRow label="Add border" value={(props.col3BorderWidth ?? 0) > 0} onChange={v => updateProps({ col3BorderWidth: v ? 1 : 0 })} />
+                            {(props.col3BorderWidth ?? 0) > 0 && (
+                                <>
+                                    <ColorRow label="Border colour" value={props.col3BorderColor ?? '#ede9fe'} onChange={v => updateProps({ col3BorderColor: v })} />
+                                    <SliderInput label="Border width" value={props.col3BorderWidth ?? 1} min={1} max={8} suffix="px" onChange={v => updateProps({ col3BorderWidth: v })} />
+                                    <SelectInput label="Border style" value={props.col3BorderStyle ?? 'solid'}
+                                        options={[{ v: 'solid', l: 'Solid' }, { v: 'dashed', l: 'Dashed' }, { v: 'dotted', l: 'Dotted' }]}
+                                        onChange={v => updateProps({ col3BorderStyle: v })} />
+                                </>
+                            )}
+                        </Section>
+                        <Section title="Column 4 — individual style">
+                            <SliderInput label="Padding override" value={props.col4Padding ?? props.colPadding ?? 0} min={0} max={60} suffix="px" onChange={v => updateProps({ col4Padding: v })} />
+                            <SliderInput label="Radius override" value={props.col4Radius ?? props.colRadius ?? 0} min={0} max={40} suffix="px" onChange={v => updateProps({ col4Radius: v })} />
+                            <SliderInput label="Min height" value={props.col4MinHeight ?? 0} min={0} max={500} suffix="px" onChange={v => updateProps({ col4MinHeight: v || undefined })} />
+                            <ToggleRow label="Add border" value={(props.col4BorderWidth ?? 0) > 0} onChange={v => updateProps({ col4BorderWidth: v ? 1 : 0 })} />
+                            {(props.col4BorderWidth ?? 0) > 0 && (
+                                <>
+                                    <ColorRow label="Border colour" value={props.col4BorderColor ?? '#ede9fe'} onChange={v => updateProps({ col4BorderColor: v })} />
+                                    <SliderInput label="Border width" value={props.col4BorderWidth ?? 1} min={1} max={8} suffix="px" onChange={v => updateProps({ col4BorderWidth: v })} />
+                                    <SelectInput label="Border style" value={props.col4BorderStyle ?? 'solid'}
+                                        options={[{ v: 'solid', l: 'Solid' }, { v: 'dashed', l: 'Dashed' }, { v: 'dotted', l: 'Dotted' }]}
+                                        onChange={v => updateProps({ col4BorderStyle: v })} />
+                                </>
+                            )}
+                        </Section>
+                        <Section title="Dividers">
+                            <ToggleRow label="Show column dividers" value={props.showDivider ?? false} onChange={v => updateProps({ showDivider: v })} />
+                            {props.showDivider && (
+                                <>
+                                    <ColorRow label="Divider colour" value={props.dividerColor ?? '#ede9fe'} onChange={v => updateProps({ dividerColor: v })} />
+                                    <SliderInput label="Divider width" value={props.dividerWidth ?? 1} min={1} max={8} suffix="px" onChange={v => updateProps({ dividerWidth: v })} />
+                                </>
+                            )}
+                        </Section>
+                        <Section title="Container border">
+                            <ToggleRow label="Add container border" value={(props.containerBorderWidth ?? 0) > 0} onChange={v => updateProps({ containerBorderWidth: v ? 1 : 0 })} />
+                            {(props.containerBorderWidth ?? 0) > 0 && (
+                                <>
+                                    <ColorRow label="Border colour" value={props.containerBorderColor ?? '#e5e7eb'} onChange={v => updateProps({ containerBorderColor: v })} />
+                                    <SliderInput label="Border width" value={props.containerBorderWidth ?? 1} min={1} max={8} suffix="px" onChange={v => updateProps({ containerBorderWidth: v })} />
+                                    <SelectInput label="Border style" value={props.containerBorderStyle ?? 'solid'}
+                                        options={[{ v: 'solid', l: 'Solid' }, { v: 'dashed', l: 'Dashed' }, { v: 'dotted', l: 'Dotted' }]}
+                                        onChange={v => updateProps({ containerBorderStyle: v })} />
+                                    <SliderInput label="Border radius" value={props.containerBorderRadius ?? 0} min={0} max={40} suffix="px" onChange={v => updateProps({ containerBorderRadius: v })} />
+                                </>
+                            )}
                         </Section>
                         <Section title="Mobile">
                             <ToggleRow label="Stack to 2 cols on mobile" value={props.stackTo2 ?? true} onChange={v => updateProps({ stackTo2: v })} />
