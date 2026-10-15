@@ -77,6 +77,7 @@ import {
     RawHtmlProps,
     ConditionBadgeProps,
     ItemSpecificsProps,
+    CompetitorComparisonProps,
 } from './blocks'
 import ProDropdown, { type DropdownOption } from '@/components/ui/ProDropdown'
 import { auditHtml } from './audit'
@@ -3325,6 +3326,34 @@ function BlockStyleProps({ block, props, updateProps }: {
                 </>
             )
 
+        case 'competitor_comparison':
+            return (
+                <>
+                    <Section title="Title Banner">
+                        <ColorRow label="Title background" value={(props as any).titleBg ?? '#7530fb'} onChange={v => updateProps({ titleBg: v } as any)} />
+                        <ColorRow label="Title text colour" value={(props as any).titleColor ?? '#ffffff'} onChange={v => updateProps({ titleColor: v } as any)} />
+                    </Section>
+                    <Section title="Our Column">
+                        <ColorRow label="Header background" value={(props as any).ourHeaderBg ?? '#7530fb'} onChange={v => updateProps({ ourHeaderBg: v } as any)} />
+                        <ColorRow label="Header text" value={(props as any).ourHeaderText ?? '#ffffff'} onChange={v => updateProps({ ourHeaderText: v } as any)} />
+                        <ColorRow label="Cell background" value={(props as any).ourColBg ?? '#f3eeff'} onChange={v => updateProps({ ourColBg: v } as any)} />
+                    </Section>
+                    <Section title="Indicators">
+                        <ColorRow label="Check ✓ colour" value={(props as any).checkColor ?? '#16a34a'} onChange={v => updateProps({ checkColor: v } as any)} />
+                        <ColorRow label="Cross ✗ colour" value={(props as any).crossColor ?? '#ef4444'} onChange={v => updateProps({ crossColor: v } as any)} />
+                        <ColorRow label="Partial ~ colour" value={(props as any).partialColor ?? '#d97706'} onChange={v => updateProps({ partialColor: v } as any)} />
+                    </Section>
+                    <Section title="Table">
+                        <ColorRow label="Header row bg" value={(props as any).headerBg ?? '#f3eeff'} onChange={v => updateProps({ headerBg: v } as any)} />
+                        <ColorRow label="Feature name colour" value={(props as any).featureColor ?? '#1e1535'} onChange={v => updateProps({ featureColor: v } as any)} />
+                        <ColorRow label="Cell text colour" value={(props as any).textColor ?? '#6b7280'} onChange={v => updateProps({ textColor: v } as any)} />
+                        <ColorRow label="Alt row background" value={(props as any).altRowBg ?? '#f8f7ff'} onChange={v => updateProps({ altRowBg: v } as any)} />
+                        <ColorRow label="Border colour" value={(props as any).borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v } as any)} />
+                        <SliderInput label="Font size" value={(props as any).fontSize ?? 13} min={11} max={18} suffix="px" onChange={v => updateProps({ fontSize: v } as any)} />
+                    </Section>
+                </>
+            )
+
         case 'numbered_list':
             return (
                 <>
@@ -5978,6 +6007,71 @@ function BlockAttributeProps({ block, props, updateProps, phButton, tokenButton,
                     </Section>
                 </>
             )
+
+        case 'competitor_comparison': {
+            const ccProps = props as any
+            const ccRows: Array<{ feature: string; ourValue: string; col2Value: string; col3Value: string }> =
+                Array.isArray(ccProps.rows) ? ccProps.rows : []
+            const showThird = ccProps.showThirdCol !== false
+
+            function ccUpdateRow(i: number, key: string, val: string) {
+                const newRows = [...ccRows]
+                newRows[i] = { ...newRows[i], [key]: val }
+                updateProps({ rows: newRows } as any)
+            }
+            function ccAddRow() {
+                updateProps({ rows: [...ccRows, { feature: 'New Feature', ourValue: 'yes', col2Value: 'no', col3Value: 'no' }] } as any)
+            }
+            function ccRemoveRow(i: number) {
+                updateProps({ rows: ccRows.filter((_, ri) => ri !== i) } as any)
+            }
+
+            return (
+                <>
+                    <Section title="Title">
+                        <ToggleRow label="Show title bar" value={ccProps.showTitle !== false} onChange={v => updateProps({ showTitle: v } as any)} />
+                        <TextInput label="Title text" value={ccProps.titleText ?? 'Why Buy From Us?'} onChange={v => updateProps({ titleText: v } as any)} />
+                    </Section>
+                    <Section title="Column Labels">
+                        <TextInput label="Our store label" value={ccProps.ourLabel ?? '⭐ Our Store'} onChange={v => updateProps({ ourLabel: v } as any)} />
+                        <TextInput label="Competitor label" value={ccProps.col2Label ?? 'Other Sellers'} onChange={v => updateProps({ col2Label: v } as any)} />
+                        <ToggleRow label="Show 3rd column" value={showThird} onChange={v => updateProps({ showThirdCol: v } as any)} />
+                        {showThird && (
+                            <TextInput label="3rd column label" value={ccProps.col3Label ?? 'High Street'} onChange={v => updateProps({ col3Label: v } as any)} />
+                        )}
+                    </Section>
+                    <Section title="Comparison Rows">
+                        {ccRows.map((row, i) => (
+                            <ComparisonRowEditor
+                                key={i}
+                                row={row}
+                                index={i}
+                                showThird={showThird}
+                                onUpdate={(key, val) => ccUpdateRow(i, key, val)}
+                                onRemove={() => ccRemoveRow(i)}
+                            />
+                        ))}
+                        <button
+                            onClick={ccAddRow}
+                            style={{
+                                marginTop: 10,
+                                padding: '7px 16px',
+                                background: C.primary,
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: 6,
+                                cursor: 'pointer',
+                                fontSize: 12,
+                                fontWeight: 600,
+                                width: '100%',
+                            }}
+                        >
+                            + Add Row
+                        </button>
+                    </Section>
+                </>
+            )
+        }
 
         case 'satisfaction_guarantee':
             return (
@@ -8976,6 +9070,93 @@ function SizeRowEditor({
             {rows.length === 0 && (
                 <p style={{ fontSize: 11, color: '#9ca3af', fontFamily: 'DM Sans,sans-serif', textAlign: 'center', margin: '8px 0' }}>No rows yet — click "+ Add Size"</p>
             )}
+        </div>
+    )
+}
+
+// ── ComparisonRowEditor ───────────────────────────────────────────────────────
+// Inline row editor for the competitor_comparison block Attributes tab
+// ─────────────────────────────────────────────────────────────────────────────
+function ComparisonRowEditor({
+    row,
+    index,
+    showThird,
+    onUpdate,
+    onRemove,
+}: {
+    row: { feature: string; ourValue: string; col2Value: string; col3Value: string }
+    index: number
+    showThird: boolean
+    onUpdate: (key: string, val: string) => void
+    onRemove: () => void
+}) {
+    const valueOptions = [
+        { v: 'yes',     l: '✓  Yes' },
+        { v: 'no',      l: '✗  No' },
+        { v: 'partial', l: '~  Partial' },
+        { v: '_custom', l: 'Custom text…' },
+    ]
+    const isPreset = (v: string) => ['yes', 'no', 'partial'].includes(v)
+
+    function ColValue({ fieldKey, label, value }: { fieldKey: string; label: string; value: string }) {
+        const using = isPreset(value) ? value : '_custom'
+        return (
+            <div style={{ marginBottom: 6 }}>
+                <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: '#6b7280', marginBottom: 3, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    {label}
+                </label>
+                <select
+                    value={using}
+                    onChange={e => {
+                        const v = e.target.value
+                        if (v !== '_custom') onUpdate(fieldKey, v)
+                        else onUpdate(fieldKey, '')
+                    }}
+                    style={{ width: '100%', padding: '5px 8px', fontSize: 12, border: '1px solid #ede9fe', borderRadius: 5, background: '#fff', color: '#374151', marginBottom: isPreset(value) ? 0 : 4 }}
+                >
+                    {valueOptions.map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
+                </select>
+                {!isPreset(value) && (
+                    <input
+                        type="text"
+                        value={value}
+                        placeholder="e.g. 2 Years, Email only…"
+                        onChange={e => onUpdate(fieldKey, e.target.value)}
+                        style={{ width: '100%', padding: '5px 8px', fontSize: 12, border: '1px solid #ede9fe', borderRadius: 5, background: '#fff', color: '#374151', boxSizing: 'border-box' }}
+                    />
+                )}
+            </div>
+        )
+    }
+
+    return (
+        <div style={{ background: '#f8f7ff', borderRadius: 7, padding: '10px 12px', marginBottom: 8, border: '1px solid #ede9fe' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    Row {index + 1}
+                </span>
+                <button
+                    onClick={onRemove}
+                    style={{ background: '#fff1f1', border: '1px solid #fca5a5', color: '#ef4444', fontSize: 11, fontWeight: 700, borderRadius: 4, cursor: 'pointer', padding: '1px 6px', lineHeight: '16px' }}
+                >
+                    ✕
+                </button>
+            </div>
+            <div style={{ marginBottom: 6 }}>
+                <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: '#6b7280', marginBottom: 3, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Feature name
+                </label>
+                <input
+                    type="text"
+                    value={row.feature}
+                    onChange={e => onUpdate('feature', e.target.value)}
+                    placeholder="e.g. Fast Dispatch"
+                    style={{ width: '100%', padding: '5px 8px', fontSize: 12, border: '1px solid #ede9fe', borderRadius: 5, background: '#fff', color: '#374151', boxSizing: 'border-box' }}
+                />
+            </div>
+            <ColValue fieldKey="ourValue"  label="Our store"  value={row.ourValue} />
+            <ColValue fieldKey="col2Value" label="Competitor" value={row.col2Value} />
+            {showThird && <ColValue fieldKey="col3Value" label="3rd column" value={row.col3Value} />}
         </div>
     )
 }

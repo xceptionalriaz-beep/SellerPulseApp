@@ -138,6 +138,7 @@ export type BlockType =
     | 'payment_methods_block'
     | 'urgency_timer_block'
     | 'trust_badge_block'
+    | 'competitor_comparison'
 
 // ── Base block instance ─────────────────────────────────────────────────────
 export interface Block {
@@ -205,6 +206,7 @@ export type BlockProps =
     | HighlightTextProps
     | WhyBuyFromUsProps
     | InfoBoxProps
+    | CompetitorComparisonProps
 
 // ── Shared common props (present on every block) ────────────────────────────
 export interface CommonProps {
@@ -1185,6 +1187,39 @@ export interface InfoBoxProps extends CommonProps {
     text?: string
     iconColor?: string
     accentColor?: string
+}
+
+// ── Competitor Comparison Table ───────────────────────────────────────────────
+export interface CompetitorComparisonProps extends CommonProps {
+    // Title bar
+    titleText: string
+    showTitle: boolean
+    titleBg: string
+    titleColor: string
+    // Column labels
+    ourLabel: string
+    col2Label: string
+    col3Label: string
+    showThirdCol: boolean
+    // Rows
+    rows: Array<{ feature: string; ourValue: string; col2Value: string; col3Value: string }>
+    // Our column highlight
+    ourColBg: string
+    ourHeaderBg: string
+    ourHeaderText: string
+    // Other header row
+    headerBg: string
+    headerTextColor: string
+    // Indicators
+    checkColor: string
+    crossColor: string
+    partialColor: string
+    // Table
+    altRowBg: string
+    borderColor: string
+    textColor: string
+    featureColor: string
+    fontSize: number
 }
 
 // ── Raw HTML ──────────────────────────────────────────────────────────────────
@@ -4287,6 +4322,138 @@ ${thumbCells}
                 const inner = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;margin:0;border-collapse:collapse;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;">${titleHtml}${fitNoteHtml}<tr><td><table width="100%" cellpadding="0" cellspacing="0" border="1" style="width:100%;border-collapse:collapse;border:1px solid ${borderColor};">${headerRow}${dataRows}</table></td></tr>${measureHtml}</table></td></tr></table>`
 
                 return wrapBlock('size_guide' as BlockType, id, inner, p)
+            },
+        },
+
+        // ── Competitor Comparison Table ──────────────────────────────────────
+        {
+            type: 'competitor_comparison' as BlockType,
+            label: 'Competitor Comparison',
+            category: 'Conversion',
+            icon: 'table-2',
+            description: '"Why buy from us vs others" conversion table',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                bgColor: '#ffffff',
+                paddingTop: 24,
+                paddingBottom: 24,
+                paddingLeft: 20,
+                paddingRight: 20,
+                titleText: 'Why Buy From Us?',
+                showTitle: true,
+                titleBg: '#7530fb',
+                titleColor: '#ffffff',
+                ourLabel: '⭐ Our Store',
+                col2Label: 'Other Sellers',
+                col3Label: 'High Street',
+                showThirdCol: true,
+                ourColBg: '#f3eeff',
+                ourHeaderBg: '#7530fb',
+                ourHeaderText: '#ffffff',
+                headerBg: '#f3eeff',
+                headerTextColor: '#1e1535',
+                checkColor: '#16a34a',
+                crossColor: '#ef4444',
+                partialColor: '#d97706',
+                altRowBg: '#f8f7ff',
+                borderColor: '#ede9fe',
+                textColor: '#6b7280',
+                featureColor: '#1e1535',
+                fontSize: 13,
+                rows: [
+                    { feature: 'Fast UK Dispatch',  ourValue: 'yes',     col2Value: 'partial', col3Value: 'no'  },
+                    { feature: 'Free Returns',       ourValue: 'yes',     col2Value: 'no',      col3Value: 'partial' },
+                    { feature: 'Genuine Products',   ourValue: 'yes',     col2Value: 'partial', col3Value: 'yes' },
+                    { feature: 'UK Stock',           ourValue: 'yes',     col2Value: 'no',      col3Value: 'yes' },
+                    { feature: 'Warranty',           ourValue: '2 Years', col2Value: '1 Year',  col3Value: 'None' },
+                    { feature: 'Expert Support',     ourValue: 'yes',     col2Value: 'no',      col3Value: 'no'  },
+                ],
+            } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps & { [key: string]: any }
+
+                const titleText     = p.titleText    ?? 'Why Buy From Us?'
+                const showTitle     = p.showTitle    !== false
+                const titleBg       = p.titleBg      ?? '#7530fb'
+                const titleColor    = p.titleColor   ?? '#ffffff'
+
+                const ourLabel      = p.ourLabel     ?? '&#11088; Our Store'
+                const col2Label     = p.col2Label    ?? 'Other Sellers'
+                const col3Label     = p.col3Label    ?? 'High Street'
+                const showThirdCol  = p.showThirdCol !== false
+                const numCols       = showThirdCol ? 4 : 3
+
+                const ourColBg      = p.ourColBg      ?? '#f3eeff'
+                const ourHeaderBg   = p.ourHeaderBg   ?? '#7530fb'
+                const ourHeaderText = p.ourHeaderText ?? '#ffffff'
+                const headerBg      = p.headerBg      ?? '#f3eeff'
+                const headerTxtCol  = p.headerTextColor ?? '#1e1535'
+
+                const checkColor    = p.checkColor   ?? '#16a34a'
+                const crossColor    = p.crossColor   ?? '#ef4444'
+                const partialColor  = p.partialColor ?? '#d97706'
+                const altRowBg      = p.altRowBg     ?? '#f8f7ff'
+                const borderColor   = p.borderColor  ?? '#ede9fe'
+                const textColor     = p.textColor    ?? '#6b7280'
+                const featureColor  = p.featureColor ?? '#1e1535'
+                const fontSize      = p.fontSize     ?? 13
+
+                const rows: Array<{ feature: string; ourValue: string; col2Value: string; col3Value: string }> =
+                    Array.isArray(p.rows) ? p.rows : []
+
+                function cellValue(val: string): string {
+                    const v = (val ?? '').toLowerCase().trim()
+                    if (v === 'yes')     return `<span style="color:${checkColor};font-size:17px;font-weight:700;line-height:1;">&#10003;</span>`
+                    if (v === 'no')      return `<span style="color:${crossColor};font-size:17px;font-weight:700;line-height:1;">&#10007;</span>`
+                    if (v === 'partial') return `<span style="color:${partialColor};font-size:15px;font-weight:700;line-height:1;">&#126;</span>`
+                    return `<span style="font-family:Arial,sans-serif;font-size:${fontSize}px;color:${textColor};">${val ?? ''}</span>`
+                }
+
+                const b = `border:1px solid ${borderColor};`
+
+                // Title row
+                const titleRow = showTitle ? `
+  <tr>
+    <td colspan="${numCols}" style="${b}background-color:${titleBg};padding:14px 20px;text-align:center;">
+      <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:19px;font-weight:800;color:${titleColor};letter-spacing:0.01em;">${titleText}</p>
+    </td>
+  </tr>` : ''
+
+                // Column headers
+                const fTh = `${b}background-color:${headerBg};padding:11px 14px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:${headerTxtCol};text-align:left;`
+                const oTh = `${b}background-color:${ourHeaderBg};padding:11px 14px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:${ourHeaderText};text-align:center;`
+                const cTh = `${b}background-color:${headerBg};padding:11px 14px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:${headerTxtCol};text-align:center;opacity:0.7;`
+
+                const headerRow = `
+  <tr>
+    <th style="${fTh}">Feature</th>
+    <th style="${oTh}">${ourLabel}</th>
+    <th style="${cTh}">${col2Label}</th>
+    ${showThirdCol ? `<th style="${cTh}">${col3Label}</th>` : ''}
+  </tr>`
+
+                // Data rows
+                const baseTd = `padding:10px 14px;${b}text-align:center;vertical-align:middle;`
+                const dataRows = rows.map((row, i) => {
+                    const rowBg = i % 2 === 0 ? '#ffffff' : altRowBg
+                    const fTd = `<td style="${baseTd}text-align:left;font-family:Arial,sans-serif;font-size:${fontSize}px;font-weight:600;color:${featureColor};background-color:${rowBg};">${row.feature}</td>`
+                    const oTd = `<td style="${baseTd}background-color:${ourColBg};">${cellValue(row.ourValue)}</td>`
+                    const c2Td = `<td style="${baseTd}background-color:${rowBg};">${cellValue(row.col2Value)}</td>`
+                    const c3Td = showThirdCol ? `<td style="${baseTd}background-color:${rowBg};">${cellValue(row.col3Value)}</td>` : ''
+                    return `  <tr>${fTd}${oTd}${c2Td}${c3Td}</tr>`
+                }).join('\n')
+
+                const inner = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;background-color:${p.bgColor};${pad(p)}">
+  <tr><td>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;">
+      ${titleRow}
+      ${headerRow}
+      ${dataRows}
+    </table>
+  </td></tr>
+</table>`
+
+                return wrapBlock('competitor_comparison' as BlockType, id, inner, p)
             },
         },
     )
