@@ -1440,14 +1440,14 @@ export default function VisualEditor({
                     const idx = blocks.findIndex(b => b.id === blockId);
                     if (idx >= 0) {
                         const target = blocks[idx];
-                        const updatedProps: Record<string, unknown> = {
+                        const updatedProps = {
                             ...(target.props as any),
                             [propKey]: fileUrl,
                             // Sync the block's bgColor with the Image Editor choice so the
                             // TABLE background-color in the template shows the right color.
                             ...(bgColor ? { bgColor } : {}),
-                        };
-                        const updatedBlock = { ...target, props: updatedProps };
+                        } as Block['props'];
+                        const updatedBlock: Block = { ...target, props: updatedProps };
                         const newBlocks = [...blocks];
                         newBlocks[idx] = updatedBlock;
                         commitBlocks(newBlocks, blocks);
