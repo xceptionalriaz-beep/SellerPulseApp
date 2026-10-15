@@ -28,4 +28,5 @@ export type {
     FrameSettings,
     FilterPreset,
     CropRect,
+    BackgroundSettings,
 } from './types'

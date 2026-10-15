@@ -3,9 +3,9 @@
 
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import {
-    X, Undo2, Redo2, ZoomIn, ZoomOut,
+    Undo2, Redo2, ZoomIn, ZoomOut,
     SlidersHorizontal, Sliders, Crop, Maximize2,
-    RotateCw, Pencil, Type, Square,
+    RotateCw, Pencil, Type, Square, Scissors,
 } from 'lucide-react'
 import { ToolId, ImageEditorState, DEFAULT_STATE, CropRect } from './types'
 
@@ -17,7 +17,8 @@ import ResizeTool  from './tools/ResizeTool'
 import RotateTool  from './tools/RotateTool'
 import DrawTool    from './tools/DrawTool'
 import TextTool    from './tools/TextTool'
-import FrameTool   from './tools/FrameTool'
+import FrameTool       from './tools/FrameTool'
+import BackgroundTool  from './tools/BackgroundTool'
 
 // ── Design tokens ──────────────────────────────────────────────
 const C = {
@@ -70,7 +71,8 @@ const TOOLS: ToolDef[] = [
     { id: 'rotate', label: 'Rotate', icon: <RotateCw size={19} /> },
     { id: 'draw',   label: 'Draw',   icon: <Pencil size={19} /> },
     { id: 'text',   label: 'Text',   icon: <Type size={19} /> },
-    { id: 'frame',  label: 'Frame',  icon: <Square size={19} /> },
+    { id: 'frame',      label: 'Frame',  icon: <Square size={19} /> },
+    { id: 'background', label: 'BG',     icon: <Scissors size={19} /> },
 ]
 
 // ── Props ──────────────────────────────────────────────────────
@@ -267,7 +269,8 @@ export default function ImageEditorModal({
             case 'rotate': return <RotateTool {...common} />
             case 'draw':   return <DrawTool   {...common} />
             case 'text':   return <TextTool   {...common} />
-            case 'frame':  return <FrameTool  {...common} />
+            case 'frame':      return <FrameTool       {...common} />
+            case 'background': return <BackgroundTool  {...common} />
             default:
                 return <PlaceholderPanel tool={TOOLS.find(t => t.id === activeTool)!} />
         }
@@ -297,7 +300,7 @@ export default function ImageEditorModal({
                         padding: '6px 16px', borderRadius: 8, border: `1px solid ${C.border}`,
                         background: C.surface, color: C.body, fontSize: 13, fontWeight: 600, cursor: 'pointer',
                     }}>Cancel</button>
-                    <button onClick={() => onSave(imageUrl, editorState)} style={{
+                    <button onClick={() => onSave(editorState.background?.processedUrl ?? imageUrl, editorState)} style={{
                         padding: '6px 20px', borderRadius: 8, border: 'none',
                         background: C.primary, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer',
                     }}>Save</button>
@@ -362,10 +365,14 @@ export default function ImageEditorModal({
                             position: 'relative',
                             borderRadius: cssFrame.inner.borderRadius,
                             overflow: 'hidden',
+                            // Show chosen background color through transparent-PNG after bg removal
+                            backgroundColor: editorState.background?.processedUrl
+                                ? (editorState.background.color ?? '#ffffff')
+                                : undefined,
                         }}>
                         <img
                             ref={imgCallbackRef}
-                            src={imageUrl}
+                            src={editorState.background?.processedUrl ?? imageUrl}
                             alt={imageName || 'Editing'}
                             draggable={false}
                             style={{

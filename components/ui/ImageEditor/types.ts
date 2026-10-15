@@ -13,6 +13,7 @@ export type ToolId =
     | 'draw'
     | 'text'
     | 'frame'
+    | 'background'
 
 // ── Filter presets ────────────────────────────────────────────
 export type FilterPreset =
@@ -83,6 +84,12 @@ export interface FrameSettings {
     borderRadius: number  // px, 0–40 (for 'rounded')
 }
 
+// ── Background removal ────────────────────────────────────────
+export interface BackgroundSettings {
+    processedUrl: string | null  // data URL of transparent PNG after AI removal
+    color:        string         // CSS background-color for wrapper, default '#ffffff'
+}
+
 // ── Full editor state (all tools) ─────────────────────────────
 export interface ImageEditorState {
     // ── Adjust ─────────────────────────────────────────────────
@@ -128,6 +135,9 @@ export interface ImageEditorState {
 
     // ── Frame ──────────────────────────────────────────────────
     frame: FrameSettings
+
+    // ── Background removal ─────────────────────────────────────
+    background: BackgroundSettings
 }
 
 // ── Defaults ──────────────────────────────────────────────────
@@ -167,6 +177,10 @@ export const DEFAULT_STATE: ImageEditorState = {
         color:        '#ffffff',
         width:        20,
         borderRadius: 12,
+    },
+    background: {
+        processedUrl: null,
+        color:        '#ffffff',
     },
 }
 
