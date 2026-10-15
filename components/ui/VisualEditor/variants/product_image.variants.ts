@@ -307,7 +307,7 @@ ${captionRow}
   <!--[if mso]><img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt}" style="width:100%;display:block;margin:0 auto;" /><![endif]-->`
         : fullDrop
       return `<!--[riazify:product_image:${id}]-->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;min-width:100% !important;max-width:100% !important;margin:0;background-color:${p.bgColor ?? '#000000'};">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;min-width:100% !important;max-width:100% !important;margin:0;background-color:${p.bgColor ?? '#ffffff'};">
   <tr>
     <td align="center" style="padding:0;line-height:0;font-size:0;text-align:center;width:100%;">
       <div style="width:100%;max-width:100%;display:block;margin:0 auto;">${overlay}</div>
@@ -539,7 +539,7 @@ ${mobileStyle}
 
       return `<!--[riazify:product_image:${id}]-->
 ${mobileStyle}
-<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;min-width:100% !important;max-width:100% !important;margin:0;background-color:${p.bgColor ?? '#000000'};border-radius:0;overflow:hidden;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100% !important;min-width:100% !important;max-width:100% !important;margin:0;background-color:${p.bgColor ?? '#ffffff'};border-radius:0;overflow:hidden;">
   <tr>
     <td align="center" style="padding:0;line-height:0;font-size:0;position:relative;text-align:center;border-radius:0;">
       <div align="center" style="position:relative;overflow:hidden;border-radius:0;margin:0 auto;text-align:center;display:block;width:100%;max-width:100%;" data-canvas-dropzone="src">
