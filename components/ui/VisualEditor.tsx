@@ -223,12 +223,16 @@ export default function VisualEditor({
         if (selectedBlockType === null) {
             return
         }
+        // Don't auto-switch tabs when the user is in slot-assignment mode (inserting into a column slot)
+        if (activeDropSlot) {
+            return
+        }
         // Only auto-switch for pure image blocks — sidebar_layout must wait for exact slot click
         if (IMAGE_BLOCK_TYPES.has(selectedBlockType) && selectedBlockType !== 'sidebar_layout') {
             setActiveTab('images')
             setPanelOpen(true)
         }
-    }, [selectedId, selectedBlockType, IMAGE_BLOCK_TYPES])
+    }, [selectedId, selectedBlockType, IMAGE_BLOCK_TYPES, activeDropSlot])
 
     // ── Canvas + preview state ────────────────────────────────────────────────
     const [deviceWidth, setDeviceWidth] = useState<'desktop' | 'tablet' | 'mobile'>('desktop')
@@ -1272,11 +1276,9 @@ export default function VisualEditor({
                     // clicking any content item in the sidebar will assign it into this slot
                     // rather than adding a new top-level block to the canvas.
                     const CONTENT_SLOT_NAMES: DropSlot[] = ['leftContent', 'rightContent', 'content', 'col1Content', 'col2Content', 'col3Content', 'col4Content'];
-                    if (!slotBlock && CONTENT_SLOT_NAMES.includes(propKey as DropSlot)) {
+                    if (CONTENT_SLOT_NAMES.includes(propKey as DropSlot)) {
+                        // Arm activeDropSlot for both empty slots (insert) and filled slots (replace)
                         setActiveDropSlot({ blockId, slot: propKey as DropSlot });
-                    } else if (slotBlock) {
-                        // Slot already has content — clear any stale drop-slot targeting
-                        setActiveDropSlot(null);
                     }
                     // Send highlight message back to iframe so slot gets purple outline
                     const iframe = document.querySelector(`iframe[data-block-id="${blockId}"]`) as HTMLIFrameElement;
