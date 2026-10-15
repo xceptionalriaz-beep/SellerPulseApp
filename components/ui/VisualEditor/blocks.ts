@@ -2,7 +2,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Riazify — Visual Editor Block System
 //
-// Pure TypeScript — no React, no imports.
+// Pure TypeScript — no React.
+import _qrcodeGenerator from 'qrcode-generator'
 // Every other VisualEditor file imports from here.
 //
 // Each block has:
@@ -1246,9 +1247,19 @@ export interface RawHtmlProps extends CommonProps {
     label: string             // internal label shown on canvas card
 }
 
-// QR code generator (synchronous .create() API)
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const _QRCodeLib = require('qrcode') as { create: (text: string, opts?: object) => { modules: { size: number; data: Uint8Array } } }
+// ── QR code generator — qrcode-generator (pure JS, browser + Node safe) ──────
+function _qrCreate(text: string): { modules: { size: number; data: Uint8Array } } {
+    // typeNumber 0 = auto-detect minimum version; errorCorrectionLevel M
+    const qr = _qrcodeGenerator(0, 'M')
+    qr.addData(text)
+    qr.make()
+    const n = qr.getModuleCount()
+    const data = new Uint8Array(n * n)
+    for (let r = 0; r < n; r++)
+        for (let c = 0; c < n; c++)
+            data[r * n + c] = qr.isDark(r, c) ? 1 : 0
+    return { modules: { size: n, data } }
+}
 
 // Variant system imports
 import { getHeroVariant as _getHeroVariant } from './variants/hero_header.variants'
@@ -4524,7 +4535,7 @@ ${thumbCells}
                 // ── Generate QR code as inline SVG ────────────────────────────
                 let qrSvg = ''
                 try {
-                    const qrData = _QRCodeLib.create(targetUrl, { errorCorrectionLevel: 'M' })
+                    const qrData = _qrCreate(targetUrl)
                     const n      = qrData.modules.size
                     const data   = qrData.modules.data
                     const quiet  = 4                       // quiet-zone modules
