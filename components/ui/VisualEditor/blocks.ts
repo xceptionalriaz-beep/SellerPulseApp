@@ -1423,20 +1423,37 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             const rows = (p as any).rows && Array.isArray((p as any).rows) ? (p as any).rows : [{ leftContent: p.leftContent, rightContent: p.rightContent }]
             const pa = p as any
             const valign = pa.colAlign === 'middle' ? 'middle' : pa.colAlign === 'bottom' ? 'bottom' : 'top'
-            const lPad = pa.leftPadding ? `padding:${pa.leftPadding}px;` : ''
-            const rPad = pa.rightPadding ? `padding:${pa.rightPadding}px;` : ''
+            // Per-column padding — 4-sided overrides uniform fallback
+            const lPad = (pa.lPadTop != null || pa.lPadRight != null || pa.lPadBottom != null || pa.lPadLeft != null)
+                ? `padding:${pa.lPadTop ?? 0}px ${pa.lPadRight ?? 0}px ${pa.lPadBottom ?? 0}px ${pa.lPadLeft ?? 0}px;`
+                : (pa.leftPadding ? `padding:${pa.leftPadding}px;` : '')
+            const rPad = (pa.rPadTop != null || pa.rPadRight != null || pa.rPadBottom != null || pa.rPadLeft != null)
+                ? `padding:${pa.rPadTop ?? 0}px ${pa.rPadRight ?? 0}px ${pa.rPadBottom ?? 0}px ${pa.rPadLeft ?? 0}px;`
+                : (pa.rightPadding ? `padding:${pa.rightPadding}px;` : '')
+            // Per-column border radius
             const lRadius = pa.leftRadius ? `border-radius:${pa.leftRadius}px;` : ''
             const rRadius = pa.rightRadius ? `border-radius:${pa.rightRadius}px;` : ''
+            // Per-column border
+            const lBorder = pa.leftBorderWidth ? `border:${pa.leftBorderWidth}px ${pa.leftBorderStyle ?? 'solid'} ${pa.leftBorderColor ?? '#ede9fe'};` : ''
+            const rBorder = pa.rightBorderWidth ? `border:${pa.rightBorderWidth}px ${pa.rightBorderStyle ?? 'solid'} ${pa.rightBorderColor ?? '#ede9fe'};` : ''
+            // Per-column min-height
+            const lMinH = pa.leftMinHeight ? `height:${pa.leftMinHeight}px;` : ''
+            const rMinH = pa.rightMinHeight ? `height:${pa.rightMinHeight}px;` : ''
+            // Divider
             const divider = pa.showDivider
                 ? `<td width="${pa.dividerWidth ?? 1}px" style="width:${pa.dividerWidth ?? 1}px;background-color:${pa.dividerColor ?? '#ede9fe'};font-size:1px;line-height:1px;">&nbsp;</td>`
                 : ''
+            // Outer container border/radius
+            const contBorder = pa.containerBorderWidth ? `border:${pa.containerBorderWidth}px ${pa.containerBorderStyle ?? 'solid'} ${pa.containerBorderColor ?? '#e5e7eb'};` : ''
+            const contRadius = pa.containerBorderRadius ? `border-radius:${pa.containerBorderRadius}px;overflow:hidden;` : ''
+            const contStyle = contBorder + contRadius
             const rowsHtml = rows.map((r: any, idx: number) => `
         <tr>
-          <td width="${p.leftWidth}%" valign="${valign}" style="padding-right:${p.gap / 2}px;${lPad}${lRadius}background-color:${pa.leftBg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">
+          <td width="${p.leftWidth}%" valign="${valign}" style="padding-right:${p.gap / 2}px;${lPad}${lRadius}${lBorder}${lMinH}background-color:${pa.leftBg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">
             <div style="width:100%;box-sizing:border-box;">${r.leftContent}</div>
           </td>
           ${divider}
-          <td width="${rightWidth}%" valign="${valign}" style="padding-left:${p.gap / 2}px;${rPad}${rRadius}background-color:${pa.rightBg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">
+          <td width="${rightWidth}%" valign="${valign}" style="padding-left:${p.gap / 2}px;${rPad}${rRadius}${rBorder}${rMinH}background-color:${pa.rightBg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">
             <div style="width:100%;box-sizing:border-box;">${r.rightContent}</div>
           </td>
         </tr>
@@ -1445,7 +1462,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
                 `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" class="mobile-stack">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" class="mobile-stack"${contStyle ? ` style="${contStyle}"` : ''}>
         ${rowsHtml}
       </table>
     </td>
@@ -1479,25 +1496,46 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             const w1 = pa3.customWidths ? (pa3.col1Width ?? 33) : 33
             const w2 = pa3.customWidths ? (pa3.col2Width ?? 34) : 34
             const w3 = pa3.customWidths ? (pa3.col3Width ?? 33) : 33
-            const cp3 = pa3.colPadding ? `padding:${pa3.colPadding}px;` : ''
-            const cr3 = pa3.colRadius ? `border-radius:${pa3.colRadius}px;` : ''
+            // Per-column padding — individual overrides uniform
+            const cpBase = pa3.colPadding ? `padding:${pa3.colPadding}px;` : ''
+            const cp1 = pa3.col1Padding != null ? `padding:${pa3.col1Padding}px;` : cpBase
+            const cp2 = pa3.col2Padding != null ? `padding:${pa3.col2Padding}px;` : cpBase
+            const cp3 = pa3.col3Padding != null ? `padding:${pa3.col3Padding}px;` : cpBase
+            // Per-column border radius — individual overrides uniform
+            const crBase = pa3.colRadius ? `border-radius:${pa3.colRadius}px;` : ''
+            const cr1 = pa3.col1Radius != null ? `border-radius:${pa3.col1Radius}px;` : crBase
+            const cr2 = pa3.col2Radius != null ? `border-radius:${pa3.col2Radius}px;` : crBase
+            const cr3 = pa3.col3Radius != null ? `border-radius:${pa3.col3Radius}px;` : crBase
+            // Per-column border
+            const cb1 = pa3.col1BorderWidth ? `border:${pa3.col1BorderWidth}px ${pa3.col1BorderStyle ?? 'solid'} ${pa3.col1BorderColor ?? '#ede9fe'};` : ''
+            const cb2 = pa3.col2BorderWidth ? `border:${pa3.col2BorderWidth}px ${pa3.col2BorderStyle ?? 'solid'} ${pa3.col2BorderColor ?? '#ede9fe'};` : ''
+            const cb3 = pa3.col3BorderWidth ? `border:${pa3.col3BorderWidth}px ${pa3.col3BorderStyle ?? 'solid'} ${pa3.col3BorderColor ?? '#ede9fe'};` : ''
+            // Per-column min-height
+            const mh1 = pa3.col1MinHeight ? `height:${pa3.col1MinHeight}px;` : ''
+            const mh2 = pa3.col2MinHeight ? `height:${pa3.col2MinHeight}px;` : ''
+            const mh3 = pa3.col3MinHeight ? `height:${pa3.col3MinHeight}px;` : ''
+            // Divider
             const div3 = pa3.showDivider
                 ? `<td width="${pa3.dividerWidth ?? 1}px" style="width:${pa3.dividerWidth ?? 1}px;background-color:${pa3.dividerColor ?? '#ede9fe'};font-size:1px;">&nbsp;</td>`
                 : ''
+            // Outer container border/radius
+            const contBorder3 = pa3.containerBorderWidth ? `border:${pa3.containerBorderWidth}px ${pa3.containerBorderStyle ?? 'solid'} ${pa3.containerBorderColor ?? '#e5e7eb'};` : ''
+            const contRadius3 = pa3.containerBorderRadius ? `border-radius:${pa3.containerBorderRadius}px;overflow:hidden;` : ''
+            const contStyle3 = contBorder3 + contRadius3
             const rowsHtml = rows.map((r: any, idx: number) => `
         <tr>
-          <td width="${w1}%" valign="${valign3}" style="padding-right:${p.gap / 2}px;${cp3}${cr3}background-color:${pa3.col1Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col1Content}</td>
+          <td width="${w1}%" valign="${valign3}" style="padding-right:${p.gap / 2}px;${cp1}${cr1}${cb1}${mh1}background-color:${pa3.col1Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col1Content}</td>
           ${div3}
-          <td width="${w2}%" valign="${valign3}" style="padding-left:${p.gap / 2}px;padding-right:${p.gap / 2}px;${cp3}${cr3}background-color:${pa3.col2Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col2Content}</td>
+          <td width="${w2}%" valign="${valign3}" style="padding-left:${p.gap / 2}px;padding-right:${p.gap / 2}px;${cp2}${cr2}${cb2}${mh2}background-color:${pa3.col2Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col2Content}</td>
           ${div3}
-          <td width="${w3}%" valign="${valign3}" style="padding-left:${p.gap / 2}px;${cp3}${cr3}background-color:${pa3.col3Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col3Content}</td>
+          <td width="${w3}%" valign="${valign3}" style="padding-left:${p.gap / 2}px;${cp3}${cr3}${cb3}${mh3}background-color:${pa3.col3Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col3Content}</td>
         </tr>
             `).join('')
             return wrapBlock('three_column', id,
                 `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" class="mobile-stack">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" class="mobile-stack"${contStyle3 ? ` style="${contStyle3}"` : ''}>
         ${rowsHtml}
       </table>
     </td>
@@ -2571,21 +2609,53 @@ ${thumbCells}
                 const fw2 = pa4.customWidths ? (pa4.col2Width ?? 25) : 25
                 const fw3 = pa4.customWidths ? (pa4.col3Width ?? 25) : 25
                 const fw4 = pa4.customWidths ? (pa4.col4Width ?? 25) : 25
-                const cp4 = pa4.colPadding ? `padding:${pa4.colPadding}px;` : ''
-                const cr4 = pa4.colRadius ? `border-radius:${pa4.colRadius}px;` : ''
+                // Per-column padding — individual overrides uniform
+                const cp4base = pa4.colPadding ? `padding:${pa4.colPadding}px;` : ''
+                const cp41 = pa4.col1Padding != null ? `padding:${pa4.col1Padding}px;` : cp4base
+                const cp42 = pa4.col2Padding != null ? `padding:${pa4.col2Padding}px;` : cp4base
+                const cp43 = pa4.col3Padding != null ? `padding:${pa4.col3Padding}px;` : cp4base
+                const cp44 = pa4.col4Padding != null ? `padding:${pa4.col4Padding}px;` : cp4base
+                // Per-column border radius — individual overrides uniform
+                const cr4base = pa4.colRadius ? `border-radius:${pa4.colRadius}px;` : ''
+                const cr41 = pa4.col1Radius != null ? `border-radius:${pa4.col1Radius}px;` : cr4base
+                const cr42 = pa4.col2Radius != null ? `border-radius:${pa4.col2Radius}px;` : cr4base
+                const cr43 = pa4.col3Radius != null ? `border-radius:${pa4.col3Radius}px;` : cr4base
+                const cr44 = pa4.col4Radius != null ? `border-radius:${pa4.col4Radius}px;` : cr4base
+                // Per-column border
+                const cb41 = pa4.col1BorderWidth ? `border:${pa4.col1BorderWidth}px ${pa4.col1BorderStyle ?? 'solid'} ${pa4.col1BorderColor ?? '#ede9fe'};` : ''
+                const cb42 = pa4.col2BorderWidth ? `border:${pa4.col2BorderWidth}px ${pa4.col2BorderStyle ?? 'solid'} ${pa4.col2BorderColor ?? '#ede9fe'};` : ''
+                const cb43 = pa4.col3BorderWidth ? `border:${pa4.col3BorderWidth}px ${pa4.col3BorderStyle ?? 'solid'} ${pa4.col3BorderColor ?? '#ede9fe'};` : ''
+                const cb44 = pa4.col4BorderWidth ? `border:${pa4.col4BorderWidth}px ${pa4.col4BorderStyle ?? 'solid'} ${pa4.col4BorderColor ?? '#ede9fe'};` : ''
+                // Per-column min-height
+                const mh41 = pa4.col1MinHeight ? `height:${pa4.col1MinHeight}px;` : ''
+                const mh42 = pa4.col2MinHeight ? `height:${pa4.col2MinHeight}px;` : ''
+                const mh43 = pa4.col3MinHeight ? `height:${pa4.col3MinHeight}px;` : ''
+                const mh44 = pa4.col4MinHeight ? `height:${pa4.col4MinHeight}px;` : ''
+                // Divider
+                const div4 = pa4.showDivider
+                    ? `<td width="${pa4.dividerWidth ?? 1}px" style="width:${pa4.dividerWidth ?? 1}px;background-color:${pa4.dividerColor ?? '#ede9fe'};font-size:1px;">&nbsp;</td>`
+                    : ''
+                // Outer container border/radius
+                const contBorder4 = pa4.containerBorderWidth ? `border:${pa4.containerBorderWidth}px ${pa4.containerBorderStyle ?? 'solid'} ${pa4.containerBorderColor ?? '#e5e7eb'};` : ''
+                const contRadius4 = pa4.containerBorderRadius ? `border-radius:${pa4.containerBorderRadius}px;overflow:hidden;` : ''
+                const contStyle4 = contBorder4 + contRadius4
+                const g = (p.gap || 8) / 2
                 const rowsHtml = rows.map((r: any, idx: number) => `
         <tr>
-          <td width="${fw1}%" valign="${valign4}" style="padding-right:${(p.gap || 8) / 2}px;${cp4}${cr4}background-color:${pa4.col1Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col1Content}</td>
-          <td width="${fw2}%" valign="${valign4}" style="padding-left:${(p.gap || 8) / 2}px;padding-right:${(p.gap || 8) / 2}px;${cp4}${cr4}background-color:${pa4.col2Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col2Content}</td>
-          <td width="${fw3}%" valign="${valign4}" style="padding-left:${(p.gap || 8) / 2}px;padding-right:${(p.gap || 8) / 2}px;${cp4}${cr4}background-color:${pa4.col3Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col3Content}</td>
-          <td width="${fw4}%" valign="${valign4}" style="padding-left:${(p.gap || 8) / 2}px;${cp4}${cr4}background-color:${pa4.col4Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col4Content}</td>
+          <td width="${fw1}%" valign="${valign4}" style="padding-right:${g}px;${cp41}${cr41}${cb41}${mh41}background-color:${pa4.col1Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col1Content}</td>
+          ${div4}
+          <td width="${fw2}%" valign="${valign4}" style="padding-left:${g}px;padding-right:${g}px;${cp42}${cr42}${cb42}${mh42}background-color:${pa4.col2Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col2Content}</td>
+          ${div4}
+          <td width="${fw3}%" valign="${valign4}" style="padding-left:${g}px;padding-right:${g}px;${cp43}${cr43}${cb43}${mh43}background-color:${pa4.col3Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col3Content}</td>
+          ${div4}
+          <td width="${fw4}%" valign="${valign4}" style="padding-left:${g}px;${cp44}${cr44}${cb44}${mh44}background-color:${pa4.col4Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col4Content}</td>
         </tr>
                 `).join('')
                 return wrapBlock('four_column' as BlockType, id,
                     `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" class="mobile-stack">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" class="mobile-stack"${contStyle4 ? ` style="${contStyle4}"` : ''}>
         ${rowsHtml}
       </table>
     </td>
