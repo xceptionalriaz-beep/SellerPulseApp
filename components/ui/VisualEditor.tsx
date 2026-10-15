@@ -735,10 +735,10 @@ export default function VisualEditor({
             onSlotsChange(slots.filter(s => s.blockId !== blockId))
         } else {
             const ROLE_LABELS: Record<TemplateSlotRole, string> = {
-                headline:        'Headline',
-                key_features:    'Key Features',
-                description:     'Description',
-                condition_note:  'Condition Note',
+                headline: 'Headline',
+                key_features: 'Key Features',
+                description: 'Description',
+                condition_note: 'Condition Note',
                 trust_statement: 'Trust Statement',
             }
             const newSlot: TemplateSlot = { role, blockId, label: ROLE_LABELS[role] }
@@ -1440,14 +1440,14 @@ export default function VisualEditor({
                     const idx = blocks.findIndex(b => b.id === blockId);
                     if (idx >= 0) {
                         const target = blocks[idx];
-                        const updatedProps: Record<string, unknown> = {
+                        const updatedProps = {
                             ...(target.props as any),
                             [propKey]: fileUrl,
                             // Sync the block's bgColor with the Image Editor choice so the
                             // TABLE background-color in the template shows the right color.
                             ...(bgColor ? { bgColor } : {}),
-                        };
-                        const updatedBlock = { ...target, props: updatedProps };
+                        } as Block['props'];
+                        const updatedBlock: Block = { ...target, props: updatedProps };
                         const newBlocks = [...blocks];
                         newBlocks[idx] = updatedBlock;
                         commitBlocks(newBlocks, blocks);
