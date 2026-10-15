@@ -150,9 +150,47 @@ export function buildStickerSvg(sticker: Pick<StickerItem, 'label' | 'subLabel' 
     }
 }
 
+// ── Emoji sticker categories ──────────────────────────────────
+export interface EmojiCategory {
+    id: string
+    label: string
+    emojis: string[]
+}
+
+export const EMOJI_CATEGORIES: EmojiCategory[] = [
+    { id: 'shopping', label: '🛍️ Shopping', emojis: ['🛍️', '💎', '👑', '💰', '💯', '✅', '🔝', '🚀', '🏆', '🥇', '💲', '🎯'] },
+    { id: 'stars', label: '⭐ Stars', emojis: ['⭐', '🌟', '✨', '💫', '⚡', '🌠', '🌙', '☀️', '🌤️', '🌈', '❄️', '🔥'] },
+    { id: 'celebrations', label: '🎉 Celebrate', emojis: ['🎉', '🎊', '🎁', '🎈', '🥂', '🎖️', '🏅', '🎗️', '🎀', '🎆', '🎇', '🥳'] },
+    { id: 'hearts', label: '❤️ Hearts', emojis: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🤍', '🖤', '💕', '💖', '💗', '💝'] },
+    { id: 'faces', label: '😊 Faces', emojis: ['😊', '😍', '🥰', '😎', '🤩', '🥳', '😋', '🤑', '😄', '🤗', '😇', '🤩'] },
+    { id: 'hands', label: '👍 Reactions', emojis: ['👍', '👏', '🙌', '✌️', '🤝', '💪', '🤜', '👌', '☝️', '🖐️', '🤞', '👋'] },
+    { id: 'nature', label: '🌸 Nature', emojis: ['🌸', '🌺', '🌹', '🌻', '🍀', '🌿', '🍃', '🌲', '🌴', '🦋', '🐝', '🌊'] },
+    { id: 'food', label: '🍕 Food', emojis: ['🍕', '🍔', '🍦', '🎂', '🍰', '🍩', '☕', '🧃', '🍷', '🎁', '🍫', '🍓'] },
+]
+
+// ── Render emoji to canvas data URL (browser-only) ────────────
+export function emojiToDataUrl(emoji: string, size = 120): string {
+    if (typeof document === 'undefined') return ''
+    const canvas = document.createElement('canvas')
+    canvas.width = size
+    canvas.height = size
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return ''
+    ctx.font = `${Math.floor(size * 0.72)}px serif`
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(emoji, size / 2, size / 2 + size * 0.04)
+    return canvas.toDataURL()
+}
+
 // ── Data URL for use in <img> src and canvas drawImage ─────────
-export function stickerToDataUrl(sticker: Pick<StickerItem, 'label' | 'subLabel' | 'shape' | 'colorScheme'>): string {
-    return `data:image/svg+xml,${encodeURIComponent(buildStickerSvg(sticker))}`
+export function stickerToDataUrl(
+    sticker: Pick<StickerItem, 'label' | 'subLabel' | 'shape' | 'colorScheme'> & { type?: string; emoji?: string },
+): string {
+    if (sticker.type === 'emoji' && sticker.emoji) {
+        return emojiToDataUrl(sticker.emoji)
+    }
+    return `data:image/svg+xml,${encodeURIComponent(buildStickerSvg(sticker as Pick<StickerItem, 'label' | 'subLabel' | 'shape' | 'colorScheme'>))}`
 }
 
 // ── Canvas draw helper ────────────────────────────────────────
@@ -166,6 +204,21 @@ export function drawStickerOnCanvas(
     h: number,  // display height
 ): Promise<void> {
     return new Promise(resolve => {
+        // Emoji stickers: draw directly with canvas text API (no CORS issues)
+        if (sticker.type === 'emoji' && sticker.emoji) {
+            ctx.save()
+            ctx.translate(cx, cy)
+            if (sticker.rotation) ctx.rotate(sticker.rotation * Math.PI / 180)
+            const fontSize = Math.floor(Math.min(w, h) * 0.82)
+            ctx.font = `${fontSize}px serif`
+            ctx.textAlign = 'center'
+            ctx.textBaseline = 'middle'
+            ctx.fillText(sticker.emoji, 0, fontSize * 0.04)
+            ctx.restore()
+            resolve()
+            return
+        }
+        // Badge stickers: load SVG data URL and drawImage
         const img = new Image()
         img.onload = () => {
             ctx.save()
