@@ -1364,6 +1364,45 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
     },
 
     {
+        type: 'full_width_hero',
+        label: 'Full Width Hero',
+        category: 'Layout',
+        icon: 'layout',
+        description: 'Large hero banner with heading, subtext and background colour',
+        defaultProps: {
+            ...DEFAULT_COMMON,
+            bgColor: '#1e1535',
+            textColor: '#ffffff',
+            accentColor: '#b8fa33',
+            heading: '{{PRODUCT_TITLE}}',
+            subText: 'Quality · Fast Dispatch · Trusted Seller',
+            align: 'center',
+            fontSize: 32,
+            paddingTop: 40,
+            paddingBottom: 40,
+            paddingLeft: 24,
+            paddingRight: 24,
+        } as unknown as BlockProps,
+        toHtml(props, id) {
+            const p = props as CommonProps & { [key: string]: any }
+            const heading = p.heading ?? '{{PRODUCT_TITLE}}'
+            const subText = p.subText ?? ''
+            const align = p.align ?? 'center'
+            const fontSize = p.fontSize ?? 32
+            return wrapBlock('full_width_hero', id,
+                `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;border-collapse:collapse;">
+  <tr>
+    <td style="background-color:${p.bgColor ?? '#1e1535'};${pad(p)}text-align:${align};">
+      <h1 style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:${fontSize}px;font-weight:800;color:${p.textColor ?? '#ffffff'};line-height:1.15;">${heading}</h1>
+      ${subText ? `<p style="margin:0;font-family:Arial,sans-serif;font-size:16px;color:${p.accentColor ?? '#b8fa33'};font-weight:600;">${subText}</p>` : ''}
+    </td>
+  </tr>
+</table>`
+            )
+        },
+    },
+
+    {
         type: 'two_column',
         label: 'Two Column',
         category: 'Layout',
@@ -1406,7 +1445,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
                 `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" class="mobile-stack">
         ${rowsHtml}
       </table>
     </td>
@@ -1458,7 +1497,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
                 `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" class="mobile-stack">
         ${rowsHtml}
       </table>
     </td>
@@ -1934,7 +1973,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
                 ? `<a href="${p.linkUrl}" style="text-decoration:none;display:inline-block;">${imgHtml}</a>`
                 : imgHtml
             return wrapBlock('image', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+                `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;border-collapse:collapse;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}${textAlign(p.align)}">
       ${linked}
@@ -2043,7 +2082,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
     </td>
   </tr>` : ''
             return wrapBlock('gallery_row', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+                `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;border-collapse:collapse;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -2145,7 +2184,7 @@ ${thumbCells}
                 ? `<strong>${p.periodText}</strong> &mdash; `
                 : ''
             return wrapBlock('returns_policy', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+                `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;border-collapse:collapse;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}border-radius:${p.borderRadius}px;border:1px solid #e5e7eb;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -2154,9 +2193,9 @@ ${thumbCells}
           <td style="padding:0 0 0 14px;vertical-align:middle;">
             <table cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td width="36" height="36" style="width:36px;height:36px;text-align:center;background-color:${p.iconBg ?? '#eff6ff'};color:${p.iconColor ?? '#3b82f6'};border-radius:8px;font-size:18px;line-height:36px;vertical-align:middle;">rotate-ccw</td>
+                <td width="36" height="36" style="width:36px;height:36px;text-align:center;background-color:${p.iconBg ?? '#eff6ff'};color:${p.iconColor ?? '#3b82f6'};border-radius:8px;line-height:36px;vertical-align:middle;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${p.iconColor ?? '#3b82f6'}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-top:9px;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></td>
                 <td style="padding-left:12px;vertical-align:middle;">
-                  <p style="margin:0 0 3px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${p.textColor};line-height:1.4;">${period}${p.periodText}</p>
+                  <p style="margin:0 0 3px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${p.textColor};line-height:1.4;">${p.showPeriod ? `<strong>${p.periodText}</strong>` : p.periodText}</p>
                   <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#475569;line-height:1.5;">${p.policyText}</p>
                 </td>
               </tr>
@@ -2366,7 +2405,7 @@ ${thumbCells}
         </td>`
             ).join('')
             return wrapBlock('cross_sell', id,
-                `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;">
+                `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;border-collapse:collapse;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
       <p style="margin:0 0 14px;font-family:Arial,sans-serif;font-size:16px;font-weight:700;color:${p.titleColor};border-left:4px solid #7530fb;padding-left:12px;">${p.title}</p>
@@ -2546,7 +2585,7 @@ ${thumbCells}
                     `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" class="mobile-stack">
         ${rowsHtml}
       </table>
     </td>
@@ -2750,12 +2789,34 @@ ${thumbCells}
             category: 'Content' as BlockCategory,
             icon: 'table',
             description: 'Two-column alternating row data table',
-            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                bgColor: '#ffffff',
+                rowAltBg: '#f8f7ff',
+                borderColor: '#ede9fe',
+                headerText: '#1e1535',
+                textColor: '#6b7280',
+                rows: [
+                    { key: 'Brand', value: '{{BRAND}}' },
+                    { key: 'Model', value: '{{MPN}}' },
+                    { key: 'Condition', value: '{{ITEM_CONDITION}}' },
+                    { key: 'Weight', value: '{{WEIGHT}}' },
+                    { key: 'Country of Origin', value: '{{ORIGIN}}' },
+                ],
+            } as unknown as BlockProps,
             toHtml(props, id) {
                 const p = props as CommonProps & { [key: string]: any }
-                const rows = [['Brand', '{{BRAND}}'], ['Model', '{{MPN}}'], ['Condition', '{{ITEM_CONDITION}}'], ['Weight', '{{WEIGHT}}'], ['Country', '{{ORIGIN}}']]
-                const rowHtml = rows.map((r, i) =>
-                    `<tr style="background-color:${i % 2 === 0 ? (p.rowAltBg ?? '#f8f7ff') : (p.headerBg ? '#fff' : '#fff')};"><td style="padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:${p.headerText ?? '#1e1535'};border:1px solid ${p.borderColor ?? '#ede9fe'};width:40%;">${r[0]}</td><td style="padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;color:${p.textColor ?? '#6b7280'};border:1px solid ${p.borderColor ?? '#ede9fe'};">${r[1]}</td></tr>`
+                const rawRows: Array<{ key: string; value: string }> = Array.isArray(p.rows) && p.rows.length > 0
+                    ? p.rows
+                    : [
+                        { key: 'Brand', value: '{{BRAND}}' },
+                        { key: 'Model', value: '{{MPN}}' },
+                        { key: 'Condition', value: '{{ITEM_CONDITION}}' },
+                        { key: 'Weight', value: '{{WEIGHT}}' },
+                        { key: 'Country of Origin', value: '{{ORIGIN}}' },
+                    ]
+                const rowHtml = rawRows.map((r, i) =>
+                    `<tr style="background-color:${i % 2 === 0 ? (p.rowAltBg ?? '#f8f7ff') : '#ffffff'};"><td style="padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:${p.headerText ?? '#1e1535'};border:1px solid ${p.borderColor ?? '#ede9fe'};width:40%;">${r.key}</td><td style="padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;color:${p.textColor ?? '#6b7280'};border:1px solid ${p.borderColor ?? '#ede9fe'};">${r.value}</td></tr>`
                 ).join('')
                 return wrapBlock('data_table' as BlockType, id,
                     `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;margin:0;border-collapse:collapse;"><tr><td style="background-color:${p.bgColor};${pad(p)}width:100%;"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;">${rowHtml}</table></td></tr></table>`, p)
@@ -2845,29 +2906,22 @@ ${thumbCells}
                         .trim() || text.trim()
                 }
 
-                const safeId = (id || 'badge_row').replace(/[^a-zA-Z0-9_-]/g, '_')
-                const badgeItems = rawBadges.map((raw, idx) => {
+                // eBay-safe: table-based layout only — no flexbox, no <style> tags (eBay strips both)
+                const tdWidth = `${colWidth}%`
+                const badgeCells = rawBadges.map((raw, idx) => {
                     const iconSvg = getBadgeIcon(raw, badgeText)
                     const label = cleanLabel(raw)
-                    return `<div class="badge-col-${safeId}" style="box-sizing:border-box;padding:4px 5px;flex:1 1 ${colWidth}%;width:${colWidth}%;max-width:100%;display:inline-block;vertical-align:middle;">` +
-                        `<div class="badge-pill-${safeId}" style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;box-sizing:border-box;padding:8px 10px;background-color:${badgeBg};color:${badgeText};font-family:Arial,sans-serif;font-size:12px;font-weight:700;line-height:16px;border-radius:100px;border:1px solid ${badgeBorder};text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">` +
-                        `<div data-feature-index="${idx}" data-icon-slot="true" style="display:inline-flex;align-items:center;justify-content:center;cursor:pointer;line-height:1;border-radius:6px;vertical-align:middle;">${iconSvg}</div>` +
-                        `<span style="vertical-align:middle;overflow:hidden;text-overflow:ellipsis;">${label}</span>` +
-                        `</div></div>`
+                    return `<td width="${tdWidth}" style="width:${tdWidth};padding:4px 5px;vertical-align:middle;text-align:center;">` +
+                        `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;background-color:${badgeBg};border:1px solid ${badgeBorder};border-radius:100px;">` +
+                        `<tr><td style="padding:8px 10px;text-align:center;vertical-align:middle;white-space:nowrap;">` +
+                        `<span data-feature-index="${idx}" data-icon-slot="true" style="display:inline-block;vertical-align:middle;line-height:1;">${iconSvg}</span>` +
+                        `<span style="display:inline-block;vertical-align:middle;margin-left:6px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:${badgeText};line-height:16px;">${label}</span>` +
+                        `</td></tr></table>` +
+                        `</td>`
                 }).join('')
 
-                const responsiveCss = `<style>` +
-                    `.badge-wrap-${safeId}{display:flex;flex-wrap:wrap;align-items:stretch;justify-content:center;width:100%;box-sizing:border-box;}` +
-                    `@media only screen and (max-width: 600px){` +
-                    `.badge-pad-${safeId}{padding-left:8px !important;padding-right:8px !important;}` +
-                    `.badge-col-${safeId}{flex:0 0 50% !important;width:50% !important;max-width:50% !important;padding:3px 4px !important;box-sizing:border-box !important;}` +
-                    `.badge-pill-${safeId}{padding:6px 6px !important;font-size:11px !important;min-height:32px !important;gap:4px !important;}` +
-                    `.badge-pill-${safeId} svg{width:12px !important;height:12px !important;}` +
-                    `}` +
-                    `</style>`
-
                 return wrapBlock('badge_row' as BlockType, id,
-                    `${responsiveCss}<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;border-collapse:collapse;"><tr><td class="badge-pad-${safeId}" style="background-color:${p.bgColor ?? '#ffffff'};${pad(p)}width:100%;"><div class="badge-wrap-${safeId}">${badgeItems}</div></td></tr></table>`, p)
+                    `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;border-collapse:collapse;"><tr><td style="background-color:${p.bgColor ?? '#ffffff'};${pad(p)}width:100%;"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;"><tr>${badgeCells}</tr></table></td></tr></table>`, p)
             },
         },
 
@@ -3094,7 +3148,7 @@ ${thumbCells}
                 const caption = p.videoCaption?.trim() || 'Watch the product video'
 
                 return wrapBlock('video_placeholder' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}text-align:center;"><div style="display:inline-block;width:100%;max-width:560px;background-color:#000;border-radius:8px;position:relative;"><img src="${thumbSrc}" alt="Product Video" style="width:100%;height:auto;display:block;opacity:0.85;border-radius:8px;"></div><p style="margin:8px 0 0;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;">&#9654; ${caption}</p></td></tr></table>`)
+                    `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;border-collapse:collapse;"><tr><td style="background-color:${p.bgColor};${pad(p)}text-align:center;"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;margin:0 auto;border-radius:8px;overflow:hidden;background-color:#000;"><tr><td style="position:relative;text-align:center;"><img src="${thumbSrc}" alt="Product Video" style="width:100%;height:auto;display:block;opacity:0.75;border-radius:8px;"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="position:absolute;top:0;left:0;width:100%;height:100%;"><tr><td style="text-align:center;vertical-align:middle;"><table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;"><tr><td style="width:64px;height:64px;background-color:rgba(255,255,255,0.9);border-radius:50%;text-align:center;vertical-align:middle;"><svg width="26" height="26" viewBox="0 0 24 24" fill="#1e1535" style="display:inline-block;vertical-align:middle;margin-left:4px;"><polygon points="5 3 19 12 5 21 5 3"/></svg></td></tr></table></td></tr></table></td></tr></table><p style="margin:8px 0 0;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;">&#9654; ${caption}</p></td></tr></table>`)
             },
         },
 
@@ -3135,11 +3189,27 @@ ${thumbCells}
             category: 'Media' as BlockCategory,
             icon: 'columns',
             description: 'Two images side by side comparison',
-            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                bgColor: '#ffffff',
+                beforeLabel: 'Before',
+                afterLabel: 'After',
+                beforeImageSrc: '{{IMAGE_BEFORE}}',
+                afterImageSrc: '{{IMAGE_AFTER}}',
+                labelBg: '#f3f4f6',
+                labelText: '#6b7280',
+                afterLabelBg: '#f0fdf4',
+                afterLabelText: '#16a34a',
+                borderColor: '#bbf7d0',
+            } as unknown as BlockProps,
             toHtml(props, id) {
                 const p = props as CommonProps & { [key: string]: any }
+                const beforeLabel = p.beforeLabel ?? 'Before'
+                const afterLabel = p.afterLabel ?? 'After'
+                const beforeSrc = p.beforeImageSrc || '{{IMAGE_BEFORE}}'
+                const afterSrc = p.afterImageSrc || '{{IMAGE_AFTER}}'
                 return wrapBlock('before_after' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#ffffff'};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="48%" style="text-align:center;vertical-align:top;"><div style="background-color:${p.labelBg ?? '#f3f4f6'};border-radius:8px;padding:8px;"><p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:${p.labelText ?? '#6b7280'};text-transform:uppercase;letter-spacing:1px;">Before</p><img src="{{IMAGE_BEFORE}}" alt="Before" style="width:100%;height:auto;display:block;border-radius:4px;"></div></td><td width="4%" style="text-align:center;font-size:20px;color:#9ca3af;">&#8594;</td><td width="48%" style="text-align:center;vertical-align:top;"><div style="background-color:${p.labelBg ?? '#f0fdf4'};border-radius:8px;padding:8px;border:1px solid ${p.borderColor ?? '#bbf7d0'};"><p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:${p.labelText ?? '#16a34a'};text-transform:uppercase;letter-spacing:1px;">After</p><img src="{{IMAGE_AFTER}}" alt="After" style="width:100%;height:auto;display:block;border-radius:4px;"></div></td></tr></table></td></tr></table>`)
+                    `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;border-collapse:collapse;"><tr><td style="background-color:${p.bgColor ?? '#ffffff'};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="48%" style="text-align:center;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${p.labelBg ?? '#f3f4f6'};border-radius:8px;"><tr><td style="padding:8px;"><p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:${p.labelText ?? '#6b7280'};text-transform:uppercase;letter-spacing:1px;">${beforeLabel}</p><img src="${beforeSrc}" alt="${beforeLabel}" style="width:100%;height:auto;display:block;border-radius:4px;"></td></tr></table></td><td width="4%" style="text-align:center;font-size:20px;color:#9ca3af;">&#8594;</td><td width="48%" style="text-align:center;vertical-align:top;"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${p.afterLabelBg ?? '#f0fdf4'};border-radius:8px;border:1px solid ${p.borderColor ?? '#bbf7d0'};"><tr><td style="padding:8px;"><p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:${p.afterLabelText ?? '#16a34a'};text-transform:uppercase;letter-spacing:1px;">${afterLabel}</p><img src="${afterSrc}" alt="${afterLabel}" style="width:100%;height:auto;display:block;border-radius:4px;"></td></tr></table></td></tr></table></td></tr></table>`)
             },
         },
 
@@ -3157,7 +3227,7 @@ ${thumbCells}
                 const methods = ['PayPal', 'Visa', 'Mastercard', 'Amex', 'Apple Pay']
                 const cells = methods.map(m => `<td style="padding:4px 6px;"><span style="display:inline-block;padding:5px 12px;background:#fff;border:1px solid #e5e7eb;border-radius:4px;font-family:Arial,sans-serif;font-size:12px;color:#1f1d2e;font-weight:600;">&#128179; ${m}</span></td>`).join('')
                 return wrapBlock('payment_methods' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor};${pad(p)}text-align:center;"><p style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:1px;">Secure Payment Methods</p><table align="center" cellpadding="0" cellspacing="4" border="0"><tr>${cells}</tr></table></td></tr></table>`)
+                    `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;border-collapse:collapse;"><tr><td style="background-color:${p.bgColor};${pad(p)}text-align:center;"><p style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:1px;">Secure Payment Methods</p><table align="center" cellpadding="0" cellspacing="4" border="0"><tr>${cells}</tr></table></td></tr></table>`)
             },
         },
 
@@ -3171,7 +3241,7 @@ ${thumbCells}
             toHtml(props, id) {
                 const p = props as CommonProps & { [key: string]: any }
                 return wrapBlock('dispatch_timer' as BlockType, id,
-                    `<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;max-width:700px;"><tr><td style="background-color:${p.bgColor ?? '#f0fdf4'};${pad(p)}border:1px solid ${p.borderColor ?? '#bbf7d0'};border-radius:8px;text-align:center;"><p style="margin:0 0 4px;font-size:24px;">&#9201;</p><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:${p.textColor ?? '#166534'};">Order in the next <span style="color:${p.accentColor ?? '#dc2626'};">{{HOURS_LEFT}} hours</span> for Same Day Dispatch</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:${p.textColor ?? '#16a34a'};">&#128230; Dispatched same working day if ordered by 2pm</p></td></tr></table>`)
+                    `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;border-collapse:collapse;"><tr><td style="background-color:${p.bgColor ?? '#f0fdf4'};${pad(p)}border:1px solid ${p.borderColor ?? '#bbf7d0'};border-radius:8px;text-align:center;"><p style="margin:0 0 4px;font-size:24px;">&#9201;</p><p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:${p.textColor ?? '#166534'};">Order in the next <span style="color:${p.accentColor ?? '#dc2626'};">{{HOURS_LEFT}} hours</span> for Same Day Dispatch</p><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:${p.textColor ?? '#16a34a'};">&#128230; Dispatched same working day if ordered by 2pm</p></td></tr></table>`)
             },
         },
 
@@ -3720,7 +3790,19 @@ ${thumbCells}
             category: 'Typography' as BlockCategory,
             icon: 'type',
             description: 'Large H1 with decorative underline',
-            defaultProps: { ...DEFAULT_COMMON } as unknown as BlockProps,
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                text: '{{PRODUCT_TITLE}}',
+                textColor: '#1e1535',
+                accentColor: '#7530fb',
+                fontSize: 28,
+                align: 'left',
+                bgColor: '#ffffff',
+                paddingTop: 16,
+                paddingBottom: 16,
+                paddingLeft: 24,
+                paddingRight: 24,
+            } as unknown as BlockProps,
             toHtml(props, id) {
                 const p = props as CommonProps & { [key: string]: any }
                 const text = p.text || '{{PRODUCT_TITLE}}'

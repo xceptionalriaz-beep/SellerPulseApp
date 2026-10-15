@@ -498,6 +498,9 @@ export default function VisualEditor({
                 commitBlocks(newBlocks, blocks);
                 setActiveDropSlot(null);
                 setSelectedId(target.id);
+                // Update slotBlock ref and activeSlotEdit so PropertiesPanel shows the new block
+                slotBlockMapRef.current[`${blockId}__${slot}`] = newBlock;
+                setActiveSlotEdit({ blockId, propKey: slot, currentHtml: newHtml, slotBlock: newBlock });
                 return;
             }
         }
@@ -1265,6 +1268,16 @@ export default function VisualEditor({
                         }
                     }
                     setActiveSlotEdit({ blockId, propKey, currentHtml: currentHtml || '', slotBlock });
+                    // If this slot is empty (no block assigned yet), arm activeDropSlot so that
+                    // clicking any content item in the sidebar will assign it into this slot
+                    // rather than adding a new top-level block to the canvas.
+                    const CONTENT_SLOT_NAMES: DropSlot[] = ['leftContent', 'rightContent', 'content', 'col1Content', 'col2Content', 'col3Content', 'col4Content'];
+                    if (!slotBlock && CONTENT_SLOT_NAMES.includes(propKey as DropSlot)) {
+                        setActiveDropSlot({ blockId, slot: propKey as DropSlot });
+                    } else if (slotBlock) {
+                        // Slot already has content — clear any stale drop-slot targeting
+                        setActiveDropSlot(null);
+                    }
                     // Send highlight message back to iframe so slot gets purple outline
                     const iframe = document.querySelector(`iframe[data-block-id="${blockId}"]`) as HTMLIFrameElement;
                     iframe?.contentWindow?.postMessage({ type: 'RIAZIFY_UPDATE_ACTIVE_SLOT', propKey }, '*');
@@ -1434,16 +1447,23 @@ export default function VisualEditor({
                 // Image editor Save — baked data URL comes back; update the block prop.
                 // editorState is also stored under `${propKey}__editorState` so it can
                 // be restored next time the user reopens the editor (non-destructive).
-                const { propKey, fileUrl, blockId, editorState } = event.data;
+                const { propKey, fileUrl, blockId, editorState, originalUrl } = event.data;
                 if (propKey && fileUrl && blockId) {
                     const idx = blocks.findIndex(b => b.id === blockId);
                     if (idx >= 0) {
                         const target = blocks[idx];
+                        // originalUrl = the clean source image before any baking.
+                        // On first edit it comes from the message; on re-edits it's
+                        // already stored, so we keep whichever was stored first.
+                        const existingOriginal = (target.props as any)[`${propKey}__originalUrl`]
                         const updatedProps = {
                             ...(target.props as any),
                             [propKey]: fileUrl,
-                            // Store the editor state keyed by propKey so re-opening
-                            // the editor can restore the previous settings.
+                            // Store original URL so future re-edits always open the
+                            // pristine source image (non-destructive editing).
+                            [`${propKey}__originalUrl`]: existingOriginal ?? originalUrl ?? fileUrl,
+                            // Store editor state so settings (bgColor, stickers, crop…)
+                            // are fully restored when the editor is reopened.
                             ...(editorState ? { [`${propKey}__editorState`]: editorState } : {}),
                         } as Block['props'];
                         const updatedBlock: Block = { ...target, props: updatedProps };
