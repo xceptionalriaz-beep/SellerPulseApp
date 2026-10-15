@@ -1406,7 +1406,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
                 `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" class="mobile-stack">
         ${rowsHtml}
       </table>
     </td>
@@ -1458,7 +1458,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
                 `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" class="mobile-stack">
         ${rowsHtml}
       </table>
     </td>
@@ -2546,7 +2546,7 @@ ${thumbCells}
                     `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" class="mobile-stack">
         ${rowsHtml}
       </table>
     </td>

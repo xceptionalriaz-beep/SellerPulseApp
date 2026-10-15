@@ -1195,6 +1195,25 @@ ${fontOverrideCss}${colorOverrideCss}${fontSizeOverrideCss}${fontWeightOverrideC
   img { border: 0; display: block; max-width: 100%; cursor: pointer; }
   a { text-decoration: none; }
   a[href] { text-decoration: underline; color: #7530fb; }
+  /* ── Mobile-responsive column stacking ───────────────────────────────────
+     Two / Three / Four Column blocks use table-based layouts for email
+     compatibility. On mobile (≤500px) we stack their <td> cells vertically
+     so content is readable instead of squeezed into tiny columns.       */
+  @media screen and (max-width: 500px) {
+    table.mobile-stack,
+    table.mobile-stack tr,
+    table.mobile-stack tbody { display: block !important; width: 100% !important; }
+    table.mobile-stack td {
+      display: block !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      padding-bottom: 12px !important;
+      box-sizing: border-box !important;
+    }
+    table.mobile-stack td:last-child { padding-bottom: 0 !important; }
+  }
   ${SLOT_SELECTION_CSS}
   /* Selected icon wrapper highlight */
   [data-feature-index].riazify-icon-selected {
