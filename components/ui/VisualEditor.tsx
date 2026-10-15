@@ -498,6 +498,9 @@ export default function VisualEditor({
                 commitBlocks(newBlocks, blocks);
                 setActiveDropSlot(null);
                 setSelectedId(target.id);
+                // Update slotBlock ref and activeSlotEdit so PropertiesPanel shows the new block
+                slotBlockMapRef.current[`${blockId}__${slot}`] = newBlock;
+                setActiveSlotEdit({ blockId, propKey: slot, currentHtml: newHtml, slotBlock: newBlock });
                 return;
             }
         }
@@ -1265,6 +1268,16 @@ export default function VisualEditor({
                         }
                     }
                     setActiveSlotEdit({ blockId, propKey, currentHtml: currentHtml || '', slotBlock });
+                    // If this slot is empty (no block assigned yet), arm activeDropSlot so that
+                    // clicking any content item in the sidebar will assign it into this slot
+                    // rather than adding a new top-level block to the canvas.
+                    const CONTENT_SLOT_NAMES: DropSlot[] = ['leftContent', 'rightContent', 'content', 'col1Content', 'col2Content', 'col3Content', 'col4Content'];
+                    if (!slotBlock && CONTENT_SLOT_NAMES.includes(propKey as DropSlot)) {
+                        setActiveDropSlot({ blockId, slot: propKey as DropSlot });
+                    } else if (slotBlock) {
+                        // Slot already has content — clear any stale drop-slot targeting
+                        setActiveDropSlot(null);
+                    }
                     // Send highlight message back to iframe so slot gets purple outline
                     const iframe = document.querySelector(`iframe[data-block-id="${blockId}"]`) as HTMLIFrameElement;
                     iframe?.contentWindow?.postMessage({ type: 'RIAZIFY_UPDATE_ACTIVE_SLOT', propKey }, '*');
