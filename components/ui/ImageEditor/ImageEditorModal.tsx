@@ -311,14 +311,23 @@ export default function ImageEditorModal({
                             setSaving(true)
                             try {
                                 const xs  = editorState.exportSettings
-                                const fmt = xs?.format   ?? 'jpeg'
+                                // Save-to-canvas always uses JPEG so the template block
+                                // never receives a transparent image (which looks black).
+                                // PNG transparency only makes sense for downloads.
+                                const fmt = 'jpeg'
                                 const q   = xs?.quality  ?? 0.92
                                 const tw: number | null =
                                     xs?.preset === 'original'     ? null
                                     : xs?.preset === 'custom'     ? (xs.customWidth ?? 1600)
                                     : xs?.preset === 'ebay-minimum' ? 500
                                     : 1600
-                                const dataUrl = await exportToDataUrl(imageUrl, editorState, tw, fmt, q)
+                                // Build a state copy that guarantees a solid background
+                                // for JPEG so transparent PNG areas are never black.
+                                const bgColor = editorState.background?.bgColor ?? '#ffffff'
+                                const saveState = bgColor === 'transparent'
+                                    ? { ...editorState, background: { ...editorState.background, bgColor: '#ffffff' } }
+                                    : editorState
+                                const dataUrl = await exportToDataUrl(imageUrl, saveState, tw, fmt, q)
                                 onSave(dataUrl, editorState)
                             } catch (err) {
                                 console.error('[ImageEditor] Save export failed — check CORS on image URL:', err)

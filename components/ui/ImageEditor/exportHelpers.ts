@@ -199,7 +199,23 @@ export async function exportToDataUrl(
     format:   'jpeg' | 'png' = 'jpeg',
     quality:  number = 0.92,
 ): Promise<string> {
-    const canvas = await exportToCanvas(imageUrl, state, targetW)
+    // For JPEG, ensure we never have a transparent/missing background — fall
+    // back to white if bgColor is unset or 'transparent' (JPEG has no alpha).
+    const stateForExport: ImageEditorState =
+        format === 'jpeg'
+            ? (() => {
+                const bg = state.background?.bgColor
+                if (!bg || bg === 'transparent') {
+                    return {
+                        ...state,
+                        background: { ...state.background, bgColor: '#ffffff' },
+                    }
+                }
+                return state
+            })()
+            : state
+
+    const canvas = await exportToCanvas(imageUrl, stateForExport, targetW)
     return new Promise((resolve, reject) => {
         const mime = format === 'png' ? 'image/png' : 'image/jpeg'
         const q    = format === 'jpeg' ? quality : undefined
