@@ -112,22 +112,26 @@ const PET_SAMPLE: CategorySampleData = {
         SUITABLE_FOR: 'Dogs & Cats — All Breeds',
         WARRANTY: '12-Month Manufacturer Warranty',
     },
-    mainImage: U('photo-1583337130417-3346a1be7dee'),
+    // ── Custom sample images (Supabase CDN) ──────────────────────────────────
+    // 700×500 hero/gallery images — 7 images, cycled across every large slot
+    // 200×200 thumbnail images  — 2 images, cycled across every small slot
+    mainImage: 'https://ohgejewwsnbyouozymcc.supabase.co/storage/v1/object/public/Template%20Studio%20sample-images/cat-face.png.png',
     thumbnails: [
-        UT('photo-1583337130417-3346a1be7dee'),
-        UT('photo-1518791841217-8f162f1e1131'),
-        UT('photo-1450778869180-41d0601e046e'),
-        UT('photo-1548199973-03cce0bbc87b'),
+        'https://ohgejewwsnbyouozymcc.supabase.co/storage/v1/object/public/Template%20Studio%20sample-images/for-product.png.png',
+        'https://ohgejewwsnbyouozymcc.supabase.co/storage/v1/object/public/Template%20Studio%20sample-images/for-product.png%20(2).png',
+        'https://ohgejewwsnbyouozymcc.supabase.co/storage/v1/object/public/Template%20Studio%20sample-images/for-product.png.png',
+        'https://ohgejewwsnbyouozymcc.supabase.co/storage/v1/object/public/Template%20Studio%20sample-images/for-product.png%20(2).png',
     ],
-    // 4 distinct pet-grooming / dog photos so the lifestyle banner and the
-    // 3-up "See It In Action" gallery don't all fall back to the same hero
-    // image. Each key is the {{TOKEN}} name embedded in the template's img
-    // src attrs (see pet.ts block 6 and block 10).
     galleryImages: {
-        LIFESTYLE_IMAGE_URL: U('photo-1548199973-03cce0bbc87b'),   // long-haired dog being brushed
-        GALLERY_IMAGE_1: U('photo-1450778869180-41d0601e046e'), // dog with loose fur
-        GALLERY_IMAGE_2: U('photo-1518791841217-8f162f1e1131'), // dog bath time
-        GALLERY_IMAGE_3: U('photo-1543466835-00a7907e9de1'),   // golden retriever portrait
+        LIFESTYLE_IMAGE_URL: 'https://ohgejewwsnbyouozymcc.supabase.co/storage/v1/object/public/Template%20Studio%20sample-images/cat-paw.png.png',
+        GALLERY_IMAGE_1:     'https://ohgejewwsnbyouozymcc.supabase.co/storage/v1/object/public/Template%20Studio%20sample-images/cat-smile.png.png',
+        GALLERY_IMAGE_2:     'https://ohgejewwsnbyouozymcc.supabase.co/storage/v1/object/public/Template%20Studio%20sample-images/cat.png.png',
+        GALLERY_IMAGE_3:     'https://ohgejewwsnbyouozymcc.supabase.co/storage/v1/object/public/Template%20Studio%20sample-images/cute-dolphin.png.png',
+        GALLERY_IMAGE_4:     'https://ohgejewwsnbyouozymcc.supabase.co/storage/v1/object/public/Template%20Studio%20sample-images/dog.png.png',
+        GALLERY_IMAGE_5:     'https://ohgejewwsnbyouozymcc.supabase.co/storage/v1/object/public/Template%20Studio%20sample-images/dolphin.png.png',
+        // cycle back for any extra slots
+        GALLERY_IMAGE_6:     'https://ohgejewwsnbyouozymcc.supabase.co/storage/v1/object/public/Template%20Studio%20sample-images/cat-face.png.png',
+        GALLERY_IMAGE_7:     'https://ohgejewwsnbyouozymcc.supabase.co/storage/v1/object/public/Template%20Studio%20sample-images/cat-paw.png.png',
     },
     related: {
         tokens: {
@@ -141,10 +145,10 @@ const PET_SAMPLE: CategorySampleData = {
             RELATED_PRICE_4: '$7.99',
         },
         images: {
-            RELATED_IMAGE_1: UT('photo-1517849845537-4d257902454a'),
-            RELATED_IMAGE_2: UT('photo-1535930891776-0c2dfb7fda1a'),
-            RELATED_IMAGE_3: UT('photo-1591946614720-90a587da4a36'),
-            RELATED_IMAGE_4: UT('photo-1601758228041-f3b2795255f1'),
+            RELATED_IMAGE_1: 'https://ohgejewwsnbyouozymcc.supabase.co/storage/v1/object/public/Template%20Studio%20sample-images/for-product.png.png',
+            RELATED_IMAGE_2: 'https://ohgejewwsnbyouozymcc.supabase.co/storage/v1/object/public/Template%20Studio%20sample-images/for-product.png%20(2).png',
+            RELATED_IMAGE_3: 'https://ohgejewwsnbyouozymcc.supabase.co/storage/v1/object/public/Template%20Studio%20sample-images/for-product.png.png',
+            RELATED_IMAGE_4: 'https://ohgejewwsnbyouozymcc.supabase.co/storage/v1/object/public/Template%20Studio%20sample-images/for-product.png%20(2).png',
         },
     },
 }
