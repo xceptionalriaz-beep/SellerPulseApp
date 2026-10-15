@@ -317,18 +317,16 @@ export default function ImageEditorModal({
                                 const xs = editorState.exportSettings
                                 const fmt = xs?.format ?? 'jpeg'
                                 const q = xs?.quality ?? 0.92
-                                // Use the user's chosen export width, or 1600 as eBay-safe default
-                                const tw: number | null = xs?.preset === 'original' ? null
-                                    : xs?.preset === 'custom' ? (xs.customWidth ?? 1600)
-                                        : xs?.preset === 'ebay-minimum' ? 500
-                                            : 1600
+                                const tw: number | null =
+                                    xs?.preset === 'original' ? null
+                                        : xs?.preset === 'custom' ? (xs.customWidth ?? 1600)
+                                            : xs?.preset === 'ebay-minimum' ? 500
+                                                : 1600
                                 const dataUrl = await exportToDataUrl(imageUrl, editorState, tw, fmt, q)
                                 onSave(dataUrl, editorState)
                             } catch (err) {
-                                console.error('[ImageEditor] Save export failed:', err)
-                                // Fallback: pass raw url so the modal at least closes
-                                onSave(imageUrl, editorState)
-                            } finally {
+                                console.error('[ImageEditor] Save export failed — check CORS on image URL:', err)
+                                alert('Export failed. Please try again or check the browser console for details.')
                                 setSaving(false)
                             }
                         }}
