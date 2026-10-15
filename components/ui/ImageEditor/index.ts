@@ -29,4 +29,9 @@ export type {
     FilterPreset,
     CropRect,
     BackgroundSettings,
+    WatermarkPosition,
+    WatermarkSettings,
+    ExportPreset,
+    ExportFormat,
+    ExportSettings,
 } from './types'

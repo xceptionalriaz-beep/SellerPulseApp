@@ -5,7 +5,7 @@ import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import {
     Undo2, Redo2, ZoomIn, ZoomOut,
     SlidersHorizontal, Sliders, Crop, Maximize2,
-    RotateCw, Pencil, Type, Square, Scissors,
+    RotateCw, Pencil, Type, Square, Scissors, Image as ImageIcon, Download,
 } from 'lucide-react'
 import { ToolId, ImageEditorState, DEFAULT_STATE, CropRect } from './types'
 
@@ -19,6 +19,8 @@ import DrawTool    from './tools/DrawTool'
 import TextTool    from './tools/TextTool'
 import FrameTool       from './tools/FrameTool'
 import BackgroundTool  from './tools/BackgroundTool'
+import WatermarkTool   from './tools/WatermarkTool'
+import ExportTool      from './tools/ExportTool'
 
 // ── Design tokens ──────────────────────────────────────────────
 const C = {
@@ -71,8 +73,10 @@ const TOOLS: ToolDef[] = [
     { id: 'rotate', label: 'Rotate', icon: <RotateCw size={19} /> },
     { id: 'draw',   label: 'Draw',   icon: <Pencil size={19} /> },
     { id: 'text',   label: 'Text',   icon: <Type size={19} /> },
-    { id: 'frame',      label: 'Frame',  icon: <Square size={19} /> },
-    { id: 'background', label: 'BG',     icon: <Scissors size={19} /> },
+    { id: 'frame',      label: 'Frame',     icon: <Square size={19} /> },
+    { id: 'background', label: 'BG',       icon: <Scissors size={19} /> },
+    { id: 'watermark',  label: 'Watermark', icon: <ImageIcon size={19} /> },
+    { id: 'export',     label: 'Export',    icon: <Download size={19} /> },
 ]
 
 // ── Props ──────────────────────────────────────────────────────
@@ -271,6 +275,8 @@ export default function ImageEditorModal({
             case 'text':   return <TextTool   {...common} />
             case 'frame':      return <FrameTool       {...common} />
             case 'background': return <BackgroundTool  {...common} />
+            case 'watermark':  return <WatermarkTool   {...common} />
+            case 'export':     return <ExportTool      {...common} />
             default:
                 return <PlaceholderPanel tool={TOOLS.find(t => t.id === activeTool)!} />
         }

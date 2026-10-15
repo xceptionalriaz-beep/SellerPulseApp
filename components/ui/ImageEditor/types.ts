@@ -14,6 +14,8 @@ export type ToolId =
     | 'text'
     | 'frame'
     | 'background'
+    | 'watermark'
+    | 'export'
 
 // ── Filter presets ────────────────────────────────────────────
 export type FilterPreset =
@@ -84,6 +86,32 @@ export interface FrameSettings {
     borderRadius: number  // px, 0–40 (for 'rounded')
 }
 
+// ── Watermark ─────────────────────────────────────────────────
+export type WatermarkPosition =
+    | 'tl' | 'tc' | 'tr'
+    | 'ml' | 'mc' | 'mr'
+    | 'bl' | 'bc' | 'br'
+
+export interface WatermarkSettings {
+    enabled:  boolean
+    dataUrl:  string | null    // uploaded logo as data URL
+    position: WatermarkPosition
+    opacity:  number           // 0–1
+    size:     number           // 5–50, % of image width
+    margin:   number           // 4–40 px from edge
+}
+
+// ── Export ────────────────────────────────────────────────────
+export type ExportPreset = 'ebay-standard' | 'ebay-minimum' | 'original' | 'custom'
+export type ExportFormat = 'jpeg' | 'png'
+
+export interface ExportSettings {
+    preset:       ExportPreset
+    customWidth:  number   // px, used when preset = 'custom'
+    quality:      number   // 0.6–1.0 (JPEG only)
+    format:       ExportFormat
+}
+
 // ── Background removal ────────────────────────────────────────
 export interface BackgroundSettings {
     processedUrl: string | null  // data URL of transparent PNG after AI removal
@@ -138,6 +166,12 @@ export interface ImageEditorState {
 
     // ── Background removal ─────────────────────────────────────
     background: BackgroundSettings
+
+    // ── Watermark ──────────────────────────────────────────────
+    watermark: WatermarkSettings
+
+    // ── Export settings ────────────────────────────────────────
+    exportSettings: ExportSettings
 }
 
 // ── Defaults ──────────────────────────────────────────────────
@@ -181,6 +215,20 @@ export const DEFAULT_STATE: ImageEditorState = {
     background: {
         processedUrl: null,
         color:        '#ffffff',
+    },
+    watermark: {
+        enabled:  false,
+        dataUrl:  null,
+        position: 'br',
+        opacity:  0.75,
+        size:     18,
+        margin:   16,
+    },
+    exportSettings: {
+        preset:      'ebay-standard',
+        customWidth: 1600,
+        quality:     0.92,
+        format:      'jpeg',
     },
 }
 
