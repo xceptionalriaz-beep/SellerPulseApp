@@ -7,7 +7,8 @@ import {
     SlidersHorizontal, Sliders, Crop, Maximize2,
     RotateCw, Pencil, Type, Square, Scissors, Image as ImageIcon, Download, Tag,
 } from 'lucide-react'
-import { ToolId, ImageEditorState, DEFAULT_STATE, CropRect } from './types'
+import { ToolId, ImageEditorState, DEFAULT_STATE, CropRect, DrawSettings, TextOverlay, StickerItem } from './types'
+import { SHAPE_DIMS, stickerToDataUrl } from './stickerHelpers'
 
 // ── Tool panel imports ─────────────────────────────────────────
 import AdjustTool  from './tools/AdjustTool'
@@ -787,8 +788,6 @@ function ZoomPillButton({ children, onClick, disabled }: {
 // ── DrawCanvas ─────────────────────────────────────────────────
 // Sits absolutely over the image; captures pointer events only when active.
 // Persists strokes when the user switches to another tool and back.
-import type { DrawSettings, TextOverlay, StickerItem } from './types'
-import { SHAPE_DIMS, stickerToDataUrl } from './stickerHelpers'
 
 function DrawCanvas({ imgEl, drawSettings, active }: {
     imgEl:        HTMLImageElement

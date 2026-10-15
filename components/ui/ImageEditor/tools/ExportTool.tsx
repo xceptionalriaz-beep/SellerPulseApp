@@ -220,7 +220,7 @@ async function exportToCanvas(
         const img = new Image()
         img.crossOrigin = 'anonymous'
 
-        img.onload = () => {
+        img.onload = async () => {
             const natW = img.naturalWidth
             const natH = img.naturalHeight
             const natAR = natW / natH

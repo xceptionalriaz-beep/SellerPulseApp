@@ -15,6 +15,7 @@ import {
     SHAPE_DIMS,
     stickerToDataUrl,
 } from '../stickerHelpers'
+import type { StickerPreset } from '../stickerHelpers'
 
 // ── Sub-components (separate components to avoid hooks-in-map) ──
 
@@ -266,7 +267,7 @@ export default function StickerTool({ state, onChange }: ToolPanelProps) {
         onChange({ stickers: stickers.filter(s => s.id !== id) })
     }
 
-    const filtered = STICKER_PRESETS.filter(p => p.category === activeTab)
+    const filtered = STICKER_PRESETS.filter((p: StickerPreset) => p.category === activeTab)
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -318,7 +319,7 @@ export default function StickerTool({ state, onChange }: ToolPanelProps) {
                     gridTemplateColumns: 'repeat(4, 1fr)',
                     gap:                 8,
                 }}>
-                    {filtered.map(p => (
+                    {filtered.map((p: StickerPreset) => (
                         <PresetThumb
                             key={p.key}
                             pKey={p.key}
