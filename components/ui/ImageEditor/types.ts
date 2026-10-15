@@ -136,6 +136,7 @@ export interface ExportSettings {
 export interface BackgroundSettings {
     processedUrl: string | null  // data URL of transparent PNG after AI removal
     color:        string         // CSS background-color for wrapper, default '#ffffff'
+    bgColor:      string         // canvas fill color for export (default '#ffffff', 'transparent' for PNG)
 }
 
 // ── Full editor state (all tools) ─────────────────────────────
@@ -238,6 +239,7 @@ export const DEFAULT_STATE: ImageEditorState = {
     background: {
         processedUrl: null,
         color:        '#ffffff',
+        bgColor:      '#ffffff',
     },
     watermark: {
         enabled:  false,

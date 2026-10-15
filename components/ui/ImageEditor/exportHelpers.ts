@@ -126,6 +126,13 @@ export async function exportToCanvas(
             canvas.height = canvasH
             const ctx = canvas.getContext('2d')!
 
+            // ── Background fill (prevents black on transparent PNGs) ──
+            const bgColor = state.background?.bgColor ?? '#ffffff'
+            if (bgColor && bgColor !== 'transparent') {
+                ctx.fillStyle = bgColor
+                ctx.fillRect(0, 0, canvasW, canvasH)
+            }
+
             // ── Apply CSS filter ───────────────────────────────
             const filterStr = buildCssFilter(state)
             if (filterStr !== 'none') ctx.filter = filterStr
