@@ -16,6 +16,7 @@ export type ToolId =
     | 'background'
     | 'watermark'
     | 'export'
+    | 'sticker'
 
 // ── Filter presets ────────────────────────────────────────────
 export type FilterPreset =
@@ -101,6 +102,23 @@ export interface WatermarkSettings {
     margin: number           // 4–40 px from edge
 }
 
+// ── Stickers / Badges ────────────────────────────────────────
+export type StickerColorScheme = 'red' | 'green' | 'blue' | 'yellow' | 'purple' | 'orange' | 'black'
+export type StickerShape = 'burst' | 'circle' | 'badge' | 'pill' | 'ribbon'
+
+export interface StickerItem {
+    id: string
+    key: string           // which preset was picked
+    label: string           // main text
+    subLabel: string           // second line (may be empty)
+    shape: StickerShape
+    colorScheme: StickerColorScheme
+    x: number           // 0–1 fraction of image width
+    y: number           // 0–1 fraction of image height
+    scale: number           // 0.5–3, default 1
+    rotation: number           // -45 to 45 deg
+}
+
 // ── Export ────────────────────────────────────────────────────
 export type ExportPreset = 'ebay-standard' | 'ebay-minimum' | 'original' | 'custom'
 export type ExportFormat = 'jpeg' | 'png'
@@ -170,6 +188,9 @@ export interface ImageEditorState {
     // ── Watermark ──────────────────────────────────────────────
     watermark: WatermarkSettings
 
+    // ── Stickers ───────────────────────────────────────────────
+    stickers: StickerItem[]
+
     // ── Export settings ────────────────────────────────────────
     exportSettings: ExportSettings
 }
@@ -224,6 +245,7 @@ export const DEFAULT_STATE: ImageEditorState = {
         size: 18,
         margin: 16,
     },
+    stickers: [],
     exportSettings: {
         preset: 'ebay-standard',
         customWidth: 1600,
