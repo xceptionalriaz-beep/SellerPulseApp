@@ -416,8 +416,17 @@ export default function Canvas({
                 <ImageEditorModal
                     imageUrl={imgEditorSrc}
                     imageName={imgEditorPropKey || 'image'}
-                    onSave={(_editedUrl: string, _state: ImageEditorState) => {
-                        // TODO: wire save back to block prop when filter/crop are implemented
+                    onSave={(editedUrl: string, _state: ImageEditorState) => {
+                        // Post the edited image URL back to VisualEditor so it can
+                        // update the block prop via commitBlocks (same pattern as RIAZIFY_DROP_ASSET)
+                        if (imgEditorBlockId && imgEditorPropKey) {
+                            window.postMessage({
+                                type: 'RIAZIFY_IMAGE_EDITED',
+                                blockId: imgEditorBlockId,
+                                propKey: imgEditorPropKey,
+                                fileUrl: editedUrl,
+                            }, '*')
+                        }
                         setImgEditorSrc(null)
                         setImgEditorPropKey(null)
                         setImgEditorBlockId(null)

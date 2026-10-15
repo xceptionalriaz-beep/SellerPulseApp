@@ -1430,6 +1430,20 @@ export default function VisualEditor({
                         }
                     }
                 }
+            } else if (event.data?.type === 'RIAZIFY_IMAGE_EDITED') {
+                // Image editor Save — baked data URL comes back; update the block prop
+                const { propKey, fileUrl, blockId } = event.data;
+                if (propKey && fileUrl && blockId) {
+                    const idx = blocks.findIndex(b => b.id === blockId);
+                    if (idx >= 0) {
+                        const target = blocks[idx];
+                        const updatedProps = { ...(target.props as any), [propKey]: fileUrl };
+                        const updatedBlock = { ...target, props: updatedProps };
+                        const newBlocks = [...blocks];
+                        newBlocks[idx] = updatedBlock;
+                        commitBlocks(newBlocks, blocks);
+                    }
+                }
             } else if (event.data?.type === 'RIAZIFY_OPEN_URL') {
                 // Anchor click inside iframe — open URL in new tab safely
                 const { url } = event.data;
