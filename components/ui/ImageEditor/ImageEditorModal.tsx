@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { ToolId, ImageEditorState, DEFAULT_STATE, CropRect, DrawSettings, TextOverlay, StickerItem, WatermarkSettings } from './types'
 import { SHAPE_DIMS, stickerToDataUrl } from './stickerHelpers'
+import { exportToDataUrl } from './exportHelpers'
 
 // ── Tool panel imports ─────────────────────────────────────────
 import AdjustTool  from './tools/AdjustTool'
@@ -97,6 +98,7 @@ export default function ImageEditorModal({
     const [activeTool, setActiveTool] = useState<ToolId>('adjust')
     const [zoom, setZoom]             = useState(100)
     const [hovTool, setHovTool]       = useState<ToolId | null>(null)
+    const [saving, setSaving]         = useState(false)
 
     // Image element ref (callback ref so CropOverlay gets notified)
     const [imgEl, setImgEl] = useState<HTMLImageElement | null>(null)
@@ -307,10 +309,38 @@ export default function ImageEditorModal({
                         padding: '6px 16px', borderRadius: 8, border: `1px solid ${C.border}`,
                         background: C.surface, color: C.body, fontSize: 13, fontWeight: 600, cursor: 'pointer',
                     }}>Cancel</button>
-                    <button onClick={() => onSave(editorState.background?.processedUrl ?? imageUrl, editorState)} style={{
-                        padding: '6px 20px', borderRadius: 8, border: 'none',
-                        background: C.primary, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer',
-                    }}>Save</button>
+                    <button
+                        disabled={saving}
+                        onClick={async () => {
+                            setSaving(true)
+                            try {
+                                const xs = editorState.exportSettings
+                                const fmt = xs?.format ?? 'jpeg'
+                                const q   = xs?.quality ?? 0.92
+                                // Use the user's chosen export width, or 1600 as eBay-safe default
+                                const tw: number | null = xs?.preset === 'original' ? null
+                                    : xs?.preset === 'custom'       ? (xs.customWidth ?? 1600)
+                                    : xs?.preset === 'ebay-minimum' ? 500
+                                    : 1600
+                                const dataUrl = await exportToDataUrl(imageUrl, editorState, tw, fmt, q)
+                                onSave(dataUrl, editorState)
+                            } catch (err) {
+                                console.error('[ImageEditor] Save export failed:', err)
+                                // Fallback: pass raw url so the modal at least closes
+                                onSave(imageUrl, editorState)
+                            } finally {
+                                setSaving(false)
+                            }
+                        }}
+                        style={{
+                            padding: '6px 20px', borderRadius: 8, border: 'none',
+                            background: saving ? '#9ca3af' : C.primary,
+                            color: '#fff', fontSize: 13, fontWeight: 700,
+                            cursor: saving ? 'not-allowed' : 'pointer',
+                            opacity: saving ? 0.8 : 1,
+                            transition: 'background 0.15s',
+                        }}
+                    >{saving ? 'Saving…' : 'Save'}</button>
                 </div>
             </div>
 
