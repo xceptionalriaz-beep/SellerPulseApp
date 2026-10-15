@@ -247,6 +247,7 @@ export default function Canvas({
     const [imgEditorSrc, setImgEditorSrc] = React.useState<string | null>(null)
     const [imgEditorPropKey, setImgEditorPropKey] = React.useState<string | null>(null)
     const [imgEditorBlockId, setImgEditorBlockId] = React.useState<string | null>(null)
+    const [imgEditorInitialState, setImgEditorInitialState] = React.useState<import('../ImageEditor/types').ImageEditorState | undefined>(undefined)
 
     // ── Listen for block selection clicks from inside iframes ──
     React.useEffect(() => {
@@ -258,14 +259,25 @@ export default function Canvas({
             }
             // Open image editor modal when user clicks edit icon on a canvas image
             if (e.data?.type === 'RIAZIFY_EDIT_IMAGE' && e.data.imageUrl) {
+                const propKey = e.data.propKey || null
+                const blockId = e.data.blockId || null
                 setImgEditorSrc(e.data.imageUrl)
-                setImgEditorPropKey(e.data.propKey || null)
-                setImgEditorBlockId(e.data.blockId || null)
+                setImgEditorPropKey(propKey)
+                setImgEditorBlockId(blockId)
+                // Restore previous editor state for non-destructive re-editing.
+                // The state is stored in block props as `${propKey}__editorState`.
+                if (blockId && propKey) {
+                    const block = blocks.find(b => b.id === blockId)
+                    const stored = block ? (block.props as any)[`${propKey}__editorState`] : undefined
+                    setImgEditorInitialState(stored ?? undefined)
+                } else {
+                    setImgEditorInitialState(undefined)
+                }
             }
         }
         window.addEventListener('message', handleIframeClick)
         return () => window.removeEventListener('message', handleIframeClick)
-    }, [onSelect, lockedIds])
+    }, [onSelect, lockedIds, blocks])
 
     // ─────────────────────────────────────────────────────────────────────────
     // RENDER
@@ -416,28 +428,31 @@ export default function Canvas({
                 <ImageEditorModal
                     imageUrl={imgEditorSrc}
                     imageName={imgEditorPropKey || 'image'}
+                    initialState={imgEditorInitialState}
                     onSave={(editedUrl: string, _state: ImageEditorState) => {
-                        // Post the edited image URL back to VisualEditor so it can
-                        // update the block prop via commitBlocks (same pattern as RIAZIFY_DROP_ASSET).
-                        // The bgColor is already baked into the exported JPEG by exportToCanvas,
-                        // so we do NOT pass it here — doing so would change the entire TABLE
-                        // background (including text columns), which is not what we want.
+                        // Post the edited image URL + editor state back to VisualEditor.
+                        // The editor state is stored in block props so it can be restored
+                        // next time the user reopens the editor (non-destructive editing).
+                        // bgColor is NOT passed separately — it's baked into the JPEG already.
                         if (imgEditorBlockId && imgEditorPropKey) {
                             window.postMessage({
                                 type: 'RIAZIFY_IMAGE_EDITED',
                                 blockId: imgEditorBlockId,
                                 propKey: imgEditorPropKey,
                                 fileUrl: editedUrl,
+                                editorState: _state,
                             }, '*')
                         }
                         setImgEditorSrc(null)
                         setImgEditorPropKey(null)
                         setImgEditorBlockId(null)
+                        setImgEditorInitialState(undefined)
                     }}
                     onClose={() => {
                         setImgEditorSrc(null)
                         setImgEditorPropKey(null)
                         setImgEditorBlockId(null)
+                        setImgEditorInitialState(undefined)
                     }}
                 />
             )}
