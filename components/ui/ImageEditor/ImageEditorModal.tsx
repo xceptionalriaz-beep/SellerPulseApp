@@ -7,7 +7,7 @@ import {
     SlidersHorizontal, Sliders, Crop, Maximize2,
     RotateCw, Pencil, Type, Square, Scissors, Image as ImageIcon, Download, Tag,
 } from 'lucide-react'
-import { ToolId, ImageEditorState, DEFAULT_STATE, CropRect, DrawSettings, TextOverlay, StickerItem } from './types'
+import { ToolId, ImageEditorState, DEFAULT_STATE, CropRect, DrawSettings, TextOverlay, StickerItem, WatermarkSettings } from './types'
 import { SHAPE_DIMS, stickerToDataUrl } from './stickerHelpers'
 
 // ── Tool panel imports ─────────────────────────────────────────
@@ -423,6 +423,14 @@ export default function ImageEditorModal({
                                 imgEl={imgEl}
                                 drawSettings={editorState.drawSettings}
                                 active={activeTool === 'draw'}
+                            />
+                        )}
+
+                        {/* Watermark live preview */}
+                        {imgEl && editorState.watermark?.enabled && editorState.watermark?.dataUrl && (
+                            <WatermarkLayer
+                                imgEl={imgEl}
+                                watermark={editorState.watermark}
                             />
                         )}
 
@@ -1052,6 +1060,64 @@ function TextOverlayLayer({ imgEl, overlays, active, onChange }: {
                     </div>
                 )
             })}
+        </div>
+    )
+}
+
+// ── WatermarkLayer ─────────────────────────────────────────────
+// Live preview of the watermark/logo overlay on the image.
+function WatermarkLayer({ imgEl, watermark }: {
+    imgEl:     HTMLImageElement
+    watermark: WatermarkSettings
+}) {
+    const [size, setSize] = useState({ w: 0, h: 0 })
+
+    useEffect(() => {
+        const sync = () => setSize({ w: imgEl.offsetWidth, h: imgEl.offsetHeight })
+        if (imgEl.complete && imgEl.naturalWidth) sync()
+        else imgEl.addEventListener('load', sync)
+        const ro = new ResizeObserver(sync)
+        ro.observe(imgEl)
+        return () => { imgEl.removeEventListener('load', sync); ro.disconnect() }
+    }, [imgEl])
+
+    if (!size.w || !size.h || !watermark.dataUrl) return null
+
+    const { position, opacity, size: sizePct, margin } = watermark
+    const logoW = size.w * sizePct / 100
+
+    // Compute position styles
+    const pos: React.CSSProperties = { position: 'absolute' }
+    if (position === 'tl') { pos.top = margin; pos.left = margin }
+    else if (position === 'tc') { pos.top = margin; pos.left = '50%'; pos.transform = 'translateX(-50%)' }
+    else if (position === 'tr') { pos.top = margin; pos.right = margin }
+    else if (position === 'ml') { pos.top = '50%'; pos.left = margin; pos.transform = 'translateY(-50%)' }
+    else if (position === 'mc') { pos.top = '50%'; pos.left = '50%'; pos.transform = 'translate(-50%,-50%)' }
+    else if (position === 'mr') { pos.top = '50%'; pos.right = margin; pos.transform = 'translateY(-50%)' }
+    else if (position === 'bl') { pos.bottom = margin; pos.left = margin }
+    else if (position === 'bc') { pos.bottom = margin; pos.left = '50%'; pos.transform = 'translateX(-50%)' }
+    else /* br */               { pos.bottom = margin; pos.right = margin }
+
+    return (
+        <div style={{
+            position: 'absolute', top: 0, left: 0,
+            width: size.w, height: size.h,
+            pointerEvents: 'none',
+            zIndex: 10,
+        }}>
+            <img
+                src={watermark.dataUrl}
+                alt="watermark"
+                draggable={false}
+                style={{
+                    ...pos,
+                    width:      logoW,
+                    height:     'auto',
+                    opacity,
+                    display:    'block',
+                    userSelect: 'none',
+                }}
+            />
         </div>
     )
 }
