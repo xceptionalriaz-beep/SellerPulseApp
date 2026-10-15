@@ -85,6 +85,7 @@ const TOOLS: ToolDef[] = [
 export interface ImageEditorModalProps {
     imageUrl: string
     imageName?: string
+    initialState?: ImageEditorState
     onSave: (editedUrl: string, state: ImageEditorState) => void
     onClose: () => void
 }
@@ -93,7 +94,7 @@ type HistoryEntry = ImageEditorState
 
 // ── Main component ─────────────────────────────────────────────
 export default function ImageEditorModal({
-    imageUrl, imageName, onSave, onClose,
+    imageUrl, imageName, initialState, onSave, onClose,
 }: ImageEditorModalProps) {
     const [activeTool, setActiveTool] = useState<ToolId>('adjust')
     const [zoom, setZoom] = useState(100)
@@ -105,7 +106,7 @@ export default function ImageEditorModal({
     const imgCallbackRef = useCallback((el: HTMLImageElement | null) => setImgEl(el), [])
 
     // ── History ────────────────────────────────────────────────
-    const [history, setHistory] = useState<HistoryEntry[]>([DEFAULT_STATE])
+    const [history, setHistory] = useState<HistoryEntry[]>([initialState ?? DEFAULT_STATE])
     const [histIdx, setHistIdx] = useState(0)
     const editorState = history[histIdx]
 

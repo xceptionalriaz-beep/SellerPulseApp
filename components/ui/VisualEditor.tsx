@@ -1432,9 +1432,9 @@ export default function VisualEditor({
                 }
             } else if (event.data?.type === 'RIAZIFY_IMAGE_EDITED') {
                 // Image editor Save — baked data URL comes back; update the block prop.
-                // The bgColor is already baked into the JPEG by exportToCanvas, so we
-                // only need to update the image src prop — not the block's bgColor.
-                const { propKey, fileUrl, blockId } = event.data;
+                // editorState is also stored under `${propKey}__editorState` so it can
+                // be restored next time the user reopens the editor (non-destructive).
+                const { propKey, fileUrl, blockId, editorState } = event.data;
                 if (propKey && fileUrl && blockId) {
                     const idx = blocks.findIndex(b => b.id === blockId);
                     if (idx >= 0) {
@@ -1442,6 +1442,9 @@ export default function VisualEditor({
                         const updatedProps = {
                             ...(target.props as any),
                             [propKey]: fileUrl,
+                            // Store the editor state keyed by propKey so re-opening
+                            // the editor can restore the previous settings.
+                            ...(editorState ? { [`${propKey}__editorState`]: editorState } : {}),
                         } as Block['props'];
                         const updatedBlock: Block = { ...target, props: updatedProps };
                         const newBlocks = [...blocks];
