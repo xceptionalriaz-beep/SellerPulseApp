@@ -1431,13 +1431,22 @@ export default function VisualEditor({
                     }
                 }
             } else if (event.data?.type === 'RIAZIFY_IMAGE_EDITED') {
-                // Image editor Save — baked data URL comes back; update the block prop
-                const { propKey, fileUrl, blockId } = event.data;
+                // Image editor Save — baked data URL comes back; update the block prop.
+                // bgColor (if provided) is also applied to the block's bgColor prop so the
+                // template TABLE's background-color matches — this fixes the black background
+                // on fullwidth/lifestyle variants whose default bgColor is #000000.
+                const { propKey, fileUrl, blockId, bgColor } = event.data;
                 if (propKey && fileUrl && blockId) {
                     const idx = blocks.findIndex(b => b.id === blockId);
                     if (idx >= 0) {
                         const target = blocks[idx];
-                        const updatedProps = { ...(target.props as any), [propKey]: fileUrl };
+                        const updatedProps: Record<string, unknown> = {
+                            ...(target.props as any),
+                            [propKey]: fileUrl,
+                            // Sync the block's bgColor with the Image Editor choice so the
+                            // TABLE background-color in the template shows the right color.
+                            ...(bgColor ? { bgColor } : {}),
+                        };
                         const updatedBlock = { ...target, props: updatedProps };
                         const newBlocks = [...blocks];
                         newBlocks[idx] = updatedBlock;
