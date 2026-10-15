@@ -4364,6 +4364,9 @@ export interface CanvasSettings {
 
     // ── Color Palette ─────────────────────────────────────────────────────────
     palette: string[]            // saved brand swatches (max 10)
+
+    // ── eBay Listing Context ───────────────────────────────────────────────────
+    ebayCategory?: string        // eBay top-level category — affects audit rules & token suggestions
 }
 
 export const DEFAULT_CANVAS_SETTINGS: CanvasSettings = {
@@ -4387,6 +4390,9 @@ export const DEFAULT_CANVAS_SETTINGS: CanvasSettings = {
 
     // Color palette — pre-seeded with brand colors
     palette: ['#7530fb', '#b8fa33', '#1e1535', '#ffffff', '#6b7280'],
+
+    // eBay category — defaults to Fashion (most common for clothing sellers)
+    ebayCategory: 'fashion',
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

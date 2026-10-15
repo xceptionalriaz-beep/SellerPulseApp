@@ -103,6 +103,65 @@ const C = {
     warningLight: '#fef3c7',
 }
 
+// ── Item Specifics Token Groups ───────────────────────────────────────────────
+// Tokens that sellers can insert into any text field via the + Token button.
+// These are eBay item specifics that get substituted at listing-generation time.
+export const TOKEN_GROUPS: Array<{ group: string; emoji: string; items: Array<{ label: string; value: string; hint?: string }> }> = [
+    {
+        group: 'Product',
+        emoji: '📦',
+        items: [
+            { label: 'Brand',     value: '{{BRAND}}',     hint: 'e.g. Nike, Sony' },
+            { label: 'Model',     value: '{{MODEL}}',     hint: 'Model name or number' },
+            { label: 'MPN',       value: '{{MPN}}',       hint: 'Manufacturer Part Number' },
+            { label: 'EAN / UPC', value: '{{EAN}}',       hint: 'Barcode number' },
+        ],
+    },
+    {
+        group: 'Condition',
+        emoji: '🔍',
+        items: [
+            { label: 'Item Condition', value: '{{ITEM_CONDITION}}', hint: 'New, Used, Refurbished…' },
+            { label: 'Condition Notes', value: '{{CONDITION_NOTES}}', hint: 'Seller condition description' },
+        ],
+    },
+    {
+        group: 'Variations',
+        emoji: '🎨',
+        items: [
+            { label: 'Colour',    value: '{{COLOR}}',    hint: 'e.g. Red, Navy Blue' },
+            { label: 'Size',      value: '{{SIZE}}',     hint: 'e.g. M, XL, UK 10' },
+            { label: 'Material',  value: '{{MATERIAL}}', hint: 'e.g. Cotton, Leather' },
+        ],
+    },
+    {
+        group: 'Seller',
+        emoji: '🏪',
+        items: [
+            { label: 'Seller Name',     value: '{{SELLER_NAME}}',    hint: 'eBay username' },
+            { label: 'Store Name',      value: '{{STORE_NAME}}',     hint: 'eBay store name' },
+            { label: 'Feedback Score',  value: '{{FEEDBACK_SCORE}}', hint: 'Positive feedback %' },
+        ],
+    },
+    {
+        group: 'Shipping',
+        emoji: '🚚',
+        items: [
+            { label: 'Dispatch Time',    value: '{{DISPATCH_TIME}}',   hint: 'e.g. Same day, 1 day' },
+            { label: 'Returns Policy',   value: '{{RETURNS_POLICY}}',  hint: 'e.g. 30-day free returns' },
+        ],
+    },
+    {
+        group: 'Price',
+        emoji: '💰',
+        items: [
+            { label: 'Price',      value: '{{PRICE}}',      hint: 'Current selling price' },
+            { label: 'Was Price',  value: '{{WAS_PRICE}}',  hint: 'Original / RRP price' },
+            { label: 'Saving',     value: '{{SAVING}}',     hint: 'e.g. Save £10 (20%)' },
+        ],
+    },
+]
+
 // ── Block types that can carry AI-filled text content ─────────────────────────
 const TEXT_BEARING_TYPES: BlockType[] = [
     'heading', 'paragraph', 'bullet_list', 'numbered_list',
@@ -4005,6 +4064,8 @@ function AttributesTab({
 }) {
     const [showPh, setShowPh] = useState(false)
     const [phTarget, setPhTarget] = useState<string | null>(null)
+    const [showToken, setShowToken] = useState(false)
+    const [tokenTarget, setTokenTarget] = useState<string | null>(null)
 
     // Insert placeholder into a specific text field
     const insertPlaceholder = (fieldKey: string, value: string) => {
@@ -4012,6 +4073,14 @@ function AttributesTab({
         updateProps({ [fieldKey]: current + value })
         setShowPh(false)
         setPhTarget(null)
+    }
+
+    // Insert item-specifics token into a specific text field
+    const insertToken = (fieldKey: string, value: string) => {
+        const current = props[fieldKey] ?? ''
+        updateProps({ [fieldKey]: current + value })
+        setShowToken(false)
+        setTokenTarget(null)
     }
 
     const phButton = (fieldKey: string, label: string) => (
@@ -4036,6 +4105,29 @@ function AttributesTab({
         </button>
     )
 
+    const tokenButton = (fieldKey: string) => (
+        <button
+            onClick={() => { setTokenTarget(fieldKey); setShowToken(true) }}
+            title="Insert eBay item specific token"
+            style={{
+                marginTop: 3,
+                marginBottom: 8,
+                marginLeft: 6,
+                padding: '3px 8px',
+                border: `1px solid #fde68a`,
+                borderRadius: 6,
+                backgroundColor: '#fffbeb',
+                color: '#b45309',
+                fontFamily: 'DM Sans, sans-serif',
+                fontSize: 10,
+                fontWeight: 600,
+                cursor: 'pointer',
+            }}
+        >
+            ⚡ Token
+        </button>
+    )
+
     return (
         <div style={{ padding: '14px 14px 24px', position: 'relative' }}>
 
@@ -4048,11 +4140,20 @@ function AttributesTab({
                 />
             )}
 
+            {/* Token picker overlay */}
+            {showToken && (
+                <TokenPickerOverlay
+                    onInsert={val => tokenTarget && insertToken(tokenTarget, val)}
+                    onClose={() => { setShowToken(false); setTokenTarget(null) }}
+                />
+            )}
+
             <BlockAttributeProps
                 block={block}
                 props={props}
                 updateProps={updateProps}
                 phButton={phButton}
+                tokenButton={tokenButton}
                 selectedSubSlot={selectedSubSlot}
             />
         </div>
@@ -4060,9 +4161,10 @@ function AttributesTab({
 }
 
 // Block-specific attribute controls
-function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubSlot }: {
+function BlockAttributeProps({ block, props, updateProps, phButton, tokenButton, selectedSubSlot }: {
     block: Block, props: any, updateProps: (p: any) => void,
     phButton: (key: string, label: string) => React.ReactNode
+    tokenButton: (key: string) => React.ReactNode
     selectedSubSlot?: string | null
 }) {
     switch (block.type) {
@@ -4079,7 +4181,10 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                 <>
                     <Section title="Content">
                         <TextareaInput label="Heading text" value={props.text ?? ''} rows={2} onChange={v => updateProps({ text: v })} />
-                        {phButton('text', 'heading')}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                            {phButton('text', 'heading')}
+                            {tokenButton('text')}
+                        </div>
                         <SelectInput label="Level" value={props.level ?? 'h2'}
                             options={[{ v: 'h1', l: 'H1 — Page Title' }, { v: 'h2', l: 'H2 — Section' }, { v: 'h3', l: 'H3 — Subsection' }, { v: 'h4', l: 'H4 — Minor' }]}
                             onChange={v => updateProps({ level: v })} />
@@ -4091,7 +4196,10 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
             return (
                 <Section title="Content">
                     <TextareaInput label="Text" value={props.text ?? ''} rows={5} onChange={v => updateProps({ text: v })} />
-                    {phButton('text', 'paragraph')}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                        {phButton('text', 'paragraph')}
+                        {tokenButton('text')}
+                    </div>
                 </Section>
             )
 
@@ -4110,14 +4218,20 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
                 <>
                     <Section title="Title text">
                         <TextInput label="Title" value={props.text ?? '{{PRODUCT_TITLE}}'} onChange={v => updateProps({ text: v })} />
-                        {phButton('text', 'title')}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                            {phButton('text', 'title')}
+                            {tokenButton('text')}
+                        </div>
                     </Section>
                     <Section title="Condition">
                         <ToggleRow label="Show condition" value={props.showCondition ?? true} onChange={v => updateProps({ showCondition: v })} />
                         {props.showCondition && (
                             <>
                                 <TextInput label="Condition text" value={props.conditionText ?? '{{ITEM_CONDITION}}'} onChange={v => updateProps({ conditionText: v })} />
-                                {phButton('conditionText', 'condition')}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                                    {phButton('conditionText', 'condition')}
+                                    {tokenButton('conditionText')}
+                                </div>
                             </>
                         )}
                     </Section>
@@ -8858,6 +8972,157 @@ function SizeRowEditor({
             {rows.length === 0 && (
                 <p style={{ fontSize: 11, color: '#9ca3af', fontFamily: 'DM Sans,sans-serif', textAlign: 'center', margin: '8px 0' }}>No rows yet — click "+ Add Size"</p>
             )}
+        </div>
+    )
+}
+
+// ── TokenPickerOverlay ────────────────────────────────────────────────────────
+// Floating overlay for inserting eBay Item Specifics tokens into text fields
+// ─────────────────────────────────────────────────────────────────────────────
+function TokenPickerOverlay({
+    onInsert,
+    onClose,
+}: {
+    onInsert: (value: string) => void
+    onClose: () => void
+}) {
+    const [search, setSearch] = useState('')
+    const q = search.toLowerCase().trim()
+
+    return (
+        <div style={{
+            position: 'absolute',
+            top: 8,
+            left: 8,
+            right: 8,
+            zIndex: 101,
+            backgroundColor: C.surface,
+            border: '1px solid #fde68a',
+            borderRadius: 10,
+            boxShadow: '0 8px 24px rgba(180,83,9,0.12)',
+            overflow: 'hidden',
+        }}>
+            {/* Header */}
+            <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '10px 12px 8px',
+                borderBottom: '1px solid #fde68a',
+                backgroundColor: '#fffbeb',
+            }}>
+                <div>
+                    <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700, color: '#b45309' }}>
+                        ⚡ Insert Token
+                    </span>
+                    <span style={{ display: 'block', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: '#d97706', marginTop: 1 }}>
+                        eBay Item Specifics — substituted at generation time
+                    </span>
+                </div>
+                <button
+                    onClick={onClose}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: 16, padding: 0 }}
+                >
+                    ×
+                </button>
+            </div>
+
+            {/* Search */}
+            <div style={{ padding: '8px 10px', borderBottom: '1px solid #fde68a' }}>
+                <input
+                    autoFocus
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    placeholder="Search tokens…"
+                    style={{ ...inputStyle, fontSize: 11 }}
+                />
+            </div>
+
+            {/* Token groups */}
+            <div style={{ maxHeight: 280, overflowY: 'auto' }}>
+                {TOKEN_GROUPS.map(group => {
+                    const filtered = q
+                        ? group.items.filter(i =>
+                            i.label.toLowerCase().includes(q) ||
+                            i.value.toLowerCase().includes(q) ||
+                            (i.hint ?? '').toLowerCase().includes(q)
+                        )
+                        : group.items
+                    if (filtered.length === 0) return null
+                    return (
+                        <div key={group.group}>
+                            <p style={{
+                                margin: 0,
+                                padding: '6px 12px 3px',
+                                fontFamily: 'DM Sans, sans-serif',
+                                fontSize: 9,
+                                fontWeight: 700,
+                                color: '#b45309',
+                                textTransform: 'uppercase' as const,
+                                letterSpacing: '0.06em',
+                                backgroundColor: '#fffbeb',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 5,
+                            }}>
+                                <span>{group.emoji}</span>
+                                {group.group}
+                            </p>
+                            {filtered.map(item => (
+                                <button
+                                    key={item.value}
+                                    onClick={() => onInsert(item.value)}
+                                    style={{
+                                        width: '100%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        padding: '7px 12px',
+                                        border: 'none',
+                                        borderBottom: `1px solid ${C.border}`,
+                                        backgroundColor: 'transparent',
+                                        cursor: 'pointer',
+                                        textAlign: 'left' as const,
+                                        gap: 8,
+                                    }}
+                                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#fffbeb')}
+                                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                                >
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: C.body, display: 'block' }}>
+                                            {item.label}
+                                        </span>
+                                        {item.hint && (
+                                            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted }}>
+                                                {item.hint}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <code style={{
+                                        fontFamily: 'monospace',
+                                        fontSize: 10,
+                                        color: '#b45309',
+                                        backgroundColor: '#fef3c7',
+                                        padding: '2px 6px',
+                                        borderRadius: 4,
+                                        flexShrink: 0,
+                                        whiteSpace: 'nowrap' as const,
+                                    }}>
+                                        {item.value}
+                                    </code>
+                                </button>
+                            ))}
+                        </div>
+                    )
+                })}
+                {q && TOKEN_GROUPS.every(g => g.items.filter(i =>
+                    i.label.toLowerCase().includes(q) || i.value.toLowerCase().includes(q)
+                ).length === 0) && (
+                    <p style={{ padding: 16, textAlign: 'center' as const, fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: C.muted }}>
+                        No tokens match &quot;{search}&quot;
+                    </p>
+                )}
+            </div>
         </div>
     )
 }

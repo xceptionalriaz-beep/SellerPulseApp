@@ -23,7 +23,7 @@
 
 import React, { useState } from 'react'
 import { CanvasSettings, DEFAULT_CANVAS_SETTINGS } from './blocks'
-import { Monitor, Type, AlignCenter, AlignLeft, RotateCcw, Palette, Layers, Copy, Smartphone } from 'lucide-react'
+import { Monitor, Type, AlignCenter, AlignLeft, RotateCcw, Palette, Layers, Copy, Smartphone, Tag } from 'lucide-react'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -53,6 +53,20 @@ const FONT_OPTIONS = [
     { label: 'Georgia (Serif)', value: 'Georgia, Times New Roman, serif', preview: 'Georgia' },
     { label: 'Verdana', value: 'Verdana, Geneva, sans-serif', preview: 'Verdana' },
     { label: 'Tahoma', value: 'Tahoma, Geneva, sans-serif', preview: 'Tahoma' },
+]
+
+// ── eBay category options ─────────────────────────────────────────────────────
+export const EBAY_CATEGORIES = [
+    { value: 'fashion',         label: 'Fashion',          emoji: '👗', hint: 'Clothing, shoes & accessories' },
+    { value: 'electronics',     label: 'Electronics',      emoji: '💻', hint: 'Phones, computers & tech' },
+    { value: 'home_garden',     label: 'Home & Garden',    emoji: '🏡', hint: 'Furniture, tools & décor' },
+    { value: 'sports',          label: 'Sports',           emoji: '⚽', hint: 'Sporting goods & fitness' },
+    { value: 'toys',            label: 'Toys',             emoji: '🧸', hint: 'Toys, games & hobbies' },
+    { value: 'motors',          label: 'Motors',           emoji: '🚗', hint: 'Cars, parts & accessories' },
+    { value: 'collectibles',    label: 'Collectibles',     emoji: '🎨', hint: 'Art, antiques & memorabilia' },
+    { value: 'business',        label: 'Business',         emoji: '🏭', hint: 'Industrial & commercial' },
+    { value: 'health_beauty',   label: 'Health & Beauty',  emoji: '💄', hint: 'Skincare, vitamins & wellbeing' },
+    { value: 'other',           label: 'Other',            emoji: '📦', hint: 'General / mixed items' },
 ]
 
 // ── Width presets ─────────────────────────────────────────────────────────────
@@ -193,6 +207,66 @@ export default function BodySettings({ settings, onUpdate, onApplyToAll }: BodyS
 
             {/* ── Settings content ── */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '14px 14px 24px' }}>
+
+                {/* ── eBay Category ── */}
+                <Section title="eBay Category" Icon={Tag}>
+                    <p style={{ margin: '0 0 10px', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, lineHeight: 1.5 }}>
+                        Sets the listing context — affects audit rules and token suggestions.
+                    </p>
+                    <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 4 }}>
+                        {EBAY_CATEGORIES.map(cat => {
+                            const active = (settings.ebayCategory ?? 'fashion') === cat.value
+                            return (
+                                <button
+                                    key={cat.value}
+                                    onClick={() => patch({ ebayCategory: cat.value })}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 10,
+                                        padding: '7px 10px',
+                                        border: `1px solid ${active ? C.primary : C.border}`,
+                                        borderRadius: 8,
+                                        backgroundColor: active ? C.primaryLight : 'transparent',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.12s',
+                                        textAlign: 'left' as const,
+                                    }}
+                                >
+                                    <span style={{ fontSize: 16, lineHeight: 1, flexShrink: 0 }}>{cat.emoji}</span>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <span style={{
+                                            display: 'block',
+                                            fontFamily: 'DM Sans, sans-serif',
+                                            fontSize: 12,
+                                            fontWeight: active ? 700 : 500,
+                                            color: active ? C.primary : C.body,
+                                        }}>{cat.label}</span>
+                                        <span style={{
+                                            display: 'block',
+                                            fontFamily: 'DM Sans, sans-serif',
+                                            fontSize: 10,
+                                            color: active ? C.primary : C.muted,
+                                            opacity: active ? 0.85 : 1,
+                                        }}>{cat.hint}</span>
+                                    </div>
+                                    {active && (
+                                        <span style={{
+                                            fontFamily: 'DM Sans, sans-serif',
+                                            fontSize: 9,
+                                            fontWeight: 700,
+                                            color: C.primary,
+                                            backgroundColor: C.primaryBorder,
+                                            padding: '2px 6px',
+                                            borderRadius: 4,
+                                            flexShrink: 0,
+                                        }}>ACTIVE</span>
+                                    )}
+                                </button>
+                            )
+                        })}
+                    </div>
+                </Section>
 
                 {/* ── Canvas Width ── */}
                 <Section title="Canvas Width" Icon={Monitor}>
