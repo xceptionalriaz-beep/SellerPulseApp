@@ -2808,6 +2808,29 @@ function BlockStyleProps({ block, props, updateProps }: {
                 </>
             )
 
+        case 'size_guide':
+            return (
+                <>
+                    <Section title="Header">
+                        <ColorRow label="Header background" value={(props as any).headerBg ?? '#7530fb'} onChange={v => updateProps({ headerBg: v })} />
+                        <ColorRow label="Header text" value={(props as any).headerText ?? '#ffffff'} onChange={v => updateProps({ headerText: v })} />
+                    </Section>
+                    <Section title="Table rows">
+                        <ColorRow label="Alt row background" value={(props as any).altRowBg ?? '#f8f7ff'} onChange={v => updateProps({ altRowBg: v })} />
+                        <ColorRow label="Border colour" value={(props as any).borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
+                        <ColorRow label="Cell text" value={(props as any).textColor ?? '#374151'} onChange={v => updateProps({ textColor: v })} />
+                    </Section>
+                    <Section title="Spacing">
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                            <NumberInput label="Pad top" value={(props as any).paddingTop ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingTop: v })} />
+                            <NumberInput label="Pad bottom" value={(props as any).paddingBottom ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v })} />
+                            <NumberInput label="Pad left" value={(props as any).paddingLeft ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingLeft: v })} />
+                            <NumberInput label="Pad right" value={(props as any).paddingRight ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingRight: v })} />
+                        </div>
+                    </Section>
+                </>
+            )
+
         case 'price_tag': {
             const pv = (props as any).variant ?? 'classic-strike'
             return (
@@ -6012,6 +6035,110 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
             )
         }
 
+        case 'size_guide': {
+            const sgCols: string[] = Array.isArray(props.columns) && props.columns.length > 0
+                ? props.columns
+                : ['Size', 'UK', 'US', 'EU', 'Chest (cm)', 'Waist (cm)']
+            const sgRows: string[][] = Array.isArray(props.rows) && props.rows.length > 0
+                ? props.rows
+                : [['S','8','4','36','84','66'],['M','10','6','38','88','70'],['L','12','8','40','92','74']]
+
+            const CATEGORY_PRESETS: Record<string, { columns: string[]; rows: string[][] }> = {
+                tops: {
+                    columns: ['Size', 'UK', 'US', 'EU', 'Chest (cm)', 'Waist (cm)'],
+                    rows: [['XS','6','2','34','80','62'],['S','8','4','36','84','66'],['M','10','6','38','88','70'],['L','12','8','40','92','74'],['XL','14','10','42','96','78'],['XXL','16','12','44','100','82']],
+                },
+                bottoms: {
+                    columns: ['Size', 'UK', 'US', 'EU', 'Waist (cm)', 'Hip (cm)', 'Leg (cm)'],
+                    rows: [['XS','6','0','34','62','87','78'],['S','8','2','36','66','91','79'],['M','10','4','38','70','95','80'],['L','12','6','40','74','99','81'],['XL','14','8','42','78','103','82']],
+                },
+                shoes: {
+                    columns: ['UK', 'US', 'EU', 'Length (cm)'],
+                    rows: [['4','6.5','37','23.5'],['5','7.5','38','24'],['6','8.5','39','24.5'],['7','9.5','40','25.5'],['8','10.5','41','26'],['9','11.5','42','27']],
+                },
+                dresses: {
+                    columns: ['Size', 'UK', 'US', 'EU', 'Chest (cm)', 'Waist (cm)', 'Hip (cm)'],
+                    rows: [['XS','6','2','34','80','62','87'],['S','8','4','36','84','66','91'],['M','10','6','38','88','70','95'],['L','12','8','40','92','74','99'],['XL','14','10','42','96','78','103']],
+                },
+                custom: { columns: sgCols, rows: sgRows },
+            }
+            return (
+                <>
+                    <Section title="Title">
+                        <TextInput label="Title text" value={props.titleText ?? 'Size Guide'} onChange={v => updateProps({ titleText: v })} />
+                    </Section>
+                    <Section title="Category">
+                        <SelectInput
+                            label="Clothing type"
+                            value={props.sizeCategory ?? 'tops'}
+                            options={[
+                                { v: 'tops', l: 'Tops / Shirts / Jackets' },
+                                { v: 'bottoms', l: 'Bottoms / Jeans / Trousers' },
+                                { v: 'shoes', l: 'Shoes / Footwear' },
+                                { v: 'dresses', l: 'Dresses / Jumpsuits' },
+                                { v: 'custom', l: 'Custom (manual columns)' },
+                            ]}
+                            onChange={v => {
+                                const preset = CATEGORY_PRESETS[v]
+                                if (preset && v !== 'custom') {
+                                    updateProps({ sizeCategory: v, columns: preset.columns, rows: preset.rows })
+                                } else {
+                                    updateProps({ sizeCategory: v })
+                                }
+                            }}
+                        />
+                    </Section>
+                    <Section title="Size rows">
+                        <SizeRowEditor
+                            columns={sgCols}
+                            rows={sgRows}
+                            onColumnsChange={cols => updateProps({ columns: cols })}
+                            onRowsChange={rows => updateProps({ rows })}
+                            allowEditColumns={props.sizeCategory === 'custom'}
+                        />
+                    </Section>
+                    <Section title="Fit note">
+                        <ToggleRow label="Show fit note" value={props.showFitNote ?? true} onChange={v => updateProps({ showFitNote: v })} />
+                        {(props.showFitNote ?? true) && (
+                            <TextareaInput
+                                label="Fit note text"
+                                value={props.fitNote ?? 'This item runs true to size. If in doubt, size up.'}
+                                rows={2}
+                                onChange={v => updateProps({ fitNote: v })}
+                            />
+                        )}
+                    </Section>
+                    <Section title="How to measure">
+                        <ToggleRow label="Show measure guide" value={props.showMeasureGuide ?? true} onChange={v => updateProps({ showMeasureGuide: v })} />
+                        {(props.showMeasureGuide ?? true) && (
+                            <TextareaInput
+                                label="Measure guide text"
+                                value={props.measureGuideText ?? 'How to measure: Use a soft tape measure. For chest, measure around the fullest part. For waist, measure around your natural waistline.'}
+                                rows={3}
+                                onChange={v => updateProps({ measureGuideText: v })}
+                            />
+                        )}
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Header background" value={(props as any).headerBg ?? '#7530fb'} onChange={v => updateProps({ headerBg: v } as any)} />
+                        <ColorRow label="Header text" value={(props as any).headerText ?? '#ffffff'} onChange={v => updateProps({ headerText: v } as any)} />
+                        <ColorRow label="Alt row background" value={(props as any).altRowBg ?? '#f8f7ff'} onChange={v => updateProps({ altRowBg: v } as any)} />
+                        <ColorRow label="Border colour" value={(props as any).borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v } as any)} />
+                        <ColorRow label="Cell text" value={(props as any).textColor ?? '#374151'} onChange={v => updateProps({ textColor: v } as any)} />
+                    </Section>
+                    <Section title="Spacing">
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                            <NumberInput label="Top (px)" value={(props as any).paddingTop ?? 16} min={0} max={80} onChange={v => updateProps({ paddingTop: v } as any)} />
+                            <NumberInput label="Bottom (px)" value={(props as any).paddingBottom ?? 16} min={0} max={80} onChange={v => updateProps({ paddingBottom: v } as any)} />
+                            <NumberInput label="Left (px)" value={(props as any).paddingLeft ?? 24} min={0} max={80} onChange={v => updateProps({ paddingLeft: v } as any)} />
+                            <NumberInput label="Right (px)" value={(props as any).paddingRight ?? 24} min={0} max={80} onChange={v => updateProps({ paddingRight: v } as any)} />
+                        </div>
+                    </Section>
+                </>
+            )
+        }
+
         case 'border_box':
             return (
                 <Section title="Content">
@@ -8343,6 +8470,107 @@ function UniversalTypography({
                 onChange={v => updateProps({ fontFamily: v })}
             />
         </Section>
+    )
+}
+
+// ── SizeRowEditor ─────────────────────────────────────────────────────────────
+// Multi-column row editor for the Size Guide block
+function SizeRowEditor({
+    columns, rows, onColumnsChange, onRowsChange, allowEditColumns = false,
+}: {
+    columns: string[]
+    rows: string[][]
+    onColumnsChange: (cols: string[]) => void
+    onRowsChange: (rows: string[][]) => void
+    allowEditColumns?: boolean
+}) {
+    const addRow = () => {
+        const blank = columns.map(() => '')
+        onRowsChange([...rows, blank])
+    }
+    const removeRow = (i: number) => onRowsChange(rows.filter((_, j) => j !== i))
+    const updateCell = (ri: number, ci: number, val: string) => {
+        const next = rows.map((row, j) => j === ri ? row.map((c, k) => k === ci ? val : c) : row)
+        onRowsChange(next)
+    }
+    const updateColHeader = (ci: number, val: string) => {
+        onColumnsChange(columns.map((c, k) => k === ci ? val : c))
+    }
+    const addColumn = () => {
+        onColumnsChange([...columns, 'Col'])
+        onRowsChange(rows.map(row => [...row, '']))
+    }
+    const removeColumn = (ci: number) => {
+        onColumnsChange(columns.filter((_, k) => k !== ci))
+        onRowsChange(rows.map(row => row.filter((_, k) => k !== ci)))
+    }
+
+    const colW = Math.max(52, Math.floor(200 / Math.max(columns.length, 1)))
+
+    return (
+        <div style={{ overflowX: 'auto' }}>
+            {/* Column headers */}
+            <div style={{ display: 'flex', gap: 4, marginBottom: 4, alignItems: 'center' }}>
+                <div style={{ width: 22, flexShrink: 0 }} />
+                {columns.map((col, ci) => (
+                    <div key={ci} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: colW, flexShrink: 0 }}>
+                        {allowEditColumns ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+                                <input
+                                    type="text"
+                                    value={col}
+                                    onChange={e => updateColHeader(ci, e.target.value)}
+                                    style={{ ...inputStyle, fontSize: 10, fontWeight: 700, padding: '3px 5px', flex: 1, minWidth: 0, textAlign: 'center' }}
+                                />
+                                {columns.length > 1 && (
+                                    <button
+                                        onClick={() => removeColumn(ci)}
+                                        style={{ padding: '1px 4px', border: '1px solid #fca5a5', background: '#fff1f1', color: '#dc2626', fontSize: 9, cursor: 'pointer', borderRadius: 3 }}
+                                    >✕</button>
+                                )}
+                            </div>
+                        ) : (
+                            <span style={{ fontSize: 10, fontWeight: 700, color: C.body, fontFamily: 'DM Sans,sans-serif', textAlign: 'center', display: 'block', padding: '3px 0' }}>{col}</span>
+                        )}
+                    </div>
+                ))}
+                {allowEditColumns && (
+                    <button
+                        onClick={addColumn}
+                        style={{ padding: '2px 6px', border: `1px dashed ${C.primary}`, background: C.primaryLight, color: C.primary, fontSize: 10, cursor: 'pointer', borderRadius: 4, flexShrink: 0 }}
+                    >+Col</button>
+                )}
+            </div>
+
+            {/* Rows */}
+            {rows.map((row, ri) => (
+                <div key={ri} style={{ display: 'flex', gap: 4, marginBottom: 4, alignItems: 'center' }}>
+                    <button
+                        onClick={() => removeRow(ri)}
+                        style={{ width: 18, height: 18, padding: 0, border: '1px solid #fca5a5', background: '#fff1f1', color: '#dc2626', fontSize: 10, cursor: 'pointer', borderRadius: 3, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    >✕</button>
+                    {columns.map((_, ci) => (
+                        <input
+                            key={ci}
+                            type="text"
+                            value={row[ci] ?? ''}
+                            onChange={e => updateCell(ri, ci, e.target.value)}
+                            style={{ ...inputStyle, width: colW, flexShrink: 0, minWidth: 0, padding: '4px 5px', textAlign: 'center', fontSize: 12 }}
+                        />
+                    ))}
+                </div>
+            ))}
+
+            {/* Add row */}
+            <button
+                onClick={addRow}
+                style={{ marginTop: 4, padding: '6px 0', borderRadius: 7, width: '100%', border: `1.5px dashed ${C.primary}`, background: C.primaryLight, color: C.primary, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans,sans-serif' }}
+            >+ Add Size</button>
+
+            {rows.length === 0 && (
+                <p style={{ fontSize: 11, color: '#9ca3af', fontFamily: 'DM Sans,sans-serif', textAlign: 'center', margin: '8px 0' }}>No rows yet — click "+ Add Size"</p>
+            )}
+        </div>
     )
 }
 

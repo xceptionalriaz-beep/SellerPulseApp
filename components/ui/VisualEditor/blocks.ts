@@ -101,6 +101,7 @@ export type BlockType =
     | 'authenticity_guarantee'
     | 'condition_badge'
     | 'item_specifics'
+    | 'size_guide'
     // Conversion
     | 'policy_tabs'
     | 'nav_bar'
@@ -4061,6 +4062,81 @@ ${thumbCells}
                 const p = props as any
                 const variantId = p.variant ?? 'test-classic-grid'
                 return wrapBlock('testimonial_block' as BlockType, id, getTestimonialsVariant(variantId).toHtml(p, id), p)
+            },
+        },
+
+        // ── Size Guide ──────────────────────────────────────────────────────────
+        {
+            type: 'size_guide' as BlockType,
+            label: 'Size Guide',
+            category: 'eBay Specific' as BlockCategory,
+            icon: 'ruler',
+            description: 'Clothing size chart with UK/US/EU columns and measurements',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                bgColor: '#ffffff',
+                titleText: 'Size Guide',
+                headerBg: '#7530fb',
+                headerText: '#ffffff',
+                altRowBg: '#f8f7ff',
+                borderColor: '#ede9fe',
+                textColor: '#374151',
+                fitNote: 'This item runs true to size. If in doubt, size up.',
+                showFitNote: true,
+                showMeasureGuide: true,
+                measureGuideText: 'How to measure: Use a soft tape measure. For chest, measure around the fullest part. For waist, measure around your natural waistline.',
+                sizeCategory: 'tops',
+                unit: 'cm',
+                columns: ['Size', 'UK', 'US', 'EU', 'Chest (cm)', 'Waist (cm)'],
+                rows: [
+                    ['XS', '6', '2', '34', '80', '62'],
+                    ['S', '8', '4', '36', '84', '66'],
+                    ['M', '10', '6', '38', '88', '70'],
+                    ['L', '12', '8', '40', '92', '74'],
+                    ['XL', '14', '10', '42', '96', '78'],
+                    ['XXL', '16', '12', '44', '100', '82'],
+                ],
+            } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps & { [key: string]: any }
+                const columns: string[] = Array.isArray(p.columns) && p.columns.length > 0
+                    ? p.columns
+                    : ['Size', 'UK', 'US', 'EU', 'Chest (cm)', 'Waist (cm)']
+                const rows: string[][] = Array.isArray(p.rows) && p.rows.length > 0
+                    ? p.rows
+                    : [['S','8','4','36','84','66'],['M','10','6','38','88','70'],['L','12','8','40','92','74']]
+
+                const headerBg = p.headerBg ?? '#7530fb'
+                const headerText = p.headerText ?? '#ffffff'
+                const altRowBg = p.altRowBg ?? '#f8f7ff'
+                const borderColor = p.borderColor ?? '#ede9fe'
+                const textColor = p.textColor ?? '#374151'
+
+                const thStyle = `padding:9px 12px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:${headerText};text-align:center;border:1px solid ${borderColor};`
+                const headerRow = `<tr style="background-color:${headerBg};">${columns.map(c => `<th style="${thStyle}">${c}</th>`).join('')}</tr>`
+
+                const dataRows = rows.map((row, i) => {
+                    const rowBg = i % 2 === 0 ? '#ffffff' : altRowBg
+                    const tdStyle = `padding:8px 12px;font-family:Arial,sans-serif;font-size:13px;color:${textColor};text-align:center;border:1px solid ${borderColor};`
+                    const cells = columns.map((_, ci) => `<td style="${tdStyle}">${row[ci] ?? ''}</td>`).join('')
+                    return `<tr style="background-color:${rowBg};">${cells}</tr>`
+                }).join('')
+
+                const fitNoteHtml = p.showFitNote && p.fitNote
+                    ? `<tr><td style="padding-bottom:12px;"><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:${headerBg};background-color:#f3eeff;padding:8px 14px;border-left:3px solid ${headerBg};">${p.fitNote}</p></td></tr>`
+                    : ''
+
+                const measureHtml = p.showMeasureGuide && p.measureGuideText
+                    ? `<tr><td style="padding-top:12px;"><p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;font-style:italic;">${p.measureGuideText}</p></td></tr>`
+                    : ''
+
+                const titleHtml = p.titleText
+                    ? `<tr><td style="padding-bottom:14px;"><h3 style="margin:0;font-family:Arial,sans-serif;font-size:18px;font-weight:700;color:#1e1535;">${p.titleText}</h3></td></tr>`
+                    : ''
+
+                const inner = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;margin:0;border-collapse:collapse;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;">${titleHtml}${fitNoteHtml}<tr><td><table width="100%" cellpadding="0" cellspacing="0" border="1" style="width:100%;border-collapse:collapse;border:1px solid ${borderColor};">${headerRow}${dataRows}</table></td></tr>${measureHtml}</table></td></tr></table>`
+
+                return wrapBlock('size_guide' as BlockType, id, inner, p)
             },
         },
     )
