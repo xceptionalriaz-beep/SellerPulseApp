@@ -258,12 +258,6 @@ async function exportToCanvas(
             canvas.height = canvasH
             const ctx = canvas.getContext('2d')!
 
-            // ── Background color (if BG was removed) ──────────
-            if (state.background?.processedUrl) {
-                ctx.fillStyle = state.background.color ?? '#ffffff'
-                ctx.fillRect(0, 0, canvasW, canvasH)
-            }
-
             // ── Apply CSS filter ───────────────────────────────
             const filterStr = buildCssFilter(state)
             if (filterStr !== 'none') ctx.filter = filterStr
@@ -355,7 +349,7 @@ export default function ExportTool({ state, onChange, imageUrl }: ToolPanelProps
         setExporting(true)
         setDone(false)
         try {
-            const src = state.background?.processedUrl ?? imageUrl
+            const src = imageUrl
             const tw = targetWidth()
             const canvas = await exportToCanvas(src, state, tw)
             const mime = format === 'png' ? 'image/png' : 'image/jpeg'
