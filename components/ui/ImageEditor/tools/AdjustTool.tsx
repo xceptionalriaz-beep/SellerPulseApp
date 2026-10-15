@@ -2,7 +2,7 @@
 // components/ui/ImageEditor/tools/AdjustTool.tsx
 
 import React from 'react'
-import { Sun, Contrast, Droplets, ScanSearch } from 'lucide-react'
+import { Sun, Contrast, Droplets, ScanSearch, PaintBucket } from 'lucide-react'
 import type { ToolPanelProps } from '../types'
 
 // ── Tokens ────────────────────────────────────────────────────
@@ -252,6 +252,67 @@ export default function AdjustTool({ state, onChange }: ToolPanelProps) {
                     onChange={v => onChange({ sharpness: v })}
                     onReset={() => onChange({ sharpness: 0 })}
                 />
+            </Section>
+
+            {/* Background Color (for PNG transparency) */}
+            <Section icon={<PaintBucket size={13} strokeWidth={2.2} />} title="Background">
+                <div style={{ fontSize: 11, color: C.muted, marginBottom: 8 }}>
+                    Sets the canvas fill colour behind transparent PNG images
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                    {/* Colour swatches */}
+                    {['#ffffff', '#000000', '#f3eeff', '#fff7ed', '#f0fdf4', '#eff6ff', '#fdf2f8'].map(col => (
+                        <button
+                            key={col}
+                            title={col}
+                            onClick={() => onChange({ background: { ...state.background, bgColor: col } })}
+                            style={{
+                                width: 24, height: 24, borderRadius: '50%',
+                                background: col,
+                                border: `2px solid ${(state.background?.bgColor ?? '#ffffff') === col ? C.primary : C.borderMid}`,
+                                cursor: 'pointer',
+                                padding: 0,
+                                flexShrink: 0,
+                                boxShadow: col === '#ffffff' ? 'inset 0 0 0 1px #e5e7eb' : undefined,
+                            }}
+                        />
+                    ))}
+                    {/* Transparent option */}
+                    <button
+                        title="Transparent (PNG only)"
+                        onClick={() => onChange({ background: { ...state.background, bgColor: 'transparent' } })}
+                        style={{
+                            width: 24, height: 24, borderRadius: '50%',
+                            background: 'repeating-conic-gradient(#d1d5db 0% 25%, #ffffff 0% 50%) 0 0 / 8px 8px',
+                            border: `2px solid ${(state.background?.bgColor ?? '#ffffff') === 'transparent' ? C.primary : C.borderMid}`,
+                            cursor: 'pointer',
+                            padding: 0,
+                            flexShrink: 0,
+                        }}
+                    />
+                    {/* Custom colour picker */}
+                    <label style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <input
+                            type="color"
+                            value={(state.background?.bgColor ?? '#ffffff') === 'transparent' ? '#ffffff' : (state.background?.bgColor ?? '#ffffff')}
+                            onChange={e => onChange({ background: { ...state.background, bgColor: e.target.value } })}
+                            style={{ width: 24, height: 24, padding: 0, border: 'none', cursor: 'pointer', borderRadius: '50%' }}
+                            title="Custom colour"
+                        />
+                        <span style={{ fontSize: 11, color: C.sub }}>Custom</span>
+                    </label>
+                </div>
+                <div style={{ marginTop: 8, fontSize: 11, color: C.sub }}>
+                    Current: <span style={{ fontWeight: 600, color: C.label }}>{state.background?.bgColor ?? '#ffffff'}</span>
+                    {(state.background?.bgColor ?? '#ffffff') !== '#ffffff' && (
+                        <button
+                            onClick={() => onChange({ background: { ...state.background, bgColor: '#ffffff' } })}
+                            style={{ marginLeft: 8, fontSize: 10, color: C.primary, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                        >
+                            Reset to white
+                        </button>
+                    )}
+                </div>
             </Section>
         </div>
     )
