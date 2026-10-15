@@ -4122,9 +4122,13 @@ function AttributesTab({
                 fontSize: 10,
                 fontWeight: 600,
                 cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
             }}
         >
-            ⚡ Token
+            <Zap size={10} />
+            Token
         </button>
     )
 
@@ -9012,8 +9016,9 @@ function TokenPickerOverlay({
                 backgroundColor: '#fffbeb',
             }}>
                 <div>
-                    <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700, color: '#b45309' }}>
-                        ⚡ Insert Token
+                    <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700, color: '#b45309', display: 'flex', alignItems: 'center', gap: 5 }}>
+                        <Zap size={12} />
+                        Insert Token
                     </span>
                     <span style={{ display: 'block', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: '#d97706', marginTop: 1 }}>
                         eBay Item Specifics — substituted at generation time

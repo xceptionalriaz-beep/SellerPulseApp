@@ -23,7 +23,11 @@
 
 import React, { useState } from 'react'
 import { CanvasSettings, DEFAULT_CANVAS_SETTINGS } from './blocks'
-import { Monitor, Type, AlignCenter, AlignLeft, RotateCcw, Palette, Layers, Copy, Smartphone, Tag } from 'lucide-react'
+import {
+    Monitor, Type, AlignCenter, AlignLeft, RotateCcw, Palette, Layers, Copy, Smartphone,
+    Tag, ShoppingBag, Cpu, Home, Activity, Gift, Wrench, Star, Briefcase, Heart, Package,
+    type LucideIcon,
+} from 'lucide-react'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -56,17 +60,17 @@ const FONT_OPTIONS = [
 ]
 
 // ── eBay category options ─────────────────────────────────────────────────────
-export const EBAY_CATEGORIES = [
-    { value: 'fashion',         label: 'Fashion',          emoji: '👗', hint: 'Clothing, shoes & accessories' },
-    { value: 'electronics',     label: 'Electronics',      emoji: '💻', hint: 'Phones, computers & tech' },
-    { value: 'home_garden',     label: 'Home & Garden',    emoji: '🏡', hint: 'Furniture, tools & décor' },
-    { value: 'sports',          label: 'Sports',           emoji: '⚽', hint: 'Sporting goods & fitness' },
-    { value: 'toys',            label: 'Toys',             emoji: '🧸', hint: 'Toys, games & hobbies' },
-    { value: 'motors',          label: 'Motors',           emoji: '🚗', hint: 'Cars, parts & accessories' },
-    { value: 'collectibles',    label: 'Collectibles',     emoji: '🎨', hint: 'Art, antiques & memorabilia' },
-    { value: 'business',        label: 'Business',         emoji: '🏭', hint: 'Industrial & commercial' },
-    { value: 'health_beauty',   label: 'Health & Beauty',  emoji: '💄', hint: 'Skincare, vitamins & wellbeing' },
-    { value: 'other',           label: 'Other',            emoji: '📦', hint: 'General / mixed items' },
+export const EBAY_CATEGORIES: Array<{ value: string; label: string; Icon: LucideIcon; hint: string }> = [
+    { value: 'fashion',       label: 'Fashion',         Icon: ShoppingBag, hint: 'Clothing, shoes & accessories' },
+    { value: 'electronics',   label: 'Electronics',     Icon: Cpu,         hint: 'Phones, computers & tech' },
+    { value: 'home_garden',   label: 'Home & Garden',   Icon: Home,        hint: 'Furniture, tools & décor' },
+    { value: 'sports',        label: 'Sports',          Icon: Activity,    hint: 'Sporting goods & fitness' },
+    { value: 'toys',          label: 'Toys',            Icon: Gift,        hint: 'Toys, games & hobbies' },
+    { value: 'motors',        label: 'Motors',          Icon: Wrench,      hint: 'Cars, parts & accessories' },
+    { value: 'collectibles',  label: 'Collectibles',    Icon: Star,        hint: 'Art, antiques & memorabilia' },
+    { value: 'business',      label: 'Business',        Icon: Briefcase,   hint: 'Industrial & commercial' },
+    { value: 'health_beauty', label: 'Health & Beauty', Icon: Heart,       hint: 'Skincare, vitamins & wellbeing' },
+    { value: 'other',         label: 'Other',           Icon: Package,     hint: 'General / mixed items' },
 ]
 
 // ── Width presets ─────────────────────────────────────────────────────────────
@@ -233,7 +237,7 @@ export default function BodySettings({ settings, onUpdate, onApplyToAll }: BodyS
                                         textAlign: 'left' as const,
                                     }}
                                 >
-                                    <span style={{ fontSize: 16, lineHeight: 1, flexShrink: 0 }}>{cat.emoji}</span>
+                                    <cat.Icon size={14} style={{ color: active ? C.primary : C.secondary, flexShrink: 0 }} />
                                     <div style={{ flex: 1, minWidth: 0 }}>
                                         <span style={{
                                             display: 'block',
