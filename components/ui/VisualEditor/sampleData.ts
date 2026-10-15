@@ -42,6 +42,20 @@ const U = (id: string, w = 700, h = 500) =>
 
 const UT = (id: string) => U(id, 200, 200)
 
+// ── Custom Supabase sample images (override all categories) ──────────────────
+// 700×500 hero / gallery images — 7 images cycled across every large slot
+// 200×200 thumbnail images       — 2 images cycled across every small slot
+const _SB = 'https://ohgejewwsnbyouozymcc.supabase.co/storage/v1/object/public/Template%20Studio%20sample-images/'
+const SB_H1 = _SB + 'cat-face.png.png'        // hero 1
+const SB_H2 = _SB + 'cat-paw.png.png'         // hero 2
+const SB_H3 = _SB + 'cat-smile.png.png'       // hero 3
+const SB_H4 = _SB + 'cat.png.png'             // hero 4
+const SB_H5 = _SB + 'cute-dolphin.png.png'    // hero 5
+const SB_H6 = _SB + 'dog.png.png'             // hero 6
+const SB_H7 = _SB + 'dolphin.png.png'         // hero 7
+const SB_T1 = _SB + 'for-product.png.png'           // thumb 1
+const SB_T2 = _SB + 'for-product.png%20(2).png'     // thumb 2
+
 // ─────────────────────────────────────────────────────────────────────────────
 // PER-CATEGORY SAMPLE DATA
 // Each category gets its own { tokens, mainImage, thumbnails, related } so the
@@ -112,22 +126,17 @@ const PET_SAMPLE: CategorySampleData = {
         SUITABLE_FOR: 'Dogs & Cats — All Breeds',
         WARRANTY: '12-Month Manufacturer Warranty',
     },
-    mainImage: U('photo-1583337130417-3346a1be7dee'),
-    thumbnails: [
-        UT('photo-1583337130417-3346a1be7dee'),
-        UT('photo-1518791841217-8f162f1e1131'),
-        UT('photo-1450778869180-41d0601e046e'),
-        UT('photo-1548199973-03cce0bbc87b'),
-    ],
-    // 4 distinct pet-grooming / dog photos so the lifestyle banner and the
-    // 3-up "See It In Action" gallery don't all fall back to the same hero
-    // image. Each key is the {{TOKEN}} name embedded in the template's img
-    // src attrs (see pet.ts block 6 and block 10).
+    mainImage: SB_H1,
+    thumbnails: [SB_T1, SB_T2, SB_T1, SB_T2],
     galleryImages: {
-        LIFESTYLE_IMAGE_URL: U('photo-1548199973-03cce0bbc87b'),   // long-haired dog being brushed
-        GALLERY_IMAGE_1: U('photo-1450778869180-41d0601e046e'), // dog with loose fur
-        GALLERY_IMAGE_2: U('photo-1518791841217-8f162f1e1131'), // dog bath time
-        GALLERY_IMAGE_3: U('photo-1543466835-00a7907e9de1'),   // golden retriever portrait
+        LIFESTYLE_IMAGE_URL: SB_H2,
+        GALLERY_IMAGE_1: SB_H3,
+        GALLERY_IMAGE_2: SB_H4,
+        GALLERY_IMAGE_3: SB_H5,
+        GALLERY_IMAGE_4: SB_H6,
+        GALLERY_IMAGE_5: SB_H7,
+        GALLERY_IMAGE_6: SB_H1,
+        GALLERY_IMAGE_7: SB_H2,
     },
     related: {
         tokens: {
@@ -141,10 +150,10 @@ const PET_SAMPLE: CategorySampleData = {
             RELATED_PRICE_4: '$7.99',
         },
         images: {
-            RELATED_IMAGE_1: UT('photo-1517849845537-4d257902454a'),
-            RELATED_IMAGE_2: UT('photo-1535930891776-0c2dfb7fda1a'),
-            RELATED_IMAGE_3: UT('photo-1591946614720-90a587da4a36'),
-            RELATED_IMAGE_4: UT('photo-1601758228041-f3b2795255f1'),
+            RELATED_IMAGE_1: SB_T1,
+            RELATED_IMAGE_2: SB_T2,
+            RELATED_IMAGE_3: SB_T1,
+            RELATED_IMAGE_4: SB_T2,
         },
     },
 }
@@ -196,14 +205,18 @@ const ELECTRONICS_SAMPLE: CategorySampleData = {
         SUITABLE_FOR: 'Music, Travel, Office, Home',
         WARRANTY: '24-Month Manufacturer Warranty',
     },
-    mainImage: U('photo-1505740420928-5e560c06d30e'),
-    thumbnails: [
-        UT('photo-1505740420928-5e560c06d30e'),
-        UT('photo-1583394838336-acd977736f90'),
-        UT('photo-1546435770-a3e426bf472b'),
-        UT('photo-1572569511254-d8f925fe2cbb'),
-    ],
-    galleryImages: {},
+    mainImage: SB_H2,
+    thumbnails: [SB_T1, SB_T2, SB_T1, SB_T2],
+    galleryImages: {
+        LIFESTYLE_IMAGE_URL: SB_H3,
+        GALLERY_IMAGE_1: SB_H4,
+        GALLERY_IMAGE_2: SB_H5,
+        GALLERY_IMAGE_3: SB_H6,
+        GALLERY_IMAGE_4: SB_H7,
+        GALLERY_IMAGE_5: SB_H1,
+        GALLERY_IMAGE_6: SB_H2,
+        GALLERY_IMAGE_7: SB_H3,
+    },
     related: {
         tokens: {
             RELATED_TITLE_1: 'Portable Bluetooth Speaker',
@@ -216,10 +229,10 @@ const ELECTRONICS_SAMPLE: CategorySampleData = {
             RELATED_PRICE_4: '$8.99',
         },
         images: {
-            RELATED_IMAGE_1: UT('photo-1608043152269-423dbba4e7e1'),
-            RELATED_IMAGE_2: UT('photo-1583863788434-e58a36330cf0'),
-            RELATED_IMAGE_3: UT('photo-1572569511254-d8f925fe2cbb'),
-            RELATED_IMAGE_4: UT('photo-1583394838336-acd977736f90'),
+            RELATED_IMAGE_1: SB_T1,
+            RELATED_IMAGE_2: SB_T2,
+            RELATED_IMAGE_3: SB_T1,
+            RELATED_IMAGE_4: SB_T2,
         },
     },
 }
@@ -271,14 +284,18 @@ const FASHION_SAMPLE: CategorySampleData = {
         SUITABLE_FOR: 'Men & Women — Casual and Active Wear',
         WARRANTY: '12-Month Manufacturer Warranty',
     },
-    mainImage: U('photo-1542291026-7eec264c27ff'),
-    thumbnails: [
-        UT('photo-1542291026-7eec264c27ff'),
-        UT('photo-1606107557195-0e29a4b5b4aa'),
-        UT('photo-1595950653106-6c9ebd614d3a'),
-        UT('photo-1551107696-a4b0c5a0d9a2'),
-    ],
-    galleryImages: {},
+    mainImage: SB_H3,
+    thumbnails: [SB_T1, SB_T2, SB_T1, SB_T2],
+    galleryImages: {
+        LIFESTYLE_IMAGE_URL: SB_H4,
+        GALLERY_IMAGE_1: SB_H5,
+        GALLERY_IMAGE_2: SB_H6,
+        GALLERY_IMAGE_3: SB_H7,
+        GALLERY_IMAGE_4: SB_H1,
+        GALLERY_IMAGE_5: SB_H2,
+        GALLERY_IMAGE_6: SB_H3,
+        GALLERY_IMAGE_7: SB_H4,
+    },
     related: {
         tokens: {
             RELATED_TITLE_1: 'Classic Cotton Hoodie',
@@ -291,10 +308,10 @@ const FASHION_SAMPLE: CategorySampleData = {
             RELATED_PRICE_4: '$29.99',
         },
         images: {
-            RELATED_IMAGE_1: UT('photo-1556821840-3a63f95609a7'),
-            RELATED_IMAGE_2: UT('photo-1521572163474-6864f9cf17ab'),
-            RELATED_IMAGE_3: UT('photo-1473966968600-fa801b869a1a'),
-            RELATED_IMAGE_4: UT('photo-1553062407-98eeb64c6a62'),
+            RELATED_IMAGE_1: SB_T1,
+            RELATED_IMAGE_2: SB_T2,
+            RELATED_IMAGE_3: SB_T1,
+            RELATED_IMAGE_4: SB_T2,
         },
     },
 }
@@ -346,14 +363,18 @@ const HOME_SAMPLE: CategorySampleData = {
         SUITABLE_FOR: 'Indoor & Outdoor Plants — Succulents, Herbs, Houseplants',
         WARRANTY: '12-Month Manufacturer Warranty',
     },
-    mainImage: U('photo-1556909114-f6e7ad7d3136'),
-    thumbnails: [
-        UT('photo-1556909114-f6e7ad7d3136'),
-        UT('photo-1485955900006-10f4d324d411'),
-        UT('photo-1416879595882-3373a0480b5b'),
-        UT('photo-1459411552884-841db9b3cc2a'),
-    ],
-    galleryImages: {},
+    mainImage: SB_H4,
+    thumbnails: [SB_T1, SB_T2, SB_T1, SB_T2],
+    galleryImages: {
+        LIFESTYLE_IMAGE_URL: SB_H5,
+        GALLERY_IMAGE_1: SB_H6,
+        GALLERY_IMAGE_2: SB_H7,
+        GALLERY_IMAGE_3: SB_H1,
+        GALLERY_IMAGE_4: SB_H2,
+        GALLERY_IMAGE_5: SB_H3,
+        GALLERY_IMAGE_6: SB_H4,
+        GALLERY_IMAGE_7: SB_H5,
+    },
     related: {
         tokens: {
             RELATED_TITLE_1: 'Indoor Plant Mister 500ml',
@@ -366,10 +387,10 @@ const HOME_SAMPLE: CategorySampleData = {
             RELATED_PRICE_4: '$19.99',
         },
         images: {
-            RELATED_IMAGE_1: UT('photo-1485955900006-10f4d324d411'),
-            RELATED_IMAGE_2: UT('photo-1416879595882-3373a0480b5b'),
-            RELATED_IMAGE_3: UT('photo-1459411552884-841db9b3cc2a'),
-            RELATED_IMAGE_4: UT('photo-1518562180175-34a163b1a9a6'),
+            RELATED_IMAGE_1: SB_T1,
+            RELATED_IMAGE_2: SB_T2,
+            RELATED_IMAGE_3: SB_T1,
+            RELATED_IMAGE_4: SB_T2,
         },
     },
 }
@@ -421,14 +442,18 @@ const SPORTS_SAMPLE: CategorySampleData = {
         SUITABLE_FOR: 'Home & Commercial Gyms — Beginner to Advanced',
         WARRANTY: '24-Month Manufacturer Warranty',
     },
-    mainImage: U('photo-1517466787929-bc90951d0974'),
-    thumbnails: [
-        UT('photo-1517466787929-bc90951d0974'),
-        UT('photo-1571019613454-1cb2f99b2d8b'),
-        UT('photo-1534438327276-14e5300c3a48'),
-        UT('photo-1540497077202-7c8a3999166f'),
-    ],
-    galleryImages: {},
+    mainImage: SB_H5,
+    thumbnails: [SB_T1, SB_T2, SB_T1, SB_T2],
+    galleryImages: {
+        LIFESTYLE_IMAGE_URL: SB_H6,
+        GALLERY_IMAGE_1: SB_H7,
+        GALLERY_IMAGE_2: SB_H1,
+        GALLERY_IMAGE_3: SB_H2,
+        GALLERY_IMAGE_4: SB_H3,
+        GALLERY_IMAGE_5: SB_H4,
+        GALLERY_IMAGE_6: SB_H5,
+        GALLERY_IMAGE_7: SB_H6,
+    },
     related: {
         tokens: {
             RELATED_TITLE_1: 'Yoga Mat 6mm',
@@ -441,10 +466,10 @@ const SPORTS_SAMPLE: CategorySampleData = {
             RELATED_PRICE_4: '$16.99',
         },
         images: {
-            RELATED_IMAGE_1: UT('photo-1540497077202-7c8a3999166f'),
-            RELATED_IMAGE_2: UT('photo-1598289431512-b97b0917affc'),
-            RELATED_IMAGE_3: UT('photo-1534438327276-14e5300c3a48'),
-            RELATED_IMAGE_4: UT('photo-1571019613454-1cb2f99b2d8b'),
+            RELATED_IMAGE_1: SB_T1,
+            RELATED_IMAGE_2: SB_T2,
+            RELATED_IMAGE_3: SB_T1,
+            RELATED_IMAGE_4: SB_T2,
         },
     },
 }
@@ -496,14 +521,18 @@ const AUTO_SAMPLE: CategorySampleData = {
         SUITABLE_FOR: 'Passenger Cars & Light Commercial — Verify Fitment',
         WARRANTY: '24-Month Manufacturer Warranty',
     },
-    mainImage: U('photo-1486006920555-c77dcf18193c'),
-    thumbnails: [
-        UT('photo-1486006920555-c77dcf18193c'),
-        UT('photo-1492144534655-ae79c964c9d7'),
-        UT('photo-1503376780353-7e6692767b70'),
-        UT('photo-1542362567-b07e54358753'),
-    ],
-    galleryImages: {},
+    mainImage: SB_H6,
+    thumbnails: [SB_T1, SB_T2, SB_T1, SB_T2],
+    galleryImages: {
+        LIFESTYLE_IMAGE_URL: SB_H7,
+        GALLERY_IMAGE_1: SB_H1,
+        GALLERY_IMAGE_2: SB_H2,
+        GALLERY_IMAGE_3: SB_H3,
+        GALLERY_IMAGE_4: SB_H4,
+        GALLERY_IMAGE_5: SB_H5,
+        GALLERY_IMAGE_6: SB_H6,
+        GALLERY_IMAGE_7: SB_H7,
+    },
     related: {
         tokens: {
             RELATED_TITLE_1: 'Brake Pad Set (Front)',
@@ -516,10 +545,10 @@ const AUTO_SAMPLE: CategorySampleData = {
             RELATED_PRICE_4: '$9.99',
         },
         images: {
-            RELATED_IMAGE_1: UT('photo-1492144534655-ae79c964c9d7'),
-            RELATED_IMAGE_2: UT('photo-1503376780353-7e6692767b70'),
-            RELATED_IMAGE_3: UT('photo-1542362567-b07e54358753'),
-            RELATED_IMAGE_4: UT('photo-1486006920555-c77dcf18193c'),
+            RELATED_IMAGE_1: SB_T1,
+            RELATED_IMAGE_2: SB_T2,
+            RELATED_IMAGE_3: SB_T1,
+            RELATED_IMAGE_4: SB_T2,
         },
     },
 }
@@ -571,14 +600,18 @@ const GENERAL_SAMPLE: CategorySampleData = {
         SUITABLE_FOR: 'All customers',
         WARRANTY: '12-Month Standard Warranty',
     },
-    mainImage: U('photo-1505740420928-5e560c06d30e'),
-    thumbnails: [
-        UT('photo-1505740420928-5e560c06d30e'),
-        UT('photo-1505740420928-5e560c06d30e'),
-        UT('photo-1505740420928-5e560c06d30e'),
-        UT('photo-1505740420928-5e560c06d30e'),
-    ],
-    galleryImages: {},
+    mainImage: SB_H7,
+    thumbnails: [SB_T1, SB_T2, SB_T1, SB_T2],
+    galleryImages: {
+        LIFESTYLE_IMAGE_URL: SB_H1,
+        GALLERY_IMAGE_1: SB_H2,
+        GALLERY_IMAGE_2: SB_H3,
+        GALLERY_IMAGE_3: SB_H4,
+        GALLERY_IMAGE_4: SB_H5,
+        GALLERY_IMAGE_5: SB_H6,
+        GALLERY_IMAGE_6: SB_H7,
+        GALLERY_IMAGE_7: SB_H1,
+    },
     related: {
         tokens: {
             RELATED_TITLE_1: 'Related Item 1',
@@ -591,10 +624,10 @@ const GENERAL_SAMPLE: CategorySampleData = {
             RELATED_PRICE_4: '$7.99',
         },
         images: {
-            RELATED_IMAGE_1: UT('photo-1505740420928-5e560c06d30e'),
-            RELATED_IMAGE_2: UT('photo-1505740420928-5e560c06d30e'),
-            RELATED_IMAGE_3: UT('photo-1505740420928-5e560c06d30e'),
-            RELATED_IMAGE_4: UT('photo-1505740420928-5e560c06d30e'),
+            RELATED_IMAGE_1: SB_T1,
+            RELATED_IMAGE_2: SB_T2,
+            RELATED_IMAGE_3: SB_T1,
+            RELATED_IMAGE_4: SB_T2,
         },
     },
 }
