@@ -1434,16 +1434,23 @@ export default function VisualEditor({
                 // Image editor Save — baked data URL comes back; update the block prop.
                 // editorState is also stored under `${propKey}__editorState` so it can
                 // be restored next time the user reopens the editor (non-destructive).
-                const { propKey, fileUrl, blockId, editorState } = event.data;
+                const { propKey, fileUrl, blockId, editorState, originalUrl } = event.data;
                 if (propKey && fileUrl && blockId) {
                     const idx = blocks.findIndex(b => b.id === blockId);
                     if (idx >= 0) {
                         const target = blocks[idx];
+                        // originalUrl = the clean source image before any baking.
+                        // On first edit it comes from the message; on re-edits it's
+                        // already stored, so we keep whichever was stored first.
+                        const existingOriginal = (target.props as any)[`${propKey}__originalUrl`]
                         const updatedProps = {
                             ...(target.props as any),
                             [propKey]: fileUrl,
-                            // Store the editor state keyed by propKey so re-opening
-                            // the editor can restore the previous settings.
+                            // Store original URL so future re-edits always open the
+                            // pristine source image (non-destructive editing).
+                            [`${propKey}__originalUrl`]: existingOriginal ?? originalUrl ?? fileUrl,
+                            // Store editor state so settings (bgColor, stickers, crop…)
+                            // are fully restored when the editor is reopened.
                             ...(editorState ? { [`${propKey}__editorState`]: editorState } : {}),
                         } as Block['props'];
                         const updatedBlock: Block = { ...target, props: updatedProps };

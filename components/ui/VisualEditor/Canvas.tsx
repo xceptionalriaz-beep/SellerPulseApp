@@ -261,16 +261,19 @@ export default function Canvas({
             if (e.data?.type === 'RIAZIFY_EDIT_IMAGE' && e.data.imageUrl) {
                 const propKey = e.data.propKey || null
                 const blockId = e.data.blockId || null
-                setImgEditorSrc(e.data.imageUrl)
                 setImgEditorPropKey(propKey)
                 setImgEditorBlockId(blockId)
-                // Restore previous editor state for non-destructive re-editing.
-                // The state is stored in block props as `${propKey}__editorState`.
                 if (blockId && propKey) {
                     const block = blocks.find(b => b.id === blockId)
-                    const stored = block ? (block.props as any)[`${propKey}__editorState`] : undefined
-                    setImgEditorInitialState(stored ?? undefined)
+                    const storedState = block ? (block.props as any)[`${propKey}__editorState`] : undefined
+                    const originalUrl = block ? (block.props as any)[`${propKey}__originalUrl`] : undefined
+                    // Non-destructive editing: use the original clean URL (before any baking)
+                    // so re-edits always apply on top of the pristine source image.
+                    // Fall back to the current imageUrl if no original is stored yet.
+                    setImgEditorSrc(originalUrl ?? e.data.imageUrl)
+                    setImgEditorInitialState(storedState ?? undefined)
                 } else {
+                    setImgEditorSrc(e.data.imageUrl)
                     setImgEditorInitialState(undefined)
                 }
             }
@@ -431,15 +434,16 @@ export default function Canvas({
                     initialState={imgEditorInitialState}
                     onSave={(editedUrl: string, _state: ImageEditorState) => {
                         // Post the edited image URL + editor state back to VisualEditor.
-                        // The editor state is stored in block props so it can be restored
-                        // next time the user reopens the editor (non-destructive editing).
-                        // bgColor is NOT passed separately — it's baked into the JPEG already.
+                        // originalUrl = the clean source image (imgEditorSrc) the editor opened
+                        // with — this is stored so future re-edits always apply to the pristine
+                        // original rather than to the already-baked JPEG (non-destructive).
                         if (imgEditorBlockId && imgEditorPropKey) {
                             window.postMessage({
                                 type: 'RIAZIFY_IMAGE_EDITED',
                                 blockId: imgEditorBlockId,
                                 propKey: imgEditorPropKey,
                                 fileUrl: editedUrl,
+                                originalUrl: imgEditorSrc,
                                 editorState: _state,
                             }, '*')
                         }
