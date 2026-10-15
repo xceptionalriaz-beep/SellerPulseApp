@@ -2808,6 +2808,58 @@ function BlockStyleProps({ block, props, updateProps }: {
                 </>
             )
 
+        case 'variation_builder':
+            return (
+                <>
+                    <Section title="Header">
+                        <ColorRow label="Header background" value={(props as any).headerBg ?? '#7530fb'} onChange={v => updateProps({ headerBg: v })} />
+                        <ColorRow label="Header text" value={(props as any).headerText ?? '#ffffff'} onChange={v => updateProps({ headerText: v })} />
+                    </Section>
+                    <Section title="Cells">
+                        <ColorRow label="Alt row background" value={(props as any).altRowBg ?? '#f8f7ff'} onChange={v => updateProps({ altRowBg: v })} />
+                        <ColorRow label="Border colour" value={(props as any).borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
+                        <ColorRow label="In stock colour" value={(props as any).inStockColor ?? '#22c55e'} onChange={v => updateProps({ inStockColor: v })} />
+                        <ColorRow label="Out of stock colour" value={(props as any).outStockColor ?? '#ef4444'} onChange={v => updateProps({ outStockColor: v })} />
+                    </Section>
+                    <Section title="Spacing">
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                            <NumberInput label="Pad top" value={(props as any).paddingTop ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingTop: v })} />
+                            <NumberInput label="Pad bottom" value={(props as any).paddingBottom ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v })} />
+                            <NumberInput label="Pad left" value={(props as any).paddingLeft ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingLeft: v })} />
+                            <NumberInput label="Pad right" value={(props as any).paddingRight ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingRight: v })} />
+                        </div>
+                    </Section>
+                </>
+            )
+
+        case 'shipping_rate_table':
+            return (
+                <>
+                    <Section title="Header">
+                        <ColorRow label="Header background" value={(props as any).headerBg ?? '#7530fb'} onChange={v => updateProps({ headerBg: v })} />
+                        <ColorRow label="Header text" value={(props as any).headerText ?? '#ffffff'} onChange={v => updateProps({ headerText: v })} />
+                    </Section>
+                    <Section title="Table rows">
+                        <ColorRow label="Alt row background" value={(props as any).altRowBg ?? '#f8f7ff'} onChange={v => updateProps({ altRowBg: v })} />
+                        <ColorRow label="Border colour" value={(props as any).borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v })} />
+                        <ColorRow label="Cell text" value={(props as any).textColor ?? '#374151'} onChange={v => updateProps({ textColor: v })} />
+                        <ColorRow label="Free shipping colour" value={(props as any).freeColor ?? '#16a34a'} onChange={v => updateProps({ freeColor: v })} />
+                    </Section>
+                    <Section title="Dispatch banner">
+                        <ColorRow label="Banner background" value={(props as any).dispatchBannerBg ?? '#f3eeff'} onChange={v => updateProps({ dispatchBannerBg: v })} />
+                        <ColorRow label="Banner text colour" value={(props as any).dispatchBannerColor ?? '#7530fb'} onChange={v => updateProps({ dispatchBannerColor: v })} />
+                    </Section>
+                    <Section title="Spacing">
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                            <NumberInput label="Pad top" value={(props as any).paddingTop ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingTop: v })} />
+                            <NumberInput label="Pad bottom" value={(props as any).paddingBottom ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v })} />
+                            <NumberInput label="Pad left" value={(props as any).paddingLeft ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingLeft: v })} />
+                            <NumberInput label="Pad right" value={(props as any).paddingRight ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingRight: v })} />
+                        </div>
+                    </Section>
+                </>
+            )
+
         case 'size_guide':
             return (
                 <>
@@ -6035,6 +6087,140 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
             )
         }
 
+        case 'variation_builder': {
+            const vbAxis1: string[] = Array.isArray(props.axis1Options) && props.axis1Options.length > 0
+                ? props.axis1Options as string[]
+                : ['Red', 'Blue', 'Black', 'White']
+            const vbAxis2: string[] = Array.isArray(props.axis2Options) && props.axis2Options.length > 0
+                ? props.axis2Options as string[]
+                : ['S', 'M', 'L', 'XL']
+            const vbAvail: Record<string, boolean> = (props.availability && typeof props.availability === 'object')
+                ? props.availability as Record<string, boolean>
+                : {}
+
+            const toggleAvail = (a1: string, a2: string) => {
+                const key = `${a1}||${a2}`
+                const cur = vbAvail[key] !== false // default true
+                updateProps({ availability: { ...vbAvail, [key]: !cur } })
+            }
+            const updateAxis = (which: 1 | 2, val: string) => {
+                const items = val.split('\n').map(s => s.trim()).filter(Boolean)
+                updateProps(which === 1 ? { axis1Options: items } : { axis2Options: items })
+            }
+
+            return (
+                <>
+                    <Section title="Axis labels">
+                        <TextInput
+                            label="Row axis label (e.g. Colour)"
+                            value={props.axis1Label ?? 'Colour'}
+                            onChange={v => updateProps({ axis1Label: v })}
+                        />
+                        <TextInput
+                            label="Column axis label (e.g. Size)"
+                            value={props.axis2Label ?? 'Size'}
+                            onChange={v => updateProps({ axis2Label: v })}
+                        />
+                    </Section>
+                    <Section title={`${props.axis1Label ?? 'Row'} options`}>
+                        <InfoBox>One option per line</InfoBox>
+                        <TextareaInput
+                            label={`${props.axis1Label ?? 'Colour'} options`}
+                            value={vbAxis1.join('\n')}
+                            rows={4}
+                            onChange={v => updateAxis(1, v)}
+                        />
+                    </Section>
+                    <Section title={`${props.axis2Label ?? 'Column'} options`}>
+                        <InfoBox>One option per line</InfoBox>
+                        <TextareaInput
+                            label={`${props.axis2Label ?? 'Size'} options`}
+                            value={vbAxis2.join('\n')}
+                            rows={3}
+                            onChange={v => updateAxis(2, v)}
+                        />
+                    </Section>
+                    <Section title="Availability (click to toggle ✓/✗)">
+                        <VariationMatrixEditor
+                            axis1={vbAxis1}
+                            axis2={vbAxis2}
+                            availability={vbAvail}
+                            onToggle={toggleAvail}
+                        />
+                        <InfoBox>✓ = in stock · ✗ = out of stock. Click any cell to toggle.</InfoBox>
+                    </Section>
+                    <Section title="Title & note">
+                        <ToggleRow label="Show title" value={props.showTitle ?? true} onChange={v => updateProps({ showTitle: v })} />
+                        {(props.showTitle ?? true) && (
+                            <TextInput label="Title text" value={props.titleText ?? 'Available Variations'} onChange={v => updateProps({ titleText: v })} />
+                        )}
+                        <ToggleRow label="Show note" value={props.showNote ?? true} onChange={v => updateProps({ showNote: v })} />
+                        {(props.showNote ?? true) && (
+                            <TextInput label="Note text" value={props.noteText ?? 'Select your options using the dropdowns above ↑'} onChange={v => updateProps({ noteText: v })} />
+                        )}
+                    </Section>
+                </>
+            )
+        }
+
+        case 'shipping_rate_table': {
+            const srtRows: Array<{ destination: string; service: string; cost: string; time: string }> =
+                Array.isArray(props.rows) && props.rows.length > 0
+                    ? props.rows as any[]
+                    : [{ destination: 'UK Mainland', service: 'Royal Mail 1st Class', cost: 'Free', time: '1–2 days' }]
+
+            const SHIPPING_PRESETS: Record<string, Array<{ destination: string; service: string; cost: string; time: string }>> = {
+                uk: [
+                    { destination: 'UK Mainland', service: 'Royal Mail 1st Class', cost: 'Free', time: '1–2 days' },
+                    { destination: 'UK Mainland', service: 'Royal Mail Tracked 48', cost: '£2.99', time: '2–3 days' },
+                    { destination: 'Scotland / N. Ireland', service: 'Royal Mail 2nd Class', cost: '£1.50', time: '3–5 days' },
+                ],
+                uk_europe: [
+                    { destination: 'UK Mainland', service: 'Royal Mail 1st Class', cost: 'Free', time: '1–2 days' },
+                    { destination: 'UK Mainland', service: 'Royal Mail Tracked 48', cost: '£2.99', time: '2–3 days' },
+                    { destination: 'Scotland / N. Ireland', service: 'Royal Mail 2nd Class', cost: '£1.50', time: '3–5 days' },
+                    { destination: 'Europe', service: 'Royal Mail Airmail', cost: '£4.99', time: '5–10 days' },
+                ],
+                worldwide: [
+                    { destination: 'UK Mainland', service: 'Royal Mail 1st Class', cost: 'Free', time: '1–2 days' },
+                    { destination: 'UK Mainland', service: 'Royal Mail Tracked 48', cost: '£2.99', time: '2–3 days' },
+                    { destination: 'Scotland / N. Ireland', service: 'Royal Mail 2nd Class', cost: '£1.50', time: '3–5 days' },
+                    { destination: 'Europe', service: 'Royal Mail Airmail', cost: '£4.99', time: '5–10 days' },
+                    { destination: 'Worldwide', service: 'Royal Mail International', cost: '£8.99', time: '7–14 days' },
+                ],
+            }
+
+            return (
+                <>
+                    <Section title="Title & subtitle">
+                        <TextInput label="Title" value={props.titleText ?? 'Shipping Information'} onChange={v => updateProps({ titleText: v })} />
+                        <TextInput label="Subtitle" value={props.subtitle ?? 'All orders dispatched within 1 working day'} onChange={v => updateProps({ subtitle: v })} />
+                    </Section>
+                    <Section title="Dispatch banner">
+                        <ToggleRow label="Show dispatch banner" value={props.showDispatchBanner ?? true} onChange={v => updateProps({ showDispatchBanner: v })} />
+                        {(props.showDispatchBanner ?? true) && (
+                            <TextInput label="Banner text" value={props.dispatchBannerText ?? '🚚 Fast Dispatch — Orders placed before 2pm shipped same day'} onChange={v => updateProps({ dispatchBannerText: v })} />
+                        )}
+                    </Section>
+                    <Section title="Quick presets">
+                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                            {([['uk', 'UK Only'], ['uk_europe', 'UK + Europe'], ['worldwide', 'Worldwide']] as const).map(([key, label]) => (
+                                <button
+                                    key={key}
+                                    onClick={() => updateProps({ rows: SHIPPING_PRESETS[key] })}
+                                    style={{ padding: '5px 10px', borderRadius: 6, border: `1px solid ${C.primaryBorder}`, background: C.primaryLight, color: C.primary, fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans,sans-serif' }}
+                                >{label}</button>
+                            ))}
+                        </div>
+                    </Section>
+                    <Section title={`Shipping rows (${srtRows.length})`}>
+                        <ShippingRowEditor rows={srtRows} onChange={r => updateProps({ rows: r })} />
+                        <InfoBox>Set cost to "Free" and it will be highlighted in green automatically.</InfoBox>
+                    </Section>
+                </>
+            )
+        }
+
         case 'size_guide': {
             const sgCols: string[] = Array.isArray(props.columns) && props.columns.length > 0
                 ? props.columns
@@ -8470,6 +8656,108 @@ function UniversalTypography({
                 onChange={v => updateProps({ fontFamily: v })}
             />
         </Section>
+    )
+}
+
+// ── VariationMatrixEditor ─────────────────────────────────────────────────────
+function VariationMatrixEditor({
+    axis1, axis2, availability, onToggle,
+}: {
+    axis1: string[]
+    axis2: string[]
+    availability: Record<string, boolean>
+    onToggle: (a1: string, a2: string) => void
+}) {
+    if (axis1.length === 0 || axis2.length === 0) {
+        return <p style={{ fontSize: 11, color: '#9ca3af', fontFamily: 'DM Sans,sans-serif', margin: '4px 0' }}>Add options above to see the availability grid.</p>
+    }
+    const colW = Math.max(34, Math.floor(180 / Math.max(axis2.length, 1)))
+    return (
+        <div style={{ overflowX: 'auto' }}>
+            {/* Header row */}
+            <div style={{ display: 'flex', gap: 3, marginBottom: 3, alignItems: 'center' }}>
+                <div style={{ width: 60, flexShrink: 0 }} />
+                {axis2.map((s, ci) => (
+                    <div key={ci} style={{ width: colW, flexShrink: 0, textAlign: 'center' }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: C.body, fontFamily: 'DM Sans,sans-serif' }}>{s}</span>
+                    </div>
+                ))}
+            </div>
+            {/* Data rows */}
+            {axis1.map((a1, ri) => (
+                <div key={ri} style={{ display: 'flex', gap: 3, marginBottom: 3, alignItems: 'center' }}>
+                    <div style={{ width: 60, flexShrink: 0 }}>
+                        <span style={{ fontSize: 11, fontWeight: 600, color: C.body, fontFamily: 'DM Sans,sans-serif', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a1}</span>
+                    </div>
+                    {axis2.map((a2, ci) => {
+                        const key = `${a1}||${a2}`
+                        const inStock = availability[key] !== false
+                        return (
+                            <button
+                                key={ci}
+                                onClick={() => onToggle(a1, a2)}
+                                style={{
+                                    width: colW, height: 28, flexShrink: 0, border: `1.5px solid ${inStock ? '#86efac' : '#fca5a5'}`,
+                                    background: inStock ? '#f0fdf4' : '#fff1f1', color: inStock ? '#16a34a' : '#dc2626',
+                                    fontSize: 13, fontWeight: 700, cursor: 'pointer', borderRadius: 5, padding: 0,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                }}
+                                title={inStock ? 'In stock — click to mark out of stock' : 'Out of stock — click to mark in stock'}
+                            >{inStock ? '✓' : '✗'}</button>
+                        )
+                    })}
+                </div>
+            ))}
+        </div>
+    )
+}
+
+// ── ShippingRowEditor ─────────────────────────────────────────────────────────
+function ShippingRowEditor({
+    rows, onChange,
+}: {
+    rows: Array<{ destination: string; service: string; cost: string; time: string }>
+    onChange: (rows: Array<{ destination: string; service: string; cost: string; time: string }>) => void
+}) {
+    const upd = (i: number, field: keyof typeof rows[0], val: string) =>
+        onChange(rows.map((r, j) => j === i ? { ...r, [field]: val } : r))
+    const remove = (i: number) => onChange(rows.filter((_, j) => j !== i))
+    const add = () => onChange([...rows, { destination: '', service: '', cost: '', time: '' }])
+
+    return (
+        <div>
+            {rows.map((row, i) => (
+                <div key={i} style={{ marginBottom: 8, padding: '8px 8px 6px', border: '1.5px solid #e5e7eb', borderRadius: 8, background: '#fafafa' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 6, gap: 6 }}>
+                        <span style={{ width: 18, height: 18, borderRadius: '50%', background: C.primaryLight, color: C.primary, fontSize: 10, fontWeight: 700, fontFamily: 'DM Sans,sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{i + 1}</span>
+                        <span style={{ flex: 1 }} />
+                        <button onClick={() => remove(i)} style={{ padding: '2px 7px', borderRadius: 4, border: '1px solid #fca5a5', background: '#fff1f1', color: '#dc2626', fontSize: 11, cursor: 'pointer', fontFamily: 'DM Sans,sans-serif' }}>✕</button>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5 }}>
+                        <div>
+                            <p style={{ margin: '0 0 2px', fontSize: 10, color: C.body, fontFamily: 'DM Sans,sans-serif' }}>Destination</p>
+                            <input type="text" value={row.destination} placeholder="e.g. UK Mainland" onChange={e => upd(i, 'destination', e.target.value)} style={inputStyle} />
+                        </div>
+                        <div>
+                            <p style={{ margin: '0 0 2px', fontSize: 10, color: C.body, fontFamily: 'DM Sans,sans-serif' }}>Service</p>
+                            <input type="text" value={row.service} placeholder="e.g. Royal Mail 1st" onChange={e => upd(i, 'service', e.target.value)} style={inputStyle} />
+                        </div>
+                        <div>
+                            <p style={{ margin: '0 0 2px', fontSize: 10, color: C.body, fontFamily: 'DM Sans,sans-serif' }}>Cost</p>
+                            <input type="text" value={row.cost} placeholder="Free or £2.99" onChange={e => upd(i, 'cost', e.target.value)} style={{ ...inputStyle, color: row.cost.toLowerCase() === 'free' ? '#16a34a' : undefined, fontWeight: row.cost.toLowerCase() === 'free' ? 700 : 400 }} />
+                        </div>
+                        <div>
+                            <p style={{ margin: '0 0 2px', fontSize: 10, color: C.body, fontFamily: 'DM Sans,sans-serif' }}>Est. Delivery</p>
+                            <input type="text" value={row.time} placeholder="e.g. 1–2 days" onChange={e => upd(i, 'time', e.target.value)} style={inputStyle} />
+                        </div>
+                    </div>
+                </div>
+            ))}
+            <button onClick={add} style={{ marginTop: 4, padding: '6px 0', borderRadius: 7, width: '100%', border: `1.5px dashed ${C.primary}`, background: C.primaryLight, color: C.primary, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans,sans-serif' }}>
+                + Add Shipping Row
+            </button>
+            {rows.length === 0 && <p style={{ fontSize: 11, color: '#9ca3af', fontFamily: 'DM Sans,sans-serif', textAlign: 'center', margin: '8px 0' }}>No rows — click "+ Add Shipping Row"</p>}
+        </div>
     )
 }
 

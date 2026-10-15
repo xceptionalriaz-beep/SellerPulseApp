@@ -102,6 +102,8 @@ export type BlockType =
     | 'condition_badge'
     | 'item_specifics'
     | 'size_guide'
+    | 'variation_builder'
+    | 'shipping_rate_table'
     // Conversion
     | 'policy_tabs'
     | 'nav_bar'
@@ -4062,6 +4064,154 @@ ${thumbCells}
                 const p = props as any
                 const variantId = p.variant ?? 'test-classic-grid'
                 return wrapBlock('testimonial_block' as BlockType, id, getTestimonialsVariant(variantId).toHtml(p, id), p)
+            },
+        },
+
+        // ── Variation Builder ───────────────────────────────────────────────────
+        {
+            type: 'variation_builder' as BlockType,
+            label: 'Variation Builder',
+            category: 'eBay Specific' as BlockCategory,
+            icon: 'grid',
+            description: 'Visual grid showing available Size/Colour combinations',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                bgColor: '#ffffff',
+                titleText: 'Available Variations',
+                showTitle: true,
+                axis1Label: 'Colour',
+                axis2Label: 'Size',
+                axis1Options: ['Red', 'Blue', 'Black', 'White'],
+                axis2Options: ['S', 'M', 'L', 'XL'],
+                availability: {} as Record<string, boolean>,
+                displayStyle: 'grid',
+                noteText: 'Select your options using the dropdowns above ↑',
+                showNote: true,
+                headerBg: '#7530fb',
+                headerText: '#ffffff',
+                inStockColor: '#22c55e',
+                outStockColor: '#ef4444',
+                altRowBg: '#f8f7ff',
+                borderColor: '#ede9fe',
+            } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps & { [key: string]: any }
+                const axis1: string[] = Array.isArray(p.axis1Options) && p.axis1Options.length > 0 ? p.axis1Options : ['Red', 'Blue', 'Black']
+                const axis2: string[] = Array.isArray(p.axis2Options) && p.axis2Options.length > 0 ? p.axis2Options : ['S', 'M', 'L', 'XL']
+                const avail: Record<string, boolean> = (p.availability && typeof p.availability === 'object') ? p.availability : {}
+
+                const headerBg = p.headerBg ?? '#7530fb'
+                const headerText = p.headerText ?? '#ffffff'
+                const altRowBg = p.altRowBg ?? '#f8f7ff'
+                const borderColor = p.borderColor ?? '#ede9fe'
+                const inStockColor = p.inStockColor ?? '#22c55e'
+                const outStockColor = p.outStockColor ?? '#ef4444'
+
+                const thStyle = `padding:8px 12px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:${headerText};text-align:center;border:1px solid ${borderColor};`
+                const cornerStyle = `padding:8px 12px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:${headerText};text-align:center;border:1px solid ${borderColor};background-color:${headerBg};`
+
+                // Header row: corner cell + axis2 options
+                const headerRow = `<tr style="background-color:${headerBg};"><th style="${cornerStyle}">${p.axis1Label ?? 'Colour'} \\ ${p.axis2Label ?? 'Size'}</th>${axis2.map(s => `<th style="${thStyle}">${s}</th>`).join('')}</tr>`
+
+                // Data rows
+                const dataRows = axis1.map((colour, ri) => {
+                    const rowBg = ri % 2 === 0 ? '#ffffff' : altRowBg
+                    const rowHeaderStyle = `padding:8px 12px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#374151;border:1px solid ${borderColor};background-color:${rowBg};`
+                    const cells = axis2.map(size => {
+                        const key = `${colour}||${size}`
+                        const isOut = avail[key] === false
+                        const symbol = isOut ? '✗' : '✓'
+                        const color = isOut ? outStockColor : inStockColor
+                        const cellStyle = `padding:8px 12px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:${color};text-align:center;border:1px solid ${borderColor};background-color:${rowBg};`
+                        return `<td style="${cellStyle}">${symbol}</td>`
+                    }).join('')
+                    return `<tr><td style="${rowHeaderStyle}">${colour}</td>${cells}</tr>`
+                }).join('')
+
+                const titleHtml = (p.showTitle ?? true) && p.titleText
+                    ? `<tr><td colspan="${axis2.length + 1}" style="padding-bottom:12px;"><h3 style="margin:0;font-family:Arial,sans-serif;font-size:18px;font-weight:700;color:#1e1535;">${p.titleText}</h3></td></tr>`
+                    : ''
+
+                const noteHtml = (p.showNote ?? true) && p.noteText
+                    ? `<tr><td colspan="${axis2.length + 1}" style="padding-top:10px;"><p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;font-style:italic;">${p.noteText}</p></td></tr>`
+                    : ''
+
+                const inner = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;margin:0;border-collapse:collapse;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;">${titleHtml}<tr><td><table width="100%" cellpadding="0" cellspacing="0" border="1" style="width:100%;border-collapse:collapse;border:1px solid ${borderColor};">${headerRow}${dataRows}</table></td></tr>${noteHtml}</table></td></tr></table>`
+
+                return wrapBlock('variation_builder' as BlockType, id, inner, p)
+            },
+        },
+
+        // ── Shipping Rate Table ──────────────────────────────────────────────────
+        {
+            type: 'shipping_rate_table' as BlockType,
+            label: 'Shipping Rate Table',
+            category: 'eBay Specific' as BlockCategory,
+            icon: 'truck',
+            description: 'Shipping costs by destination and service with delivery times',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                bgColor: '#ffffff',
+                titleText: 'Shipping Information',
+                subtitle: 'All orders dispatched within 1 working day',
+                showDispatchBanner: true,
+                dispatchBannerText: '🚚 Fast Dispatch — Orders placed before 2pm shipped same day',
+                dispatchBannerBg: '#f3eeff',
+                dispatchBannerColor: '#7530fb',
+                headerBg: '#7530fb',
+                headerText: '#ffffff',
+                altRowBg: '#f8f7ff',
+                borderColor: '#ede9fe',
+                textColor: '#374151',
+                freeColor: '#16a34a',
+                rows: [
+                    { destination: 'UK Mainland', service: 'Royal Mail 1st Class', cost: 'Free', time: '1–2 days' },
+                    { destination: 'UK Mainland', service: 'Royal Mail Tracked 48', cost: '£2.99', time: '2–3 days' },
+                    { destination: 'Scotland / N. Ireland', service: 'Royal Mail 2nd Class', cost: '£1.50', time: '3–5 days' },
+                    { destination: 'Europe', service: 'Royal Mail Airmail', cost: '£4.99', time: '5–10 days' },
+                    { destination: 'Worldwide', service: 'Royal Mail International', cost: '£8.99', time: '7–14 days' },
+                ],
+            } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps & { [key: string]: any }
+                const rows: Array<{ destination: string; service: string; cost: string; time: string }> =
+                    Array.isArray(p.rows) && p.rows.length > 0 ? p.rows : [
+                        { destination: 'UK Mainland', service: 'Royal Mail 1st Class', cost: 'Free', time: '1–2 days' },
+                    ]
+
+                const headerBg = p.headerBg ?? '#7530fb'
+                const headerText = p.headerText ?? '#ffffff'
+                const altRowBg = p.altRowBg ?? '#f8f7ff'
+                const borderColor = p.borderColor ?? '#ede9fe'
+                const textColor = p.textColor ?? '#374151'
+                const freeColor = p.freeColor ?? '#16a34a'
+
+                const thStyle = `padding:9px 14px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:${headerText};text-align:left;border:1px solid ${borderColor};`
+                const headerRow = `<tr style="background-color:${headerBg};"><th style="${thStyle}">Destination</th><th style="${thStyle}">Service</th><th style="${thStyle}">Cost</th><th style="${thStyle}">Est. Delivery</th></tr>`
+
+                const dataRows = rows.map((r, i) => {
+                    const rowBg = i % 2 === 0 ? '#ffffff' : altRowBg
+                    const tdBase = `padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;border:1px solid ${borderColor};background-color:${rowBg};`
+                    const isFree = r.cost.toLowerCase().trim() === 'free'
+                    const costStyle = `${tdBase}color:${isFree ? freeColor : textColor};font-weight:${isFree ? '700' : '400'};`
+                    return `<tr><td style="${tdBase}color:${textColor};font-weight:600;">${r.destination}</td><td style="${tdBase}color:${textColor};">${r.service}</td><td style="${costStyle}">${r.cost}</td><td style="${tdBase}color:${textColor};">${r.time}</td></tr>`
+                }).join('')
+
+                const dispatchHtml = (p.showDispatchBanner ?? true) && p.dispatchBannerText
+                    ? `<tr><td colspan="4" style="padding-bottom:10px;"><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:${p.dispatchBannerColor ?? '#7530fb'};background-color:${p.dispatchBannerBg ?? '#f3eeff'};padding:8px 14px;border-left:3px solid ${p.dispatchBannerColor ?? '#7530fb'};">${p.dispatchBannerText}</p></td></tr>`
+                    : ''
+
+                const titleHtml = p.titleText
+                    ? `<tr><td colspan="4" style="padding-bottom:4px;"><h3 style="margin:0;font-family:Arial,sans-serif;font-size:18px;font-weight:700;color:#1e1535;">${p.titleText}</h3></td></tr>`
+                    : ''
+
+                const subtitleHtml = p.subtitle
+                    ? `<tr><td colspan="4" style="padding-bottom:12px;"><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#6b7280;">${p.subtitle}</p></td></tr>`
+                    : ''
+
+                const inner = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;margin:0;border-collapse:collapse;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;">${dispatchHtml}${titleHtml}${subtitleHtml}<tr><td colspan="4"><table width="100%" cellpadding="0" cellspacing="0" border="1" style="width:100%;border-collapse:collapse;border:1px solid ${borderColor};">${headerRow}${dataRows}</table></td></tr></table></td></tr></table>`
+
+                return wrapBlock('shipping_rate_table' as BlockType, id, inner, p)
             },
         },
 
