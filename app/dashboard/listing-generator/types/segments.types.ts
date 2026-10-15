@@ -34,12 +34,12 @@ export type FilterOperator =
 
 // ── A single filter condition ─────────────────────────────────
 export interface SegmentFilter {
-    field: FilterField
-    op: FilterOperator
+    field:    FilterField
+    op:       FilterOperator
     // value is optional — not needed for is_empty / is_not_empty
-    value?: string | number | boolean
+    value?:   string | number | boolean
     // second value used only when op = 'between'
-    value2?: string | number
+    value2?:  string | number
 }
 
 // ── How multiple filters combine ──────────────────────────────
@@ -47,24 +47,24 @@ export type FilterLogic = 'AND' | 'OR'
 
 // ── A built-in segment (hardcoded, cannot be deleted) ─────────
 export interface BuiltInSegment {
-    id: string          // stable identifier e.g. 'active', 'vero_flagged'
-    name: string          // display label
-    icon: string          // lucide icon name
-    color: string          // hex — used for the left dot
-    filters: SegmentFilter[] // empty array = no filter (show all)
-    logic: FilterLogic     // how filters combine (usually 'AND')
+    id:        string          // stable identifier e.g. 'active', 'vero_flagged'
+    name:      string          // display label
+    icon:      string          // lucide icon name
+    color:     string          // hex — used for the left dot
+    filters:   SegmentFilter[] // empty array = no filter (show all)
+    logic:     FilterLogic     // how filters combine (usually 'AND')
     isBuiltIn: true
 }
 
 // ── A custom segment (user-created, stored in Supabase) ───────
 export interface CustomSegment {
-    id: string          // uuid from Supabase
-    user_id: string
-    name: string
-    icon: string          // emoji or lucide icon name
-    color: string          // hex
-    filters: SegmentFilter[]
-    logic: FilterLogic
+    id:        string          // uuid from Supabase
+    user_id:   string
+    name:      string
+    icon:      string          // emoji or lucide icon name
+    color:     string          // hex
+    filters:   SegmentFilter[]
+    logic:     FilterLogic
     sort_order: number
     created_at: string
     isBuiltIn: false
@@ -75,98 +75,98 @@ export type Segment = BuiltInSegment | CustomSegment
 
 // ── What the Supabase row looks like (raw from DB) ───────────
 export interface SegmentRow {
-    id: string
-    user_id: string
-    name: string
-    icon: string
-    color: string
-    filters: SegmentFilter[]   // stored as jsonb
-    logic: FilterLogic
+    id:         string
+    user_id:    string
+    name:       string
+    icon:       string
+    color:      string
+    filters:    SegmentFilter[]   // stored as jsonb
+    logic:      FilterLogic
     sort_order: number
     created_at: string
 }
 
 // ── Payload for creating / updating a custom segment ─────────
 export interface SegmentUpsert {
-    name: string
-    icon: string
-    color: string
-    filters: SegmentFilter[]
-    logic: FilterLogic
+    name:       string
+    icon:       string
+    color:      string
+    filters:    SegmentFilter[]
+    logic:      FilterLogic
     sort_order?: number
 }
 
 // ── Human-readable labels for each filter field ───────────────
 export const FILTER_FIELD_LABELS: Record<FilterField, string> = {
-    status: 'Status',
-    vero_status: 'VeRO Status',
-    health_score: 'Health Score',
-    margin: 'Margin %',
-    sell_price: 'Price',
-    net_profit: 'Net Profit',
-    sku: 'SKU',
+    status:          'Status',
+    vero_status:     'VeRO Status',
+    health_score:    'Health Score',
+    margin:          'Margin %',
+    sell_price:      'Price',
+    net_profit:      'Net Profit',
+    sku:             'SKU',
     source_platform: 'Source',
-    category: 'Category',
-    condition: 'Condition',
-    created_at: 'Created Date',
+    category:        'Category',
+    condition:       'Condition',
+    created_at:      'Created Date',
 }
 
 // ── Which operators apply to each field ──────────────────────
 export const FIELD_OPERATORS: Record<FilterField, FilterOperator[]> = {
-    status: ['eq', 'not_eq'],
-    vero_status: ['eq', 'not_eq'],
-    health_score: ['gt', 'gte', 'lt', 'lte', 'between', 'eq'],
-    margin: ['gt', 'gte', 'lt', 'lte', 'between', 'eq'],
-    sell_price: ['gt', 'gte', 'lt', 'lte', 'between', 'is_empty', 'is_not_empty'],
-    net_profit: ['gt', 'gte', 'lt', 'lte', 'between', 'is_empty'],
-    sku: ['is_empty', 'is_not_empty', 'contains', 'eq'],
+    status:          ['eq', 'not_eq'],
+    vero_status:     ['eq', 'not_eq'],
+    health_score:    ['gt', 'gte', 'lt', 'lte', 'between', 'eq'],
+    margin:          ['gt', 'gte', 'lt', 'lte', 'between', 'eq'],
+    sell_price:      ['gt', 'gte', 'lt', 'lte', 'between', 'is_empty', 'is_not_empty'],
+    net_profit:      ['gt', 'gte', 'lt', 'lte', 'between', 'is_empty'],
+    sku:             ['is_empty', 'is_not_empty', 'contains', 'eq'],
     source_platform: ['eq', 'not_eq'],
-    category: ['eq', 'not_eq', 'contains', 'is_empty'],
-    condition: ['eq', 'not_eq'],
-    created_at: ['gt', 'gte', 'lt', 'lte', 'between'],
+    category:        ['eq', 'not_eq', 'contains', 'is_empty'],
+    condition:       ['eq', 'not_eq'],
+    created_at:      ['gt', 'gte', 'lt', 'lte', 'between'],
 }
 
 // ── Human-readable operator labels ───────────────────────────
 export const OPERATOR_LABELS: Record<FilterOperator, string> = {
-    eq: 'is',
-    not_eq: 'is not',
-    gt: 'greater than',
-    gte: 'at least',
-    lt: 'less than',
-    lte: 'at most',
-    between: 'between',
-    contains: 'contains',
-    is_empty: 'is empty',
+    eq:           'is',
+    not_eq:       'is not',
+    gt:           'greater than',
+    gte:          'at least',
+    lt:           'less than',
+    lte:          'at most',
+    between:      'between',
+    contains:     'contains',
+    is_empty:     'is empty',
     is_not_empty: 'is not empty',
 }
 
 // ── Enum options for fields that have a fixed value set ───────
 export const FIELD_OPTIONS: Partial<Record<FilterField, { value: string; label: string }[]>> = {
     status: [
-        { value: 'draft', label: 'Draft' },
+        { value: 'draft',     label: 'Draft' },
         { value: 'published', label: 'Active' },
-        { value: 'ended', label: 'Ended' },
+        { value: 'ended',     label: 'Ended' },
         { value: 'scheduled', label: 'Scheduled' },
     ],
     vero_status: [
-        { value: 'clear', label: 'Clear' },
+        { value: 'clear',   label: 'Clear' },
         { value: 'warning', label: 'Warning' },
         { value: 'flagged', label: 'Flagged' },
     ],
     source_platform: [
         { value: 'barcode_import', label: 'Barcode AI' },
-        { value: 'title_import', label: 'Title AI' },
-        { value: 'url_import', label: 'URL AI' },
-        { value: 'image_import', label: 'Photo AI' },
-        { value: 'manual', label: 'Manual' },
+        { value: 'title_import',   label: 'Title AI' },
+        { value: 'url_import',     label: 'URL AI' },
+        { value: 'image_import',   label: 'Photo AI' },
+        { value: 'manual',         label: 'Manual' },
     ],
     condition: [
-        { value: 'New', label: 'New' },
-        { value: 'Used', label: 'Used' },
+        { value: 'New',             label: 'New' },
+        { value: 'Used',            label: 'Used' },
         { value: 'Used – Like New', label: 'Used – Like New' },
-        { value: 'Used – Good', label: 'Used – Good' },
+        { value: 'Used – Good',     label: 'Used – Good' },
         { value: 'Used – Acceptable', label: 'Used – Acceptable' },
-        { value: 'For parts', label: 'For parts' },
+        { value: 'For parts',       label: 'For parts' },
     ],
 }
 

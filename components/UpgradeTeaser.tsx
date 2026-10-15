@@ -5,9 +5,9 @@ import { useEffect } from 'react'
 import { X, CheckCircle2 } from 'lucide-react'
 
 interface UpgradeTeaserProps {
-    onClose: () => void
-    onViewPlans: () => void
-    title?: string
+    onClose:      () => void
+    onViewPlans:  () => void
+    title?:       string
     description?: string
 }
 
@@ -22,7 +22,7 @@ const BULLETS = [
 export function UpgradeTeaser({
     onClose,
     onViewPlans,
-    title = "You've reached your plan limit.",
+    title       = "You've reached your plan limit.",
     description = 'Upgrade to unlock full access to AI-powered eBay listing tools.',
 }: UpgradeTeaserProps) {
 
@@ -51,15 +51,15 @@ export function UpgradeTeaser({
             <div
                 onClick={e => e.stopPropagation()}
                 style={{
-                    background: '#ffffff',
+                    background:   '#ffffff',
                     borderRadius: '20px',
-                    width: '100%',
-                    maxWidth: '460px',
-                    padding: '32px',
-                    position: 'relative',
-                    boxShadow: '0 24px 64px rgba(117,48,251,0.15)',
-                    border: '1px solid #ede9fe',
-                    fontFamily: '"DM Sans", Inter, sans-serif',
+                    width:        '100%',
+                    maxWidth:     '460px',
+                    padding:      '32px',
+                    position:     'relative',
+                    boxShadow:    '0 24px 64px rgba(117,48,251,0.15)',
+                    border:       '1px solid #ede9fe',
+                    fontFamily:   '"DM Sans", Inter, sans-serif',
                 }}>
 
                 {/* Close */}

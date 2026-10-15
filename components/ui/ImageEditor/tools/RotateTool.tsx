@@ -9,21 +9,21 @@ import type { ToolPanelProps } from '../types'
 
 // ── Tokens ─────────────────────────────────────────────────────
 const C = {
-    primary: '#7530fb',
+    primary:      '#7530fb',
     primaryLight: '#f3eeff',
-    primaryBorder: '#c4a8fd',
-    border: '#ede9fe',
-    borderMid: '#e5e7eb',
-    label: '#111827',
-    sub: '#6b7280',
-    muted: '#9ca3af',
-    surface: '#ffffff',
-    sectionBg: '#fafafa',
-    hover: '#f3f4f6',
-    danger: '#ef4444',
-    dangerLight: '#fef2f2',
+    primaryBorder:'#c4a8fd',
+    border:       '#ede9fe',
+    borderMid:    '#e5e7eb',
+    label:        '#111827',
+    sub:          '#6b7280',
+    muted:        '#9ca3af',
+    surface:      '#ffffff',
+    sectionBg:    '#fafafa',
+    hover:        '#f3f4f6',
+    danger:       '#ef4444',
+    dangerLight:  '#fef2f2',
     dangerBorder: '#fca5a5',
-    dark: '#1e1535',
+    dark:         '#1e1535',
 }
 
 // ── AngleButton — 0 / 90 / 180 / 270 presets ──────────────────
@@ -200,16 +200,16 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export default function RotateTool({ state, onChange }: ToolPanelProps) {
     const [hovReset, setHovReset] = useState(false)
 
-    const rotation = state.rotation ?? 0
+    const rotation  = state.rotation  ?? 0
     const straighten = state.straighten ?? 0
-    const flipH = state.flipH ?? false
-    const flipV = state.flipV ?? false
-    const totalDeg = rotation + straighten
+    const flipH     = state.flipH     ?? false
+    const flipV     = state.flipV     ?? false
+    const totalDeg  = rotation + straighten
 
     const isDirty = rotation !== 0 || straighten !== 0 || flipH || flipV
 
-    function rotateLeft() { onChange({ rotation: ((rotation - 90 + 360) % 360) as 0 | 90 | 180 | 270 }) }
-    function rotateRight() { onChange({ rotation: ((rotation + 90) % 360) as 0 | 90 | 180 | 270 }) }
+    function rotateLeft()  { onChange({ rotation: ((rotation - 90 + 360) % 360) as 0|90|180|270 }) }
+    function rotateRight() { onChange({ rotation: ((rotation + 90) % 360) as 0|90|180|270 }) }
 
     const pct = ((straighten - (-45)) / 90) * 100
 

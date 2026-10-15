@@ -10,39 +10,39 @@
 export type ColumnGroup = 'product' | 'pricing' | 'performance' | 'status' | 'identifiers'
 
 export interface ColumnDef {
-    id: string
-    label: string
-    width: number          // px — used as table-layout: fixed column width
-    group: ColumnGroup
+    id:     string
+    label:  string
+    width:  number          // px — used as table-layout: fixed column width
+    group:  ColumnGroup
 }
 
 // ── All available columns ─────────────────────────────────────
 // Order here is the "canonical" order used when resetting to defaults
 export const COLUMN_DEFS: ColumnDef[] = [
     // Product Info
-    { id: 'product', label: 'Product', width: 220, group: 'product' },
-    { id: 'condition', label: 'Condition', width: 110, group: 'product' },
-    { id: 'category', label: 'Category', width: 110, group: 'product' },
-    { id: 'source', label: 'Source', width: 100, group: 'product' },
-    { id: 'seller_type', label: 'Seller Type', width: 100, group: 'product' },
+    { id: 'product',       label: 'Product',        width: 220, group: 'product'      },
+    { id: 'condition',     label: 'Condition',       width: 110, group: 'product'      },
+    { id: 'category',      label: 'Category',        width: 110, group: 'product'      },
+    { id: 'source',        label: 'Source',          width: 100, group: 'product'      },
+    { id: 'seller_type',   label: 'Seller Type',     width: 100, group: 'product'      },
 
     // Pricing
-    { id: 'price', label: 'Price', width: 90, group: 'pricing' },
-    { id: 'margin', label: 'Margin %', width: 80, group: 'pricing' },
-    { id: 'net_profit', label: 'Net Profit', width: 90, group: 'pricing' },
+    { id: 'price',         label: 'Price',           width: 90,  group: 'pricing'      },
+    { id: 'margin',        label: 'Margin %',        width: 80,  group: 'pricing'      },
+    { id: 'net_profit',    label: 'Net Profit',      width: 90,  group: 'pricing'      },
 
     // Performance
-    { id: 'health', label: 'Health Score', width: 70, group: 'performance' },
-    { id: 'vero', label: 'VeRO Status', width: 80, group: 'performance' },
-    { id: 'stock', label: 'Stock', width: 90, group: 'performance' },
+    { id: 'health',        label: 'Health Score',    width: 70,  group: 'performance'  },
+    { id: 'vero',          label: 'VeRO Status',     width: 80,  group: 'performance'  },
+    { id: 'stock',         label: 'Stock',           width: 90,  group: 'performance'  },
 
     // Status & Dates
-    { id: 'status', label: 'Status', width: 90, group: 'status' },
-    { id: 'date', label: 'Created Date', width: 80, group: 'status' },
-    { id: 'updated', label: 'Last Updated', width: 80, group: 'status' },
+    { id: 'status',        label: 'Status',          width: 90,  group: 'status'       },
+    { id: 'date',          label: 'Created Date',    width: 80,  group: 'status'       },
+    { id: 'updated',       label: 'Last Updated',    width: 80,  group: 'status'       },
 
     // Identifiers
-    { id: 'ids', label: 'EAN / eBay ID', width: 160, group: 'identifiers' },
+    { id: 'ids',           label: 'EAN / eBay ID',   width: 160, group: 'identifiers'  },
 ]
 
 // ── Quick lookup by id ────────────────────────────────────────
@@ -51,10 +51,10 @@ export const COLUMN_BY_ID: Record<string, ColumnDef> =
 
 // ── Group labels ──────────────────────────────────────────────
 export const GROUP_LABELS: Record<ColumnGroup, string> = {
-    product: 'Product Info',
-    pricing: 'Pricing',
+    product:     'Product Info',
+    pricing:     'Pricing',
     performance: 'Performance',
-    status: 'Status & Dates',
+    status:      'Status & Dates',
     identifiers: 'Identifiers',
 }
 

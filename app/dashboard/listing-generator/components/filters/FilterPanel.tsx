@@ -30,18 +30,18 @@ import {
 
 // ── Design tokens ─────────────────────────────────────────────
 const C = {
-    bg: '#f8f7ff',
-    surface: '#ffffff',
-    border: '#ede9fe',
+    bg:          '#f8f7ff',
+    surface:     '#ffffff',
+    border:      '#ede9fe',
     borderInput: '#e5e0f5',
-    primary: '#7530fb',
-    primaryLight: '#f3eeff',
-    dark: '#1e1535',
-    muted: '#9ca3af',
-    secondary: '#6b7280',
-    danger: '#ef4444',
-    dangerBg: '#fee2e2',
-    success: '#16a34a',
+    primary:     '#7530fb',
+    primaryLight:'#f3eeff',
+    dark:        '#1e1535',
+    muted:       '#9ca3af',
+    secondary:   '#6b7280',
+    danger:      '#ef4444',
+    dangerBg:    '#fee2e2',
+    success:     '#16a34a',
 }
 
 // ── Field groups (left column) ────────────────────────────────
@@ -74,12 +74,12 @@ const FILTER_GROUPS: { id: string; label: string; colIds: string[] }[] = [
 ]
 
 interface FilterPanelProps {
-    open: boolean
-    onClose: () => void
+    open:          boolean
+    onClose:       () => void
     activeFilters: ActiveFilter[]
-    onApply: (filter: Omit<ActiveFilter, 'id'>) => void
-    onClear: (colId: string) => void
-    onClearAll: () => void
+    onApply:       (filter: Omit<ActiveFilter, 'id'>) => void
+    onClear:       (colId: string) => void
+    onClearAll:    () => void
 }
 
 // ── Inline field editor ───────────────────────────────────────
@@ -89,14 +89,14 @@ function FieldEditor({
     onApply,
     onBack,
 }: {
-    fieldDef: FilterFieldDef
-    existing: ActiveFilter | null
-    onApply: (filter: Omit<ActiveFilter, 'id'>) => void
-    onBack: () => void
+    fieldDef:  FilterFieldDef
+    existing:  ActiveFilter | null
+    onApply:   (filter: Omit<ActiveFilter, 'id'>) => void
+    onBack:    () => void
 }) {
-    const operators = OPERATORS[fieldDef.type]
+    const operators  = OPERATORS[fieldDef.type]
     const [operator, setOperator] = useState(existing?.operator ?? defaultOperator(fieldDef.type))
-    const [value, setValue] = useState<string | string[]>(
+    const [value,  setValue]  = useState<string | string[]>(
         existing ? String(existing.value ?? '') : ''
     )
     const [value2, setValue2] = useState<string>(
@@ -258,7 +258,7 @@ export function FilterPanel({
 
     if (!open) return null
 
-    const group = FILTER_GROUPS.find(g => g.id === activeGroup)!
+    const group       = FILTER_GROUPS.find(g => g.id === activeGroup)!
     const editingField = editingColId ? FILTER_FIELD_DEFS[editingColId] : null
     const existingFilter = (colId: string) => activeFilters.find(f => f.colId === colId) ?? null
 
@@ -272,18 +272,18 @@ export function FilterPanel({
 
             {/* Panel */}
             <div style={{
-                position: 'fixed',
-                top: 0,
-                left: 200,   // sits next to the segment sidebar (approx 200px)
-                bottom: 0,
-                width: 460,
-                zIndex: 41,
+                position:  'fixed',
+                top:       0,
+                left:      200,   // sits next to the segment sidebar (approx 200px)
+                bottom:    0,
+                width:     460,
+                zIndex:    41,
                 background: C.surface,
                 borderRight: `1px solid ${C.border}`,
-                boxShadow: '8px 0 32px rgba(117,48,251,0.10)',
-                display: 'flex',
+                boxShadow:  '8px 0 32px rgba(117,48,251,0.10)',
+                display:   'flex',
                 flexDirection: 'column',
-                overflow: 'hidden',
+                overflow:  'hidden',
             }}>
                 {/* Header */}
                 <div style={{
@@ -365,7 +365,7 @@ export function FilterPanel({
                             }}>
                                 {FILTER_GROUPS.map(g => {
                                     const activeCount = activeFilters.filter(f => g.colIds.includes(f.colId)).length
-                                    const isActive = activeGroup === g.id
+                                    const isActive    = activeGroup === g.id
                                     return (
                                         <button key={g.id} type="button" onClick={() => setActiveGroup(g.id)}
                                             style={{
@@ -384,7 +384,7 @@ export function FilterPanel({
                                                 fontSize: 10, fontWeight: 700, minWidth: 18, textAlign: 'center',
                                                 padding: '1px 5px', borderRadius: 20,
                                                 background: activeCount > 0 ? C.primary : C.bg,
-                                                color: activeCount > 0 ? '#fff' : C.muted,
+                                                color:      activeCount > 0 ? '#fff'    : C.muted,
                                             }}>
                                                 {activeCount > 0 ? activeCount : g.colIds.length}
                                             </span>
@@ -396,7 +396,7 @@ export function FilterPanel({
                             {/* Right: fields in selected group */}
                             <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
                                 {group.colIds.map(colId => {
-                                    const fd = FILTER_FIELD_DEFS[colId]
+                                    const fd     = FILTER_FIELD_DEFS[colId]
                                     const active = existingFilter(colId)
                                     if (!fd) return null
                                     return (

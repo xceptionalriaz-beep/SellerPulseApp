@@ -26,46 +26,46 @@ import type { DropdownOption } from '@/components/ui/ProDropdown'
 
 // ── Design tokens (mirrors LgDashboard) ──────────────────────
 const C = {
-    bg: '#f8f7ff',
-    surface: '#ffffff',
-    border: '#ede9fe',
+    bg:          '#f8f7ff',
+    surface:     '#ffffff',
+    border:      '#ede9fe',
     borderInput: '#e5e0f5',
-    primary: '#7530fb',
-    primaryLight: '#f3eeff',
-    dark: '#1e1535',
-    muted: '#9ca3af',
-    danger: '#ef4444',
-    dangerBg: '#fee2e2',
+    primary:     '#7530fb',
+    primaryLight:'#f3eeff',
+    dark:        '#1e1535',
+    muted:       '#9ca3af',
+    danger:      '#ef4444',
+    dangerBg:    '#fee2e2',
 }
 
 // ── Shared input/select style ─────────────────────────────────
 const inputStyle: React.CSSProperties = {
-    height: 32,
-    padding: '0 10px',
-    borderRadius: 8,
-    border: `1.5px solid ${C.borderInput}`,
-    background: C.surface,
-    color: C.dark,
-    fontSize: 13,
-    outline: 'none',
-    width: '100%',
-    boxSizing: 'border-box',
+    height:          32,
+    padding:         '0 10px',
+    borderRadius:    8,
+    border:          `1.5px solid ${C.borderInput}`,
+    background:      C.surface,
+    color:           C.dark,
+    fontSize:        13,
+    outline:         'none',
+    width:           '100%',
+    boxSizing:       'border-box',
 }
 
 // ── Field types for deciding which value input to show ────────
 type FieldKind = 'enum' | 'number' | 'date' | 'text'
 
 function getFieldKind(field: FilterField): FieldKind {
-    if (FIELD_OPTIONS[field]) return 'enum'
+    if (FIELD_OPTIONS[field])                                    return 'enum'
     if (['health_score', 'margin', 'sell_price', 'net_profit'].includes(field)) return 'number'
-    if (field === 'created_at') return 'date'
+    if (field === 'created_at')                                  return 'date'
     return 'text'
 }
 
 // ── Props ─────────────────────────────────────────────────────
 interface FilterRowProps {
-    filter: SegmentFilter
-    index: number
+    filter:   SegmentFilter
+    index:    number
     onChange: (index: number, updated: SegmentFilter) => void
     onRemove: (index: number) => void
 }
@@ -73,10 +73,10 @@ interface FilterRowProps {
 // ─────────────────────────────────────────────────────────────
 export function FilterRow({ filter, index, onChange, onRemove }: FilterRowProps) {
 
-    const kind = getFieldKind(filter.field)
+    const kind      = getFieldKind(filter.field)
     const operators = FIELD_OPERATORS[filter.field]
-    const options = FIELD_OPTIONS[filter.field]
-    const noValue = filter.op === 'is_empty' || filter.op === 'is_not_empty'
+    const options   = FIELD_OPTIONS[filter.field]
+    const noValue   = filter.op === 'is_empty' || filter.op === 'is_not_empty'
     const isBetween = filter.op === 'between'
 
     // ── Handlers ─────────────────────────────────────────────
@@ -86,8 +86,8 @@ export function FilterRow({ filter, index, onChange, onRemove }: FilterRowProps)
         const newOps = FIELD_OPERATORS[field]
         onChange(index, {
             field,
-            op: newOps[0],
-            value: undefined,
+            op:     newOps[0],
+            value:  undefined,
             value2: undefined,
         })
     }
@@ -160,13 +160,13 @@ export function FilterRow({ filter, index, onChange, onRemove }: FilterRowProps)
     return (
         <div
             style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '8px 10px',
-                borderRadius: 10,
-                background: C.bg,
-                border: `1.5px solid ${C.border}`,
+                display:       'flex',
+                alignItems:    'center',
+                gap:           8,
+                padding:       '8px 10px',
+                borderRadius:  10,
+                background:    C.bg,
+                border:        `1.5px solid ${C.border}`,
             }}
         >
             {/* ── Field selector ──────────────────────────── */}
@@ -228,26 +228,26 @@ export function FilterRow({ filter, index, onChange, onRemove }: FilterRowProps)
                 onClick={() => onRemove(index)}
                 title="Remove filter"
                 style={{
-                    flexShrink: 0,
-                    width: 26,
-                    height: 26,
+                    flexShrink:   0,
+                    width:        26,
+                    height:       26,
                     borderRadius: 6,
-                    border: 'none',
-                    background: 'transparent',
-                    color: C.muted,
-                    display: 'flex',
-                    alignItems: 'center',
+                    border:       'none',
+                    background:   'transparent',
+                    color:        C.muted,
+                    display:      'flex',
+                    alignItems:   'center',
                     justifyContent: 'center',
-                    cursor: 'pointer',
-                    transition: 'background 0.15s, color 0.15s',
+                    cursor:       'pointer',
+                    transition:   'background 0.15s, color 0.15s',
                 }}
                 onMouseEnter={e => {
-                    ; (e.currentTarget as HTMLButtonElement).style.background = C.dangerBg
-                        ; (e.currentTarget as HTMLButtonElement).style.color = C.danger
+                    ;(e.currentTarget as HTMLButtonElement).style.background = C.dangerBg
+                    ;(e.currentTarget as HTMLButtonElement).style.color      = C.danger
                 }}
                 onMouseLeave={e => {
-                    ; (e.currentTarget as HTMLButtonElement).style.background = 'transparent'
-                        ; (e.currentTarget as HTMLButtonElement).style.color = C.muted
+                    ;(e.currentTarget as HTMLButtonElement).style.background = 'transparent'
+                    ;(e.currentTarget as HTMLButtonElement).style.color      = C.muted
                 }}
             >
                 <X size={13} />

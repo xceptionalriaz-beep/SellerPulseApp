@@ -27,20 +27,20 @@ import BarcodeImportFailed from './BarcodeImportFailed'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
-    primary: '#7530fb',
+    primary:      '#7530fb',
     primaryLight: '#f3eeff',
-    accent: '#b8fa33',
-    accentDark: '#8abf1f',
-    bg: '#f8f7ff',
-    surface: '#ffffff',
-    border: '#ede9fe',
-    text: '#1a1523',
-    muted: '#6b7280',
-    error: '#ef4444',
-    errorLight: '#fef2f2',
-    warning: '#f59e0b',
+    accent:       '#b8fa33',
+    accentDark:   '#8abf1f',
+    bg:           '#f8f7ff',
+    surface:      '#ffffff',
+    border:       '#ede9fe',
+    text:         '#1a1523',
+    muted:        '#6b7280',
+    error:        '#ef4444',
+    errorLight:   '#fef2f2',
+    warning:      '#f59e0b',
     warningLight: '#fffbeb',
-    success: '#22c55e',
+    success:      '#22c55e',
     successLight: '#f0fdf4',
 } as const
 
@@ -53,7 +53,7 @@ interface BarcodeImportProps {
 const MAX_CONCURRENT = 3
 
 // ── Max queue size (prevents accidental bulk overflow) ────────────────────────
-const MAX_QUEUE = 100
+const MAX_QUEUE      = 100
 const MAX_BULK_PASTE = 50
 
 // ── Fetch timeout (ms) — items stuck in loading forever is bad UX ─────────────
@@ -64,37 +64,37 @@ const SESSION_KEY = 'riazify_barcode_session'
 
 // ── Types for stored session ──────────────────────────────────────────────────
 interface StoredSession {
-    items: BarcodeQueueItem[]
+    items:   BarcodeQueueItem[]
     savedAt: number
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function BarcodeImport({ onBack }: BarcodeImportProps) {
-    const [queue, setQueue] = useState<BarcodeQueueItem[]>([])
+    const [queue, setQueue]               = useState<BarcodeQueueItem[]>([])
     const [identifierMode, setIdentifierMode] = useState<IdentifierMode>('UPC')
-    const identifierModeRef = useRef<IdentifierMode>('UPC')
+    const identifierModeRef               = useRef<IdentifierMode>('UPC')
     const [cameraActive, setCameraActive] = useState(false)
-    const [manualInput, setManualInput] = useState('')
-    const [inputError, setInputError] = useState<string | null>(null)
-    const [previewItem, setPreviewItem] = useState<BarcodeQueueItem | null>(null)
-    const [failedItem, setFailedItem] = useState<BarcodeQueueItem | null>(null)
-    const [bulkDone, setBulkDone] = useState(false)
-    const [bulkSavedCount, setBulkSavedCount] = useState(0)
-    const [restoreSession, setRestoreSession] = useState<StoredSession | null>(null)
+    const [manualInput, setManualInput]   = useState('')
+    const [inputError, setInputError]     = useState<string | null>(null)
+    const [previewItem, setPreviewItem]   = useState<BarcodeQueueItem | null>(null)
+    const [failedItem, setFailedItem]     = useState<BarcodeQueueItem | null>(null)
+    const [bulkDone, setBulkDone]               = useState(false)
+    const [bulkSavedCount, setBulkSavedCount]   = useState(0)
+    const [restoreSession, setRestoreSession]   = useState<StoredSession | null>(null)
     // ── AI options — user can toggle before creating ──────────────────────────
     const [aiTitle, setAiTitle] = useState(true)   // AI-optimised title + description
     const [aiPrice, setAiPrice] = useState(true)   // AI suggested price
     // Camera scan feedback: 'added' (green flash) | 'duplicate' (amber) | 'invalid' (red)
     const [cameraScanFeedback, setCameraScanFeedback] = useState<'added' | 'duplicate' | 'invalid' | null>(null)
-    const inFlightRef = useRef<Set<string>>(new Set())
+    const inFlightRef                           = useRef<Set<string>>(new Set())
     // Mirror of queue for synchronous reads (avoids stale closure in camera handler)
-    const queueRef = useRef<BarcodeQueueItem[]>([])
-    const inputRef = useRef<HTMLTextAreaElement>(null)
+    const queueRef                              = useRef<BarcodeQueueItem[]>([])
+    const inputRef                              = useRef<HTMLTextAreaElement>(null)
 
     // ── Derived state ─────────────────────────────────────────────────────────
-    const found = queue.filter(i => i.status === 'found' || i.status === 'vero_risk')
-    const selected = found.filter(i => i.selected)
-    const pending = queue.filter(i => i.status === 'pending' || i.status === 'loading')
+    const found      = queue.filter(i => i.status === 'found' || i.status === 'vero_risk')
+    const selected   = found.filter(i => i.selected)
+    const pending    = queue.filter(i => i.status === 'pending' || i.status === 'loading')
     const allSelected = found.length > 0 && selected.length === found.length
 
     // ── Keep queueRef in sync (allows synchronous reads without stale closures) ──
@@ -111,19 +111,19 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
 
         // Abort after FETCH_TIMEOUT_MS to prevent items stuck loading forever
         const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+        const timeoutId  = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
 
         try {
             const res = await fetch('/api/listing/barcode-import', {
-                method: 'POST',
+                method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
+                body:    JSON.stringify({
                     barcode,
                     identifierMode: identifierModeRef.current,
                     useAiTitle: aiTitle,
                     useAiPrice: aiPrice,
                 }),
-                signal: controller.signal,
+                signal:  controller.signal,
             })
             const data: BarcodeImportResponse = await res.json()
             if (data.success && data.result) {
@@ -189,12 +189,12 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
 
         setInputError(null)
         const newItem: BarcodeQueueItem = {
-            id: crypto.randomUUID().slice(0, 8),
+            id:          crypto.randomUUID().slice(0, 8),
             barcode,
             barcodeType,
-            status: 'pending',
-            selected: false,
-            scannedAt: Date.now(),
+            status:      'pending',
+            selected:    false,
+            scannedAt:   Date.now(),
         }
 
         setQueue(prev => {
@@ -317,21 +317,21 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
 
             for (const line of batch) {
                 const result = addBarcode(line)
-                if (result === 'added') added++
+                if (result === 'added')     added++
                 else if (result === 'duplicate') dupes++
-                else if (result === 'invalid') invalid++
-                else if (result === 'full') { hitLimit = true; break }
+                else if (result === 'invalid')   invalid++
+                else if (result === 'full')      { hitLimit = true; break }
             }
 
             // Build a summary message
             const parts: string[] = []
-            if (added > 0) parts.push(`${added} added`)
-            if (dupes > 0) parts.push(`${dupes} duplicate${dupes > 1 ? 's' : ''} skipped`)
-            if (invalid > 0) parts.push(`${invalid} invalid`)
-            if (hitLimit) parts.push('queue full — remove items to add more')
-            if (skipped > 0) parts.push(`${skipped} over the ${MAX_BULK_PASTE}-per-paste limit`)
+            if (added > 0)    parts.push(`${added} added`)
+            if (dupes > 0)    parts.push(`${dupes} duplicate${dupes > 1 ? 's' : ''} skipped`)
+            if (invalid > 0)  parts.push(`${invalid} invalid`)
+            if (hitLimit)     parts.push('queue full — remove items to add more')
+            if (skipped > 0)  parts.push(`${skipped} over the ${MAX_BULK_PASTE}-per-paste limit`)
             if (parts.length) setInputError(parts.join(' · '))
-            else setInputError(null)
+            else              setInputError(null)
         }
 
         setManualInput('')
@@ -378,11 +378,11 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
 
     // ── Stats bar ─────────────────────────────────────────────────────────────
     const stats = {
-        total: queue.length,
-        found: found.length,
-        loading: queue.filter(i => i.status === 'loading').length,
-        pending: queue.filter(i => i.status === 'pending').length,
-        failed: queue.filter(i => i.status === 'not_found' || i.status === 'error').length,
+        total:    queue.length,
+        found:    found.length,
+        loading:  queue.filter(i => i.status === 'loading').length,
+        pending:  queue.filter(i => i.status === 'pending').length,
+        failed:   queue.filter(i => i.status === 'not_found' || i.status === 'error').length,
     }
 
     // ── Empty state ───────────────────────────────────────────────────────────
@@ -486,9 +486,9 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
                                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
                                 style={{
                                     backgroundColor: identifierMode === opt.value ? C.primary : C.bg,
-                                    color: identifierMode === opt.value ? '#fff' : C.muted,
-                                    border: `1.5px solid ${identifierMode === opt.value ? C.primary : C.border}`,
-                                    fontFamily: 'DM Mono, monospace',
+                                    color:           identifierMode === opt.value ? '#fff' : C.muted,
+                                    border:          `1.5px solid ${identifierMode === opt.value ? C.primary : C.border}`,
+                                    fontFamily:      'DM Mono, monospace',
                                 }}
                             >
                                 {opt.label}
@@ -535,21 +535,21 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
                                 identifierMode === 'MPN'
                                     ? 'Paste manufacturer part numbers — one per line (up to 50)'
                                     : identifierMode === 'EPID'
-                                        ? 'Paste eBay Product IDs — one per line (up to 50)'
-                                        : identifierMode === 'ISBN'
-                                            ? 'Paste ISBN numbers — one per line (up to 50)'
-                                            : `Paste ${identifierMode} barcodes — one per line (up to 50)`
+                                    ? 'Paste eBay Product IDs — one per line (up to 50)'
+                                    : identifierMode === 'ISBN'
+                                    ? 'Paste ISBN numbers — one per line (up to 50)'
+                                    : `Paste ${identifierMode} barcodes — one per line (up to 50)`
                             }
                             className="w-full rounded-xl px-4 py-3 text-sm outline-none resize-none transition-shadow"
                             style={{
-                                border: `1.5px solid ${inputError ? C.error : C.border}`,
+                                border:          `1.5px solid ${inputError ? C.error : C.border}`,
                                 backgroundColor: C.surface,
-                                color: C.text,
-                                fontFamily: 'DM Mono, monospace',
-                                lineHeight: '1.6',
+                                color:           C.text,
+                                fontFamily:      'DM Mono, monospace',
+                                lineHeight:      '1.6',
                             }}
                             onFocus={e => (e.currentTarget.style.borderColor = inputError ? C.error : C.primary)}
-                            onBlur={e => (e.currentTarget.style.borderColor = inputError ? C.error : C.border)}
+                            onBlur={e  => (e.currentTarget.style.borderColor = inputError ? C.error : C.border)}
                             onKeyDown={e => {
                                 // Ctrl/Cmd+Enter submits without needing the button
                                 if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
@@ -585,8 +585,8 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
                             className="flex items-center gap-1.5 px-5 py-2 rounded-xl font-semibold text-sm transition-opacity disabled:opacity-40 flex-shrink-0"
                             style={{
                                 backgroundColor: C.primary,
-                                color: '#fff',
-                                fontFamily: 'DM Sans, sans-serif',
+                                color:           '#fff',
+                                fontFamily:      'DM Sans, sans-serif',
                             }}
                         >
                             <PlusCircle size={15} />
@@ -820,8 +820,8 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
                                     {!aiTitle && !aiPrice
                                         ? 'AI title, description and price skipped — raw data only'
                                         : !aiTitle
-                                            ? 'AI title & description skipped — raw product name will be used'
-                                            : 'AI price skipped — price will not be set automatically'}
+                                        ? 'AI title & description skipped — raw product name will be used'
+                                        : 'AI price skipped — price will not be set automatically'}
                                 </p>
                             )}
                         </div>

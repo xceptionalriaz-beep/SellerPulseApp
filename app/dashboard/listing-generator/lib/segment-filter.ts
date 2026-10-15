@@ -14,34 +14,34 @@ import type { SegmentFilter, FilterField, FilterLogic } from '../types/segments.
 // that FilterField can target. Kept loose so it works if extra
 // fields are added to Listing later.
 export interface FilterableListing {
-    status: string | null
-    vero_status: string | null
-    health_score: number
-    margin: number | null
-    sell_price: number | null
-    net_profit: number | null
-    sku: string | null
+    status:          string | null
+    vero_status:     string | null
+    health_score:    number
+    margin:          number | null
+    sell_price:      number | null
+    net_profit:      number | null
+    sku:             string | null
     source_platform: string | null
-    category: string | null
-    condition: string | null
-    created_at: string
+    category:        string | null
+    condition:       string | null
+    created_at:      string
 }
 
 // ── Extract the raw value for a given field ───────────────────
 function getValue(listing: FilterableListing, field: FilterField): string | number | null {
     switch (field) {
-        case 'status': return listing.status
-        case 'vero_status': return listing.vero_status
-        case 'health_score': return listing.health_score
-        case 'margin': return listing.margin
-        case 'sell_price': return listing.sell_price
-        case 'net_profit': return listing.net_profit
-        case 'sku': return listing.sku
+        case 'status':          return listing.status
+        case 'vero_status':     return listing.vero_status
+        case 'health_score':    return listing.health_score
+        case 'margin':          return listing.margin
+        case 'sell_price':      return listing.sell_price
+        case 'net_profit':      return listing.net_profit
+        case 'sku':             return listing.sku
         case 'source_platform': return listing.source_platform
-        case 'category': return listing.category
-        case 'condition': return listing.condition
-        case 'created_at': return listing.created_at
-        default: return null
+        case 'category':        return listing.category
+        case 'condition':       return listing.condition
+        case 'created_at':      return listing.created_at
+        default:                return null
     }
 }
 
@@ -108,12 +108,12 @@ function matchesFilter(listing: FilterableListing, filter: SegmentFilter): boole
         case 'between': {
             if (raw === null) return false
             if (filter.field === 'created_at') {
-                const t = compareDates(String(raw), String(filter.value ?? ''))
+                const t  = compareDates(String(raw), String(filter.value  ?? ''))
                 const t2 = compareDates(String(raw), String(filter.value2 ?? ''))
                 return t >= 0 && t2 <= 0
             }
-            const n = Number(raw)
-            const lo = Number(filter.value ?? 0)
+            const n  = Number(raw)
+            const lo = Number(filter.value  ?? 0)
             const hi = Number(filter.value2 ?? 0)
             return n >= lo && n <= hi
         }
@@ -131,9 +131,9 @@ function matchesFilter(listing: FilterableListing, filter: SegmentFilter): boole
  * An empty filters array always returns true (matches everything).
  */
 export function matchesSegment(
-    listing: FilterableListing,
-    filters: SegmentFilter[],
-    logic: FilterLogic = 'AND',
+    listing:  FilterableListing,
+    filters:  SegmentFilter[],
+    logic:    FilterLogic = 'AND',
 ): boolean {
     if (filters.length === 0) return true
 
@@ -149,9 +149,9 @@ export function matchesSegment(
  * Used by the sidebar to show count badges next to each segment.
  */
 export function countMatches(
-    all: FilterableListing[],
+    all:     FilterableListing[],
     filters: SegmentFilter[],
-    logic: FilterLogic = 'AND',
+    logic:   FilterLogic = 'AND',
 ): number {
     if (filters.length === 0) return all.length
     return all.filter(l => matchesSegment(l, filters, logic)).length
@@ -164,9 +164,9 @@ export function countMatches(
  * filtered list for the active segment.
  */
 export function applySegment<T extends FilterableListing>(
-    all: T[],
+    all:     T[],
     filters: SegmentFilter[],
-    logic: FilterLogic = 'AND',
+    logic:   FilterLogic = 'AND',
 ): T[] {
     if (filters.length === 0) return all
     return all.filter(l => matchesSegment(l, filters, logic))

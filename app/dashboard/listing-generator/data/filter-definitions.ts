@@ -15,53 +15,53 @@ export interface FilterOperator {
     value: string
     label: string
     needsInput: boolean   // false = "has value" / "is empty" — no value input
-    needsTwo: boolean   // true = "between" — needs value + value2
+    needsTwo:   boolean   // true = "between" — needs value + value2
 }
 
 export interface FilterFieldDef {
-    colId: string
-    label: string
-    type: FilterFieldType
-    field: string     // listing property name (for apply logic)
+    colId:    string
+    label:    string
+    type:     FilterFieldType
+    field:    string     // listing property name (for apply logic)
     options?: { value: string; label: string }[]
 }
 
 // ── Operator sets per type ────────────────────────────────────
 export const OPERATORS: Record<FilterFieldType, FilterOperator[]> = {
     text: [
-        { value: 'contains', label: 'contains', needsInput: true, needsTwo: false },
-        { value: 'not_contains', label: 'does not contain', needsInput: true, needsTwo: false },
-        { value: 'equals', label: 'equals', needsInput: true, needsTwo: false },
-        { value: 'not_equals', label: 'not equals to', needsInput: true, needsTwo: false },
-        { value: 'starts_with', label: 'starts with', needsInput: true, needsTwo: false },
-        { value: 'has_value', label: 'has value', needsInput: false, needsTwo: false },
-        { value: 'is_empty', label: 'is empty', needsInput: false, needsTwo: false },
+        { value: 'contains',         label: 'contains',         needsInput: true,  needsTwo: false },
+        { value: 'not_contains',     label: 'does not contain', needsInput: true,  needsTwo: false },
+        { value: 'equals',           label: 'equals',           needsInput: true,  needsTwo: false },
+        { value: 'not_equals',       label: 'not equals to',    needsInput: true,  needsTwo: false },
+        { value: 'starts_with',      label: 'starts with',      needsInput: true,  needsTwo: false },
+        { value: 'has_value',        label: 'has value',        needsInput: false, needsTwo: false },
+        { value: 'is_empty',         label: 'is empty',         needsInput: false, needsTwo: false },
     ],
     number: [
-        { value: 'eq', label: 'equals', needsInput: true, needsTwo: false },
-        { value: 'neq', label: 'not equals', needsInput: true, needsTwo: false },
-        { value: 'gt', label: 'greater than', needsInput: true, needsTwo: false },
-        { value: 'gte', label: 'at least', needsInput: true, needsTwo: false },
-        { value: 'lt', label: 'less than', needsInput: true, needsTwo: false },
-        { value: 'lte', label: 'at most', needsInput: true, needsTwo: false },
-        { value: 'between', label: 'between', needsInput: true, needsTwo: true },
-        { value: 'has_value', label: 'has value', needsInput: false, needsTwo: false },
-        { value: 'is_empty', label: 'is empty', needsInput: false, needsTwo: false },
+        { value: 'eq',               label: 'equals',           needsInput: true,  needsTwo: false },
+        { value: 'neq',              label: 'not equals',       needsInput: true,  needsTwo: false },
+        { value: 'gt',               label: 'greater than',     needsInput: true,  needsTwo: false },
+        { value: 'gte',              label: 'at least',         needsInput: true,  needsTwo: false },
+        { value: 'lt',               label: 'less than',        needsInput: true,  needsTwo: false },
+        { value: 'lte',              label: 'at most',          needsInput: true,  needsTwo: false },
+        { value: 'between',          label: 'between',          needsInput: true,  needsTwo: true  },
+        { value: 'has_value',        label: 'has value',        needsInput: false, needsTwo: false },
+        { value: 'is_empty',         label: 'is empty',         needsInput: false, needsTwo: false },
     ],
     enum: [
-        { value: 'one_of', label: 'one of', needsInput: true, needsTwo: false },
-        { value: 'not_one_of', label: 'not one of', needsInput: true, needsTwo: false },
-        { value: 'is', label: 'is', needsInput: true, needsTwo: false },
-        { value: 'is_not', label: 'is not', needsInput: true, needsTwo: false },
-        { value: 'has_value', label: 'has value', needsInput: false, needsTwo: false },
-        { value: 'is_empty', label: 'is empty', needsInput: false, needsTwo: false },
+        { value: 'one_of',           label: 'one of',           needsInput: true,  needsTwo: false },
+        { value: 'not_one_of',       label: 'not one of',       needsInput: true,  needsTwo: false },
+        { value: 'is',               label: 'is',               needsInput: true,  needsTwo: false },
+        { value: 'is_not',           label: 'is not',           needsInput: true,  needsTwo: false },
+        { value: 'has_value',        label: 'has value',        needsInput: false, needsTwo: false },
+        { value: 'is_empty',         label: 'is empty',         needsInput: false, needsTwo: false },
     ],
     date: [
-        { value: 'before', label: 'before', needsInput: true, needsTwo: false },
-        { value: 'after', label: 'after', needsInput: true, needsTwo: false },
-        { value: 'between', label: 'between', needsInput: true, needsTwo: true },
-        { value: 'has_value', label: 'has value', needsInput: false, needsTwo: false },
-        { value: 'is_empty', label: 'is empty', needsInput: false, needsTwo: false },
+        { value: 'before',           label: 'before',           needsInput: true,  needsTwo: false },
+        { value: 'after',            label: 'after',            needsInput: true,  needsTwo: false },
+        { value: 'between',          label: 'between',          needsInput: true,  needsTwo: true  },
+        { value: 'has_value',        label: 'has value',        needsInput: false, needsTwo: false },
+        { value: 'is_empty',         label: 'is empty',         needsInput: false, needsTwo: false },
     ],
 }
 
@@ -73,10 +73,10 @@ export const FILTER_FIELD_DEFS: Record<string, FilterFieldDef> = {
     condition: {
         colId: 'condition', label: 'Condition', type: 'enum', field: 'condition',
         options: [
-            { value: 'New', label: 'New' },
-            { value: 'Used', label: 'Used' },
-            { value: 'Refurbished', label: 'Refurbished' },
-            { value: 'For parts', label: 'For parts' },
+            { value: 'New',               label: 'New'               },
+            { value: 'Used',              label: 'Used'              },
+            { value: 'Refurbished',       label: 'Refurbished'       },
+            { value: 'For parts',         label: 'For parts'         },
         ],
     },
     category: {
@@ -85,23 +85,23 @@ export const FILTER_FIELD_DEFS: Record<string, FilterFieldDef> = {
     source: {
         colId: 'source', label: 'Source', type: 'enum', field: 'source_platform',
         options: [
-            { value: 'cj', label: 'CJ Dropshipping' },
-            { value: 'aliexpress', label: 'AliExpress' },
-            { value: 'manual', label: 'Manual' },
-            { value: 'ai', label: 'AI Import' },
-            { value: 'barcode', label: 'Barcode Import' },
-            { value: 'url', label: 'URL Import' },
+            { value: 'cj',        label: 'CJ Dropshipping' },
+            { value: 'aliexpress', label: 'AliExpress'      },
+            { value: 'manual',    label: 'Manual'           },
+            { value: 'ai',        label: 'AI Import'        },
+            { value: 'barcode',   label: 'Barcode Import'   },
+            { value: 'url',       label: 'URL Import'       },
         ],
     },
     seller_type: {
         colId: 'seller_type', label: 'Seller Type', type: 'enum', field: 'seller_type',
         options: [
-            { value: 'own_stock', label: 'Own Stock' },
-            { value: 'wholesale', label: 'Wholesale' },
-            { value: 'retail_arb', label: 'Retail Arbitrage' },
-            { value: 'dropship', label: 'Dropship' },
-            { value: 'pod', label: 'Print on Demand' },
-            { value: 'reseller', label: 'Reseller' },
+            { value: 'own_stock',   label: 'Own Stock'       },
+            { value: 'wholesale',   label: 'Wholesale'       },
+            { value: 'retail_arb',  label: 'Retail Arbitrage'},
+            { value: 'dropship',    label: 'Dropship'        },
+            { value: 'pod',         label: 'Print on Demand' },
+            { value: 'reseller',    label: 'Reseller'        },
         ],
     },
     price: {
@@ -119,10 +119,10 @@ export const FILTER_FIELD_DEFS: Record<string, FilterFieldDef> = {
     vero: {
         colId: 'vero', label: 'VeRO Status', type: 'enum', field: 'vero_status',
         options: [
-            { value: 'clear', label: 'Clear' },
-            { value: 'warning', label: 'Warning' },
-            { value: 'flagged', label: 'Flagged' },
-            { value: 'unchecked', label: 'Unchecked' },
+            { value: 'clear',      label: 'Clear'     },
+            { value: 'warning',    label: 'Warning'   },
+            { value: 'flagged',    label: 'Flagged'   },
+            { value: 'unchecked',  label: 'Unchecked' },
         ],
     },
     stock: {
@@ -131,9 +131,9 @@ export const FILTER_FIELD_DEFS: Record<string, FilterFieldDef> = {
     status: {
         colId: 'status', label: 'Status', type: 'enum', field: 'status',
         options: [
-            { value: 'published', label: 'Live' },
-            { value: 'draft', label: 'Draft' },
-            { value: 'ended', label: 'Ended' },
+            { value: 'published', label: 'Live'      },
+            { value: 'draft',     label: 'Draft'     },
+            { value: 'ended',     label: 'Ended'     },
             { value: 'scheduled', label: 'Scheduled' },
         ],
     },
@@ -150,17 +150,17 @@ export const FILTER_FIELD_DEFS: Record<string, FilterFieldDef> = {
 
 // ── Active filter shape ───────────────────────────────────────
 export interface ActiveFilter {
-    id: string           // unique: colId + '_' + timestamp
-    colId: string
-    operator: string
-    value: string | string[] | number | null
+    id:      string           // unique: colId + '_' + timestamp
+    colId:   string
+    operator:string
+    value:   string | string[] | number | null
     value2?: number | string | null  // "between" upper bound
 }
 
 // ── Default operator per type ─────────────────────────────────
 export function defaultOperator(type: FilterFieldType): string {
-    if (type === 'text') return 'contains'
+    if (type === 'text')   return 'contains'
     if (type === 'number') return 'gte'
-    if (type === 'enum') return 'one_of'
+    if (type === 'enum')   return 'one_of'
     return 'after'
 }

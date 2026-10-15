@@ -15,24 +15,24 @@ import {
 
 // ── Design tokens ─────────────────────────────────────────────
 const C = {
-    bg: '#f8f7ff',
-    surface: '#ffffff',
-    border: '#ede9fe',
+    bg:          '#f8f7ff',
+    surface:     '#ffffff',
+    border:      '#ede9fe',
     borderInput: '#e5e0f5',
-    primary: '#7530fb',
-    primaryHover: '#6020e0',
-    primaryLight: '#f3eeff',
-    accent: '#b8fa33',
-    dark: '#1e1535',
-    body: '#1f1d2e',
-    secondary: '#6b7280',
-    muted: '#9ca3af',
-    success: '#16a34a',
-    successBg: '#dcfce7',
-    warning: '#d97706',
-    warningBg: '#fef3c7',
-    danger: '#ef4444',
-    dangerBg: '#fee2e2',
+    primary:     '#7530fb',
+    primaryHover:'#6020e0',
+    primaryLight:'#f3eeff',
+    accent:      '#b8fa33',
+    dark:        '#1e1535',
+    body:        '#1f1d2e',
+    secondary:   '#6b7280',
+    muted:       '#9ca3af',
+    success:     '#16a34a',
+    successBg:   '#dcfce7',
+    warning:     '#d97706',
+    warningBg:   '#fef3c7',
+    danger:      '#ef4444',
+    dangerBg:    '#fee2e2',
 }
 
 interface FeedbackItem {
@@ -99,9 +99,9 @@ function formatDateFull(iso: string | null) {
 }
 
 const SENTIMENT = {
-    Positive: { color: C.success, bg: C.successBg, icon: ThumbsUp, border: '#86efac' },
-    Negative: { color: C.danger, bg: C.dangerBg, icon: ThumbsDown, border: '#fca5a5' },
-    Neutral: { color: C.warning, bg: C.warningBg, icon: Minus, border: '#fcd34d' },
+    Positive: { color: C.success,  bg: C.successBg,  icon: ThumbsUp,   border: '#86efac' },
+    Negative: { color: C.danger,   bg: C.dangerBg,   icon: ThumbsDown, border: '#fca5a5' },
+    Neutral:  { color: C.warning,  bg: C.warningBg,  icon: Minus,      border: '#fcd34d' },
 }
 
 // ── Left list row ─────────────────────────────────────────────
@@ -598,16 +598,16 @@ export default function FeedbackPage() {
     // Stats
     const positive = items.filter(i => i.comment_type === 'Positive').length
     const negative = items.filter(i => i.comment_type === 'Negative').length
-    const neutral = items.filter(i => i.comment_type === 'Neutral').length
+    const neutral  = items.filter(i => i.comment_type === 'Neutral').length
     const disputed = items.filter(i => i.disputed).length
-    const score = items.length > 0 ? Math.round((positive / items.length) * 100) : null
+    const score    = items.length > 0 ? Math.round((positive / items.length) * 100) : null
 
     // Filter
     const filtered = items.filter(item => {
         const matchTab =
-            activeTab === 'all' ? true :
-                activeTab === 'disputed' ? item.disputed :
-                    item.comment_type === activeTab
+            activeTab === 'all'      ? true :
+            activeTab === 'disputed' ? item.disputed :
+            item.comment_type === activeTab
         const q = search.toLowerCase().trim()
         if (!q) return matchTab
         return matchTab && (
@@ -627,10 +627,10 @@ export default function FeedbackPage() {
     }, [filtered.length])
 
     const TABS: { key: TabFilter; label: string; count: number }[] = [
-        { key: 'all', label: 'All', count: items.length },
+        { key: 'all',      label: 'All',      count: items.length },
         { key: 'Positive', label: 'Positive', count: positive },
         { key: 'Negative', label: 'Negative', count: negative },
-        { key: 'Neutral', label: 'Neutral', count: neutral },
+        { key: 'Neutral',  label: 'Neutral',  count: neutral },
         { key: 'disputed', label: 'Disputed', count: disputed },
     ]
 
@@ -660,10 +660,10 @@ export default function FeedbackPage() {
                 {/* KPI chips */}
                 <div className="hidden md:flex items-center gap-2">
                     {[
-                        { label: 'Positive', count: positive, color: C.success, bg: C.successBg, Icon: ThumbsUp },
-                        { label: 'Negative', count: negative, color: C.danger, bg: C.dangerBg, Icon: ThumbsDown },
-                        { label: 'Neutral', count: neutral, color: C.warning, bg: C.warningBg, Icon: Minus },
-                        { label: 'Disputed', count: disputed, color: C.warning, bg: C.warningBg, Icon: Flag },
+                        { label: 'Positive', count: positive, color: C.success,  bg: C.successBg,  Icon: ThumbsUp },
+                        { label: 'Negative', count: negative, color: C.danger,   bg: C.dangerBg,   Icon: ThumbsDown },
+                        { label: 'Neutral',  count: neutral,  color: C.warning,  bg: C.warningBg,  Icon: Minus },
+                        { label: 'Disputed', count: disputed, color: C.warning,  bg: C.warningBg,  Icon: Flag },
                     ].map(({ label, count, color, bg, Icon }) => (
                         <div key={label} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl"
                             style={{ backgroundColor: bg, border: `1px solid ${color}22` }}>

@@ -26,25 +26,25 @@ import {
 
 // ── Design tokens ─────────────────────────────────────────────
 const C = {
-    bg: '#f8f7ff',
-    surface: '#ffffff',
-    border: '#ede9fe',
+    bg:          '#f8f7ff',
+    surface:     '#ffffff',
+    border:      '#ede9fe',
     borderInput: '#e5e0f5',
-    primary: '#7530fb',
-    primaryLight: '#f3eeff',
-    dark: '#1e1535',
-    muted: '#9ca3af',
-    secondary: '#6b7280',
-    danger: '#ef4444',
-    dangerBg: '#fee2e2',
+    primary:     '#7530fb',
+    primaryLight:'#f3eeff',
+    dark:        '#1e1535',
+    muted:       '#9ca3af',
+    secondary:   '#6b7280',
+    danger:      '#ef4444',
+    dangerBg:    '#fee2e2',
 }
 
 interface ColumnFilterPopoverProps {
-    colId: string
+    colId:        string
     activeFilter: ActiveFilter | null
-    onApply: (filter: Omit<ActiveFilter, 'id'>) => void
-    onClear: () => void
-    onClose: () => void
+    onApply:      (filter: Omit<ActiveFilter, 'id'>) => void
+    onClear:      () => void
+    onClose:      () => void
 }
 
 export function ColumnFilterPopover({
@@ -63,7 +63,7 @@ export function ColumnFilterPopover({
     const [operator, setOperator] = useState(
         activeFilter?.operator ?? defaultOperator(fieldDef.type)
     )
-    const [value, setValue] = useState<string | string[]>(
+    const [value,  setValue]  = useState<string | string[]>(
         activeFilter ? String(activeFilter.value ?? '') : ''
     )
     const [value2, setValue2] = useState<string>(
@@ -71,7 +71,7 @@ export function ColumnFilterPopover({
     )
 
     const containerRef = useRef<HTMLDivElement>(null)
-    const currentOp = operators.find(o => o.value === operator)
+    const currentOp    = operators.find(o => o.value === operator)
 
     // Reset value when operator changes to a no-input one
     useEffect(() => {
@@ -109,17 +109,17 @@ export function ColumnFilterPopover({
 
     // ── Shared input style ────────────────────────────────────
     const inputSt: React.CSSProperties = {
-        width: '100%',
-        height: 32,
-        padding: '0 10px',
+        width:        '100%',
+        height:       32,
+        padding:      '0 10px',
         borderRadius: 7,
-        border: `1.5px solid ${C.borderInput}`,
-        background: C.surface,
-        color: C.dark,
-        fontSize: 13,
-        outline: 'none',
-        boxSizing: 'border-box',
-        fontFamily: 'DM Sans, sans-serif',
+        border:       `1.5px solid ${C.borderInput}`,
+        background:   C.surface,
+        color:        C.dark,
+        fontSize:     13,
+        outline:      'none',
+        boxSizing:    'border-box',
+        fontFamily:   'DM Sans, sans-serif',
     }
 
     // ─────────────────────────────────────────────────────────
@@ -127,26 +127,26 @@ export function ColumnFilterPopover({
         <div
             ref={containerRef}
             style={{
-                position: 'absolute',
-                top: '100%',
-                left: 0,
-                zIndex: 200,
-                width: 220,
-                marginTop: 4,
-                background: C.surface,
+                position:     'absolute',
+                top:          '100%',
+                left:         0,
+                zIndex:       200,
+                width:        220,
+                marginTop:    4,
+                background:   C.surface,
                 borderRadius: 12,
-                border: `1.5px solid ${C.border}`,
-                boxShadow: '0 8px 32px rgba(117,48,251,0.14)',
-                overflow: 'hidden',
+                border:       `1.5px solid ${C.border}`,
+                boxShadow:    '0 8px 32px rgba(117,48,251,0.14)',
+                overflow:     'hidden',
             }}
         >
             {/* Header */}
             <div style={{
-                display: 'flex',
-                alignItems: 'center',
+                display:        'flex',
+                alignItems:     'center',
                 justifyContent: 'space-between',
-                padding: '10px 12px 8px',
-                borderBottom: `1px solid ${C.border}`,
+                padding:        '10px 12px 8px',
+                borderBottom:   `1px solid ${C.border}`,
             }}>
                 <span style={{ fontSize: 12, fontWeight: 700, color: C.dark, fontFamily: 'DM Sans, sans-serif' }}>
                     Filter: {fieldDef.label}
@@ -171,27 +171,27 @@ export function ColumnFilterPopover({
                         type="button"
                         onClick={() => setOperator(op.value)}
                         style={{
-                            width: '100%',
-                            display: 'flex',
+                            width:      '100%',
+                            display:    'flex',
                             alignItems: 'center',
-                            gap: 8,
-                            padding: '6px 12px',
+                            gap:        8,
+                            padding:    '6px 12px',
                             background: 'transparent',
-                            border: 'none',
-                            cursor: 'pointer',
-                            textAlign: 'left',
+                            border:     'none',
+                            cursor:     'pointer',
+                            textAlign:  'left',
                         }}
                     >
                         {/* Radio dot */}
                         <span style={{
-                            width: 14,
-                            height: 14,
-                            borderRadius: '50%',
-                            border: `2px solid ${operator === op.value ? C.primary : C.borderInput}`,
-                            background: operator === op.value ? C.primary : 'transparent',
-                            flexShrink: 0,
-                            display: 'flex',
-                            alignItems: 'center',
+                            width:       14,
+                            height:      14,
+                            borderRadius:'50%',
+                            border:      `2px solid ${operator === op.value ? C.primary : C.borderInput}`,
+                            background:  operator === op.value ? C.primary : 'transparent',
+                            flexShrink:  0,
+                            display:     'flex',
+                            alignItems:  'center',
                             justifyContent: 'center',
                         }}>
                             {operator === op.value && (
@@ -224,15 +224,15 @@ export function ColumnFilterPopover({
                                         type="button"
                                         onClick={() => handleEnumToggle(opt.value)}
                                         style={{
-                                            display: 'flex',
+                                            display:    'flex',
                                             alignItems: 'center',
-                                            gap: 8,
-                                            padding: '4px 6px',
+                                            gap:        8,
+                                            padding:    '4px 6px',
                                             background: checked ? C.primaryLight : 'transparent',
                                             borderRadius: 6,
-                                            border: 'none',
-                                            cursor: 'pointer',
-                                            textAlign: 'left',
+                                            border:     'none',
+                                            cursor:     'pointer',
+                                            textAlign:  'left',
                                         }}
                                     >
                                         <span style={{
@@ -309,26 +309,26 @@ export function ColumnFilterPopover({
 
             {/* Footer: Back / Add */}
             <div style={{
-                display: 'flex',
+                display:        'flex',
                 justifyContent: 'space-between',
-                padding: '8px 12px',
-                borderTop: `1px solid ${C.border}`,
-                gap: 8,
+                padding:        '8px 12px',
+                borderTop:      `1px solid ${C.border}`,
+                gap:            8,
             }}>
                 <button
                     type="button"
                     onClick={() => { onClear(); onClose() }}
                     style={{
-                        flex: 1,
-                        height: 30,
+                        flex:         1,
+                        height:       30,
                         borderRadius: 7,
-                        border: `1.5px solid ${C.border}`,
-                        background: C.bg,
-                        color: C.secondary,
-                        fontSize: 12,
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        fontFamily: 'DM Sans, sans-serif',
+                        border:       `1.5px solid ${C.border}`,
+                        background:   C.bg,
+                        color:        C.secondary,
+                        fontSize:     12,
+                        fontWeight:   600,
+                        cursor:       'pointer',
+                        fontFamily:   'DM Sans, sans-serif',
                     }}
                 >
                     {activeFilter ? 'Clear' : 'Back'}
@@ -337,16 +337,16 @@ export function ColumnFilterPopover({
                     type="button"
                     onClick={() => { handleApply(); onClose() }}
                     style={{
-                        flex: 1,
-                        height: 30,
+                        flex:         1,
+                        height:       30,
                         borderRadius: 7,
-                        border: 'none',
-                        background: C.primary,
-                        color: '#fff',
-                        fontSize: 12,
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        fontFamily: 'DM Sans, sans-serif',
+                        border:       'none',
+                        background:   C.primary,
+                        color:        '#fff',
+                        fontSize:     12,
+                        fontWeight:   700,
+                        cursor:       'pointer',
+                        fontFamily:   'DM Sans, sans-serif',
                     }}
                 >
                     Add

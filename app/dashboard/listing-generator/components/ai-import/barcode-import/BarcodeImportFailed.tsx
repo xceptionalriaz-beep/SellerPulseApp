@@ -15,36 +15,36 @@ import { BarcodeQueueItem, BarcodeImportErrorCode, barcodTypeLabel } from '../..
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
-    primary: '#7530fb',
+    primary:      '#7530fb',
     primaryLight: '#f3eeff',
-    accent: '#b8fa33',
-    accentDark: '#8abf1f',
-    bg: '#f8f7ff',
-    surface: '#ffffff',
-    border: '#ede9fe',
-    text: '#1a1523',
-    muted: '#6b7280',
-    error: '#ef4444',
-    errorLight: '#fef2f2',
-    warning: '#f59e0b',
+    accent:       '#b8fa33',
+    accentDark:   '#8abf1f',
+    bg:           '#f8f7ff',
+    surface:      '#ffffff',
+    border:       '#ede9fe',
+    text:         '#1a1523',
+    muted:        '#6b7280',
+    error:        '#ef4444',
+    errorLight:   '#fef2f2',
+    warning:      '#f59e0b',
     warningLight: '#fffbeb',
-    success: '#22c55e',
+    success:      '#22c55e',
     successLight: '#f0fdf4',
 } as const
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 interface BarcodeImportFailedProps {
-    item: BarcodeQueueItem
-    onClose: () => void
-    onRemove: (id: string) => void
-    onRetry: (id: string) => Promise<void>
+    item:      BarcodeQueueItem
+    onClose:   () => void
+    onRemove:  (id: string) => void
+    onRetry:   (id: string) => Promise<void>
 }
 
 // ── Error config ──────────────────────────────────────────────────────────────
 type ErrorInfo = {
-    icon: React.ReactNode
-    heading: string
-    body: string
+    icon:     React.ReactNode
+    heading:  string
+    body:     string
     canRetry: boolean
 }
 
@@ -52,44 +52,44 @@ function errorInfo(code: BarcodeImportErrorCode | undefined): ErrorInfo {
     switch (code) {
         case 'not_found':
             return {
-                icon: <Search size={22} style={{ color: C.muted }} />,
-                heading: 'Product not found',
-                body: 'This barcode isn\'t in any of our lookup databases — it may be a regional product, private label, or very new item. You can still create a listing manually.',
+                icon:     <Search size={22} style={{ color: C.muted }} />,
+                heading:  'Product not found',
+                body:     'This barcode isn\'t in any of our lookup databases — it may be a regional product, private label, or very new item. You can still create a listing manually.',
                 canRetry: false,
             }
         case 'invalid_barcode':
             return {
-                icon: <AlertCircle size={22} style={{ color: C.warning }} />,
-                heading: 'Invalid barcode',
-                body: 'The barcode failed its check-digit validation. It may have been misread or mis-typed. Try scanning again or check the packaging.',
+                icon:     <AlertCircle size={22} style={{ color: C.warning }} />,
+                heading:  'Invalid barcode',
+                body:     'The barcode failed its check-digit validation. It may have been misread or mis-typed. Try scanning again or check the packaging.',
                 canRetry: true,
             }
         case 'rate_limited':
             return {
-                icon: <Clock size={22} style={{ color: C.warning }} />,
-                heading: 'Lookup quota reached',
-                body: 'The free barcode database has hit today\'s lookup limit. Retrying will use AI simulation to estimate the product details instead.',
+                icon:     <Clock size={22} style={{ color: C.warning }} />,
+                heading:  'Lookup quota reached',
+                body:     'The free barcode database has hit today\'s lookup limit. Retrying will use AI simulation to estimate the product details instead.',
                 canRetry: true,
             }
         case 'network_error':
             return {
-                icon: <WifiOff size={22} style={{ color: C.error }} />,
-                heading: 'Network error',
-                body: 'The lookup request couldn\'t reach the server. Check your connection and try again.',
+                icon:     <WifiOff size={22} style={{ color: C.error }} />,
+                heading:  'Network error',
+                body:     'The lookup request couldn\'t reach the server. Check your connection and try again.',
                 canRetry: true,
             }
         case 'config_error':
             return {
-                icon: <Settings2 size={22} style={{ color: C.error }} />,
-                heading: 'AI key not configured',
-                body: 'The AI provider key is missing from the vault. Ask your account admin to add the Gemini or Anthropic key in Settings → API Keys.',
+                icon:     <Settings2 size={22} style={{ color: C.error }} />,
+                heading:  'AI key not configured',
+                body:     'The AI provider key is missing from the vault. Ask your account admin to add the Gemini or Anthropic key in Settings → API Keys.',
                 canRetry: false,
             }
         default:
             return {
-                icon: <HelpCircle size={22} style={{ color: C.muted }} />,
-                heading: 'Lookup failed',
-                body: 'Something went wrong with the product lookup. Try again or create the listing manually.',
+                icon:     <HelpCircle size={22} style={{ color: C.muted }} />,
+                heading:  'Lookup failed',
+                body:     'Something went wrong with the product lookup. Try again or create the listing manually.',
                 canRetry: true,
             }
     }
@@ -97,41 +97,41 @@ function errorInfo(code: BarcodeImportErrorCode | undefined): ErrorInfo {
 
 // ── Alternative action cards ──────────────────────────────────────────────────
 interface AltAction {
-    icon: React.ReactNode
+    icon:  React.ReactNode
     title: string
-    desc: string
+    desc:  string
     href?: string
-    cta: string
+    cta:   string
 }
 
 function altActions(): AltAction[] {
     return [
         {
-            icon: <ImagePlus size={15} style={{ color: C.primary }} />,
+            icon:  <ImagePlus size={15} style={{ color: C.primary }} />,
             title: 'Use Image Import',
-            desc: 'Take a photo of the product — AI identifies it from the image.',
-            cta: 'Switch to Image Import',
+            desc:  'Take a photo of the product — AI identifies it from the image.',
+            cta:   'Switch to Image Import',
         },
         {
-            icon: <Link2 size={15} style={{ color: C.primary }} />,
+            icon:  <Link2 size={15} style={{ color: C.primary }} />,
             title: 'Import from URL',
-            desc: 'Find the product on any website and paste the URL.',
-            cta: 'Switch to URL Import',
+            desc:  'Find the product on any website and paste the URL.',
+            cta:   'Switch to URL Import',
         },
         {
-            icon: <Search size={15} style={{ color: C.primary }} />,
+            icon:  <Search size={15} style={{ color: C.primary }} />,
             title: 'Search manually',
-            desc: 'Look up the product on eBay, Amazon or Google and start from there.',
-            href: 'https://www.ebay.co.uk/sch/',
-            cta: 'Open eBay search',
+            desc:  'Look up the product on eBay, Amazon or Google and start from there.',
+            href:  'https://www.ebay.co.uk/sch/',
+            cta:   'Open eBay search',
         },
     ]
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function BarcodeImportFailed({ item, onClose, onRemove, onRetry }: BarcodeImportFailedProps) {
-    const panelRef = useRef<HTMLDivElement>(null)
-    const info = errorInfo(item.errorCode)
+    const panelRef   = useRef<HTMLDivElement>(null)
+    const info       = errorInfo(item.errorCode)
 
     // Close on Escape
     useEffect(() => {

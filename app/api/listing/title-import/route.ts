@@ -211,34 +211,34 @@ async function saveDraft(
         const { data, error } = await supabaseAdmin
             .from('listing_drafts')
             .insert({
-                user_id: userId,
-                product_name: product.title,
-                title: product.title_ebay,
-                title_score: product.cassini_score,
-                health_score: product.cassini_score ?? 60,
-                description_html: product.description_html,
-                category: product.category_label ?? null,
+                user_id:           userId,
+                product_name:      product.title,
+                title:             product.title_ebay,
+                title_score:       product.cassini_score,
+                health_score:      product.cassini_score ?? 60,
+                description_html:  product.description_html,
+                category:          product.category_label ?? null,
                 condition,
-                ean: product.ean ?? null,
-                item_specifics: product.item_specifics,
-                sell_price: product.price_suggested ?? null,
-                buy_price: null,
-                supplier_price: null,
+                ean:               product.ean ?? null,
+                item_specifics:    product.item_specifics,
+                sell_price:        product.price_suggested ?? null,
+                buy_price:         null,
+                supplier_price:    null,
                 markup_percentage: null,
-                net_profit: null,
-                margin: null,
-                seller_type: 'own_stock',
-                source_platform: 'title_import',
-                supplier_url: null,
-                supplier_images: product.images,
-                photos: [],
-                main_photo_url: product.images[0] ?? null,
-                photo_count: 0,
-                vero_status: product.vero_status,
+                net_profit:        null,
+                margin:            null,
+                seller_type:       'own_stock',
+                source_platform:   'title_import',
+                supplier_url:      null,
+                supplier_images:   product.images,
+                photos:            [],
+                main_photo_url:    product.images[0] ?? null,
+                photo_count:       0,
+                vero_status:       product.vero_status,
                 vero_brands_found: product.vero_brand ? [product.vero_brand] : [],
-                status: 'draft',
-                current_step: 1,
-                notes: `Imported via Title to Listing — original search: "${originalTitle}"`,
+                status:            'draft',
+                current_step:      1,
+                notes:             `Imported via Title to Listing — original search: "${originalTitle}"`,
             })
             .select('id')
             .single()
@@ -319,11 +319,11 @@ async function searchUpcItemDb(title: string, userKey?: string | null): Promise<
             : item.lowest_recorded_price ?? undefined
 
         return {
-            title: item.title.trim(),
-            brand: item.brand?.trim() ?? undefined,
-            description: item.description?.trim() ?? undefined,
-            images: (item.images ?? []).slice(0, 8),
-            category: item.category?.trim() ?? undefined,
+            title:        item.title.trim(),
+            brand:        item.brand?.trim() ?? undefined,
+            description:  item.description?.trim() ?? undefined,
+            images:       (item.images ?? []).slice(0, 8),
+            category:     item.category?.trim() ?? undefined,
             price_market: priceAnchor,
         }
     } catch { return null }
@@ -563,8 +563,8 @@ export async function POST(req: NextRequest) {
         useAiPrice?: boolean
     }
 
-    const rawTitle = (body.title ?? '').trim()
-    const condition = (body.condition ?? 'New').trim()
+    const rawTitle   = (body.title ?? '').trim()
+    const condition  = (body.condition ?? 'New').trim()
     const useAiTitle = body.useAiTitle !== false   // default true
     const useAiPrice = body.useAiPrice !== false   // default true
 
@@ -624,8 +624,8 @@ export async function POST(req: NextRequest) {
         }
         // Use the raw title as-is — AI transform will do its best
         raw = {
-            title: rawTitle,
-            brand: extractBrandFromTitle(rawTitle),
+            title:  rawTitle,
+            brand:  extractBrandFromTitle(rawTitle),
             images: [],
         }
         source = 'ai_simulation'
@@ -636,22 +636,22 @@ export async function POST(req: NextRequest) {
 
     if (useAiTitle && (geminiKey || anthropicKey)) {
         const [aiGemini, aiAnthropic] = await Promise.all([
-            geminiKey ? aiTransformWithGemini(raw, condition, rawTitle, geminiKey) : Promise.resolve(null),
+            geminiKey    ? aiTransformWithGemini(raw, condition, rawTitle, geminiKey)       : Promise.resolve(null),
             anthropicKey ? aiTransformWithAnthropic(raw, condition, rawTitle, anthropicKey) : Promise.resolve(null),
         ])
         ai = aiGemini ?? aiAnthropic
     }
 
     // Fallbacks when AI disabled or unavailable
-    const titleEbay = useAiTitle ? (ai?.title_ebay ?? raw.title.slice(0, 80)) : raw.title.slice(0, 80)
-    const cassini = ai?.cassini_score ?? 60
-    const descHtml = useAiTitle
+    const titleEbay     = useAiTitle ? (ai?.title_ebay ?? raw.title.slice(0, 80)) : raw.title.slice(0, 80)
+    const cassini       = ai?.cassini_score ?? 60
+    const descHtml      = useAiTitle
         ? (ai?.description_html
             ?? `<p>${raw.title}${raw.brand ? ` by ${raw.brand}` : ''}. ${raw.description ?? 'See product details.'}</p>`)
         : `<p>${raw.title}${raw.brand ? ` by ${raw.brand}` : ''}. ${raw.description ?? 'See product details.'}</p>`
     const categoryLabel = ai?.category_label ?? raw.category ?? 'General'
     const itemSpecifics: Record<string, string> = {
-        Brand: raw.brand ?? 'Unbranded',
+        Brand:     raw.brand ?? 'Unbranded',
         Condition: condition,
         ...(raw.model ? { Model: raw.model } : {}),
         ...(ai?.item_specifics ?? {}),
@@ -672,26 +672,26 @@ export async function POST(req: NextRequest) {
 
     // ── Step 5: Build product data ──────────────────────────────────────────────
     const product: BarcodeProductData = {
-        title: raw.title,
-        title_ebay: titleEbay,
-        brand: raw.brand ?? undefined,
-        description_html: descHtml,
+        title:                   raw.title,
+        title_ebay:              titleEbay,
+        brand:                   raw.brand ?? undefined,
+        description_html:        descHtml,
         description_is_fallback: !useAiTitle || !ai?.description_html,
-        images: raw.images,
-        category_label: categoryLabel,
+        images:                  raw.images,
+        category_label:          categoryLabel,
         condition,
-        item_specifics: itemSpecifics,
+        item_specifics:          itemSpecifics,
         // Price intelligence
-        price_suggested: priceSuggested,
-        price_avg_sold: undefined,
-        price_range_low: undefined,
-        price_range_high: undefined,
-        sold_last_30_days: undefined,
-        active_listings_count: undefined,
+        price_suggested:         priceSuggested,
+        price_avg_sold:          undefined,
+        price_range_low:         undefined,
+        price_range_high:        undefined,
+        sold_last_30_days:       undefined,
+        active_listings_count:   undefined,
         // VeRO
-        vero_status: vero.status,
-        vero_reason: vero.reason,
-        vero_brand: vero.vero_brand,
+        vero_status:  vero.status,
+        vero_reason:  vero.reason,
+        vero_brand:   vero.vero_brand,
         // Cassini
         cassini_score: cassini,
     }
@@ -704,9 +704,9 @@ export async function POST(req: NextRequest) {
 
     // ── Step 7: Return result ───────────────────────────────────────────────────
     const result: BarcodeImportResult = {
-        barcode: rawTitle,          // reuses barcode field as the search term
+        barcode:     rawTitle,          // reuses barcode field as the search term
         barcodeType: 'TITLE',           // signals title-import mode → panel shows "Title"
-        source: source as 'upcitemdb' | 'ai_simulation',
+        source:      source as 'upcitemdb' | 'ai_simulation',
         product,
         draft_id: draftId ?? undefined,
     }

@@ -37,9 +37,9 @@ function exportResultsCSV(rows: QueueRow[]) {
         lines.push(cells.join(','))
     }
     const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href     = url
     a.download = `bulk-results-${new Date().toISOString().slice(0, 10)}.csv`
     a.click()
     URL.revokeObjectURL(url)
@@ -47,70 +47,70 @@ function exportResultsCSV(rows: QueueRow[]) {
 
 // ── Design tokens ─────────────────────────────────────────────
 const C = {
-    bg: '#f8f7ff',
-    surface: '#ffffff',
-    border: '#ede9fe',
-    primary: '#7530fb',
+    bg:           '#f8f7ff',
+    surface:      '#ffffff',
+    border:       '#ede9fe',
+    primary:      '#7530fb',
     primaryLight: '#f3eeff',
-    accent: '#b8fa33',
-    accentText: '#1e1535',
-    dark: '#1e1535',
-    secondary: '#6b7280',
-    muted: '#9ca3af',
-    success: '#16a34a',
-    successBg: '#dcfce7',
-    successBorder: '#bbf7d0',
-    warning: '#d97706',
-    warningBg: '#fef3c7',
-    warningBorder: '#fde68a',
-    danger: '#ef4444',
-    dangerBg: '#fee2e2',
+    accent:       '#b8fa33',
+    accentText:   '#1e1535',
+    dark:         '#1e1535',
+    secondary:    '#6b7280',
+    muted:        '#9ca3af',
+    success:      '#16a34a',
+    successBg:    '#dcfce7',
+    successBorder:'#bbf7d0',
+    warning:      '#d97706',
+    warningBg:    '#fef3c7',
+    warningBorder:'#fde68a',
+    danger:       '#ef4444',
+    dangerBg:     '#fee2e2',
     dangerBorder: '#fecaca',
 }
 
 // ── Props ─────────────────────────────────────────────────────
 interface BulkUploadSummaryProps {
-    rows: QueueRow[]
-    onClose: () => void          // goes back to dashboard
-    onRetry: (rows: QueueRow[]) => void  // re-queues failed rows
+    rows:        QueueRow[]
+    onClose:     () => void          // goes back to dashboard
+    onRetry:     (rows: QueueRow[]) => void  // re-queues failed rows
 }
 
 // ─────────────────────────────────────────────────────────────
 export function BulkUploadSummary({ rows, onClose, onRetry }: BulkUploadSummaryProps) {
 
     // ── Derived ───────────────────────────────────────────────
-    const created = rows.filter(r => r._status === 'done')
-    const failed = rows.filter(r => r._status === 'error')
+    const created  = rows.filter(r => r._status === 'done')
+    const failed   = rows.filter(r => r._status === 'error')
     // Use _veroStatus when available; fall back to message-string scan for backwards compat
     const warnings = created.filter(r =>
         (r._veroStatus && r._veroStatus !== 'ok') ||
         (!r._veroStatus && (r._message.toLowerCase().includes('warn') || r._message.toLowerCase().includes('vero')))
     )
-    const clean = created.filter(r => !warnings.some(w => w._rowIndex === r._rowIndex))
+    const clean    = created.filter(r => !warnings.some(w => w._rowIndex === r._rowIndex))
 
-    const allGood = failed.length === 0 && warnings.length === 0
-    const allFailed = created.length === 0 && failed.length > 0
-    const partialFail = failed.length > 0
+    const allGood    = failed.length === 0 && warnings.length === 0
+    const allFailed  = created.length === 0 && failed.length > 0
+    const partialFail= failed.length > 0
 
     // ── Hero config ───────────────────────────────────────────
     const hero = allGood ? {
-        icon: <CheckCircle2 size={32} style={{ color: C.success }} />,
-        bg: C.successBg,
-        border: C.successBorder,
-        title: `${created.length} listing${created.length !== 1 ? 's' : ''} created!`,
-        sub: 'All rows generated successfully. Your drafts are ready to review.',
+        icon:    <CheckCircle2 size={32} style={{ color: C.success }} />,
+        bg:      C.successBg,
+        border:  C.successBorder,
+        title:   `${created.length} listing${created.length !== 1 ? 's' : ''} created!`,
+        sub:     'All rows generated successfully. Your drafts are ready to review.',
     } : allFailed ? {
-        icon: <XCircle size={32} style={{ color: C.danger }} />,
-        bg: C.dangerBg,
-        border: C.dangerBorder,
-        title: 'Generation failed',
-        sub: 'None of the rows could be processed. Check the errors below and try again.',
+        icon:    <XCircle size={32} style={{ color: C.danger }} />,
+        bg:      C.dangerBg,
+        border:  C.dangerBorder,
+        title:   'Generation failed',
+        sub:     'None of the rows could be processed. Check the errors below and try again.',
     } : {
-        icon: <AlertTriangle size={32} style={{ color: C.warning }} />,
-        bg: C.warningBg,
-        border: C.warningBorder,
-        title: `${created.length} created${failed.length > 0 ? `, ${failed.length} failed` : ''}`,
-        sub: failed.length > 0
+        icon:    <AlertTriangle size={32} style={{ color: C.warning }} />,
+        bg:      C.warningBg,
+        border:  C.warningBorder,
+        title:   `${created.length} created${failed.length > 0 ? `, ${failed.length} failed` : ''}`,
+        sub:     failed.length > 0
             ? 'Some rows need attention. Review the errors and retry if needed.'
             : 'All created — some listings have warnings that need your review.',
     }
@@ -126,36 +126,36 @@ export function BulkUploadSummary({ rows, onClose, onRetry }: BulkUploadSummaryP
         <>
             {/* Backdrop */}
             <div style={{
-                position: 'fixed', inset: 0,
+                position:   'fixed', inset: 0,
                 background: 'rgba(30,21,53,0.45)',
                 backdropFilter: 'blur(4px)',
-                zIndex: 1000,
-                display: 'flex',
+                zIndex:     1000,
+                display:    'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
             }}>
                 {/* Panel */}
                 <div style={{
-                    width: '100%',
-                    maxWidth: 520,
-                    maxHeight: '90vh',
-                    background: C.surface,
+                    width:        '100%',
+                    maxWidth:     520,
+                    maxHeight:    '90vh',
+                    background:   C.surface,
                     borderRadius: 20,
-                    boxShadow: '0 24px 64px rgba(117,48,251,0.18)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    overflow: 'hidden',
-                    margin: '0 16px',
+                    boxShadow:    '0 24px 64px rgba(117,48,251,0.18)',
+                    display:      'flex',
+                    flexDirection:'column',
+                    overflow:     'hidden',
+                    margin:       '0 16px',
                 }}>
 
                     {/* ── Header ──────────────────────────────── */}
                     <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
+                        display:        'flex',
+                        alignItems:     'center',
                         justifyContent: 'space-between',
-                        padding: '18px 22px',
-                        borderBottom: `1px solid ${C.border}`,
-                        flexShrink: 0,
+                        padding:        '18px 22px',
+                        borderBottom:   `1px solid ${C.border}`,
+                        flexShrink:     0,
                     }}>
                         <span style={{ fontSize: 15, fontWeight: 700, color: C.dark, fontFamily: 'Syne, sans-serif' }}>
                             Bulk Upload Results
@@ -178,13 +178,13 @@ export function BulkUploadSummary({ rows, onClose, onRetry }: BulkUploadSummaryP
 
                         {/* ── Hero card ──────────────────────── */}
                         <div style={{
-                            padding: '20px',
+                            padding:      '20px',
                             borderRadius: 14,
-                            background: hero.bg,
-                            border: `1px solid ${hero.border}`,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 14,
+                            background:   hero.bg,
+                            border:       `1px solid ${hero.border}`,
+                            display:      'flex',
+                            alignItems:   'center',
+                            gap:          14,
                             marginBottom: 18,
                         }}>
                             <div style={{
@@ -212,35 +212,35 @@ export function BulkUploadSummary({ rows, onClose, onRetry }: BulkUploadSummaryP
                                 {
                                     value: clean.length,
                                     label: 'Created',
-                                    icon: <CheckCircle2 size={16} style={{ color: C.success }} />,
+                                    icon:  <CheckCircle2 size={16} style={{ color: C.success }} />,
                                     color: C.success, bg: C.successBg, border: C.successBorder,
-                                    show: true,
+                                    show:  true,
                                 },
                                 {
                                     value: warnings.length,
                                     label: 'Warnings',
-                                    icon: <AlertTriangle size={16} style={{ color: C.warning }} />,
+                                    icon:  <AlertTriangle size={16} style={{ color: C.warning }} />,
                                     color: C.warning, bg: C.warningBg, border: C.warningBorder,
-                                    show: true,
+                                    show:  true,
                                 },
                                 {
                                     value: failed.length,
                                     label: 'Failed',
-                                    icon: <XCircle size={16} style={{ color: C.danger }} />,
+                                    icon:  <XCircle size={16} style={{ color: C.danger }} />,
                                     color: C.danger, bg: C.dangerBg, border: C.dangerBorder,
-                                    show: true,
+                                    show:  true,
                                 },
                             ].map(s => (
                                 <div key={s.label} style={{
-                                    padding: '12px',
+                                    padding:      '12px',
                                     borderRadius: 12,
-                                    background: s.value > 0 ? s.bg : C.bg,
-                                    border: `1px solid ${s.value > 0 ? s.border : C.border}`,
-                                    textAlign: 'center',
+                                    background:   s.value > 0 ? s.bg : C.bg,
+                                    border:       `1px solid ${s.value > 0 ? s.border : C.border}`,
+                                    textAlign:    'center',
                                 }}>
                                     <div style={{
                                         fontSize: 26, fontWeight: 800,
-                                        color: s.value > 0 ? s.color : C.muted,
+                                        color:    s.value > 0 ? s.color : C.muted,
                                         fontFamily: 'Syne, sans-serif',
                                         lineHeight: 1,
                                         marginBottom: 4,
@@ -254,7 +254,7 @@ export function BulkUploadSummary({ rows, onClose, onRetry }: BulkUploadSummaryP
                                         {s.value > 0 && s.icon}
                                         <span style={{
                                             fontSize: 11, fontWeight: 600,
-                                            color: s.value > 0 ? s.color : C.muted,
+                                            color:    s.value > 0 ? s.color : C.muted,
                                             fontFamily: 'DM Sans, sans-serif',
                                         }}>
                                             {s.label}
@@ -315,15 +315,15 @@ export function BulkUploadSummary({ rows, onClose, onRetry }: BulkUploadSummaryP
 
                     {/* ── Footer ───────────────────────────────── */}
                     <div style={{
-                        padding: '14px 22px',
-                        borderTop: `1px solid ${C.border}`,
-                        flexShrink: 0,
-                        display: 'flex',
-                        alignItems: 'center',
+                        padding:        '14px 22px',
+                        borderTop:      `1px solid ${C.border}`,
+                        flexShrink:     0,
+                        display:        'flex',
+                        alignItems:     'center',
                         justifyContent: 'space-between',
-                        gap: 10,
-                        background: C.surface,
-                        flexWrap: 'wrap',
+                        gap:            10,
+                        background:     C.surface,
+                        flexWrap:       'wrap',
                     }}>
                         {/* Left side: retry + export */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -372,10 +372,10 @@ export function BulkUploadSummary({ rows, onClose, onRetry }: BulkUploadSummaryP
                                 fontSize: 13, fontWeight: 700,
                                 border: 'none',
                                 background: created.length > 0 ? C.accent : C.border,
-                                color: created.length > 0 ? C.accentText : C.muted,
-                                cursor: 'pointer',
+                                color:      created.length > 0 ? C.accentText : C.muted,
+                                cursor:     'pointer',
                                 fontFamily: 'Syne, sans-serif',
-                                boxShadow: created.length > 0 ? '0 4px 12px rgba(184,250,51,0.35)' : 'none',
+                                boxShadow:  created.length > 0 ? '0 4px 12px rgba(184,250,51,0.35)' : 'none',
                             }}
                         >
                             <Sparkles size={13} />
@@ -392,28 +392,28 @@ export function BulkUploadSummary({ rows, onClose, onRetry }: BulkUploadSummaryP
 function Section({
     title, color, bg, border, icon, note, children, mb,
 }: {
-    title: string
-    color: string
-    bg: string
-    border: string
-    icon: React.ReactNode
-    note: string
+    title:    string
+    color:    string
+    bg:       string
+    border:   string
+    icon:     React.ReactNode
+    note:     string
     children: React.ReactNode
-    mb: number
+    mb:       number
 }) {
     return (
         <div style={{
             borderRadius: 12,
-            border: `1px solid ${border}`,
-            overflow: 'hidden',
+            border:       `1px solid ${border}`,
+            overflow:     'hidden',
             marginBottom: mb,
         }}>
             {/* Section header */}
             <div style={{
-                display: 'flex',
+                display:    'flex',
                 alignItems: 'center',
-                gap: 6,
-                padding: '9px 12px',
+                gap:        6,
+                padding:    '9px 12px',
                 background: bg,
                 borderBottom: `1px solid ${border}`,
             }}>
@@ -435,19 +435,19 @@ function Section({
 
 // ── Single row line ───────────────────────────────────────────
 function RowLine({ index, label, message, color, draftId }: {
-    index: number
-    label: string
-    message: string
-    color: string
+    index:    number
+    label:    string
+    message:  string
+    color:    string
     draftId?: string
 }) {
     return (
         <div style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: 10,
-            padding: '8px 12px',
-            borderBottom: `1px solid #f5f3ff`,
+            display:     'flex',
+            alignItems:  'flex-start',
+            gap:         10,
+            padding:     '8px 12px',
+            borderBottom:`1px solid #f5f3ff`,
         }}>
             <span style={{
                 fontSize: 10, fontWeight: 700, color: '#9ca3af',

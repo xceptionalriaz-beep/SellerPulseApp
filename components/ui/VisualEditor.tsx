@@ -735,10 +735,10 @@ export default function VisualEditor({
             onSlotsChange(slots.filter(s => s.blockId !== blockId))
         } else {
             const ROLE_LABELS: Record<TemplateSlotRole, string> = {
-                headline: 'Headline',
-                key_features: 'Key Features',
-                description: 'Description',
-                condition_note: 'Condition Note',
+                headline:        'Headline',
+                key_features:    'Key Features',
+                description:     'Description',
+                condition_note:  'Condition Note',
                 trust_statement: 'Trust Statement',
             }
             const newSlot: TemplateSlot = { role, blockId, label: ROLE_LABELS[role] }

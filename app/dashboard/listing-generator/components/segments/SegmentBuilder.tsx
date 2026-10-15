@@ -14,7 +14,7 @@
 import { useState, useMemo } from 'react'
 import { Plus, X, Users } from 'lucide-react'
 
-import { FilterRow } from './FilterRow'
+import { FilterRow }   from './FilterRow'
 import { countMatches } from '../../lib/segment-filter'
 import type { FilterableListing } from '../../lib/segment-filter'
 
@@ -28,18 +28,18 @@ import { SEGMENT_COLORS } from '../../types/segments.types'
 
 // ── Design tokens ─────────────────────────────────────────────
 const C = {
-    bg: '#f8f7ff',
-    surface: '#ffffff',
-    border: '#ede9fe',
+    bg:          '#f8f7ff',
+    surface:     '#ffffff',
+    border:      '#ede9fe',
     borderInput: '#e5e0f5',
-    primary: '#7530fb',
-    primaryLight: '#f3eeff',
-    dark: '#1e1535',
-    muted: '#9ca3af',
-    danger: '#ef4444',
-    dangerBg: '#fee2e2',
-    success: '#16a34a',
-    successBg: '#dcfce7',
+    primary:     '#7530fb',
+    primaryLight:'#f3eeff',
+    dark:        '#1e1535',
+    muted:       '#9ca3af',
+    danger:      '#ef4444',
+    dangerBg:    '#fee2e2',
+    success:     '#16a34a',
+    successBg:   '#dcfce7',
 }
 
 // ── Icon palette (lucide names only — no emoji) ───────────────
@@ -82,9 +82,9 @@ function emptyFilter(): SegmentFilter {
 // ── Props ─────────────────────────────────────────────────────
 interface SegmentBuilderProps {
     initialSegment?: Segment          // undefined = create mode
-    listings: FilterableListing[]
-    onSave: (payload: SegmentUpsert) => Promise<void>
-    onClose: () => void
+    listings:        FilterableListing[]
+    onSave:          (payload: SegmentUpsert) => Promise<void>
+    onClose:         () => void
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -98,14 +98,14 @@ export function SegmentBuilder({
     const isEdit = !!initialSegment
 
     // ── Form state ────────────────────────────────────────────
-    const [name, setName] = useState(initialSegment?.name ?? '')
-    const [icon, setIcon] = useState(initialSegment?.icon ?? 'Tag')
-    const [color, setColor] = useState(initialSegment?.color ?? C.primary)
-    const [logic, setLogic] = useState<FilterLogic>(initialSegment?.logic ?? 'AND')
+    const [name,    setName]    = useState(initialSegment?.name  ?? '')
+    const [icon,    setIcon]    = useState(initialSegment?.icon  ?? 'Tag')
+    const [color,   setColor]   = useState(initialSegment?.color ?? C.primary)
+    const [logic,   setLogic]   = useState<FilterLogic>(initialSegment?.logic ?? 'AND')
     const [filters, setFilters] = useState<SegmentFilter[]>(
         initialSegment?.filters.length ? initialSegment.filters : [emptyFilter()]
     )
-    const [saving, setSaving] = useState(false)
+    const [saving,  setSaving]  = useState(false)
     const [nameErr, setNameErr] = useState('')
 
     // ── Live preview count ────────────────────────────────────
@@ -133,7 +133,7 @@ export function SegmentBuilder({
         setNameErr('')
         setSaving(true)
         await onSave({
-            name: name.trim(),
+            name:    name.trim(),
             icon,
             color,
             filters,
@@ -144,16 +144,16 @@ export function SegmentBuilder({
 
     // ── Shared input style ────────────────────────────────────
     const inputSt: React.CSSProperties = {
-        width: '100%',
-        height: 36,
-        padding: '0 12px',
+        width:        '100%',
+        height:       36,
+        padding:      '0 12px',
         borderRadius: 8,
-        border: `1.5px solid ${nameErr ? C.danger : C.borderInput}`,
-        background: C.surface,
-        color: C.dark,
-        fontSize: 14,
-        outline: 'none',
-        boxSizing: 'border-box',
+        border:       `1.5px solid ${nameErr ? C.danger : C.borderInput}`,
+        background:   C.surface,
+        color:        C.dark,
+        fontSize:     14,
+        outline:      'none',
+        boxSizing:    'border-box',
     }
 
     // ─────────────────────────────────────────────────────────
@@ -162,39 +162,39 @@ export function SegmentBuilder({
         <div
             onClick={e => { if (e.target === e.currentTarget) onClose() }}
             style={{
-                position: 'fixed',
-                inset: 0,
-                background: 'rgba(30,21,53,0.45)',
-                zIndex: 50,
-                display: 'flex',
-                alignItems: 'center',
+                position:       'fixed',
+                inset:          0,
+                background:     'rgba(30,21,53,0.45)',
+                zIndex:         50,
+                display:        'flex',
+                alignItems:     'center',
                 justifyContent: 'center',
-                padding: 16,
+                padding:        16,
             }}
         >
             {/* ── Modal panel ─────────────────────────────── */}
             <div
                 onClick={e => e.stopPropagation()}
                 style={{
-                    width: 500,
-                    maxWidth: '100%',
-                    maxHeight: '90vh',
-                    overflowY: 'auto',
-                    background: C.surface,
+                    width:        500,
+                    maxWidth:     '100%',
+                    maxHeight:    '90vh',
+                    overflowY:    'auto',
+                    background:   C.surface,
                     borderRadius: 16,
-                    boxShadow: '0 20px 60px rgba(117,48,251,0.18)',
-                    display: 'flex',
-                    flexDirection: 'column',
+                    boxShadow:    '0 20px 60px rgba(117,48,251,0.18)',
+                    display:      'flex',
+                    flexDirection:'column',
                 }}
             >
                 {/* ── Header ──────────────────────────────── */}
                 <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
+                    display:        'flex',
+                    alignItems:     'center',
                     justifyContent: 'space-between',
-                    padding: '18px 20px 14px',
-                    borderBottom: `1px solid ${C.border}`,
-                    flexShrink: 0,
+                    padding:        '18px 20px 14px',
+                    borderBottom:   `1px solid ${C.border}`,
+                    flexShrink:     0,
                 }}>
                     <span style={{ fontSize: 15, fontWeight: 700, color: C.dark }}>
                         {isEdit ? 'Edit Segment' : 'New Segment'}
@@ -240,15 +240,15 @@ export function SegmentBuilder({
                                 ICON
                             </label>
                             <div style={{
-                                display: 'flex',
-                                flexWrap: 'wrap',
-                                gap: 5,
-                                padding: 10,
-                                borderRadius: 8,
-                                border: `1.5px solid ${C.borderInput}`,
-                                background: C.bg,
-                                maxHeight: 110,
-                                overflowY: 'auto',
+                                display:       'flex',
+                                flexWrap:      'wrap',
+                                gap:           5,
+                                padding:       10,
+                                borderRadius:  8,
+                                border:        `1.5px solid ${C.borderInput}`,
+                                background:    C.bg,
+                                maxHeight:     110,
+                                overflowY:     'auto',
                             }}>
                                 {ICON_OPTIONS.map(ic => (
                                     <button
@@ -257,17 +257,17 @@ export function SegmentBuilder({
                                         onClick={() => setIcon(ic)}
                                         title={ic}
                                         style={{
-                                            width: 28,
-                                            height: 28,
+                                            width:        28,
+                                            height:       28,
                                             borderRadius: 6,
-                                            border: icon === ic ? `2px solid ${color}` : `1.5px solid ${C.border}`,
-                                            background: icon === ic ? color + '1a' : C.surface,
-                                            color: icon === ic ? color : C.muted,
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
+                                            border:       icon === ic ? `2px solid ${color}` : `1.5px solid ${C.border}`,
+                                            background:   icon === ic ? color + '1a' : C.surface,
+                                            color:        icon === ic ? color : C.muted,
+                                            cursor:       'pointer',
+                                            display:      'flex',
+                                            alignItems:   'center',
                                             justifyContent: 'center',
-                                            flexShrink: 0,
+                                            flexShrink:   0,
                                         }}
                                     >
                                         <DynIcon name={ic} size={13} color={icon === ic ? color : undefined} />
@@ -282,13 +282,13 @@ export function SegmentBuilder({
                                 COLOR
                             </label>
                             <div style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: 4,
-                                padding: 8,
+                                display:      'flex',
+                                flexDirection:'column',
+                                gap:          4,
+                                padding:      8,
                                 borderRadius: 8,
-                                border: `1.5px solid ${C.borderInput}`,
-                                background: C.bg,
+                                border:       `1.5px solid ${C.borderInput}`,
+                                background:   C.bg,
                             }}>
                                 {/* Three columns of swatches */}
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4 }}>
@@ -298,16 +298,16 @@ export function SegmentBuilder({
                                             type="button"
                                             onClick={() => setColor(hex)}
                                             style={{
-                                                width: 20,
-                                                height: 20,
+                                                width:        20,
+                                                height:       20,
                                                 borderRadius: 5,
-                                                border: color === hex
+                                                border:       color === hex
                                                     ? `2px solid ${C.dark}`
                                                     : '2px solid transparent',
-                                                background: hex,
-                                                cursor: 'pointer',
-                                                outline: color === hex ? `2px solid ${hex}` : 'none',
-                                                outlineOffset: 1,
+                                                background:   hex,
+                                                cursor:       'pointer',
+                                                outline:      color === hex ? `2px solid ${hex}` : 'none',
+                                                outlineOffset:1,
                                             }}
                                         />
                                     ))}
@@ -326,15 +326,15 @@ export function SegmentBuilder({
                                     type="button"
                                     onClick={() => setLogic(l)}
                                     style={{
-                                        height: 28,
-                                        padding: '0 12px',
+                                        height:       28,
+                                        padding:      '0 12px',
                                         borderRadius: 6,
-                                        border: logic === l ? 'none' : `1.5px solid ${C.border}`,
-                                        background: logic === l ? C.primary : C.surface,
-                                        color: logic === l ? '#fff' : C.muted,
-                                        fontSize: 12,
-                                        fontWeight: 600,
-                                        cursor: 'pointer',
+                                        border:       logic === l ? 'none' : `1.5px solid ${C.border}`,
+                                        background:   logic === l ? C.primary : C.surface,
+                                        color:        logic === l ? '#fff' : C.muted,
+                                        fontSize:     12,
+                                        fontWeight:   600,
+                                        cursor:       'pointer',
                                     }}
                                 >{l}</button>
                             ))}
@@ -343,13 +343,13 @@ export function SegmentBuilder({
 
                         {/* Live count */}
                         <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 5,
-                            padding: '4px 10px',
+                            display:      'flex',
+                            alignItems:   'center',
+                            gap:          5,
+                            padding:      '4px 10px',
                             borderRadius: 20,
-                            background: C.primaryLight,
-                            border: `1px solid ${C.primary}33`,
+                            background:   C.primaryLight,
+                            border:       `1px solid ${C.primary}33`,
                         }}>
                             <Users size={11} style={{ color: C.primary }} />
                             <span style={{ fontSize: 12, fontWeight: 600, color: C.primary }}>
@@ -366,12 +366,12 @@ export function SegmentBuilder({
 
                         {filters.length === 0 ? (
                             <div style={{
-                                padding: '14px 0',
-                                textAlign: 'center',
-                                fontSize: 13,
-                                color: C.muted,
+                                padding:      '14px 0',
+                                textAlign:    'center',
+                                fontSize:     13,
+                                color:        C.muted,
                                 borderRadius: 8,
-                                border: `1.5px dashed ${C.border}`,
+                                border:       `1.5px dashed ${C.border}`,
                             }}>
                                 No filters — this segment will match all listings.
                             </div>
@@ -391,19 +391,19 @@ export function SegmentBuilder({
                             type="button"
                             onClick={addFilter}
                             style={{
-                                display: 'flex',
-                                alignItems: 'center',
+                                display:      'flex',
+                                alignItems:   'center',
                                 justifyContent: 'center',
-                                gap: 5,
-                                height: 32,
+                                gap:          5,
+                                height:       32,
                                 borderRadius: 8,
-                                border: `1.5px dashed ${C.primary}55`,
-                                background: C.primaryLight,
-                                color: C.primary,
-                                fontSize: 12,
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                                width: '100%',
+                                border:       `1.5px dashed ${C.primary}55`,
+                                background:   C.primaryLight,
+                                color:        C.primary,
+                                fontSize:     12,
+                                fontWeight:   600,
+                                cursor:       'pointer',
+                                width:        '100%',
                             }}
                         >
                             <Plus size={13} />
@@ -414,28 +414,28 @@ export function SegmentBuilder({
 
                 {/* ── Footer ──────────────────────────────── */}
                 <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
+                    display:        'flex',
+                    alignItems:     'center',
                     justifyContent: 'flex-end',
-                    gap: 8,
-                    padding: '14px 20px',
-                    borderTop: `1px solid ${C.border}`,
-                    flexShrink: 0,
+                    gap:            8,
+                    padding:        '14px 20px',
+                    borderTop:      `1px solid ${C.border}`,
+                    flexShrink:     0,
                 }}>
                     <button
                         type="button"
                         onClick={onClose}
                         disabled={saving}
                         style={{
-                            height: 36,
-                            padding: '0 16px',
+                            height:       36,
+                            padding:      '0 16px',
                             borderRadius: 8,
-                            border: `1.5px solid ${C.border}`,
-                            background: C.surface,
-                            color: C.muted,
-                            fontSize: 13,
-                            fontWeight: 600,
-                            cursor: saving ? 'not-allowed' : 'pointer',
+                            border:       `1.5px solid ${C.border}`,
+                            background:   C.surface,
+                            color:        C.muted,
+                            fontSize:     13,
+                            fontWeight:   600,
+                            cursor:       saving ? 'not-allowed' : 'pointer',
                         }}
                     >Cancel</button>
 
@@ -444,18 +444,18 @@ export function SegmentBuilder({
                         onClick={handleSave}
                         disabled={saving}
                         style={{
-                            height: 36,
-                            padding: '0 20px',
+                            height:       36,
+                            padding:      '0 20px',
                             borderRadius: 8,
-                            border: 'none',
-                            background: saving ? C.muted : C.primary,
-                            color: '#fff',
-                            fontSize: 13,
-                            fontWeight: 700,
-                            cursor: saving ? 'not-allowed' : 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 6,
+                            border:       'none',
+                            background:   saving ? C.muted : C.primary,
+                            color:        '#fff',
+                            fontSize:     13,
+                            fontWeight:   700,
+                            cursor:       saving ? 'not-allowed' : 'pointer',
+                            display:      'flex',
+                            alignItems:   'center',
+                            gap:          6,
                         }}
                     >
                         {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Create Segment'}

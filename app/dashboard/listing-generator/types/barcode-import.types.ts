@@ -16,11 +16,11 @@ export type IdentifierMode =
     | 'EPID'  // eBay Product ID (numeric, platform-specific)
 
 export const IDENTIFIER_MODE_OPTIONS: { value: IdentifierMode; label: string; hint: string }[] = [
-    { value: 'UPC', label: 'UPC', hint: '12-digit US barcodes' },
-    { value: 'EAN', label: 'EAN', hint: '13-digit global barcodes' },
+    { value: 'UPC',  label: 'UPC',  hint: '12-digit US barcodes' },
+    { value: 'EAN',  label: 'EAN',  hint: '13-digit global barcodes' },
     { value: 'GTIN', label: 'GTIN', hint: 'Universal trade identifiers' },
     { value: 'ISBN', label: 'ISBN', hint: 'Books & publications' },
-    { value: 'MPN', label: 'MPN', hint: 'Manufacturer part numbers' },
+    { value: 'MPN',  label: 'MPN',  hint: 'Manufacturer part numbers' },
     { value: 'EPID', label: 'EPID', hint: 'eBay product identifiers' },
 ]
 
@@ -206,13 +206,13 @@ export function validateCheckDigit(barcode: string, type: BarcodeType): boolean 
  */
 export function barcodTypeLabel(type: BarcodeType): string {
     switch (type) {
-        case 'EAN13': return 'EAN-13'
-        case 'UPC_A': return 'UPC-A'
+        case 'EAN13':  return 'EAN-13'
+        case 'UPC_A':  return 'UPC-A'
         case 'ISBN13': return 'ISBN-13'
         case 'ISBN10': return 'ISBN-10'
-        case 'EAN8': return 'EAN-8'
-        case 'UPC_E': return 'UPC-E'
-        case 'TITLE': return 'Title'
-        default: return 'Barcode'
+        case 'EAN8':   return 'EAN-8'
+        case 'UPC_E':  return 'UPC-E'
+        case 'TITLE':  return 'Title'
+        default:       return 'Barcode'
     }
 }

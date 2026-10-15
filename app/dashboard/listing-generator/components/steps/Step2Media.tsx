@@ -93,12 +93,12 @@ const TEMPLATES: { label: string; icon: string; html: string }[] = [
     },
 ]
 interface Props {
-    draft: DraftData
-    onChange: (updates: Partial<DraftData>) => void
-    onNext: () => void
-    onPrev: () => void
-    onSave?: () => void
-    atLimit?: boolean      // user is at their plan cap → lock AI features
+    draft:      DraftData
+    onChange:   (updates: Partial<DraftData>) => void
+    onNext:     () => void
+    onPrev:     () => void
+    onSave?:    () => void
+    atLimit?:   boolean      // user is at their plan cap → lock AI features
     onUpgrade?: () => void   // open upgrade modal
 }
 
@@ -1314,7 +1314,7 @@ export default function Step2Media({ draft, onChange, onNext, onPrev, onSave, at
                                             uploadedPhotos={draft.photo_urls?.filter(Boolean) || []}
                                             supabaseUpload={uploadPhoto}
                                             onLibrary={() => setDescTab('library')}
-                                            onAiWrite={atLimit ? (onUpgrade ?? (() => { })) : generateDescription}
+                                            onAiWrite={atLimit ? (onUpgrade ?? (() => {})) : generateDescription}
                                             aiLoading={aiDescLoading}
                                             aiLocked={atLimit}
                                         />

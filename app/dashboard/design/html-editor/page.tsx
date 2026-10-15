@@ -319,9 +319,9 @@ function HtmlEditorInner() {
 
     function downloadHtml() {
         const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
+        const url  = URL.createObjectURL(blob)
+        const a    = document.createElement('a')
+        a.href     = url
         a.download = `${name.replace(/[^a-z0-9]/gi, '-').toLowerCase() || 'template'}.html`
         document.body.appendChild(a)
         a.click()

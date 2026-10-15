@@ -7,38 +7,38 @@ import type { ToolPanelProps } from '../types'
 
 // ── Tokens ─────────────────────────────────────────────────────
 const C = {
-    primary: '#7530fb',
+    primary:      '#7530fb',
     primaryLight: '#f3eeff',
-    primaryBorder: '#c4a8fd',
-    border: '#ede9fe',
-    borderMid: '#e5e7eb',
-    label: '#111827',
-    sub: '#6b7280',
-    muted: '#9ca3af',
-    surface: '#ffffff',
-    sectionBg: '#fafafa',
-    hover: '#f3f4f6',
-    danger: '#ef4444',
-    dangerLight: '#fef2f2',
+    primaryBorder:'#c4a8fd',
+    border:       '#ede9fe',
+    borderMid:    '#e5e7eb',
+    label:        '#111827',
+    sub:          '#6b7280',
+    muted:        '#9ca3af',
+    surface:      '#ffffff',
+    sectionBg:    '#fafafa',
+    hover:        '#f3f4f6',
+    danger:       '#ef4444',
+    dangerLight:  '#fef2f2',
     dangerBorder: '#fca5a5',
-    accent: '#b8fa33',
-    dark: '#1e1535',
+    accent:       '#b8fa33',
+    dark:         '#1e1535',
 }
 
 // ── Common e-commerce presets ──────────────────────────────────
 const PRESETS = [
-    { label: 'Amazon Main', w: 2000, h: 2000, hint: '1:1' },
-    { label: 'Amazon Thumb', w: 500, h: 500, hint: '1:1' },
-    { label: 'eBay Listing', w: 1600, h: 1600, hint: '1:1' },
-    { label: 'Shopify 1:1', w: 2048, h: 2048, hint: '1:1' },
-    { label: 'Shopify 4:3', w: 2048, h: 1536, hint: '4:3' },
-    { label: 'Etsy Listing', w: 2000, h: 1500, hint: '4:3' },
-    { label: 'Facebook Post', w: 1200, h: 630, hint: '~2:1' },
-    { label: 'Instagram Sq', w: 1080, h: 1080, hint: '1:1' },
+    { label: 'Amazon Main',   w: 2000, h: 2000, hint: '1:1' },
+    { label: 'Amazon Thumb',  w:  500, h:  500, hint: '1:1' },
+    { label: 'eBay Listing',  w: 1600, h: 1600, hint: '1:1' },
+    { label: 'Shopify 1:1',   w: 2048, h: 2048, hint: '1:1' },
+    { label: 'Shopify 4:3',   w: 2048, h: 1536, hint: '4:3' },
+    { label: 'Etsy Listing',  w: 2000, h: 1500, hint: '4:3' },
+    { label: 'Facebook Post', w: 1200, h:  630, hint: '~2:1' },
+    { label: 'Instagram Sq',  w: 1080, h: 1080, hint: '1:1' },
     { label: 'Instagram 4:5', w: 1080, h: 1350, hint: '4:5' },
-    { label: 'Pinterest', w: 1000, h: 1500, hint: '2:3' },
-    { label: 'Twitter Post', w: 1600, h: 900, hint: '16:9' },
-    { label: 'Walmart', w: 2000, h: 2000, hint: '1:1' },
+    { label: 'Pinterest',     w: 1000, h: 1500, hint: '2:3' },
+    { label: 'Twitter Post',  w: 1600, h:  900, hint: '16:9' },
+    { label: 'Walmart',       w: 2000, h: 2000, hint: '1:1' },
 ]
 
 // ── Percent presets ────────────────────────────────────────────
@@ -127,9 +127,9 @@ function PctButton({ pct, isActive, onClick }: {
 export default function ResizeTool({ state, onChange, imageUrl }: ToolPanelProps) {
     const [naturalW, setNaturalW] = useState(0)
     const [naturalH, setNaturalH] = useState(0)
-    const [inputW, setInputW] = useState('')
-    const [inputH, setInputH] = useState('')
-    const [locked, setLocked] = useState(state.resizeLockAR ?? true)
+    const [inputW,   setInputW]   = useState('')
+    const [inputH,   setInputH]   = useState('')
+    const [locked,   setLocked]   = useState(state.resizeLockAR ?? true)
     const [activePreset, setActivePreset] = useState<string | null>(null)
     const [hovReset, setHovReset] = useState(false)
     const initDone = useRef(false)
@@ -144,7 +144,7 @@ export default function ResizeTool({ state, onChange, imageUrl }: ToolPanelProps
             if (!initDone.current) {
                 initDone.current = true
                 // Pre-fill from saved state or natural dims
-                const savedW = state.resizeWidth ?? img.naturalWidth
+                const savedW = state.resizeWidth  ?? img.naturalWidth
                 const savedH = state.resizeHeight ?? img.naturalHeight
                 setInputW(String(savedW))
                 setInputH(String(savedH))
@@ -158,7 +158,7 @@ export default function ResizeTool({ state, onChange, imageUrl }: ToolPanelProps
 
     const currentW = parseInt(inputW) || naturalW
     const currentH = parseInt(inputH) || naturalH
-    const ar = naturalW && naturalH ? naturalW / naturalH : 1
+    const ar       = naturalW && naturalH ? naturalW / naturalH : 1
 
     function commitW(raw: string) {
         const w = Math.max(1, Math.min(9999, parseInt(raw) || 1))
@@ -210,7 +210,7 @@ export default function ResizeTool({ state, onChange, imageUrl }: ToolPanelProps
     }
 
     const isDirty = (state.resizeWidth !== null && state.resizeWidth !== naturalW)
-        || (state.resizeHeight !== null && state.resizeHeight !== naturalH)
+                 || (state.resizeHeight !== null && state.resizeHeight !== naturalH)
 
     // Megapixel info
     const mp = naturalW && naturalH
@@ -288,7 +288,7 @@ export default function ResizeTool({ state, onChange, imageUrl }: ToolPanelProps
                                     transition: 'border-color 0.15s',
                                 }}
                                 onFocus={e => (e.target.style.borderColor = C.primary)}
-                            // onBlur handled above but also reset border
+                                // onBlur handled above but also reset border
                             />
                             <span style={{ fontSize: 12, color: C.muted, flexShrink: 0 }}>px</span>
                         </div>

@@ -18,35 +18,35 @@ import {
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
-    primary: '#7530fb',
+    primary:      '#7530fb',
     primaryLight: '#f3eeff',
-    accent: '#b8fa33',
-    accentDark: '#8abf1f',
-    bg: '#f8f7ff',
-    surface: '#ffffff',
-    border: '#ede9fe',
-    text: '#1a1523',
-    muted: '#6b7280',
-    error: '#ef4444',
-    errorLight: '#fef2f2',
-    warning: '#f59e0b',
+    accent:       '#b8fa33',
+    accentDark:   '#8abf1f',
+    bg:           '#f8f7ff',
+    surface:      '#ffffff',
+    border:       '#ede9fe',
+    text:         '#1a1523',
+    muted:        '#6b7280',
+    error:        '#ef4444',
+    errorLight:   '#fef2f2',
+    warning:      '#f59e0b',
     warningLight: '#fffbeb',
-    success: '#22c55e',
+    success:      '#22c55e',
     successLight: '#f0fdf4',
 } as const
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 interface BarcodeQueueRowProps {
-    item: BarcodeQueueItem
-    onView: (item: BarcodeQueueItem) => void    // open preview panel
-    onRemove: (id: string) => void                // remove from queue
+    item:        BarcodeQueueItem
+    onView:      (item: BarcodeQueueItem) => void    // open preview panel
+    onRemove:    (id: string) => void                // remove from queue
     onToggleSelect: (id: string) => void             // toggle bulk-select checkbox
 }
 
 // ── Status config ─────────────────────────────────────────────────────────────
 type StatusConfig = {
-    icon: React.ReactNode
-    badge: string
+    icon:    React.ReactNode
+    badge:   string
     badgeBg: string
     badgeFg: string
 }
@@ -55,43 +55,43 @@ function statusConfig(item: BarcodeQueueItem): StatusConfig {
     switch (item.status) {
         case 'loading':
             return {
-                icon: <Loader2 size={15} className="animate-spin" style={{ color: C.primary }} />,
-                badge: 'Looking up…',
+                icon:    <Loader2 size={15} className="animate-spin" style={{ color: C.primary }} />,
+                badge:   'Looking up…',
                 badgeBg: C.primaryLight,
                 badgeFg: C.primary,
             }
         case 'found':
             return {
-                icon: <CheckCircle2 size={15} style={{ color: C.success }} />,
-                badge: 'Found',
+                icon:    <CheckCircle2 size={15} style={{ color: C.success }} />,
+                badge:   'Found',
                 badgeBg: C.successLight,
                 badgeFg: C.success,
             }
         case 'vero_risk':
             return {
-                icon: <ShieldAlert size={15} style={{ color: C.warning }} />,
-                badge: 'VeRO Risk',
+                icon:    <ShieldAlert size={15} style={{ color: C.warning }} />,
+                badge:   'VeRO Risk',
                 badgeBg: C.warningLight,
                 badgeFg: C.warning,
             }
         case 'not_found':
             return {
-                icon: <XCircle size={15} style={{ color: C.muted }} />,
-                badge: 'Not found',
+                icon:    <XCircle size={15} style={{ color: C.muted }} />,
+                badge:   'Not found',
                 badgeBg: '#f3f4f6',
                 badgeFg: C.muted,
             }
         case 'error':
             return {
-                icon: <AlertTriangle size={15} style={{ color: C.error }} />,
-                badge: 'Error',
+                icon:    <AlertTriangle size={15} style={{ color: C.error }} />,
+                badge:   'Error',
                 badgeBg: C.errorLight,
                 badgeFg: C.error,
             }
         default: // pending
             return {
-                icon: <Clock size={15} style={{ color: C.muted }} />,
-                badge: 'Queued',
+                icon:    <Clock size={15} style={{ color: C.muted }} />,
+                badge:   'Queued',
                 badgeBg: '#f3f4f6',
                 badgeFg: C.muted,
             }
@@ -101,7 +101,7 @@ function statusConfig(item: BarcodeQueueItem): StatusConfig {
 // ── Cassini score pill ────────────────────────────────────────────────────────
 function CassiniPill({ score }: { score: number }) {
     const color = score >= 80 ? C.success : score >= 60 ? C.warning : C.error
-    const bg = score >= 80 ? C.successLight : score >= 60 ? C.warningLight : C.errorLight
+    const bg    = score >= 80 ? C.successLight : score >= 60 ? C.warningLight : C.errorLight
     return (
         <span
             className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
@@ -120,8 +120,8 @@ export default function BarcodeQueueRow({
     onRemove,
     onToggleSelect,
 }: BarcodeQueueRowProps) {
-    const rowRef = useRef<HTMLDivElement>(null)
-    const cfg = statusConfig(item)
+    const rowRef  = useRef<HTMLDivElement>(null)
+    const cfg     = statusConfig(item)
     const product = item.result?.product
 
     // Highlight newly-added rows
@@ -134,8 +134,8 @@ export default function BarcodeQueueRow({
         )
     }, [])
 
-    const canSelect = item.status === 'found' || item.status === 'vero_risk'
-    const canView = canSelect
+    const canSelect  = item.status === 'found' || item.status === 'vero_risk'
+    const canView    = canSelect
     const isSelected = item.selected && canSelect
 
     return (
@@ -143,7 +143,7 @@ export default function BarcodeQueueRow({
             ref={rowRef}
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors"
             style={{
-                border: `1px solid ${isSelected ? C.primary : C.border}`,
+                border:          `1px solid ${isSelected ? C.primary : C.border}`,
                 backgroundColor: isSelected ? C.primaryLight : C.surface,
             }}
         >

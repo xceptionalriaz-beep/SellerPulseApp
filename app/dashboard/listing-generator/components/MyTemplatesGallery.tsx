@@ -13,24 +13,24 @@ import {
 } from 'lucide-react'
 
 const C = {
-    bg: '#f8f7ff',
-    surface: '#ffffff',
-    border: '#ede9fe',
-    borderInput: '#e5e0f5',
-    primary: '#7530fb',
-    primaryHov: '#6020e0',
+    bg:           '#f8f7ff',
+    surface:      '#ffffff',
+    border:       '#ede9fe',
+    borderInput:  '#e5e0f5',
+    primary:      '#7530fb',
+    primaryHov:   '#6020e0',
     primaryLight: '#f3eeff',
-    dark: '#1e1535',
-    body: '#1f1d2e',
-    secondary: '#6b7280',
-    muted: '#9ca3af',
+    dark:         '#1e1535',
+    body:         '#1f1d2e',
+    secondary:    '#6b7280',
+    muted:        '#9ca3af',
 }
 
 interface VisualTemplate {
-    id: string
-    name: string
-    category: string | null
-    updated_at: string
+    id:          string
+    name:        string
+    category:    string | null
+    updated_at:  string
     blocks_json: unknown
 }
 
@@ -43,7 +43,7 @@ function timeAgo(iso: string) {
     const d = Math.floor(diff / 86400000)
     if (d === 0) return 'Today'
     if (d === 1) return 'Yesterday'
-    if (d < 7) return `${d}d ago`
+    if (d < 7)  return `${d}d ago`
     if (d < 30) return `${Math.floor(d / 7)}w ago`
     return `${Math.floor(d / 30)}mo ago`
 }
@@ -58,11 +58,11 @@ function Thumb({ name, size = 130 }: { name: string; size?: number }) {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             position: 'relative', overflow: 'hidden',
         }}>
-            {[0, 1, 2, 3].map(i => (
+            {[0,1,2,3].map(i => (
                 <div key={i} style={{
                     position: 'absolute',
-                    top: `${12 + i * 20}%`,
-                    left: '10%', right: '10%',
+                    top:    `${12 + i * 20}%`,
+                    left:   '10%', right: '10%',
                     height: '10%',
                     background: `hsl(${hue},60%,55%)`,
                     opacity: 0.18 - i * 0.03,
@@ -76,9 +76,9 @@ function Thumb({ name, size = 130 }: { name: string; size?: number }) {
 
 export default function MyTemplatesGallery({ onClose }: Props) {
     const [templates, setTemplates] = useState<VisualTemplate[]>([])
-    const [loading, setLoading] = useState(true)
-    const [search, setSearch] = useState('')
-    const [hoverId, setHoverId] = useState<string | null>(null)
+    const [loading, setLoading]     = useState(true)
+    const [search, setSearch]       = useState('')
+    const [hoverId, setHoverId]     = useState<string | null>(null)
 
     useEffect(() => { load() }, [])
 

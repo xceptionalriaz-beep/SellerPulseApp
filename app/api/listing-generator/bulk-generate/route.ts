@@ -16,9 +16,9 @@
 // ─────────────────────────────────────────────────────────────
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { createClient }              from '@supabase/supabase-js'
+import { createServerClient }        from '@supabase/ssr'
+import { cookies }                   from 'next/headers'
 
 export const maxDuration = 60   // bulk rows need more time than single imports
 
@@ -31,16 +31,16 @@ const supabaseAdmin = createClient(
 
 // ── VeRO brand list — mirror of /api/b2b/vero/route.ts ───────────────────────
 const VERO_BRANDS = [
-    { brand: 'Nike', keywords: ['nike', 'air max', 'air force', 'jordan', 'swoosh'], risk: 'high' },
-    { brand: 'Adidas', keywords: ['adidas', 'yeezy', 'ultraboost', 'three stripes'], risk: 'high' },
-    { brand: 'Apple', keywords: ['apple', 'iphone', 'macbook', 'airpods', 'ipad'], risk: 'high' },
-    { brand: 'Louis Vuitton', keywords: ['louis vuitton', 'lv', 'monogram'], risk: 'high' },
-    { brand: 'Gucci', keywords: ['gucci', 'gg supreme'], risk: 'high' },
-    { brand: 'Disney', keywords: ['disney', 'mickey mouse', 'marvel', 'star wars', 'pixar'], risk: 'high' },
-    { brand: 'Rolex', keywords: ['rolex', 'submariner', 'datejust'], risk: 'high' },
-    { brand: 'Supreme', keywords: ['supreme', 'box logo'], risk: 'medium' },
-    { brand: 'The North Face', keywords: ['north face', 'tnf'], risk: 'medium' },
-    { brand: 'Sony', keywords: ['sony', 'playstation', 'ps5', 'ps4'], risk: 'medium' },
+    { brand: 'Nike',          keywords: ['nike', 'air max', 'air force', 'jordan', 'swoosh'],       risk: 'high'   },
+    { brand: 'Adidas',        keywords: ['adidas', 'yeezy', 'ultraboost', 'three stripes'],          risk: 'high'   },
+    { brand: 'Apple',         keywords: ['apple', 'iphone', 'macbook', 'airpods', 'ipad'],           risk: 'high'   },
+    { brand: 'Louis Vuitton', keywords: ['louis vuitton', 'lv', 'monogram'],                         risk: 'high'   },
+    { brand: 'Gucci',         keywords: ['gucci', 'gg supreme'],                                     risk: 'high'   },
+    { brand: 'Disney',        keywords: ['disney', 'mickey mouse', 'marvel', 'star wars', 'pixar'],  risk: 'high'   },
+    { brand: 'Rolex',         keywords: ['rolex', 'submariner', 'datejust'],                          risk: 'high'   },
+    { brand: 'Supreme',       keywords: ['supreme', 'box logo'],                                     risk: 'medium' },
+    { brand: 'The North Face',keywords: ['north face', 'tnf'],                                       risk: 'medium' },
+    { brand: 'Sony',          keywords: ['sony', 'playstation', 'ps5', 'ps4'],                       risk: 'medium' },
 ] as const
 
 // ─────────────────────────────────────────────────────────────
@@ -76,11 +76,11 @@ async function trackUsage(platform: string) {
 // Helper: VeRO check
 // ─────────────────────────────────────────────────────────────
 interface VeroResult {
-    isVero: boolean
-    brand: string | null
+    isVero:    boolean
+    brand:     string | null
     riskLevel: string
-    status: 'safe' | 'caution' | 'avoid'
-    message: string
+    status:    'safe' | 'caution' | 'avoid'
+    message:   string
 }
 
 async function checkVero(title: string): Promise<VeroResult> {
@@ -90,11 +90,11 @@ async function checkVero(title: string): Promise<VeroResult> {
     for (const entry of VERO_BRANDS) {
         if (entry.keywords.some(k => lc.includes(k))) {
             return {
-                isVero: true,
-                brand: entry.brand,
+                isVero:    true,
+                brand:     entry.brand,
                 riskLevel: entry.risk,
-                status: entry.risk === 'high' ? 'avoid' : 'caution',
-                message: `VeRO warning: "${entry.brand}" is a protected brand`,
+                status:    entry.risk === 'high' ? 'avoid' : 'caution',
+                message:   `VeRO warning: "${entry.brand}" is a protected brand`,
             }
         }
     }
@@ -106,11 +106,11 @@ async function checkVero(title: string): Promise<VeroResult> {
         for (const b of dbBrands) {
             if (b && lc.includes(b)) {
                 return {
-                    isVero: true,
-                    brand: b,
+                    isVero:    true,
+                    brand:     b,
                     riskLevel: 'high',
-                    status: 'avoid',
-                    message: `VeRO warning: "${b}" is a protected brand`,
+                    status:    'avoid',
+                    message:   `VeRO warning: "${b}" is a protected brand`,
                 }
             }
         }
@@ -169,14 +169,14 @@ async function generateWithAnthropic(
     const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey,
+            'Content-Type':      'application/json',
+            'x-api-key':         apiKey,
             'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
-            model: 'claude-haiku-4-5-20251001',
+            model:      'claude-haiku-4-5-20251001',
             max_tokens: 700,
-            messages: [{ role: 'user', content: prompt }],
+            messages:   [{ role: 'user', content: prompt }],
         }),
         signal: AbortSignal.timeout(25_000),
     })
@@ -199,7 +199,7 @@ async function generateWithGemini(
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }],
+                contents:         [{ parts: [{ text: prompt }] }],
                 generationConfig: { maxOutputTokens: 700, temperature: 0.7 },
             }),
             signal: AbortSignal.timeout(25_000),
@@ -265,9 +265,9 @@ async function generateListing(
 
     // No-AI fallback — use raw title + empty description placeholder
     return {
-        title: rawTitle.slice(0, 80),
+        title:       rawTitle.slice(0, 80),
         description: `<p>${rawTitle}</p>`,
-        provider: 'none',
+        provider:    'none',
     }
 }
 
@@ -276,26 +276,26 @@ async function generateListing(
 // ─────────────────────────────────────────────────────────────
 interface MarginStats {
     markup_percentage: number | null
-    net_profit: number | null
-    margin: number | null
+    net_profit:        number | null
+    margin:            number | null
 }
 
 function calcMargin(buyStr?: string, sellStr?: string): MarginStats {
-    const buy = buyStr ? parseFloat(buyStr) : NaN
+    const buy  = buyStr  ? parseFloat(buyStr)  : NaN
     const sell = sellStr ? parseFloat(sellStr) : NaN
 
     if (isNaN(buy) || isNaN(sell) || sell <= 0) {
         return { markup_percentage: null, net_profit: null, margin: null }
     }
 
-    const profit = sell - buy
-    const margin = (profit / sell) * 100
-    const markup = buy > 0 ? (profit / buy) * 100 : null
+    const profit   = sell - buy
+    const margin   = (profit / sell) * 100
+    const markup   = buy > 0 ? (profit / buy) * 100 : null
 
     return {
-        markup_percentage: markup !== null ? parseFloat(markup.toFixed(2)) : null,
-        net_profit: parseFloat(profit.toFixed(2)),
-        margin: parseFloat(margin.toFixed(2)),
+        markup_percentage: markup  !== null ? parseFloat(markup.toFixed(2))  : null,
+        net_profit:        parseFloat(profit.toFixed(2)),
+        margin:            parseFloat(margin.toFixed(2)),
     }
 }
 
@@ -324,17 +324,17 @@ export async function POST(req: NextRequest) {
 
     // ── 2. Parse request body ────────────────────────────────────────────────
     let body: {
-        title?: string
-        barcode?: string
-        buy_price?: string
-        sell_price?: string
-        sku?: string
-        condition?: string
-        quantity?: string
+        title?:       string
+        barcode?:     string
+        buy_price?:   string
+        sell_price?:  string
+        sku?:         string
+        condition?:   string
+        quantity?:    string
         category_id?: string
-        images?: string
+        images?:      string
         template_id?: string
-        _rowIndex?: number
+        _rowIndex?:   number
     }
 
     try {
@@ -353,7 +353,7 @@ export async function POST(req: NextRequest) {
         // Attempt barcode lookup to get a title
         const lookedUp = await lookupBarcode(barcode.trim())
         if (lookedUp) {
-            resolvedTitle = lookedUp
+            resolvedTitle   = lookedUp
             barcodeResolved = true
         } else {
             // Barcode lookup failed — use barcode itself as a minimal identifier
@@ -370,7 +370,7 @@ export async function POST(req: NextRequest) {
     }
 
     // ── 4. AI generation: eBay title + HTML description ──────────────────────
-    const cond = condition?.toLowerCase() || 'used'
+    const cond         = condition?.toLowerCase() || 'used'
     const categoryHint = category_id || ''
     const { title: ebayTitle, description: descHtml, provider } =
         await generateListing(resolvedTitle, cond, categoryHint)
@@ -390,37 +390,37 @@ export async function POST(req: NextRequest) {
     const { data: draftData, error: draftError } = await supabaseAdmin
         .from('listing_drafts')
         .insert({
-            user_id: userId,
-            product_name: resolvedTitle,
-            title: ebayTitle,
-            title_score: null,
-            health_score: vero.isVero ? 40 : 70,
-            description_html: descHtml,
-            category: category_id ? String(category_id) : null,
-            condition: cond,
-            ean: barcode?.trim() ?? null,
-            item_specifics: {},
-            sell_price: sell_price ? parseFloat(sell_price) : null,
-            buy_price: buy_price ? parseFloat(buy_price) : null,
-            supplier_price: null,
+            user_id:           userId,
+            product_name:      resolvedTitle,
+            title:             ebayTitle,
+            title_score:       null,
+            health_score:      vero.isVero ? 40 : 70,
+            description_html:  descHtml,
+            category:          category_id ? String(category_id) : null,
+            condition:         cond,
+            ean:               barcode?.trim() ?? null,
+            item_specifics:    {},
+            sell_price:        sell_price ? parseFloat(sell_price) : null,
+            buy_price:         buy_price  ? parseFloat(buy_price)  : null,
+            supplier_price:    null,
             markup_percentage: margins.markup_percentage,
-            net_profit: margins.net_profit,
-            margin: margins.margin,
-            seller_type: 'own_stock',
-            source_platform: 'bulk_upload',
-            supplier_url: null,
-            supplier_images: imageList,
-            photos: [],
-            main_photo_url: imageList[0] ?? null,
-            photo_count: 0,
-            vero_status: vero.status,
+            net_profit:        margins.net_profit,
+            margin:            margins.margin,
+            seller_type:       'own_stock',
+            source_platform:   'bulk_upload',
+            supplier_url:      null,
+            supplier_images:   imageList,
+            photos:            [],
+            main_photo_url:    imageList[0] ?? null,
+            photo_count:       0,
+            vero_status:       vero.status,
             vero_brands_found: vero.brand ? [vero.brand] : [],
-            sku: sku?.trim() || null,
-            quantity: quantity ? parseInt(quantity, 10) : null,
-            template_id: template_id?.trim() || null,
-            status: 'draft',
-            current_step: 1,
-            notes: [
+            sku:               sku?.trim() || null,
+            quantity:          quantity ? parseInt(quantity, 10) : null,
+            template_id:       template_id?.trim() || null,
+            status:            'draft',
+            current_step:      1,
+            notes:             [
                 `Generated via Bulk Upload · AI: ${provider}`,
                 barcodeResolved ? `Barcode ${barcode} resolved via lookup` : null,
             ].filter(Boolean).join(' · '),
@@ -446,11 +446,11 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({
-        ok: true,
-        draftId: draftData.id,
-        title: ebayTitle,
+        ok:         true,
+        draftId:    draftData.id,
+        title:      ebayTitle,
         veroStatus: vero.status,
-        veroFound: vero.brand,
+        veroFound:  vero.brand,
         message,
     })
 }

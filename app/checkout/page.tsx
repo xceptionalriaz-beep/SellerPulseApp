@@ -3,55 +3,55 @@
 // Route: /checkout?plan=growth&billing=annual
 
 import { Suspense, useEffect, useState, useCallback } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase'
+import { useSearchParams, useRouter }                  from 'next/navigation'
+import { createClient }                                from '@/lib/supabase'
 import { Check, RefreshCw, ArrowLeft, Lock, Zap, ShieldCheck } from 'lucide-react'
 
 // ── Design tokens (Riazify v2) ────────────────────────────────────────────────
 const T = {
-    bgApp: '#f8f7ff',
-    white: '#ffffff',
-    border: '#ede9fe',
-    borderIn: '#e5e0f5',
-    primary: '#7530fb',
-    primaryHov: '#6020e0',
+    bgApp:     '#f8f7ff',
+    white:     '#ffffff',
+    border:    '#ede9fe',
+    borderIn:  '#e5e0f5',
+    primary:   '#7530fb',
+    primaryHov:'#6020e0',
     primaryLt: '#f3eeff',
-    accent: '#b8fa33',
-    dark: '#1e1535',
-    darkHov: '#2d1f4e',
-    textPri: '#1f1d2e',
-    textSec: '#6b7280',
+    accent:    '#b8fa33',
+    dark:      '#1e1535',
+    darkHov:   '#2d1f4e',
+    textPri:   '#1f1d2e',
+    textSec:   '#6b7280',
     textMuted: '#9ca3af',
-    success: '#16a34a',
+    success:   '#16a34a',
     successBg: '#dcfce7',
 }
 
 interface DBPlan {
-    id: string
-    plan_id: string
-    name: string
-    price: string
-    price_annual: string | null
+    id:                 string
+    plan_id:            string
+    name:               string
+    price:              string
+    price_annual:       string | null
     price_annual_total: string | null
-    description: string
-    features: { text: string; included: boolean }[]
+    description:        string
+    features:           { text: string; included: boolean }[]
 }
 
 function CheckoutContent() {
     const searchParams = useSearchParams()
-    const router = useRouter()
-    const supabase = createClient()
+    const router       = useRouter()
+    const supabase     = createClient()
 
     const planId = searchParams.get('plan') ?? 'growth'
     const initialBilling = (searchParams.get('billing') ?? 'annual') as 'monthly' | 'annual'
 
-    const [plan, setPlan] = useState<DBPlan | null>(null)
+    const [plan,        setPlan]        = useState<DBPlan | null>(null)
     const [planLoading, setPlanLoading] = useState(true)
-    const [billing, setBilling] = useState<'monthly' | 'annual'>(initialBilling)
+    const [billing,     setBilling]     = useState<'monthly' | 'annual'>(initialBilling)
     const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null)
-    const [urlLoading, setUrlLoading] = useState(false)
-    const [paying, setPaying] = useState(false)
-    const [error, setError] = useState<string | null>(null)
+    const [urlLoading,  setUrlLoading]  = useState(false)
+    const [paying,      setPaying]      = useState(false)
+    const [error,       setError]       = useState<string | null>(null)
 
     // Load LS embed script
     useEffect(() => {
@@ -59,12 +59,12 @@ function CheckoutContent() {
         s.src = 'https://assets.lemonsqueezy.com/lemon.js'
         s.defer = true
         document.head.appendChild(s)
-        return () => { try { document.head.removeChild(s) } catch { } }
+        return () => { try { document.head.removeChild(s) } catch {} }
     }, [])
 
     // Load plan
     useEffect(() => {
-        ; (async () => {
+        ;(async () => {
             setPlanLoading(true)
             const { data } = await (supabase.from('landing_pricing') as any)
                 .select('*').eq('plan_id', planId).eq('is_active', true).single()
@@ -81,7 +81,7 @@ function CheckoutContent() {
         try {
             const { data: { session } } = await supabase.auth.getSession()
             if (!session) { router.push(`/login?redirect=/checkout?plan=${planId}&billing=${cycle}`); return }
-            const res = await fetch('/api/payments/checkout', {
+            const res  = await fetch('/api/payments/checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
                 body: JSON.stringify({ plan: planId, billing: cycle, userId: session.user.id, userEmail: session.user.email, userName: session.user.user_metadata?.full_name ?? '' }),
@@ -115,7 +115,7 @@ function CheckoutContent() {
     )
 
     const isAnnual = billing === 'annual'
-    const price = isAnnual && plan?.price_annual ? plan.price_annual : (plan?.price ?? '—')
+    const price    = isAnnual && plan?.price_annual ? plan.price_annual : (plan?.price ?? '—')
     const included = plan?.features.filter(f => f.included) ?? []
 
     return (
@@ -129,15 +129,15 @@ function CheckoutContent() {
 
             {/* ── Navbar ───────────────────────────────────────────────── */}
             <nav style={{
-                background: T.dark,
-                height: 56,
-                display: 'flex',
-                alignItems: 'center',
+                background:     T.dark,
+                height:         56,
+                display:        'flex',
+                alignItems:     'center',
                 justifyContent: 'space-between',
-                padding: '0 24px',
-                position: 'sticky',
-                top: 0,
-                zIndex: 20,
+                padding:        '0 24px',
+                position:       'sticky',
+                top:            0,
+                zIndex:         20,
             }}>
                 <button
                     onClick={() => router.back()}

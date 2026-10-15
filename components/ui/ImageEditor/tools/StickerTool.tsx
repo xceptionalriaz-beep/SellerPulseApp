@@ -21,17 +21,17 @@ import type { StickerPreset } from '../stickerHelpers'
 
 // ── Badge preset thumb ─────────────────────────────────────────
 interface PresetThumbProps {
-    pKey: string
-    label: string
-    subLabel: string
-    shape: StickerShape
+    pKey:         string
+    label:        string
+    subLabel:     string
+    shape:        StickerShape
     defaultColor: StickerColorScheme
-    onAdd: (key: string, label: string, subLabel: string, shape: StickerShape, color: StickerColorScheme) => void
+    onAdd:        (key: string, label: string, subLabel: string, shape: StickerShape, color: StickerColorScheme) => void
 }
 function PresetThumb({ pKey, label, subLabel, shape, defaultColor, onAdd }: PresetThumbProps) {
     const [hovered, setHovered] = useState(false)
     const dataUrl = stickerToDataUrl({ label, subLabel, shape, colorScheme: defaultColor })
-    const dims = SHAPE_DIMS[shape]
+    const dims    = SHAPE_DIMS[shape]
 
     return (
         <button
@@ -40,16 +40,16 @@ function PresetThumb({ pKey, label, subLabel, shape, defaultColor, onAdd }: Pres
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
             style={{
-                background: hovered ? '#ede9fe' : '#f8f7ff',
-                border: hovered ? '2px solid #7530fb' : '2px solid #ede9fe',
-                borderRadius: 10,
-                padding: 6,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
+                background:     hovered ? '#ede9fe' : '#f8f7ff',
+                border:         hovered ? '2px solid #7530fb' : '2px solid #ede9fe',
+                borderRadius:   10,
+                padding:        6,
+                cursor:         'pointer',
+                display:        'flex',
+                alignItems:     'center',
                 justifyContent: 'center',
-                aspectRatio: '1',
-                transition: 'all 0.15s',
+                aspectRatio:    '1',
+                transition:     'all 0.15s',
             }}
         >
             <img
@@ -57,12 +57,12 @@ function PresetThumb({ pKey, label, subLabel, shape, defaultColor, onAdd }: Pres
                 alt={label}
                 draggable={false}
                 style={{
-                    width: '100%',
-                    height: 'auto',
-                    maxHeight: '100%',
-                    objectFit: 'contain',
+                    width:       '100%',
+                    height:      'auto',
+                    maxHeight:   '100%',
+                    objectFit:   'contain',
                     aspectRatio: `${dims.w}/${dims.h}`,
-                    display: 'block',
+                    display:     'block',
                 }}
             />
         </button>
@@ -71,8 +71,8 @@ function PresetThumb({ pKey, label, subLabel, shape, defaultColor, onAdd }: Pres
 
 // ── Emoji sticker thumb ────────────────────────────────────────
 interface EmojiThumbProps {
-    emoji: string
-    onAdd: (emoji: string) => void
+    emoji:  string
+    onAdd:  (emoji: string) => void
 }
 function EmojiThumb({ emoji, onAdd }: EmojiThumbProps) {
     const [hovered, setHovered] = useState(false)
@@ -83,19 +83,19 @@ function EmojiThumb({ emoji, onAdd }: EmojiThumbProps) {
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
             style={{
-                background: hovered ? '#ede9fe' : '#f8f7ff',
-                border: hovered ? '2px solid #7530fb' : '2px solid transparent',
-                borderRadius: 10,
-                padding: 4,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
+                background:     hovered ? '#ede9fe' : '#f8f7ff',
+                border:         hovered ? '2px solid #7530fb' : '2px solid transparent',
+                borderRadius:   10,
+                padding:        4,
+                cursor:         'pointer',
+                display:        'flex',
+                alignItems:     'center',
                 justifyContent: 'center',
-                aspectRatio: '1',
-                fontSize: 28,
-                lineHeight: 1,
-                transition: 'all 0.12s',
-                userSelect: 'none',
+                aspectRatio:    '1',
+                fontSize:       28,
+                lineHeight:     1,
+                transition:     'all 0.12s',
+                userSelect:     'none',
             }}
         >
             {emoji}
@@ -105,7 +105,7 @@ function EmojiThumb({ emoji, onAdd }: EmojiThumbProps) {
 
 // ── Color chip ─────────────────────────────────────────────────
 interface ColorChipProps {
-    scheme: StickerColorScheme
+    scheme:   StickerColorScheme
     selected: boolean
     onSelect: (s: StickerColorScheme) => void
 }
@@ -119,16 +119,16 @@ function ColorChip({ scheme, selected, onSelect }: ColorChipProps) {
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
             style={{
-                width: 26,
-                height: 26,
+                width:        26,
+                height:       26,
                 borderRadius: '50%',
-                background: col.bg,
-                border: selected ? '3px solid #7530fb' : hovered ? '3px solid #b8fa33' : '3px solid transparent',
-                cursor: 'pointer',
-                outline: selected ? '2px solid #1e1535' : 'none',
+                background:   col.bg,
+                border:       selected ? '3px solid #7530fb' : hovered ? '3px solid #b8fa33' : '3px solid transparent',
+                cursor:       'pointer',
+                outline:      selected ? '2px solid #1e1535' : 'none',
                 outlineOffset: 1,
-                transition: 'all 0.12s',
-                flexShrink: 0,
+                transition:   'all 0.12s',
+                flexShrink:   0,
             }}
         />
     )
@@ -136,23 +136,23 @@ function ColorChip({ scheme, selected, onSelect }: ColorChipProps) {
 
 // ── Active sticker row ─────────────────────────────────────────
 interface StickerRowProps {
-    sticker: StickerItem
+    sticker:  StickerItem
     onUpdate: (patch: Partial<StickerItem>) => void
     onRemove: () => void
 }
 function StickerRow({ sticker, onUpdate, onRemove }: StickerRowProps) {
-    const [expanded, setExpanded] = useState(false)
+    const [expanded,  setExpanded]  = useState(false)
     const [removeHov, setRemoveHov] = useState(false)
-    const [hdr, setHdr] = useState(false)
+    const [hdr,       setHdr]       = useState(false)
 
     const isEmoji = sticker.type === 'emoji'
 
     return (
         <div style={{
-            background: '#f8f7ff',
-            border: '1.5px solid #ede9fe',
+            background:   '#f8f7ff',
+            border:       '1.5px solid #ede9fe',
             borderRadius: 10,
-            overflow: 'hidden',
+            overflow:     'hidden',
         }}>
             {/* Header */}
             <div
@@ -160,11 +160,11 @@ function StickerRow({ sticker, onUpdate, onRemove }: StickerRowProps) {
                 onMouseEnter={() => setHdr(true)}
                 onMouseLeave={() => setHdr(false)}
                 style={{
-                    display: 'flex',
+                    display:    'flex',
                     alignItems: 'center',
-                    gap: 10,
-                    padding: '8px 10px',
-                    cursor: 'pointer',
+                    gap:        10,
+                    padding:    '8px 10px',
+                    cursor:     'pointer',
                     background: hdr ? '#ede9fe' : 'transparent',
                     transition: 'background 0.12s',
                 }}
@@ -197,16 +197,16 @@ function StickerRow({ sticker, onUpdate, onRemove }: StickerRowProps) {
                     onMouseEnter={() => setRemoveHov(true)}
                     onMouseLeave={() => setRemoveHov(false)}
                     style={{
-                        background: removeHov ? '#fef2f2' : 'transparent',
-                        border: 'none',
-                        cursor: 'pointer',
-                        color: removeHov ? '#ef4444' : '#9ca3af',
-                        padding: '2px 6px',
+                        background:   removeHov ? '#fef2f2' : 'transparent',
+                        border:       'none',
+                        cursor:       'pointer',
+                        color:        removeHov ? '#ef4444' : '#9ca3af',
+                        padding:      '2px 6px',
                         borderRadius: 6,
-                        fontSize: 15,
-                        fontWeight: 700,
-                        lineHeight: 1,
-                        transition: 'all 0.12s',
+                        fontSize:     15,
+                        fontWeight:   700,
+                        lineHeight:   1,
+                        transition:   'all 0.12s',
                     }}
                 >
                     ×
@@ -276,30 +276,30 @@ function StickerRow({ sticker, onUpdate, onRemove }: StickerRowProps) {
 type MainTab = 'badge' | 'discount' | 'emoji'
 
 export default function StickerTool({ state, onChange }: ToolPanelProps) {
-    const stickers = state.stickers ?? []
-    const [mainTab, setMainTab] = useState<MainTab>('badge')
+    const stickers  = state.stickers ?? []
+    const [mainTab,     setMainTab]     = useState<MainTab>('badge')
     const [emojiCatIdx, setEmojiCatIdx] = useState(0)
 
     // Add a badge/discount sticker
     function addBadgeSticker(
-        key: string,
-        label: string,
+        key:      string,
+        label:    string,
         subLabel: string,
-        shape: StickerShape,
-        color: StickerColorScheme,
+        shape:    StickerShape,
+        color:    StickerColorScheme,
     ) {
         const item: StickerItem = {
-            id: `sticker-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            id:          `sticker-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
             key,
             label,
             subLabel,
             shape,
             colorScheme: color,
-            x: 0.12,
-            y: 0.12,
-            scale: 1,
-            rotation: 0,
-            type: 'badge',
+            x:           0.12,
+            y:           0.12,
+            scale:       1,
+            rotation:    0,
+            type:        'badge',
         }
         onChange({ stickers: [...stickers, item] })
     }
@@ -307,17 +307,17 @@ export default function StickerTool({ state, onChange }: ToolPanelProps) {
     // Add an emoji sticker
     const addEmojiSticker = useCallback((emoji: string) => {
         const item: StickerItem = {
-            id: `sticker-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-            key: `emoji-${emoji}`,
-            label: emoji,
-            subLabel: '',
-            shape: 'circle',    // placeholder — not used for emoji
+            id:          `sticker-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            key:         `emoji-${emoji}`,
+            label:       emoji,
+            subLabel:    '',
+            shape:       'circle',    // placeholder — not used for emoji
             colorScheme: 'red',       // placeholder
-            x: 0.12,
-            y: 0.12,
-            scale: 1,
-            rotation: 0,
-            type: 'emoji',
+            x:           0.12,
+            y:           0.12,
+            scale:       1,
+            rotation:    0,
+            type:        'emoji',
             emoji,
         }
         onChange({ stickers: [...stickers, item] })
@@ -349,25 +349,25 @@ export default function StickerTool({ state, onChange }: ToolPanelProps) {
             {/* Main tabs */}
             <div style={{ display: 'flex', background: '#ede9fe', borderRadius: 8, padding: 3, gap: 3 }}>
                 {([
-                    { id: 'badge', label: '🏷 Badges' },
+                    { id: 'badge',    label: '🏷 Badges'   },
                     { id: 'discount', label: '% Discounts' },
-                    { id: 'emoji', label: '😊 Stickers' },
+                    { id: 'emoji',    label: '😊 Stickers' },
                 ] as const).map(tab => (
                     <button
                         key={tab.id}
                         onClick={() => setMainTab(tab.id)}
                         style={{
-                            flex: 1,
-                            padding: '6px 0',
+                            flex:         1,
+                            padding:      '6px 0',
                             borderRadius: 6,
-                            border: 'none',
-                            background: mainTab === tab.id ? '#7530fb' : 'transparent',
-                            color: mainTab === tab.id ? '#ffffff' : '#7530fb',
-                            fontWeight: 700,
-                            fontSize: 11,
-                            cursor: 'pointer',
-                            transition: 'all 0.15s',
-                            whiteSpace: 'nowrap',
+                            border:       'none',
+                            background:   mainTab === tab.id ? '#7530fb' : 'transparent',
+                            color:        mainTab === tab.id ? '#ffffff' : '#7530fb',
+                            fontWeight:   700,
+                            fontSize:     11,
+                            cursor:       'pointer',
+                            transition:   'all 0.15s',
+                            whiteSpace:   'nowrap',
                         }}
                     >
                         {tab.label}
@@ -407,17 +407,17 @@ export default function StickerTool({ state, onChange }: ToolPanelProps) {
                                 key={cat.id}
                                 onClick={() => setEmojiCatIdx(idx)}
                                 style={{
-                                    flexShrink: 0,
-                                    padding: '5px 10px',
+                                    flexShrink:   0,
+                                    padding:      '5px 10px',
                                     borderRadius: 20,
-                                    border: emojiCatIdx === idx ? '2px solid #7530fb' : '2px solid #ede9fe',
-                                    background: emojiCatIdx === idx ? '#7530fb' : '#f8f7ff',
-                                    color: emojiCatIdx === idx ? '#ffffff' : '#374151',
-                                    fontWeight: 600,
-                                    fontSize: 11,
-                                    cursor: 'pointer',
-                                    whiteSpace: 'nowrap',
-                                    transition: 'all 0.12s',
+                                    border:       emojiCatIdx === idx ? '2px solid #7530fb' : '2px solid #ede9fe',
+                                    background:   emojiCatIdx === idx ? '#7530fb' : '#f8f7ff',
+                                    color:        emojiCatIdx === idx ? '#ffffff' : '#374151',
+                                    fontWeight:   600,
+                                    fontSize:     11,
+                                    cursor:       'pointer',
+                                    whiteSpace:   'nowrap',
+                                    transition:   'all 0.12s',
                                 }}
                             >
                                 {cat.label}
@@ -427,10 +427,10 @@ export default function StickerTool({ state, onChange }: ToolPanelProps) {
 
                     {/* Emoji grid */}
                     <div style={{
-                        display: 'grid',
+                        display:             'grid',
                         gridTemplateColumns: 'repeat(6, 1fr)',
-                        gap: 6,
-                        marginTop: 10,
+                        gap:                 6,
+                        marginTop:           10,
                     }}>
                         {currentEmojiCat.emojis.map(emoji => (
                             <EmojiThumb key={emoji} emoji={emoji} onAdd={addEmojiSticker} />
@@ -449,10 +449,10 @@ export default function StickerTool({ state, onChange }: ToolPanelProps) {
             {stickers.length > 0 && (
                 <div>
                     <div style={{
-                        display: 'flex',
+                        display:        'flex',
                         justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: 8,
+                        alignItems:     'center',
+                        marginBottom:   8,
                     }}>
                         <div style={{ fontSize: 12, fontWeight: 700, color: '#1e1535' }}>
                             Active ({stickers.length})
@@ -480,13 +480,13 @@ export default function StickerTool({ state, onChange }: ToolPanelProps) {
             {/* Empty state */}
             {stickers.length === 0 && (
                 <div style={{
-                    textAlign: 'center',
-                    padding: '14px 8px',
-                    color: '#9ca3af',
-                    fontSize: 12,
-                    background: '#f8f7ff',
+                    textAlign:    'center',
+                    padding:      '14px 8px',
+                    color:        '#9ca3af',
+                    fontSize:     12,
+                    background:   '#f8f7ff',
                     borderRadius: 10,
-                    border: '1.5px dashed #ede9fe',
+                    border:       '1.5px dashed #ede9fe',
                 }}>
                     No stickers added yet.<br />
                     <span style={{ color: '#7530fb', fontWeight: 600 }}>Click any sticker above</span> to place it.
@@ -495,12 +495,12 @@ export default function StickerTool({ state, onChange }: ToolPanelProps) {
 
             {/* Tip */}
             <div style={{
-                fontSize: 11,
-                color: '#6b7280',
-                background: '#f3eeff',
+                fontSize:     11,
+                color:        '#6b7280',
+                background:   '#f3eeff',
                 borderRadius: 8,
-                padding: '8px 10px',
-                lineHeight: 1.5,
+                padding:      '8px 10px',
+                lineHeight:   1.5,
             }}>
                 💡 <strong>Tip:</strong> Drag stickers on the image to reposition. Best used on secondary product images, not the main hero shot.
             </div>

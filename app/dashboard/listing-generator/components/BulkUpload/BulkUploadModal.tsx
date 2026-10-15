@@ -27,65 +27,65 @@ import { createClient } from '@/lib/supabase'
 
 // ── Design tokens ─────────────────────────────────────────────
 const C = {
-    bg: '#f8f7ff',
-    surface: '#ffffff',
-    border: '#ede9fe',
-    borderInput: '#e5e0f5',
-    primary: '#7530fb',
+    bg:           '#f8f7ff',
+    surface:      '#ffffff',
+    border:       '#ede9fe',
+    borderInput:  '#e5e0f5',
+    primary:      '#7530fb',
     primaryLight: '#f3eeff',
-    accent: '#b8fa33',
-    accentText: '#1e1535',
-    dark: '#1e1535',
-    secondary: '#6b7280',
-    muted: '#9ca3af',
-    success: '#16a34a',
-    successBg: '#dcfce7',
-    warning: '#d97706',
-    warningBg: '#fef3c7',
-    danger: '#ef4444',
-    dangerBg: '#fee2e2',
-    info: '#0ea5e9',
-    infoBg: '#e0f2fe',
+    accent:       '#b8fa33',
+    accentText:   '#1e1535',
+    dark:         '#1e1535',
+    secondary:    '#6b7280',
+    muted:        '#9ca3af',
+    success:      '#16a34a',
+    successBg:    '#dcfce7',
+    warning:      '#d97706',
+    warningBg:    '#fef3c7',
+    danger:       '#ef4444',
+    dangerBg:     '#fee2e2',
+    info:         '#0ea5e9',
+    infoBg:       '#e0f2fe',
 }
 
 // ── Types ─────────────────────────────────────────────────────
 export interface BulkRow {
-    _rowIndex: number
-    title?: string
-    barcode?: string
-    buy_price?: string
+    _rowIndex:   number
+    title?:      string
+    barcode?:    string
+    buy_price?:  string
     sell_price?: string
-    sku?: string
-    condition?: string
-    quantity?: string
-    category_id?: string
-    images?: string
+    sku?:        string
+    condition?:  string
+    quantity?:   string
+    category_id?:string
+    images?:     string
 }
 
 export interface ParsedRow extends BulkRow {
     _errors: string[]
-    _valid: boolean
+    _valid:  boolean
 }
 
 export type RowStatus = 'pending' | 'generating' | 'done' | 'error'
 
 export interface QueueRow extends ParsedRow {
-    _status: RowStatus
-    _message: string
-    _draftId?: string          // filled on success
-    _veroStatus?: string          // 'ok' | 'warning' | 'blocked' — filled on success
+    _status:     RowStatus
+    _message:    string
+    _draftId?:   string          // filled on success
+    _veroStatus?:string          // 'ok' | 'warning' | 'blocked' — filled on success
 }
 
 // Minimal template shape for the picker
 interface TemplateSummary {
-    id: string
+    id:   string
     name: string
     category: string | null
     is_ebay_compliant: boolean
 }
 
 interface BulkUploadModalProps {
-    onClose: () => void
+    onClose:   () => void
     onConfirm: (rows: ParsedRow[], templateId: string | null) => void
     planLimit: number   // max rows allowed by plan (0 = unlimited)
 }
@@ -107,9 +107,9 @@ async function downloadTemplate() {
         const res = await fetch('/templates/bulk-upload-template.csv')
         if (res.ok) {
             const blob = await res.blob()
-            const url = URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url
+            const url  = URL.createObjectURL(blob)
+            const a    = document.createElement('a')
+            a.href     = url
             a.download = 'riazify-bulk-upload-template.csv'
             a.click()
             URL.revokeObjectURL(url)
@@ -118,11 +118,11 @@ async function downloadTemplate() {
     } catch { /* fall through to generated version */ }
 
     // Fallback: generate client-side from COLUMN_META
-    const csv = generateCSVTemplate()
+    const csv  = generateCSVTemplate()
     const blob = new Blob([csv], { type: 'text/csv' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href     = url
     a.download = 'riazify-bulk-upload-template.csv'
     a.click()
     URL.revokeObjectURL(url)
@@ -130,14 +130,14 @@ async function downloadTemplate() {
 
 // ─────────────────────────────────────────────────────────────
 export function BulkUploadModal({ onClose, onConfirm, planLimit }: BulkUploadModalProps) {
-    const [step, setStep] = useState<Step>('drop')
-    const [dragging, setDragging] = useState(false)
-    const [fileName, setFileName] = useState('')
-    const [rows, setRows] = useState<ParsedRow[]>([])
-    const [parseError, setParseError] = useState('')
-    const [templates, setTemplates] = useState<TemplateSummary[]>([])
+    const [step,               setStep]               = useState<Step>('drop')
+    const [dragging,           setDragging]           = useState(false)
+    const [fileName,           setFileName]           = useState('')
+    const [rows,               setRows]               = useState<ParsedRow[]>([])
+    const [parseError,         setParseError]         = useState('')
+    const [templates,          setTemplates]          = useState<TemplateSummary[]>([])
     const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null)
-    const [templateOpen, setTemplateOpen] = useState(false)
+    const [templateOpen,       setTemplateOpen]       = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const supabase = createClient()
 
@@ -158,10 +158,10 @@ export function BulkUploadModal({ onClose, onConfirm, planLimit }: BulkUploadMod
         fetchTemplates()
     }, [])
 
-    const invalidRows = rows.filter(r => !r._valid)
+    const invalidRows             = rows.filter(r => !r._valid)
     const { allowed: limitedRows, blocked } = applyPlanLimit(rows, planLimit)
-    const validRows = [...limitedRows, ...blocked]
-    const overLimit = blocked.length > 0
+    const validRows               = [...limitedRows, ...blocked]
+    const overLimit               = blocked.length > 0
 
     // ── File processing ───────────────────────────────────────
     async function processFile(file: File) {
@@ -181,9 +181,9 @@ export function BulkUploadModal({ onClose, onConfirm, planLimit }: BulkUploadMod
     }
 
     // ── Drag events ───────────────────────────────────────────
-    const onDragOver = useCallback((e: DragEvent) => { e.preventDefault(); setDragging(true) }, [])
+    const onDragOver  = useCallback((e: DragEvent) => { e.preventDefault(); setDragging(true)  }, [])
     const onDragLeave = useCallback((e: DragEvent) => { e.preventDefault(); setDragging(false) }, [])
-    const onDrop = useCallback((e: DragEvent) => {
+    const onDrop      = useCallback((e: DragEvent) => {
         e.preventDefault(); setDragging(false)
         const file = e.dataTransfer.files[0]
         if (file) processFile(file)
@@ -211,11 +211,11 @@ export function BulkUploadModal({ onClose, onConfirm, planLimit }: BulkUploadMod
             <div
                 onClick={onClose}
                 style={{
-                    position: 'fixed', inset: 0,
+                    position:   'fixed', inset: 0,
                     background: 'rgba(30,21,53,0.45)',
                     backdropFilter: 'blur(4px)',
-                    zIndex: 1000,
-                    display: 'flex',
+                    zIndex:     1000,
+                    display:    'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                 }}
@@ -224,27 +224,27 @@ export function BulkUploadModal({ onClose, onConfirm, planLimit }: BulkUploadMod
                 <div
                     onClick={e => e.stopPropagation()}
                     style={{
-                        width: '100%',
-                        maxWidth: step === 'preview' ? 780 : 560,
-                        maxHeight: '90vh',
-                        background: C.surface,
+                        width:        '100%',
+                        maxWidth:     step === 'preview' ? 780 : 560,
+                        maxHeight:    '90vh',
+                        background:   C.surface,
                         borderRadius: 20,
-                        boxShadow: '0 24px 64px rgba(117,48,251,0.18)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        overflow: 'hidden',
-                        margin: '0 16px',
-                        transition: 'max-width 0.25s ease',
+                        boxShadow:    '0 24px 64px rgba(117,48,251,0.18)',
+                        display:      'flex',
+                        flexDirection:'column',
+                        overflow:     'hidden',
+                        margin:       '0 16px',
+                        transition:   'max-width 0.25s ease',
                     }}
                 >
                     {/* ── Modal header ──────────────────────── */}
                     <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
+                        display:        'flex',
+                        alignItems:     'center',
                         justifyContent: 'space-between',
-                        padding: '18px 24px',
-                        borderBottom: `1px solid ${C.border}`,
-                        flexShrink: 0,
+                        padding:        '18px 24px',
+                        borderBottom:   `1px solid ${C.border}`,
+                        flexShrink:     0,
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                             {step === 'preview' && (
@@ -275,7 +275,7 @@ export function BulkUploadModal({ onClose, onConfirm, planLimit }: BulkUploadMod
                                     Bulk Upload
                                 </div>
                                 <div style={{ fontSize: 12, color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                                    {step === 'drop' && 'Upload a CSV file to generate multiple listings at once'}
+                                    {step === 'drop'    && 'Upload a CSV file to generate multiple listings at once'}
                                     {step === 'preview' && `${fileName} — ${rows.length} row${rows.length !== 1 ? 's' : ''} found`}
                                 </div>
                             </div>
@@ -305,13 +305,13 @@ export function BulkUploadModal({ onClose, onConfirm, planLimit }: BulkUploadMod
                                 onDrop={onDrop}
                                 onClick={() => fileInputRef.current?.click()}
                                 style={{
-                                    border: `2px dashed ${dragging ? C.primary : C.border}`,
+                                    border:       `2px dashed ${dragging ? C.primary : C.border}`,
                                     borderRadius: 16,
-                                    padding: '40px 24px',
-                                    textAlign: 'center',
-                                    cursor: 'pointer',
-                                    background: dragging ? C.primaryLight : C.bg,
-                                    transition: 'all 0.15s ease',
+                                    padding:      '40px 24px',
+                                    textAlign:    'center',
+                                    cursor:       'pointer',
+                                    background:   dragging ? C.primaryLight : C.bg,
+                                    transition:   'all 0.15s ease',
                                 }}
                             >
                                 <div style={{
@@ -465,9 +465,9 @@ export function BulkUploadModal({ onClose, onConfirm, planLimit }: BulkUploadMod
                                     display: 'flex', gap: 10, marginBottom: 18, flexWrap: 'wrap',
                                 }}>
                                     {[
-                                        { label: 'Total rows', value: rows.length, color: C.primary, bg: C.primaryLight },
-                                        { label: 'Valid', value: validRows.length, color: C.success, bg: C.successBg },
-                                        { label: 'Errors', value: invalidRows.length, color: C.danger, bg: C.dangerBg },
+                                        { label: 'Total rows',  value: rows.length,        color: C.primary,  bg: C.primaryLight },
+                                        { label: 'Valid',       value: validRows.length,    color: C.success,  bg: C.successBg   },
+                                        { label: 'Errors',      value: invalidRows.length,  color: C.danger,   bg: C.dangerBg    },
                                         ...(overLimit ? [{ label: `Over limit (${planLimit})`, value: blocked.length, color: C.warning, bg: C.warningBg }] : []),
                                     ].map(stat => (
                                         <div key={stat.label} style={{
@@ -527,9 +527,9 @@ export function BulkUploadModal({ onClose, onConfirm, planLimit }: BulkUploadMod
                                                         <tr
                                                             key={row._rowIndex}
                                                             style={{
-                                                                borderTop: `1px solid ${C.border}`,
+                                                                borderTop:  `1px solid ${C.border}`,
                                                                 background: overPlan ? '#fffbeb' : !row._valid ? '#fff5f5' : i % 2 === 0 ? '#fff' : C.bg + '66',
-                                                                opacity: overPlan ? 0.6 : 1,
+                                                                opacity:    overPlan ? 0.6 : 1,
                                                             }}
                                                         >
                                                             <td style={tdStyle}><span style={{ color: C.muted, fontSize: 11 }}>{row._rowIndex}</span></td>
@@ -546,7 +546,7 @@ export function BulkUploadModal({ onClose, onConfirm, planLimit }: BulkUploadMod
                                                                     <span style={{ fontSize: 11, color: C.danger, fontStyle: 'italic' }}>—</span>
                                                                 )}
                                                             </td>
-                                                            <td style={tdStyle}><span style={{ fontSize: 12, color: C.secondary }}>{row.buy_price || '—'}</span></td>
+                                                            <td style={tdStyle}><span style={{ fontSize: 12, color: C.secondary }}>{row.buy_price  || '—'}</span></td>
                                                             <td style={tdStyle}><span style={{ fontSize: 12, color: C.secondary }}>{row.sell_price || '—'}</span></td>
                                                             <td style={tdStyle}><span style={{ fontSize: 12, color: C.secondary, fontFamily: 'monospace' }}>{row.sku || '—'}</span></td>
                                                             <td style={tdStyle}><ConditionBadge value={row.condition as string | undefined} /></td>
@@ -766,14 +766,14 @@ export function BulkUploadModal({ onClose, onConfirm, planLimit }: BulkUploadMod
 
                             {/* Footer CTA */}
                             <div style={{
-                                padding: '14px 24px',
-                                borderTop: `1px solid ${C.border}`,
-                                display: 'flex',
-                                alignItems: 'center',
+                                padding:      '14px 24px',
+                                borderTop:    `1px solid ${C.border}`,
+                                display:      'flex',
+                                alignItems:   'center',
                                 justifyContent: 'space-between',
-                                gap: 12,
-                                flexShrink: 0,
-                                background: C.surface,
+                                gap:          12,
+                                flexShrink:   0,
+                                background:   C.surface,
                             }}>
                                 <div style={{ fontSize: 13, color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
                                     {limitedRows.length} listing{limitedRows.length !== 1 ? 's' : ''} will be generated
@@ -796,8 +796,8 @@ export function BulkUploadModal({ onClose, onConfirm, planLimit }: BulkUploadMod
                                             padding: '8px 20px', borderRadius: 10, fontSize: 13, fontWeight: 700,
                                             border: 'none',
                                             background: limitedRows.length > 0 ? C.accent : C.border,
-                                            color: limitedRows.length > 0 ? C.accentText : C.muted,
-                                            cursor: limitedRows.length > 0 ? 'pointer' : 'not-allowed',
+                                            color:      limitedRows.length > 0 ? C.accentText : C.muted,
+                                            cursor:     limitedRows.length > 0 ? 'pointer' : 'not-allowed',
                                             fontFamily: 'Syne, sans-serif',
                                             display: 'flex', alignItems: 'center', gap: 6,
                                             boxShadow: limitedRows.length > 0 ? '0 4px 12px rgba(184,250,51,0.35)' : 'none',
@@ -818,29 +818,29 @@ export function BulkUploadModal({ onClose, onConfirm, planLimit }: BulkUploadMod
 
 // ── Small helpers ─────────────────────────────────────────────
 const thStyle: React.CSSProperties = {
-    padding: '9px 12px',
-    textAlign: 'left',
-    fontSize: 11,
-    fontWeight: 700,
-    color: '#9ca3af',
+    padding:     '9px 12px',
+    textAlign:   'left',
+    fontSize:    11,
+    fontWeight:  700,
+    color:       '#9ca3af',
     letterSpacing: '0.05em',
-    whiteSpace: 'nowrap',
-    fontFamily: 'DM Sans, sans-serif',
+    whiteSpace:  'nowrap',
+    fontFamily:  'DM Sans, sans-serif',
 }
 
 const tdStyle: React.CSSProperties = {
-    padding: '8px 12px',
+    padding:   '8px 12px',
     verticalAlign: 'top',
-    fontFamily: 'DM Sans, sans-serif',
+    fontFamily:'DM Sans, sans-serif',
 }
 
 function ConditionBadge({ value }: { value?: string }) {
     if (!value) return <span style={{ fontSize: 12, color: '#9ca3af' }}>—</span>
     const v = value.toLowerCase()
     const map: Record<string, { label: string; color: string; bg: string }> = {
-        new: { label: 'New', color: '#16a34a', bg: '#dcfce7' },
-        used: { label: 'Used', color: '#d97706', bg: '#fef3c7' },
-        refurbished: { label: 'Refurbished', color: '#0ea5e9', bg: '#e0f2fe' },
+        new:         { label: 'New',         color: '#16a34a', bg: '#dcfce7' },
+        used:        { label: 'Used',         color: '#d97706', bg: '#fef3c7' },
+        refurbished: { label: 'Refurbished',  color: '#0ea5e9', bg: '#e0f2fe' },
     }
     const cfg = map[v]
     if (!cfg) return <span style={{ fontSize: 12, color: '#9ca3af' }}>{value}</span>

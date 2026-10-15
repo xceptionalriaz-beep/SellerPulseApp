@@ -7,18 +7,18 @@ import type { ToolPanelProps, WatermarkPosition } from '../types'
 
 // ── Tokens ─────────────────────────────────────────────────────
 const C = {
-    primary: '#7530fb',
+    primary:      '#7530fb',
     primaryLight: '#f3eeff',
-    primaryBorder: '#c4a8fd',
-    primaryHov: '#6020e0',
-    border: '#ede9fe',
-    borderMid: '#e5e7eb',
-    label: '#111827',
-    sub: '#6b7280',
-    muted: '#9ca3af',
-    surface: '#ffffff',
-    sectionBg: '#fafafa',
-    hover: '#f3f4f6',
+    primaryBorder:'#c4a8fd',
+    primaryHov:   '#6020e0',
+    border:       '#ede9fe',
+    borderMid:    '#e5e7eb',
+    label:        '#111827',
+    sub:          '#6b7280',
+    muted:        '#9ca3af',
+    surface:      '#ffffff',
+    sectionBg:    '#fafafa',
+    hover:        '#f3f4f6',
 }
 
 // 9-position grid order

@@ -6,120 +6,120 @@ import type { ToolPanelProps, FrameStyle } from '../types'
 
 // ── Tokens ─────────────────────────────────────────────────────
 const C = {
-    primary: '#7530fb',
+    primary:      '#7530fb',
     primaryLight: '#f3eeff',
-    primaryBorder: '#c4a8fd',
-    border: '#ede9fe',
-    borderMid: '#e5e7eb',
-    label: '#111827',
-    sub: '#6b7280',
-    muted: '#9ca3af',
-    surface: '#ffffff',
-    sectionBg: '#fafafa',
-    hover: '#f3f4f6',
-    danger: '#ef4444',
-    dangerLight: '#fef2f2',
+    primaryBorder:'#c4a8fd',
+    border:       '#ede9fe',
+    borderMid:    '#e5e7eb',
+    label:        '#111827',
+    sub:          '#6b7280',
+    muted:        '#9ca3af',
+    surface:      '#ffffff',
+    sectionBg:    '#fafafa',
+    hover:        '#f3f4f6',
+    danger:       '#ef4444',
+    dangerLight:  '#fef2f2',
     dangerBorder: '#fca5a5',
 }
 
 // ── Frame style definitions ─────────────────────────────────────
 const FRAME_STYLES: {
-    id: FrameStyle
-    label: string
+    id:      FrameStyle
+    label:   string
     preview: React.ReactNode
 }[] = [
-        {
-            id: 'none',
-            label: 'None',
-            preview: (
-                <div style={{
-                    width: 40, height: 30,
-                    background: 'linear-gradient(135deg, #e5e7eb 25%, #f3f4f6 25%, #f3f4f6 50%, #e5e7eb 50%, #e5e7eb 75%, #f3f4f6 75%)',
-                    backgroundSize: '8px 8px',
-                    borderRadius: 3,
-                }} />
-            ),
-        },
-        {
-            id: 'solid',
-            label: 'Solid',
-            preview: (
-                <div style={{
-                    width: 40, height: 30,
-                    border: '4px solid #374151',
-                    background: '#d1d5db',
-                    borderRadius: 0,
-                    boxSizing: 'border-box',
-                }} />
-            ),
-        },
-        {
-            id: 'rounded',
-            label: 'Rounded',
-            preview: (
-                <div style={{
-                    width: 40, height: 30,
-                    border: '4px solid #374151',
-                    background: '#d1d5db',
-                    borderRadius: 8,
-                    boxSizing: 'border-box',
-                }} />
-            ),
-        },
-        {
-            id: 'shadow',
-            label: 'Shadow',
-            preview: (
-                <div style={{
-                    width: 34, height: 26,
-                    background: '#d1d5db',
-                    borderRadius: 3,
-                    boxShadow: '3px 3px 0 #374151, 5px 5px 8px rgba(0,0,0,0.35)',
-                    margin: '2px 0 0 2px',
-                }} />
-            ),
-        },
-        {
-            id: 'polaroid',
-            label: 'Polaroid',
-            preview: (
-                <div style={{
-                    width: 34, height: 38, background: '#fff',
-                    padding: '3px 3px 9px 3px', boxSizing: 'border-box',
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.18)',
-                    borderRadius: 1,
-                }}>
-                    <div style={{ width: '100%', height: '100%', background: '#d1d5db' }} />
-                </div>
-            ),
-        },
-        {
-            id: 'film',
-            label: 'Film Strip',
-            preview: (
-                <div style={{
-                    width: 40, height: 30, background: '#111',
-                    display: 'flex', flexDirection: 'column',
-                    justifyContent: 'space-between', padding: '2px 0',
-                    overflow: 'hidden', borderRadius: 2,
-                }}>
-                    {/* sprocket row */}
-                    {[0, 1].map(row => (
-                        <div key={row} style={{
-                            display: 'flex', gap: 3, paddingLeft: 2,
-                            height: 4, alignItems: 'center',
-                        }}>
-                            {[0, 1, 2, 3, 4, 5].map(i => (
-                                <div key={i} style={{ width: 4, height: 3, background: '#444', borderRadius: 1 }} />
-                            ))}
-                        </div>
-                    ))}
-                    {/* centre image area */}
-                    <div style={{ flex: 1, background: '#d1d5db', margin: '0 1px' }} />
-                </div>
-            ),
-        },
-    ]
+    {
+        id: 'none',
+        label: 'None',
+        preview: (
+            <div style={{
+                width: 40, height: 30,
+                background: 'linear-gradient(135deg, #e5e7eb 25%, #f3f4f6 25%, #f3f4f6 50%, #e5e7eb 50%, #e5e7eb 75%, #f3f4f6 75%)',
+                backgroundSize: '8px 8px',
+                borderRadius: 3,
+            }} />
+        ),
+    },
+    {
+        id: 'solid',
+        label: 'Solid',
+        preview: (
+            <div style={{
+                width: 40, height: 30,
+                border: '4px solid #374151',
+                background: '#d1d5db',
+                borderRadius: 0,
+                boxSizing: 'border-box',
+            }} />
+        ),
+    },
+    {
+        id: 'rounded',
+        label: 'Rounded',
+        preview: (
+            <div style={{
+                width: 40, height: 30,
+                border: '4px solid #374151',
+                background: '#d1d5db',
+                borderRadius: 8,
+                boxSizing: 'border-box',
+            }} />
+        ),
+    },
+    {
+        id: 'shadow',
+        label: 'Shadow',
+        preview: (
+            <div style={{
+                width: 34, height: 26,
+                background: '#d1d5db',
+                borderRadius: 3,
+                boxShadow: '3px 3px 0 #374151, 5px 5px 8px rgba(0,0,0,0.35)',
+                margin: '2px 0 0 2px',
+            }} />
+        ),
+    },
+    {
+        id: 'polaroid',
+        label: 'Polaroid',
+        preview: (
+            <div style={{
+                width: 34, height: 38, background: '#fff',
+                padding: '3px 3px 9px 3px', boxSizing: 'border-box',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.18)',
+                borderRadius: 1,
+            }}>
+                <div style={{ width: '100%', height: '100%', background: '#d1d5db' }} />
+            </div>
+        ),
+    },
+    {
+        id: 'film',
+        label: 'Film Strip',
+        preview: (
+            <div style={{
+                width: 40, height: 30, background: '#111',
+                display: 'flex', flexDirection: 'column',
+                justifyContent: 'space-between', padding: '2px 0',
+                overflow: 'hidden', borderRadius: 2,
+            }}>
+                {/* sprocket row */}
+                {[0, 1].map(row => (
+                    <div key={row} style={{
+                        display: 'flex', gap: 3, paddingLeft: 2,
+                        height: 4, alignItems: 'center',
+                    }}>
+                        {[0,1,2,3,4,5].map(i => (
+                            <div key={i} style={{ width: 4, height: 3, background: '#444', borderRadius: 1 }} />
+                        ))}
+                    </div>
+                ))}
+                {/* centre image area */}
+                <div style={{ flex: 1, background: '#d1d5db', margin: '0 1px' }} />
+            </div>
+        ),
+    },
+]
 
 // ── Colour palette ──────────────────────────────────────────────
 const PALETTE = [
@@ -155,8 +155,8 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 // ── StyleCard ───────────────────────────────────────────────────
 function StyleCard({ def, active, onClick }: {
-    def: typeof FRAME_STYLES[0]
-    active: boolean
+    def:     typeof FRAME_STYLES[0]
+    active:  boolean
     onClick: () => void
 }) {
     const [hov, setHov] = useState(false)
@@ -230,10 +230,10 @@ export default function FrameTool({ state, onChange }: ToolPanelProps) {
         onChange({ frame: { ...frame, ...partial } })
     }
 
-    const widthPct = (width / 60) * 100
+    const widthPct  = (width / 60)  * 100
     const radiusPct = (borderRadius / 40) * 100
 
-    const showColor = style !== 'none' && style !== 'film'
+    const showColor  = style !== 'none' && style !== 'film'
     const showRadius = style === 'rounded'
 
     return (
@@ -422,10 +422,10 @@ export default function FrameTool({ state, onChange }: ToolPanelProps) {
                 }}>
                     <strong style={{ color: C.primary }}>
                         {style === 'polaroid' && '📷 Polaroid'}
-                        {style === 'film' && '🎞️ Film Strip'}
-                        {style === 'solid' && '▪ Solid Border'}
-                        {style === 'rounded' && '▢ Rounded Border'}
-                        {style === 'shadow' && '◻ Drop Shadow'}
+                        {style === 'film'     && '🎞️ Film Strip'}
+                        {style === 'solid'    && '▪ Solid Border'}
+                        {style === 'rounded'  && '▢ Rounded Border'}
+                        {style === 'shadow'   && '◻ Drop Shadow'}
                     </strong>
                     {' '}frame applied — adjust thickness
                     {showColor ? ' and colour' : ''} above.

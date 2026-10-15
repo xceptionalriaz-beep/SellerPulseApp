@@ -13,39 +13,39 @@
 import { useState } from 'react'
 import { Plus, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 
-import { SegmentItem } from './SegmentItem'
+import { SegmentItem }    from './SegmentItem'
 import { SegmentBuilder } from './SegmentBuilder'
-import { countMatches } from '../../lib/segment-filter'
+import { countMatches }   from '../../lib/segment-filter'
 import type { FilterableListing } from '../../lib/segment-filter'
 
-import { SEGMENT_GROUPS } from '../../data/built-in-segments'
+import { SEGMENT_GROUPS }    from '../../data/built-in-segments'
 import { BUILT_IN_SEGMENT_MAP } from '../../data/built-in-segments'
 import type { Segment, CustomSegment, SegmentUpsert } from '../../types/segments.types'
 
 // ── Design tokens ─────────────────────────────────────────────
 const C = {
-    bg: '#f8f7ff',
-    surface: '#ffffff',
-    border: '#ede9fe',
-    primary: '#7530fb',
-    primaryLight: '#f3eeff',
-    dark: '#1e1535',
-    muted: '#9ca3af',
+    bg:          '#f8f7ff',
+    surface:     '#ffffff',
+    border:      '#ede9fe',
+    primary:     '#7530fb',
+    primaryLight:'#f3eeff',
+    dark:        '#1e1535',
+    muted:       '#9ca3af',
 }
 
 const SIDEBAR_W = 220   // px when expanded
 
 // ── Props ─────────────────────────────────────────────────────
 interface SegmentSidebarProps {
-    segments: Segment[]
-    customSegments: CustomSegment[]
-    activeSegmentId: string
-    listings: FilterableListing[]
-    loading: boolean
-    onSelect: (id: string) => void
-    onCreateSegment: (payload: SegmentUpsert) => Promise<void>
-    onUpdateSegment: (id: string, payload: Partial<SegmentUpsert>) => Promise<void>
-    onDeleteSegment: (id: string) => Promise<void>
+    segments:          Segment[]
+    customSegments:    CustomSegment[]
+    activeSegmentId:   string
+    listings:          FilterableListing[]
+    loading:           boolean
+    onSelect:          (id: string) => void
+    onCreateSegment:   (payload: SegmentUpsert) => Promise<void>
+    onUpdateSegment:   (id: string, payload: Partial<SegmentUpsert>) => Promise<void>
+    onDeleteSegment:   (id: string) => Promise<void>
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -61,8 +61,8 @@ export function SegmentSidebar({
     onDeleteSegment,
 }: SegmentSidebarProps) {
 
-    const [collapsed, setCollapsed] = useState(false)
-    const [builderOpen, setBuilderOpen] = useState(false)
+    const [collapsed,     setCollapsed]     = useState(false)
+    const [builderOpen,   setBuilderOpen]   = useState(false)
     const [editingSegment, setEditingSegment] = useState<CustomSegment | null>(null)
 
     // ── Count for each segment ────────────────────────────────
@@ -105,16 +105,16 @@ export function SegmentSidebar({
                 {/* ── Sidebar panel ───────────────────────── */}
                 <div
                     style={{
-                        width: collapsed ? 0 : SIDEBAR_W,
-                        minWidth: collapsed ? 0 : SIDEBAR_W,
-                        overflowX: 'hidden',
-                        overflowY: collapsed ? 'hidden' : 'auto',
-                        transition: 'width 0.22s ease, min-width 0.22s ease',
-                        background: C.surface,
-                        borderRight: collapsed ? 'none' : `1px solid ${C.border}`,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        height: '100%',
+                        width:        collapsed ? 0 : SIDEBAR_W,
+                        minWidth:     collapsed ? 0 : SIDEBAR_W,
+                        overflowX:    'hidden',
+                        overflowY:    collapsed ? 'hidden' : 'auto',
+                        transition:   'width 0.22s ease, min-width 0.22s ease',
+                        background:   C.surface,
+                        borderRight:  collapsed ? 'none' : `1px solid ${C.border}`,
+                        display:      'flex',
+                        flexDirection:'column',
+                        height:       '100%',
                     }}
                 >
                     {/* Inner — only rendered when open to avoid layout bleed */}
@@ -122,11 +122,11 @@ export function SegmentSidebar({
 
                         {/* ── Sidebar header ───────────────── */}
                         <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
+                            display:        'flex',
+                            alignItems:     'center',
                             justifyContent: 'space-between',
-                            padding: '14px 12px 10px',
-                            flexShrink: 0,
+                            padding:        '14px 12px 10px',
+                            flexShrink:     0,
                         }}>
                             <span style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: '0.06em' }}>
                                 SEGMENTS
@@ -167,11 +167,11 @@ export function SegmentSidebar({
                                         return (
                                             <div key={group.label} style={{ marginBottom: 14 }}>
                                                 <div style={{
-                                                    fontSize: 10,
-                                                    fontWeight: 700,
-                                                    color: C.muted,
+                                                    fontSize:      10,
+                                                    fontWeight:    700,
+                                                    color:         C.muted,
                                                     letterSpacing: '0.07em',
-                                                    padding: '2px 2px 4px',
+                                                    padding:       '2px 2px 4px',
                                                 }}>
                                                     {group.label.toUpperCase()}
                                                 </div>
@@ -191,11 +191,11 @@ export function SegmentSidebar({
                                     {/* My Segments (custom) */}
                                     <div style={{ marginBottom: 14 }}>
                                         <div style={{
-                                            fontSize: 10,
-                                            fontWeight: 700,
-                                            color: C.muted,
+                                            fontSize:      10,
+                                            fontWeight:    700,
+                                            color:         C.muted,
                                             letterSpacing: '0.07em',
-                                            padding: '2px 2px 4px',
+                                            padding:       '2px 2px 4px',
                                         }}>
                                             MY SEGMENTS
                                         </div>
@@ -227,20 +227,20 @@ export function SegmentSidebar({
                                             type="button"
                                             onClick={openCreate}
                                             style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: 5,
-                                                width: '100%',
-                                                padding: '5px 8px',
-                                                marginTop: 4,
-                                                borderRadius: 7,
-                                                border: `1.5px dashed ${C.primary}55`,
-                                                background: 'transparent',
-                                                color: C.primary,
-                                                fontSize: 12,
-                                                fontWeight: 600,
-                                                cursor: 'pointer',
-                                                textAlign: 'left',
+                                                display:        'flex',
+                                                alignItems:     'center',
+                                                gap:            5,
+                                                width:          '100%',
+                                                padding:        '5px 8px',
+                                                marginTop:      4,
+                                                borderRadius:   7,
+                                                border:         `1.5px dashed ${C.primary}55`,
+                                                background:     'transparent',
+                                                color:          C.primary,
+                                                fontSize:       12,
+                                                fontWeight:     600,
+                                                cursor:         'pointer',
+                                                textAlign:      'left',
                                             }}
                                         >
                                             <Plus size={12} />
@@ -259,22 +259,22 @@ export function SegmentSidebar({
                         onClick={() => setCollapsed(false)}
                         title="Expand sidebar"
                         style={{
-                            position: 'absolute',
-                            top: 12,
-                            left: 0,
-                            width: 22,
-                            height: 48,
-                            borderRadius: '0 8px 8px 0',
-                            border: `1px solid ${C.border}`,
-                            borderLeft: 'none',
-                            background: C.surface,
-                            color: C.muted,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
+                            position:       'absolute',
+                            top:            12,
+                            left:           0,
+                            width:          22,
+                            height:         48,
+                            borderRadius:   '0 8px 8px 0',
+                            border:         `1px solid ${C.border}`,
+                            borderLeft:     'none',
+                            background:     C.surface,
+                            color:          C.muted,
+                            cursor:         'pointer',
+                            display:        'flex',
+                            alignItems:     'center',
                             justifyContent: 'center',
-                            boxShadow: '2px 0 8px rgba(117,48,251,0.08)',
-                            zIndex: 10,
+                            boxShadow:      '2px 0 8px rgba(117,48,251,0.08)',
+                            zIndex:         10,
                         }}
                     >
                         <ChevronRight size={13} />

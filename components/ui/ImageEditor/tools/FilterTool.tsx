@@ -7,61 +7,61 @@ import type { ToolPanelProps, FilterPreset } from '../types'
 
 // ── Tokens ────────────────────────────────────────────────────
 const C = {
-    primary: '#7530fb',
+    primary:      '#7530fb',
     primaryLight: '#f3eeff',
-    primaryDark: '#6020e0',
-    border: '#ede9fe',
-    borderMid: '#e5e7eb',
-    label: '#111827',
-    sub: '#6b7280',
-    muted: '#9ca3af',
-    surface: '#ffffff',
-    sectionBg: '#fafafa',
-    danger: '#ef4444',
-    dangerLight: '#fef2f2',
+    primaryDark:  '#6020e0',
+    border:       '#ede9fe',
+    borderMid:    '#e5e7eb',
+    label:        '#111827',
+    sub:          '#6b7280',
+    muted:        '#9ca3af',
+    surface:      '#ffffff',
+    sectionBg:    '#fafafa',
+    danger:       '#ef4444',
+    dangerLight:  '#fef2f2',
     dangerBorder: '#fca5a5',
 }
 
 // ── Filter preset definitions ─────────────────────────────────
 interface PresetDef {
-    id: FilterPreset
+    id:    FilterPreset
     label: string
-    css: string
+    css:   string
 }
 
 const PRESETS: PresetDef[] = [
-    { id: 'none', label: 'None', css: '' },
-    { id: 'grayscale', label: 'Grayscale', css: 'grayscale(100%)' },
-    { id: 'sepia', label: 'Sepia', css: 'sepia(90%)' },
-    { id: 'vintage', label: 'Vintage', css: 'sepia(50%) contrast(110%) brightness(88%) saturate(75%)' },
-    { id: 'polaroid', label: 'Polaroid', css: 'contrast(115%) brightness(108%) saturate(75%) sepia(15%)' },
-    { id: 'chrome', label: 'Chrome', css: 'contrast(125%) saturate(160%) brightness(95%)' },
-    { id: 'fade', label: 'Fade', css: 'contrast(88%) brightness(112%) saturate(70%)' },
-    { id: 'kodachrome', label: 'Kodachrome', css: 'contrast(120%) saturate(115%) hue-rotate(12deg) brightness(88%)' },
-    { id: 'technicolor', label: 'Technicolor', css: 'saturate(155%) hue-rotate(-28deg) contrast(118%)' },
-    { id: 'brownie', label: 'Brownie', css: 'sepia(55%) saturate(45%) contrast(108%) brightness(92%)' },
-    { id: 'noir', label: 'Noir', css: 'grayscale(100%) contrast(135%) brightness(75%)' },
-    { id: 'vivid', label: 'Vivid', css: 'saturate(185%) contrast(112%) brightness(102%)' },
-    { id: 'matte', label: 'Matte', css: 'contrast(82%) brightness(115%) saturate(65%)' },
-    { id: 'blueprint', label: 'Blueprint', css: 'sepia(100%) hue-rotate(185deg) saturate(210%)' },
-    { id: 'cool', label: 'Cool', css: 'hue-rotate(195deg) saturate(125%) brightness(106%)' },
-    { id: 'warm', label: 'Warm', css: 'hue-rotate(-22deg) saturate(135%) brightness(106%)' },
-    { id: 'emboss', label: 'Emboss', css: 'grayscale(100%) contrast(210%) brightness(108%)' },
-    { id: 'invert', label: 'Invert', css: 'invert(100%)' },
+    { id: 'none',        label: 'None',        css: '' },
+    { id: 'grayscale',   label: 'Grayscale',   css: 'grayscale(100%)' },
+    { id: 'sepia',       label: 'Sepia',        css: 'sepia(90%)' },
+    { id: 'vintage',     label: 'Vintage',      css: 'sepia(50%) contrast(110%) brightness(88%) saturate(75%)' },
+    { id: 'polaroid',    label: 'Polaroid',     css: 'contrast(115%) brightness(108%) saturate(75%) sepia(15%)' },
+    { id: 'chrome',      label: 'Chrome',       css: 'contrast(125%) saturate(160%) brightness(95%)' },
+    { id: 'fade',        label: 'Fade',         css: 'contrast(88%) brightness(112%) saturate(70%)' },
+    { id: 'kodachrome',  label: 'Kodachrome',   css: 'contrast(120%) saturate(115%) hue-rotate(12deg) brightness(88%)' },
+    { id: 'technicolor', label: 'Technicolor',  css: 'saturate(155%) hue-rotate(-28deg) contrast(118%)' },
+    { id: 'brownie',     label: 'Brownie',      css: 'sepia(55%) saturate(45%) contrast(108%) brightness(92%)' },
+    { id: 'noir',        label: 'Noir',         css: 'grayscale(100%) contrast(135%) brightness(75%)' },
+    { id: 'vivid',       label: 'Vivid',        css: 'saturate(185%) contrast(112%) brightness(102%)' },
+    { id: 'matte',       label: 'Matte',        css: 'contrast(82%) brightness(115%) saturate(65%)' },
+    { id: 'blueprint',   label: 'Blueprint',    css: 'sepia(100%) hue-rotate(185deg) saturate(210%)' },
+    { id: 'cool',        label: 'Cool',         css: 'hue-rotate(195deg) saturate(125%) brightness(106%)' },
+    { id: 'warm',        label: 'Warm',         css: 'hue-rotate(-22deg) saturate(135%) brightness(106%)' },
+    { id: 'emboss',      label: 'Emboss',       css: 'grayscale(100%) contrast(210%) brightness(108%)' },
+    { id: 'invert',      label: 'Invert',       css: 'invert(100%)' },
 ]
 
 // ── Shared slider row ─────────────────────────────────────────
 interface SliderRowProps {
-    label: string
-    hint?: string
-    value: number
-    min: number
-    max: number
-    step?: number
-    def?: number
+    label:    string
+    hint?:    string
+    value:    number
+    min:      number
+    max:      number
+    step?:    number
+    def?:     number
     onChange: (v: number) => void
-    onReset: () => void
-    format?: (v: number) => string
+    onReset:  () => void
+    format?:  (v: number) => string
 }
 
 function SliderRow({
@@ -70,7 +70,7 @@ function SliderRow({
 }: SliderRowProps) {
     const [hovReset, setHovReset] = React.useState(false)
     const isDirty = value !== def
-    const pct = ((value - min) / (max - min)) * 100
+    const pct     = ((value - min) / (max - min)) * 100
     const display = format ? format(value) : (value > 0 && min < 0 ? `+${value}` : String(value))
 
     return (
@@ -82,15 +82,15 @@ function SliderRow({
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{
-                        fontSize: 12,
-                        fontWeight: 700,
-                        color: isDirty ? C.primary : C.muted,
-                        background: isDirty ? C.primaryLight : 'transparent',
-                        padding: isDirty ? '1px 8px' : '1px 0',
-                        borderRadius: 5,
-                        minWidth: 36,
-                        textAlign: 'right',
-                        transition: 'all 0.15s',
+                        fontSize:           12,
+                        fontWeight:         700,
+                        color:              isDirty ? C.primary : C.muted,
+                        background:         isDirty ? C.primaryLight : 'transparent',
+                        padding:            isDirty ? '1px 8px' : '1px 0',
+                        borderRadius:       5,
+                        minWidth:           36,
+                        textAlign:          'right',
+                        transition:         'all 0.15s',
                         fontVariantNumeric: 'tabular-nums',
                     }}>
                         {display}
@@ -104,13 +104,13 @@ function SliderRow({
                             style={{
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 width: 20, height: 20,
-                                background: hovReset ? C.dangerLight : 'transparent',
-                                border: `1px solid ${hovReset ? C.dangerBorder : C.border}`,
+                                background:   hovReset ? C.dangerLight : 'transparent',
+                                border:       `1px solid ${hovReset ? C.dangerBorder : C.border}`,
                                 borderRadius: 4,
-                                cursor: 'pointer',
-                                color: hovReset ? C.danger : C.muted,
-                                fontSize: 13, lineHeight: 1,
-                                transition: 'all 0.12s', padding: 0,
+                                cursor:       'pointer',
+                                color:        hovReset ? C.danger : C.muted,
+                                fontSize:     13, lineHeight: 1,
+                                transition:   'all 0.12s', padding: 0,
                             }}
                         >×</button>
                     )}
@@ -167,22 +167,22 @@ export default function FilterTool({ state, onChange, imageUrl }: ToolPanelProps
     const [hovReset, setHovReset] = React.useState(false)
 
     // ── safe reads (new fields may be undefined on older saved states) ──
-    const gamma = state.gamma ?? 1
-    const vibrance = state.vibrance ?? 0
-    const hue = state.hue ?? 0
-    const blur = state.blur ?? 0
-    const pixelate = state.pixelate ?? 0
-    const noise = state.noise ?? 0
+    const gamma    = state.gamma           ?? 1
+    const vibrance = state.vibrance        ?? 0
+    const hue      = state.hue             ?? 0
+    const blur     = state.blur            ?? 0
+    const pixelate = state.pixelate        ?? 0
+    const noise    = state.noise           ?? 0
     const intensity = state.filterIntensity ?? 100
 
     const hasFilter = state.activeFilter !== 'none'
     const hasAdjust =
-        gamma !== 1 ||
-        vibrance !== 0 ||
-        hue !== 0 ||
-        blur !== 0 ||
-        pixelate !== 0 ||
-        noise !== 0
+        gamma    !== 1  ||
+        vibrance !== 0  ||
+        hue      !== 0  ||
+        blur     !== 0  ||
+        pixelate !== 0  ||
+        noise    !== 0
 
     const allDirty = hasFilter || hasAdjust
 
@@ -212,11 +212,11 @@ export default function FilterTool({ state, onChange, imageUrl }: ToolPanelProps
                         onMouseEnter={() => setHovReset(true)}
                         onMouseLeave={() => setHovReset(false)}
                         style={{
-                            background: hovReset ? C.dangerLight : C.sectionBg,
-                            border: `1px solid ${hovReset ? C.dangerBorder : C.border}`,
+                            background:   hovReset ? C.dangerLight : C.sectionBg,
+                            border:       `1px solid ${hovReset ? C.dangerBorder : C.border}`,
                             borderRadius: 6, padding: '4px 10px',
                             fontSize: 11, fontWeight: 600,
-                            color: hovReset ? C.danger : C.sub,
+                            color:   hovReset ? C.danger : C.sub,
                             cursor: 'pointer', transition: 'all 0.15s',
                         }}
                     >Reset all</button>
@@ -264,39 +264,39 @@ export default function FilterTool({ state, onChange, imageUrl }: ToolPanelProps
                                     filterIntensity: state.filterIntensity === 0 ? 100 : state.filterIntensity,
                                 })}
                                 style={{
-                                    background: 'none',
-                                    border: `2px solid ${active ? C.primary : C.borderMid}`,
+                                    background:   'none',
+                                    border:       `2px solid ${active ? C.primary : C.borderMid}`,
                                     borderRadius: 8,
-                                    padding: 4,
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    gap: 4,
-                                    transition: 'border-color 0.15s',
-                                    position: 'relative',
-                                    overflow: 'hidden',
+                                    padding:      4,
+                                    cursor:       'pointer',
+                                    display:      'flex',
+                                    flexDirection:'column',
+                                    alignItems:   'center',
+                                    gap:          4,
+                                    transition:   'border-color 0.15s',
+                                    position:     'relative',
+                                    overflow:     'hidden',
                                 }}
                             >
                                 {/* Thumbnail */}
                                 <div style={{
-                                    width: '100%',
-                                    aspectRatio: '1',
+                                    width:        '100%',
+                                    aspectRatio:  '1',
                                     borderRadius: 5,
-                                    overflow: 'hidden',
-                                    background: '#e5e7eb',
-                                    position: 'relative',
+                                    overflow:     'hidden',
+                                    background:   '#e5e7eb',
+                                    position:     'relative',
                                 }}>
                                     {imageUrl ? (
                                         <img
                                             src={imageUrl}
                                             alt={preset.label}
                                             style={{
-                                                width: '100%',
-                                                height: '100%',
-                                                objectFit: 'cover',
-                                                filter: preset.css || 'none',
-                                                display: 'block',
+                                                width:      '100%',
+                                                height:     '100%',
+                                                objectFit:  'cover',
+                                                filter:     preset.css || 'none',
+                                                display:    'block',
                                             }}
                                         />
                                     ) : (
@@ -312,12 +312,12 @@ export default function FilterTool({ state, onChange, imageUrl }: ToolPanelProps
                                     {/* Active checkmark */}
                                     {active && (
                                         <div style={{
-                                            position: 'absolute', top: 3, right: 3,
-                                            width: 16, height: 16,
-                                            background: C.primary,
-                                            borderRadius: '50%',
-                                            display: 'flex',
-                                            alignItems: 'center',
+                                            position:       'absolute', top: 3, right: 3,
+                                            width:          16, height: 16,
+                                            background:     C.primary,
+                                            borderRadius:   '50%',
+                                            display:        'flex',
+                                            alignItems:     'center',
                                             justifyContent: 'center',
                                         }}>
                                             <Check size={10} color="#fff" strokeWidth={3} />
@@ -327,14 +327,14 @@ export default function FilterTool({ state, onChange, imageUrl }: ToolPanelProps
 
                                 {/* Label */}
                                 <span style={{
-                                    fontSize: 9,
-                                    fontWeight: active ? 700 : 500,
-                                    color: active ? C.primary : C.sub,
-                                    letterSpacing: '0.01em',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
+                                    fontSize:     9,
+                                    fontWeight:   active ? 700 : 500,
+                                    color:        active ? C.primary : C.sub,
+                                    letterSpacing:'0.01em',
+                                    whiteSpace:   'nowrap',
+                                    overflow:     'hidden',
                                     textOverflow: 'ellipsis',
-                                    maxWidth: '100%',
+                                    maxWidth:     '100%',
                                 }}>
                                     {preset.label}
                                 </span>
@@ -346,8 +346,8 @@ export default function FilterTool({ state, onChange, imageUrl }: ToolPanelProps
                 {/* Intensity slider — only when a filter is active */}
                 {hasFilter && (
                     <div style={{
-                        padding: '0 14px 14px',
-                        borderTop: `1px solid ${C.border}`,
+                        padding:    '0 14px 14px',
+                        borderTop:  `1px solid ${C.border}`,
                         paddingTop: 12,
                     }}>
                         <SliderRow

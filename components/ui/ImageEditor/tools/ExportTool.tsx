@@ -8,32 +8,32 @@ import { exportToCanvas } from '../exportHelpers'
 
 // ── Tokens ─────────────────────────────────────────────────────
 const C = {
-    primary: '#7530fb',
+    primary:      '#7530fb',
     primaryLight: '#f3eeff',
-    primaryBorder: '#c4a8fd',
-    primaryHov: '#6020e0',
-    border: '#ede9fe',
-    borderMid: '#e5e7eb',
-    label: '#111827',
-    sub: '#6b7280',
-    muted: '#9ca3af',
-    surface: '#ffffff',
-    sectionBg: '#fafafa',
-    hover: '#f3f4f6',
-    accent: '#b8fa33',
-    success: '#16a34a',
+    primaryBorder:'#c4a8fd',
+    primaryHov:   '#6020e0',
+    border:       '#ede9fe',
+    borderMid:    '#e5e7eb',
+    label:        '#111827',
+    sub:          '#6b7280',
+    muted:        '#9ca3af',
+    surface:      '#ffffff',
+    sectionBg:    '#fafafa',
+    hover:        '#f3f4f6',
+    accent:       '#b8fa33',
+    success:      '#16a34a',
     successLight: '#f0fdf4',
-    successBorder: '#86efac',
+    successBorder:'#86efac',
 }
 
 // ── Preset definitions ─────────────────────────────────────────
 interface PresetDef {
-    id: ExportPreset
-    label: string
-    sub: string
-    badge: string
-    badgeColor: string
-    longestPx: number | null   // null = original
+    id:          ExportPreset
+    label:       string
+    sub:         string
+    badge:       string
+    badgeColor:  string
+    longestPx:   number | null   // null = original
 }
 const PRESETS: PresetDef[] = [
     {
@@ -173,8 +173,8 @@ function Slider({ label, value, min, max, step, display, onChange }: {
 // ── ExportTool ─────────────────────────────────────────────────
 export default function ExportTool({ state, onChange, imageUrl }: ToolPanelProps) {
     const [exporting, setExporting] = useState(false)
-    const [done, setDone] = useState(false)
-    const [hovBtn, setHovBtn] = useState(false)
+    const [done, setDone]           = useState(false)
+    const [hovBtn, setHovBtn]       = useState(false)
 
     const xs = state.exportSettings ?? {
         preset: 'ebay-standard' as ExportPreset,
@@ -191,7 +191,7 @@ export default function ExportTool({ state, onChange, imageUrl }: ToolPanelProps
     function targetWidth(): number | null {
         const def = PRESETS.find(p => p.id === preset)!
         if (def.longestPx !== null) return def.longestPx
-        if (preset === 'custom') return customWidth
+        if (preset === 'custom')   return customWidth
         return null  // original
     }
 
@@ -199,17 +199,17 @@ export default function ExportTool({ state, onChange, imageUrl }: ToolPanelProps
         setExporting(true)
         setDone(false)
         try {
-            const src = imageUrl
-            const tw = targetWidth()
+            const src    = imageUrl
+            const tw     = targetWidth()
             const canvas = await exportToCanvas(src, state, tw)
-            const mime = format === 'png' ? 'image/png' : 'image/jpeg'
-            const q = format === 'jpeg' ? quality : undefined
+            const mime   = format === 'png' ? 'image/png' : 'image/jpeg'
+            const q      = format === 'jpeg' ? quality : undefined
 
             canvas.toBlob(blob => {
                 if (!blob) { setExporting(false); return }
-                const url = URL.createObjectURL(blob)
-                const a = document.createElement('a')
-                a.href = url
+                const url  = URL.createObjectURL(blob)
+                const a    = document.createElement('a')
+                a.href     = url
                 a.download = `edited-${preset}-${Date.now()}.${format}`
                 document.body.appendChild(a)
                 a.click()

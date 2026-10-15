@@ -192,9 +192,9 @@ const STEPS = [
 
 // ── Props ─────────────────────────────────────────────────────
 interface Props {
-    draftId: string | null
-    onBack: () => void
-    atLimit?: boolean        // true → user has hit their plan cap
+    draftId:    string | null
+    onBack:     () => void
+    atLimit?:   boolean        // true → user has hit their plan cap
     onUpgrade?: () => void     // open PlanUpgradeModal
 }
 

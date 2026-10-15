@@ -25,15 +25,15 @@ import type {
 // ── Shape returned by the hook ────────────────────────────────
 export interface UseSegmentsReturn {
     /** All segments in sidebar order: built-ins first, then custom */
-    segments: Segment[]
+    segments:         Segment[]
     /** Custom segments only (from Supabase) */
-    customSegments: CustomSegment[]
+    customSegments:   CustomSegment[]
     /** id of the currently-selected segment */
-    activeSegmentId: string
+    activeSegmentId:  string
     /** true while the initial Supabase load is in flight */
-    loading: boolean
+    loading:          boolean
     /** non-null when the last operation failed */
-    error: string | null
+    error:            string | null
 
     // ── Selection ───────────────────────────────────────────
     setActiveSegmentId: (id: string) => void
@@ -54,25 +54,25 @@ export interface UseSegmentsReturn {
 // ── Row → CustomSegment adapter ───────────────────────────────
 function rowToSegment(row: SegmentRow): CustomSegment {
     return {
-        id: row.id,
-        user_id: row.user_id,
-        name: row.name,
-        icon: row.icon,
-        color: row.color,
-        filters: row.filters,
-        logic: row.logic,
+        id:         row.id,
+        user_id:    row.user_id,
+        name:       row.name,
+        icon:       row.icon,
+        color:      row.color,
+        filters:    row.filters,
+        logic:      row.logic,
         sort_order: row.sort_order,
         created_at: row.created_at,
-        isBuiltIn: false,
+        isBuiltIn:  false,
     }
 }
 
 // ─────────────────────────────────────────────────────────────
 export function useSegments(): UseSegmentsReturn {
-    const [customSegments, setCustomSegments] = useState<CustomSegment[]>([])
+    const [customSegments,  setCustomSegments]  = useState<CustomSegment[]>([])
     const [activeSegmentId, setActiveSegmentId] = useState<string>('all')
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    const [loading,         setLoading]         = useState(true)
+    const [error,           setError]           = useState<string | null>(null)
 
     // ── Merged list: built-ins first, then custom ─────────────
     const segments: Segment[] = [
@@ -97,7 +97,7 @@ export function useSegments(): UseSegmentsReturn {
                 .select('*')
                 .eq('user_id', user.id)
                 .order('sort_order', { ascending: true })
-                .order('created_at', { ascending: true })
+                .order('created_at',  { ascending: true })
 
             if (dbErr) throw dbErr
 
@@ -128,12 +128,12 @@ export function useSegments(): UseSegmentsReturn {
             )
 
             const insert = {
-                user_id: user.id,
-                name: payload.name,
-                icon: payload.icon,
-                color: payload.color,
-                filters: payload.filters,
-                logic: payload.logic,
+                user_id:    user.id,
+                name:       payload.name,
+                icon:       payload.icon,
+                color:      payload.color,
+                filters:    payload.filters,
+                logic:      payload.logic,
                 sort_order: payload.sort_order ?? maxOrder + 1,
             }
 
@@ -156,7 +156,7 @@ export function useSegments(): UseSegmentsReturn {
 
     // ── Update ────────────────────────────────────────────────
     const updateSegment = useCallback(async (
-        id: string,
+        id:      string,
         payload: Partial<SegmentUpsert>,
     ): Promise<boolean> => {
         setError(null)
@@ -212,7 +212,7 @@ export function useSegments(): UseSegmentsReturn {
         try {
             const supabase = createClient()
             const updates = ordered.map((s, i) => ({
-                id: s.id,
+                id:         s.id,
                 sort_order: i,
             }))
 

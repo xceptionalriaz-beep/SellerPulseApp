@@ -86,41 +86,41 @@ interface ListingTemplate {
 // direct. Filter logic also supports old Design-Studio slugs for backwards compat.
 import type { LucideIcon } from 'lucide-react'
 const CATEGORIES: { id: string; label: string; Icon: LucideIcon }[] = [
-    { id: 'all', label: 'All Templates', Icon: LayoutGrid },
-    { id: 'consumer_electronics', label: 'Consumer Electronics', Icon: Smartphone },
-    { id: 'computers', label: 'Computers & Tablets', Icon: Monitor },
-    { id: 'clothing', label: 'Clothing & Accessories', Icon: Shirt },
-    { id: 'jewelry', label: 'Jewellery & Watches', Icon: Gem },
-    { id: 'health_beauty', label: 'Health & Beauty', Icon: Heart },
-    { id: 'home_garden', label: 'Home & Garden', Icon: Home },
-    { id: 'furniture', label: 'Furniture', Icon: Sofa },
-    { id: 'toys_hobbies', label: 'Toys & Hobbies', Icon: Gamepad2 },
-    { id: 'sporting_goods', label: 'Sporting Goods', Icon: Dumbbell },
-    { id: 'collectibles', label: 'Collectibles & Art', Icon: Archive },
-    { id: 'books_movies', label: 'Books & Media', Icon: BookOpen },
-    { id: 'pet_supplies', label: 'Pet Supplies', Icon: PawPrint },
-    { id: 'motors_parts', label: 'Motors & Parts', Icon: Car },
-    { id: 'business', label: 'Business & Industrial', Icon: Briefcase },
-    { id: 'general', label: 'General / Other', Icon: Tag },
+    { id: 'all',                  label: 'All Templates',         Icon: LayoutGrid  },
+    { id: 'consumer_electronics', label: 'Consumer Electronics',  Icon: Smartphone  },
+    { id: 'computers',            label: 'Computers & Tablets',   Icon: Monitor     },
+    { id: 'clothing',             label: 'Clothing & Accessories',Icon: Shirt       },
+    { id: 'jewelry',              label: 'Jewellery & Watches',   Icon: Gem         },
+    { id: 'health_beauty',        label: 'Health & Beauty',       Icon: Heart       },
+    { id: 'home_garden',          label: 'Home & Garden',         Icon: Home        },
+    { id: 'furniture',            label: 'Furniture',             Icon: Sofa        },
+    { id: 'toys_hobbies',         label: 'Toys & Hobbies',        Icon: Gamepad2    },
+    { id: 'sporting_goods',       label: 'Sporting Goods',        Icon: Dumbbell    },
+    { id: 'collectibles',         label: 'Collectibles & Art',    Icon: Archive     },
+    { id: 'books_movies',         label: 'Books & Media',         Icon: BookOpen    },
+    { id: 'pet_supplies',         label: 'Pet Supplies',          Icon: PawPrint    },
+    { id: 'motors_parts',         label: 'Motors & Parts',        Icon: Car         },
+    { id: 'business',             label: 'Business & Industrial', Icon: Briefcase   },
+    { id: 'general',              label: 'General / Other',       Icon: Tag         },
 ]
 
 // Maps new listing-category IDs → old Design-Studio slugs (backwards compat)
 const LEGACY_SLUGS: Record<string, string[]> = {
     consumer_electronics: ['electronics'],
-    computers: ['electronics', 'computers'],
-    clothing: ['fashion', 'clothing'],
-    jewelry: ['fashion', 'jewelry', 'jewellery'],
-    health_beauty: ['fashion', 'health_beauty', 'health'],
-    home_garden: ['home', 'home_garden'],
-    furniture: ['home', 'furniture'],
-    toys_hobbies: ['toys', 'toys_hobbies'],
-    sporting_goods: ['sports', 'sporting_goods'],
-    pet_supplies: ['pets', 'pet_supplies'],
-    motors_parts: ['auto', 'motors_parts'],
-    books_movies: ['general', 'books_movies'],
-    collectibles: ['general', 'collectibles'],
-    business: ['general', 'business'],
-    general: ['general'],
+    computers:            ['electronics', 'computers'],
+    clothing:             ['fashion', 'clothing'],
+    jewelry:              ['fashion', 'jewelry', 'jewellery'],
+    health_beauty:        ['fashion', 'health_beauty', 'health'],
+    home_garden:          ['home', 'home_garden'],
+    furniture:            ['home', 'furniture'],
+    toys_hobbies:         ['toys', 'toys_hobbies'],
+    sporting_goods:       ['sports', 'sporting_goods'],
+    pet_supplies:         ['pets', 'pet_supplies'],
+    motors_parts:         ['auto', 'motors_parts'],
+    books_movies:         ['general', 'books_movies'],
+    collectibles:         ['general', 'collectibles'],
+    business:             ['general', 'business'],
+    general:              ['general'],
 }
 
 function matchesCategoryFilter(templateCat: string | null, filterId: string): boolean {
@@ -213,28 +213,28 @@ function CategoryBadge({ category }: { category: string | null }) {
     const map: Record<string, { bg: string; text: string }> = {
         // ── New category IDs ───────────────────────────────────────────
         consumer_electronics: { bg: '#dbeafe', text: '#1d4ed8' },
-        computers: { bg: '#dbeafe', text: '#1d4ed8' },
-        clothing: { bg: '#fce7f3', text: '#be185d' },
-        jewelry: { bg: '#fce7f3', text: '#be185d' },
-        health_beauty: { bg: '#fce7f3', text: '#be185d' },
-        home_garden: { bg: '#dcfce7', text: '#15803d' },
-        furniture: { bg: '#dcfce7', text: '#15803d' },
-        motors_parts: { bg: '#fef3c7', text: '#b45309' },
-        pet_supplies: { bg: '#f3e8ff', text: '#7e22ce' },
-        sporting_goods: { bg: '#e0f2fe', text: '#0369a1' },
-        toys_hobbies: { bg: '#fef9c3', text: '#a16207' },
-        collectibles: { bg: '#f1f5f9', text: '#475569' },
-        books_movies: { bg: '#f1f5f9', text: '#475569' },
-        business: { bg: '#f1f5f9', text: '#475569' },
-        general: { bg: '#f1f5f9', text: '#475569' },
+        computers:            { bg: '#dbeafe', text: '#1d4ed8' },
+        clothing:             { bg: '#fce7f3', text: '#be185d' },
+        jewelry:              { bg: '#fce7f3', text: '#be185d' },
+        health_beauty:        { bg: '#fce7f3', text: '#be185d' },
+        home_garden:          { bg: '#dcfce7', text: '#15803d' },
+        furniture:            { bg: '#dcfce7', text: '#15803d' },
+        motors_parts:         { bg: '#fef3c7', text: '#b45309' },
+        pet_supplies:         { bg: '#f3e8ff', text: '#7e22ce' },
+        sporting_goods:       { bg: '#e0f2fe', text: '#0369a1' },
+        toys_hobbies:         { bg: '#fef9c3', text: '#a16207' },
+        collectibles:         { bg: '#f1f5f9', text: '#475569' },
+        books_movies:         { bg: '#f1f5f9', text: '#475569' },
+        business:             { bg: '#f1f5f9', text: '#475569' },
+        general:              { bg: '#f1f5f9', text: '#475569' },
         // ── Legacy slugs (backwards compat) ───────────────────────────
-        electronics: { bg: '#dbeafe', text: '#1d4ed8' },
-        fashion: { bg: '#fce7f3', text: '#be185d' },
-        home: { bg: '#dcfce7', text: '#15803d' },
-        auto: { bg: '#fef3c7', text: '#b45309' },
-        pet: { bg: '#f3e8ff', text: '#7e22ce' },
-        sports: { bg: '#e0f2fe', text: '#0369a1' },
-        toys: { bg: '#fef9c3', text: '#a16207' },
+        electronics:          { bg: '#dbeafe', text: '#1d4ed8' },
+        fashion:              { bg: '#fce7f3', text: '#be185d' },
+        home:                 { bg: '#dcfce7', text: '#15803d' },
+        auto:                 { bg: '#fef3c7', text: '#b45309' },
+        pet:                  { bg: '#f3e8ff', text: '#7e22ce' },
+        sports:               { bg: '#e0f2fe', text: '#0369a1' },
+        toys:                 { bg: '#fef9c3', text: '#a16207' },
     }
     const cat = (category || 'general').toLowerCase()
     const style = map[cat] || map.general
@@ -653,10 +653,10 @@ function DesignStudioInner() {
                                         {CATEGORIES.filter(cat =>
                                             !catSearch || cat.label.toLowerCase().includes(catSearch.toLowerCase())
                                         ).length === 0 && (
-                                                <p style={{ textAlign: 'center', fontSize: 12, color: C.muted, padding: '12px 0', fontFamily: 'DM Sans, sans-serif' }}>
-                                                    No categories found
-                                                </p>
-                                            )}
+                                            <p style={{ textAlign: 'center', fontSize: 12, color: C.muted, padding: '12px 0', fontFamily: 'DM Sans, sans-serif' }}>
+                                                No categories found
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                             </>

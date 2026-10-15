@@ -53,10 +53,10 @@ interface ListingPickerModalProps {
 function statusBadge(status: string | null) {
     switch (status) {
         case 'published': return { label: 'Live', bg: C.successLight, color: C.success }
-        case 'draft': return { label: 'Draft', bg: C.primaryLight, color: C.primary }
+        case 'draft':     return { label: 'Draft', bg: C.primaryLight, color: C.primary }
         case 'scheduled': return { label: 'Scheduled', bg: '#fef3c7', color: C.warning }
-        case 'ended': return { label: 'Ended', bg: '#f3f4f6', color: C.secondary }
-        default: return { label: status ?? '—', bg: '#f3f4f6', color: C.secondary }
+        case 'ended':     return { label: 'Ended', bg: '#f3f4f6', color: C.secondary }
+        default:          return { label: status ?? '—', bg: '#f3f4f6', color: C.secondary }
     }
 }
 

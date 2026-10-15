@@ -93,7 +93,7 @@ export default function SavedTab({ onLoad, savedCount = 0 }: SavedTabProps) {
     // Re-fetch whenever a new save completes
     useEffect(() => {
         if (savedCount > 0) fetchTemplates()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [savedCount])
 
     const handleDelete = useCallback(async (id: string) => {

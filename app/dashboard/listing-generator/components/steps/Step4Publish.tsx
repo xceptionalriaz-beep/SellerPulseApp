@@ -232,9 +232,9 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
 
         try {
             const res = await fetch('/api/ebay/publish-listing', {
-                method: 'POST',
+                method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ draftId: draft.id }),
+                body:    JSON.stringify({ draftId: draft.id }),
             })
             const data = await res.json()
 
@@ -242,16 +242,16 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
                 // Success — update draft with returned itemId so UI reflects live status
                 onChange({ ebay_listing_id: data.itemId, status: 'published' } as any)
                 setPublishResult({
-                    type: 'success',
+                    type:    'success',
                     message: 'Listed on eBay! 🎉',
-                    itemId: data.itemId,
+                    itemId:  data.itemId,
                     ebayUrl: data.ebayUrl,
                 })
 
                 // Auto-enroll in Promoted Listings Standard if enabled
                 if (draft.promoted_general && draft.promoted_general_rate && data.itemId) {
                     // Find or create default campaign, then enroll (fire-and-forget)
-                    ; (async () => {
+                    ;(async () => {
                         try {
                             // Get existing running CPS campaigns
                             const campsRes = await fetch('/api/ebay/promotions/campaigns')
@@ -267,8 +267,8 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({
                                         campaignId,
-                                        listingId: data.itemId,
-                                        listingTitle: draft.title ?? undefined,
+                                        listingId:     data.itemId,
+                                        listingTitle:  draft.title ?? undefined,
                                         bidPercentage: draft.promoted_general_rate,
                                     }),
                                 })
@@ -279,18 +279,18 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
                 }
             } else if (data.notConnected) {
                 setPublishResult({
-                    type: 'not_connected',
+                    type:    'not_connected',
                     message: data.error ?? 'eBay is not connected.',
                 })
             } else {
                 setPublishResult({
-                    type: 'error',
+                    type:    'error',
                     message: data.error ?? 'Publishing failed. Please try again.',
                 })
             }
         } catch (err) {
             setPublishResult({
-                type: 'error',
+                type:    'error',
                 message: 'Network error. Please check your connection and try again.',
             })
         } finally {
@@ -1132,8 +1132,8 @@ export default function Step4Publish({ draft, onChange, onSave, onStepJump }: Pr
                                 {publishResult.type === 'success'
                                     ? <CheckCircle2 size={14} style={{ color: '#16a34a', flexShrink: 0, marginTop: 1 }} />
                                     : publishResult.type === 'not_connected'
-                                        ? <AlertCircle size={14} style={{ color: C.warning, flexShrink: 0, marginTop: 1 }} />
-                                        : <XCircle size={14} style={{ color: C.danger, flexShrink: 0, marginTop: 1 }} />
+                                    ? <AlertCircle size={14} style={{ color: C.warning, flexShrink: 0, marginTop: 1 }} />
+                                    : <XCircle size={14} style={{ color: C.danger, flexShrink: 0, marginTop: 1 }} />
                                 }
                                 <div className="flex-1 min-w-0">
                                     <p className="text-[12px] font-bold" style={{

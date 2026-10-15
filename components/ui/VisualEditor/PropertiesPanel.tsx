@@ -111,12 +111,12 @@ const TEXT_BEARING_TYPES: BlockType[] = [
 ]
 
 const SLOT_ROLE_OPTIONS: { value: TemplateSlotRole | ''; label: string }[] = [
-    { value: '', label: 'No AI Role' },
-    { value: 'headline', label: 'Headline' },
-    { value: 'key_features', label: 'Key Features' },
-    { value: 'description', label: 'Description' },
+    { value: '',               label: 'No AI Role' },
+    { value: 'headline',       label: 'Headline' },
+    { value: 'key_features',   label: 'Key Features' },
+    { value: 'description',    label: 'Description' },
     { value: 'condition_note', label: 'Condition Note' },
-    { value: 'trust_statement', label: 'Trust Statement' },
+    { value: 'trust_statement',label: 'Trust Statement' },
 ]
 
 // ── Lucide icon lookup — maps icon string keys from blocks.ts to components ────
@@ -1003,9 +1003,10 @@ function StylesTab({
                 {/* ── Block-specific style props ── */}
                 <BlockStyleProps block={block} props={props} updateProps={updateProps} />
 
-                {/* ── Universal: Border + Shadow ── */}
+                {/* ── Universal: Border + Shadow + Typography ── */}
                 <UniversalBorder props={props as any} updateProps={p => updateProps(p as any)} />
                 <UniversalShadow props={props as any} updateProps={p => updateProps(p as any)} />
+                <UniversalTypography props={props as any} updateProps={p => updateProps(p as any)} />
             </div>
         </div>
     )
@@ -3051,9 +3052,9 @@ function BlockStyleProps({ block, props, updateProps }: {
                 <>
                     <Section title="Colours">
                         <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
-                        <ColorRow label="Badge background" value={props.badgeBg ?? '#f3eeff'} onChange={v => updateProps({ badgeBg: v })} />
-                        <ColorRow label="Badge text" value={props.badgeText ?? props.badgeColor ?? '#7530fb'} onChange={v => updateProps({ badgeText: v, badgeColor: v })} />
-                        <ColorRow label="Badge border" value={props.badgeBorder ?? '#ede9fe'} onChange={v => updateProps({ badgeBorder: v })} />
+                        <ColorRow label="Badge background" value={props.badgeBg ?? '#7530fb'} onChange={v => updateProps({ badgeBg: v })} />
+                        <ColorRow label="Badge text" value={props.badgeText ?? '#ffffff'} onChange={v => updateProps({ badgeText: v })} />
+                        <ColorRow label="Badge border" value={props.badgeBorder ?? '#7530fb'} onChange={v => updateProps({ badgeBorder: v })} />
                     </Section>
                 </>
             )
@@ -5535,16 +5536,15 @@ function BlockAttributeProps({ block, props, updateProps, phButton, selectedSubS
         case 'badge_row':
             return (
                 <Section title="Badges">
-                    <InfoBox>One badge per line. Smart icons are automatically assigned for Genuine, UK Stock, Top Rated, Easy Returns, Shipping, Warranty, etc.</InfoBox>
+                    <InfoBox>One badge per line. Use emoji + text e.g. ✓ Genuine</InfoBox>
                     <TextareaInput
                         label="Badges (one per line)"
-                        value={Array.isArray(props.badges) ? props.badges.join('\n') : (typeof props.badges === 'string' ? props.badges : 'Genuine\nUK Stock\nTop Rated\nEasy Returns')}
+                        value={Array.isArray(props.badges) ? props.badges.join('\n') : '✓ Genuine\n📦 UK Stock\n★ Top Rated\n🔄 Easy Returns'}
                         rows={4}
                         onChange={v => updateProps({ badges: v.split('\n').filter((s: string) => s.trim()) })}
                     />
                     <ColorRow label="Badge background" value={props.badgeBg ?? '#f3eeff'} onChange={v => updateProps({ badgeBg: v })} />
-                    <ColorRow label="Badge text" value={props.badgeText ?? props.badgeColor ?? '#7530fb'} onChange={v => updateProps({ badgeText: v, badgeColor: v })} />
-                    <ColorRow label="Badge border" value={props.badgeBorder ?? '#ede9fe'} onChange={v => updateProps({ badgeBorder: v })} />
+                    <ColorRow label="Badge text" value={props.badgeColor ?? '#7530fb'} onChange={v => updateProps({ badgeColor: v })} />
                 </Section>
             )
 
@@ -8131,6 +8131,32 @@ function UniversalShadow({
                     <SliderInput label="Y offset" value={p.shadowY ?? 4} min={-30} max={30} suffix="px" onChange={v => updateProps({ shadowY: v })} />
                 </>
             )}
+        </Section>
+    )
+}
+
+function UniversalTypography({
+    props, updateProps
+}: {
+    props: Record<string, unknown>
+    updateProps: (p: Record<string, unknown>) => void
+}) {
+    const p = props as any
+    return (
+        <Section title="Font family">
+            <SelectInput
+                label="Font"
+                value={p.fontFamily ?? 'Arial, Helvetica, sans-serif'}
+                options={[
+                    { v: 'Arial, Helvetica, sans-serif', l: 'Arial' },
+                    { v: 'Georgia, Times New Roman, serif', l: 'Georgia' },
+                    { v: 'Verdana, Geneva, sans-serif', l: 'Verdana' },
+                    { v: "'Trebuchet MS', Helvetica, sans-serif", l: 'Trebuchet' },
+                    { v: "'Times New Roman', Times, serif", l: 'Times New Roman' },
+                    { v: "'Courier New', Courier, monospace", l: 'Courier New' },
+                ]}
+                onChange={v => updateProps({ fontFamily: v })}
+            />
         </Section>
     )
 }

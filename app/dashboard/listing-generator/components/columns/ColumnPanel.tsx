@@ -26,39 +26,39 @@ import { GROUP_LABELS } from '../../data/column-definitions'
 
 // ── Design tokens ─────────────────────────────────────────────
 const C = {
-    bg: '#f8f7ff',
-    surface: '#ffffff',
-    border: '#ede9fe',
+    bg:          '#f8f7ff',
+    surface:     '#ffffff',
+    border:      '#ede9fe',
     borderInput: '#e5e0f5',
-    primary: '#7530fb',
-    primaryLight: '#f3eeff',
-    dark: '#1e1535',
-    muted: '#9ca3af',
-    secondary: '#6b7280',
-    danger: '#ef4444',
-    dangerBg: '#fee2e2',
-    success: '#16a34a',
-    successBg: '#dcfce7',
+    primary:     '#7530fb',
+    primaryLight:'#f3eeff',
+    dark:        '#1e1535',
+    muted:       '#9ca3af',
+    secondary:   '#6b7280',
+    danger:      '#ef4444',
+    dangerBg:    '#fee2e2',
+    success:     '#16a34a',
+    successBg:   '#dcfce7',
 }
 
 interface ColumnPanelProps {
-    open: boolean
-    onClose: () => void
-    allColumns: ColumnDef[]
-    visibleIds: string[]
-    isDefault: boolean
-    onToggle: (id: string) => void
-    onMove: (fromIdx: number, toIdx: number) => void
-    onReset: () => void
+    open:        boolean
+    onClose:     () => void
+    allColumns:  ColumnDef[]
+    visibleIds:  string[]
+    isDefault:   boolean
+    onToggle:    (id: string) => void
+    onMove:      (fromIdx: number, toIdx: number) => void
+    onReset:     () => void
 }
 
 // ── Group badge colours ────────────────────────────────────────
 const GROUP_COLORS: Record<ColumnGroup, { bg: string; text: string }> = {
-    product: { bg: C.primaryLight, text: C.primary },
-    pricing: { bg: C.successBg, text: C.success },
-    performance: { bg: '#fef3c7', text: '#d97706' },
-    status: { bg: '#e0f2fe', text: '#0ea5e9' },
-    identifiers: { bg: '#f3f4f6', text: '#6b7280' },
+    product:     { bg: C.primaryLight, text: C.primary  },
+    pricing:     { bg: C.successBg,    text: C.success  },
+    performance: { bg: '#fef3c7',      text: '#d97706'  },
+    status:      { bg: '#e0f2fe',      text: '#0ea5e9'  },
+    identifiers: { bg: '#f3f4f6',      text: '#6b7280'  },
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -135,28 +135,28 @@ export function ColumnPanel({
             {/* Panel */}
             <div
                 style={{
-                    position: 'fixed',
-                    top: 0,
-                    right: 0,
-                    bottom: 0,
-                    width: 300,
-                    zIndex: 41,
-                    background: C.surface,
-                    borderLeft: `1px solid ${C.border}`,
-                    boxShadow: '-8px 0 32px rgba(117,48,251,0.10)',
-                    display: 'flex',
+                    position:    'fixed',
+                    top:         0,
+                    right:       0,
+                    bottom:      0,
+                    width:       300,
+                    zIndex:      41,
+                    background:  C.surface,
+                    borderLeft:  `1px solid ${C.border}`,
+                    boxShadow:   '-8px 0 32px rgba(117,48,251,0.10)',
+                    display:     'flex',
                     flexDirection: 'column',
-                    overflow: 'hidden',
+                    overflow:    'hidden',
                 }}
             >
                 {/* Header */}
                 <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
+                    display:        'flex',
+                    alignItems:     'center',
                     justifyContent: 'space-between',
-                    padding: '16px 16px 12px',
-                    borderBottom: `1px solid ${C.border}`,
-                    flexShrink: 0,
+                    padding:        '16px 16px 12px',
+                    borderBottom:   `1px solid ${C.border}`,
+                    flexShrink:     0,
                 }}>
                     <div>
                         <p style={{ fontSize: 14, fontWeight: 700, color: C.dark, margin: 0 }}>
@@ -173,18 +173,18 @@ export function ColumnPanel({
                                 onClick={onReset}
                                 title="Reset to defaults"
                                 style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 4,
-                                    height: 28,
-                                    padding: '0 10px',
+                                    display:      'flex',
+                                    alignItems:   'center',
+                                    gap:          4,
+                                    height:       28,
+                                    padding:      '0 10px',
                                     borderRadius: 7,
-                                    border: `1.5px solid ${C.border}`,
-                                    background: C.bg,
-                                    color: C.secondary,
-                                    fontSize: 11,
-                                    fontWeight: 600,
-                                    cursor: 'pointer',
+                                    border:       `1.5px solid ${C.border}`,
+                                    background:   C.bg,
+                                    color:        C.secondary,
+                                    fontSize:     11,
+                                    fontWeight:   600,
+                                    cursor:       'pointer',
                                 }}
                             >
                                 <RotateCcw size={11} />
@@ -195,14 +195,14 @@ export function ColumnPanel({
                             type="button"
                             onClick={onClose}
                             style={{
-                                width: 28,
-                                height: 28,
+                                width:      28,
+                                height:     28,
                                 borderRadius: 7,
-                                border: 'none',
+                                border:     'none',
                                 background: C.bg,
-                                color: C.muted,
-                                cursor: 'pointer',
-                                display: 'flex',
+                                color:      C.muted,
+                                cursor:     'pointer',
+                                display:    'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                             }}
@@ -214,9 +214,9 @@ export function ColumnPanel({
 
                 {/* Scrollable body */}
                 <div style={{
-                    flex: 1,
+                    flex:      1,
                     overflowY: 'auto',
-                    padding: '12px 12px 20px',
+                    padding:   '12px 12px 20px',
                 }}>
 
                     {/* ── VISIBLE columns (draggable) ───────────── */}
@@ -235,15 +235,15 @@ export function ColumnPanel({
                                     onDragOver={e => handleDragOver(e, idx)}
                                     onDrop={handleDrop}
                                     style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 8,
-                                        padding: '7px 8px',
+                                        display:      'flex',
+                                        alignItems:   'center',
+                                        gap:          8,
+                                        padding:      '7px 8px',
                                         borderRadius: 8,
-                                        border: `1.5px solid ${C.border}`,
-                                        background: C.surface,
-                                        cursor: 'grab',
-                                        userSelect: 'none',
+                                        border:       `1.5px solid ${C.border}`,
+                                        background:   C.surface,
+                                        cursor:       'grab',
+                                        userSelect:   'none',
                                     }}
                                 >
                                     {/* Drag handle */}
@@ -251,21 +251,21 @@ export function ColumnPanel({
 
                                     {/* Group badge */}
                                     <span style={{
-                                        fontSize: 9,
-                                        fontWeight: 700,
-                                        padding: '1px 5px',
+                                        fontSize:     9,
+                                        fontWeight:   700,
+                                        padding:      '1px 5px',
                                         borderRadius: 4,
-                                        background: gc.bg,
-                                        color: gc.text,
-                                        flexShrink: 0,
+                                        background:   gc.bg,
+                                        color:        gc.text,
+                                        flexShrink:   0,
                                         letterSpacing: '0.04em',
                                         textTransform: 'uppercase',
                                     }}>
-                                        {col.group === 'product' ? 'Prod' :
-                                            col.group === 'pricing' ? '£' :
-                                                col.group === 'performance' ? 'Perf' :
-                                                    col.group === 'status' ? 'Stat' :
-                                                        'ID'}
+                                        {col.group === 'product'     ? 'Prod' :
+                                         col.group === 'pricing'     ? '£'    :
+                                         col.group === 'performance' ? 'Perf' :
+                                         col.group === 'status'      ? 'Stat' :
+                                                                       'ID'   }
                                     </span>
 
                                     {/* Label */}
@@ -279,25 +279,25 @@ export function ColumnPanel({
                                         onClick={() => onToggle(col.id)}
                                         title="Hide column"
                                         style={{
-                                            flexShrink: 0,
-                                            width: 22,
-                                            height: 22,
+                                            flexShrink:   0,
+                                            width:        22,
+                                            height:       22,
                                             borderRadius: 5,
-                                            border: 'none',
-                                            background: 'transparent',
-                                            color: C.muted,
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
+                                            border:       'none',
+                                            background:   'transparent',
+                                            color:        C.muted,
+                                            cursor:       'pointer',
+                                            display:      'flex',
+                                            alignItems:   'center',
                                             justifyContent: 'center',
                                         }}
                                         onMouseEnter={e => {
                                             (e.currentTarget as HTMLElement).style.background = C.dangerBg
-                                                ; (e.currentTarget as HTMLElement).style.color = C.danger
+                                            ;(e.currentTarget as HTMLElement).style.color = C.danger
                                         }}
                                         onMouseLeave={e => {
                                             (e.currentTarget as HTMLElement).style.background = 'transparent'
-                                                ; (e.currentTarget as HTMLElement).style.color = C.muted
+                                            ;(e.currentTarget as HTMLElement).style.color = C.muted
                                         }}
                                     >
                                         <EyeOff size={11} />
@@ -328,33 +328,33 @@ export function ColumnPanel({
                                                 <div
                                                     key={col.id}
                                                     style={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: 8,
-                                                        padding: '7px 8px',
+                                                        display:      'flex',
+                                                        alignItems:   'center',
+                                                        gap:          8,
+                                                        padding:      '7px 8px',
                                                         borderRadius: 8,
-                                                        border: `1.5px dashed ${C.border}`,
-                                                        background: C.bg,
-                                                        opacity: 0.8,
+                                                        border:       `1.5px dashed ${C.border}`,
+                                                        background:   C.bg,
+                                                        opacity:      0.8,
                                                     }}
                                                 >
                                                     {/* Group badge */}
                                                     <span style={{
-                                                        fontSize: 9,
-                                                        fontWeight: 700,
-                                                        padding: '1px 5px',
+                                                        fontSize:     9,
+                                                        fontWeight:   700,
+                                                        padding:      '1px 5px',
                                                         borderRadius: 4,
-                                                        background: gc.bg,
-                                                        color: gc.text,
-                                                        flexShrink: 0,
+                                                        background:   gc.bg,
+                                                        color:        gc.text,
+                                                        flexShrink:   0,
                                                         letterSpacing: '0.04em',
                                                         textTransform: 'uppercase',
                                                     }}>
-                                                        {col.group === 'product' ? 'Prod' :
-                                                            col.group === 'pricing' ? '£' :
-                                                                col.group === 'performance' ? 'Perf' :
-                                                                    col.group === 'status' ? 'Stat' :
-                                                                        'ID'}
+                                                        {col.group === 'product'     ? 'Prod' :
+                                                         col.group === 'pricing'     ? '£'    :
+                                                         col.group === 'performance' ? 'Perf' :
+                                                         col.group === 'status'      ? 'Stat' :
+                                                                                       'ID'   }
                                                     </span>
 
                                                     {/* Label */}
@@ -368,25 +368,25 @@ export function ColumnPanel({
                                                         onClick={() => onToggle(col.id)}
                                                         title="Show column"
                                                         style={{
-                                                            flexShrink: 0,
-                                                            width: 22,
-                                                            height: 22,
+                                                            flexShrink:   0,
+                                                            width:        22,
+                                                            height:       22,
                                                             borderRadius: 5,
-                                                            border: 'none',
-                                                            background: 'transparent',
-                                                            color: C.muted,
-                                                            cursor: 'pointer',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
+                                                            border:       'none',
+                                                            background:   'transparent',
+                                                            color:        C.muted,
+                                                            cursor:       'pointer',
+                                                            display:      'flex',
+                                                            alignItems:   'center',
                                                             justifyContent: 'center',
                                                         }}
                                                         onMouseEnter={e => {
                                                             (e.currentTarget as HTMLElement).style.background = C.primaryLight
-                                                                ; (e.currentTarget as HTMLElement).style.color = C.primary
+                                                            ;(e.currentTarget as HTMLElement).style.color = C.primary
                                                         }}
                                                         onMouseLeave={e => {
                                                             (e.currentTarget as HTMLElement).style.background = 'transparent'
-                                                                ; (e.currentTarget as HTMLElement).style.color = C.muted
+                                                            ;(e.currentTarget as HTMLElement).style.color = C.muted
                                                         }}
                                                     >
                                                         <Eye size={11} />
@@ -404,9 +404,9 @@ export function ColumnPanel({
 
                 {/* Footer hint */}
                 <div style={{
-                    padding: '10px 16px',
-                    borderTop: `1px solid ${C.border}`,
-                    flexShrink: 0,
+                    padding:      '10px 16px',
+                    borderTop:    `1px solid ${C.border}`,
+                    flexShrink:   0,
                 }}>
                     <p style={{ fontSize: 11, color: C.muted, margin: 0, textAlign: 'center', fontFamily: 'DM Sans, sans-serif' }}>
                         Columns auto-save · per segment

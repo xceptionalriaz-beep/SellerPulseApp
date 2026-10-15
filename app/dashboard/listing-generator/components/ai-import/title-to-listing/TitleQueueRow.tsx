@@ -15,35 +15,35 @@ import { TitleQueueItem } from './TitleImport'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
-    primary: '#7530fb',
+    primary:      '#7530fb',
     primaryLight: '#f3eeff',
-    accent: '#b8fa33',
-    accentDark: '#8abf1f',
-    bg: '#f8f7ff',
-    surface: '#ffffff',
-    border: '#ede9fe',
-    text: '#1a1523',
-    muted: '#6b7280',
-    error: '#ef4444',
-    errorLight: '#fef2f2',
-    warning: '#f59e0b',
+    accent:       '#b8fa33',
+    accentDark:   '#8abf1f',
+    bg:           '#f8f7ff',
+    surface:      '#ffffff',
+    border:       '#ede9fe',
+    text:         '#1a1523',
+    muted:        '#6b7280',
+    error:        '#ef4444',
+    errorLight:   '#fef2f2',
+    warning:      '#f59e0b',
     warningLight: '#fffbeb',
-    success: '#22c55e',
+    success:      '#22c55e',
     successLight: '#f0fdf4',
 } as const
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 interface TitleQueueRowProps {
-    item: TitleQueueItem
-    onView: (item: TitleQueueItem) => void
-    onRemove: (id: string) => void
+    item:           TitleQueueItem
+    onView:         (item: TitleQueueItem) => void
+    onRemove:       (id: string) => void
     onToggleSelect: (id: string) => void
 }
 
 // ── Status config ─────────────────────────────────────────────────────────────
 type StatusConfig = {
-    icon: React.ReactNode
-    badge: string
+    icon:    React.ReactNode
+    badge:   string
     badgeBg: string
     badgeFg: string
 }
@@ -52,43 +52,43 @@ function getStatusConfig(item: TitleQueueItem): StatusConfig {
     switch (item.status) {
         case 'loading':
             return {
-                icon: <Loader2 size={15} className="animate-spin" style={{ color: C.primary }} />,
-                badge: 'Searching…',
+                icon:    <Loader2 size={15} className="animate-spin" style={{ color: C.primary }} />,
+                badge:   'Searching…',
                 badgeBg: C.primaryLight,
                 badgeFg: C.primary,
             }
         case 'found':
             return {
-                icon: <CheckCircle2 size={15} style={{ color: C.success }} />,
-                badge: 'Found',
+                icon:    <CheckCircle2 size={15} style={{ color: C.success }} />,
+                badge:   'Found',
                 badgeBg: C.successLight,
                 badgeFg: C.success,
             }
         case 'vero_risk':
             return {
-                icon: <ShieldAlert size={15} style={{ color: C.warning }} />,
-                badge: 'VeRO Risk',
+                icon:    <ShieldAlert size={15} style={{ color: C.warning }} />,
+                badge:   'VeRO Risk',
                 badgeBg: C.warningLight,
                 badgeFg: C.warning,
             }
         case 'not_found':
             return {
-                icon: <XCircle size={15} style={{ color: C.muted }} />,
-                badge: 'Not found',
+                icon:    <XCircle size={15} style={{ color: C.muted }} />,
+                badge:   'Not found',
                 badgeBg: '#f3f4f6',
                 badgeFg: C.muted,
             }
         case 'error':
             return {
-                icon: <AlertTriangle size={15} style={{ color: C.error }} />,
-                badge: 'Error',
+                icon:    <AlertTriangle size={15} style={{ color: C.error }} />,
+                badge:   'Error',
                 badgeBg: C.errorLight,
                 badgeFg: C.error,
             }
         default: // pending
             return {
-                icon: <Clock size={15} style={{ color: C.muted }} />,
-                badge: 'Queued',
+                icon:    <Clock size={15} style={{ color: C.muted }} />,
+                badge:   'Queued',
                 badgeBg: '#f3f4f6',
                 badgeFg: C.muted,
             }
@@ -97,10 +97,10 @@ function getStatusConfig(item: TitleQueueItem): StatusConfig {
 
 // ── Condition colour map ───────────────────────────────────────────────────────
 function conditionColor(condition: string): { bg: string; fg: string } {
-    if (condition === 'New') return { bg: '#dbeafe', fg: '#1d4ed8' }
-    if (condition === 'Used – Good') return { bg: C.successLight, fg: '#16a34a' }
+    if (condition === 'New')               return { bg: '#dbeafe', fg: '#1d4ed8' }
+    if (condition === 'Used – Good')       return { bg: C.successLight, fg: '#16a34a' }
     if (condition === 'Used – Acceptable') return { bg: C.warningLight, fg: '#b45309' }
-    if (condition === 'For Parts') return { bg: C.errorLight, fg: C.error }
+    if (condition === 'For Parts')         return { bg: C.errorLight, fg: C.error }
     return { bg: '#f3f4f6', fg: C.muted }
 }
 
@@ -109,9 +109,9 @@ export default function TitleQueueRow({ item, onView, onRemove, onToggleSelect }
     const { icon, badge, badgeBg, badgeFg } = getStatusConfig(item)
     const cc = conditionColor(item.condition)
 
-    const isSelectable = item.status === 'found' || item.status === 'vero_risk'
-    const isViewable = isSelectable || item.status === 'not_found' || item.status === 'error'
-    const isActive = item.status === 'loading' || item.status === 'pending'
+    const isSelectable  = item.status === 'found' || item.status === 'vero_risk'
+    const isViewable    = isSelectable || item.status === 'not_found' || item.status === 'error'
+    const isActive      = item.status === 'loading' || item.status === 'pending'
 
     // Smooth row entrance
     const rowRef = useRef<HTMLDivElement>(null)
@@ -122,8 +122,8 @@ export default function TitleQueueRow({ item, onView, onRemove, onToggleSelect }
         el.style.transform = 'translateY(-6px)'
         const raf = requestAnimationFrame(() => {
             el.style.transition = 'opacity 220ms ease, transform 220ms ease'
-            el.style.opacity = '1'
-            el.style.transform = 'translateY(0)'
+            el.style.opacity    = '1'
+            el.style.transform  = 'translateY(0)'
         })
         return () => cancelAnimationFrame(raf)
     }, [])
@@ -137,8 +137,8 @@ export default function TitleQueueRow({ item, onView, onRemove, onToggleSelect }
             className="flex items-center gap-3 px-3 py-2.5"
             style={{
                 backgroundColor: item.selected ? C.primaryLight : 'transparent',
-                borderLeft: item.selected ? `3px solid ${C.primary}` : '3px solid transparent',
-                transition: 'background-color 150ms ease, border-color 150ms ease',
+                borderLeft:      item.selected ? `3px solid ${C.primary}` : '3px solid transparent',
+                transition:      'background-color 150ms ease, border-color 150ms ease',
             }}
         >
             {/* Checkbox */}
@@ -154,7 +154,7 @@ export default function TitleQueueRow({ item, onView, onRemove, onToggleSelect }
                         style={{ backgroundColor: C.primary }}
                     >
                         <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
-                            <path d="M1 3.5L3.5 6L8 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            <path d="M1 3.5L3.5 6L8 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                     </div>
                 ) : (

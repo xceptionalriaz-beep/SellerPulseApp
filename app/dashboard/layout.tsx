@@ -70,9 +70,9 @@ const NAV_ITEMS = [
   { icon: Package, label: 'Inventory', href: '/dashboard/inventory' },
   { icon: Radar, label: 'Competitor Research', href: '/dashboard/competitor-research' },
   { icon: ShieldCheck, label: 'Orders', href: '/dashboard/orders' },
-  { icon: Star, label: 'Feedback', href: '/dashboard/feedback' },
+  { icon: Star,      label: 'Feedback',   href: '/dashboard/feedback'   },
   { icon: Megaphone, label: 'Promotions', href: '/dashboard/promotions' },
-  { icon: Truck, label: 'Shipping', href: '/dashboard/shipping' },
+  { icon: Truck,     label: 'Shipping',   href: '/dashboard/shipping'   },
 ]
 
 // -- Design Studio sub-sidebar tabs ----------------------------
@@ -85,10 +85,10 @@ const DESIGN_STUDIO_TABS = [
 
 // -- Promotions sub-sidebar tabs --------------------------------
 const PROMOTIONS_TABS = [
-  { id: 'campaigns', label: 'Campaigns', icon: Megaphone, href: '/dashboard/promotions' },
-  { id: 'analytics', label: 'Analytics', icon: BarChart2, href: '/dashboard/promotions?tab=analytics' },
-  { id: 'automation', label: 'Automation', icon: Zap, href: '/dashboard/promotions?tab=automation' },
-  { id: 'settings', label: 'Settings', icon: Settings2, href: '/dashboard/promotions?tab=settings' },
+  { id: 'campaigns',  label: 'Campaigns',   icon: Megaphone,   href: '/dashboard/promotions' },
+  { id: 'analytics',  label: 'Analytics',   icon: BarChart2,   href: '/dashboard/promotions?tab=analytics' },
+  { id: 'automation', label: 'Automation',  icon: Zap,         href: '/dashboard/promotions?tab=automation' },
+  { id: 'settings',   label: 'Settings',    icon: Settings2,   href: '/dashboard/promotions?tab=settings' },
 ]
 
 // -- Kill switch ? nav label mapping ---------------------------

@@ -16,20 +16,20 @@ import { NotFoundException } from '@zxing/library'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
-    primary: '#7530fb',
+    primary:      '#7530fb',
     primaryLight: '#f3eeff',
-    accent: '#b8fa33',
-    accentDark: '#8abf1f',
-    bg: '#f8f7ff',
-    surface: '#ffffff',
-    border: '#ede9fe',
-    text: '#1a1523',
-    muted: '#6b7280',
-    error: '#ef4444',
-    errorLight: '#fef2f2',
-    warning: '#f59e0b',
+    accent:       '#b8fa33',
+    accentDark:   '#8abf1f',
+    bg:           '#f8f7ff',
+    surface:      '#ffffff',
+    border:       '#ede9fe',
+    text:         '#1a1523',
+    muted:        '#6b7280',
+    error:        '#ef4444',
+    errorLight:   '#fef2f2',
+    warning:      '#f59e0b',
     warningLight: '#fffbeb',
-    success: '#22c55e',
+    success:      '#22c55e',
     successLight: '#f0fdf4',
 } as const
 
@@ -77,23 +77,23 @@ export default function BarcodeCamera({
     scanFeedback = null,
     className = '',
 }: BarcodeCameraProps) {
-    const videoRef = useRef<HTMLVideoElement>(null)
-    const canvasRef = useRef<HTMLCanvasElement>(null)
-    const streamRef = useRef<MediaStream | null>(null)
+    const videoRef    = useRef<HTMLVideoElement>(null)
+    const canvasRef   = useRef<HTMLCanvasElement>(null)
+    const streamRef   = useRef<MediaStream | null>(null)
     const detectorRef = useRef<BarcodeDetectorInstance | null>(null)
-    const zxingRef = useRef<BrowserMultiFormatReader | null>(null)
-    const rafRef = useRef<number>(0)
-    const lastRef = useRef<{ value: string; at: number } | null>(null)
+    const zxingRef    = useRef<BrowserMultiFormatReader | null>(null)
+    const rafRef      = useRef<number>(0)
+    const lastRef     = useRef<{ value: string; at: number } | null>(null)
 
     // 'native' = BarcodeDetector API, 'zxing' = @zxing/browser fallback, null = initialising
-    const [scanMode, setScanMode] = useState<'native' | 'zxing' | null>(null)
-    const [cameraError, setCameraError] = useState<string | null>(null)
-    const [cameras, setCameras] = useState<MediaDeviceInfo[]>([])
-    const [cameraIdx, setCameraIdx] = useState(0)
-    const [loading, setLoading] = useState(false)
-    const [zoom, setZoom] = useState(1)
-    const [lastScan, setLastScan] = useState<string | null>(null)
-    const [flashActive, setFlashActive] = useState(false)
+    const [scanMode, setScanMode]           = useState<'native' | 'zxing' | null>(null)
+    const [cameraError, setCameraError]     = useState<string | null>(null)
+    const [cameras, setCameras]             = useState<MediaDeviceInfo[]>([])
+    const [cameraIdx, setCameraIdx]         = useState(0)
+    const [loading, setLoading]             = useState(false)
+    const [zoom, setZoom]                   = useState(1)
+    const [lastScan, setLastScan]           = useState<string | null>(null)
+    const [flashActive, setFlashActive]     = useState(false)
 
     // ── Detect scan mode once on mount ────────────────────────────────────────
     useEffect(() => {
@@ -122,7 +122,7 @@ export default function BarcodeCamera({
         if (!scanMode) return
         navigator.mediaDevices.enumerateDevices().then(devices => {
             setCameras(devices.filter(d => d.kind === 'videoinput'))
-        }).catch(() => { })
+        }).catch(() => {})
     }, [scanMode])
 
     // ── Start / stop camera stream ─────────────────────────────────────────────
@@ -144,7 +144,7 @@ export default function BarcodeCamera({
             const constraints: MediaStreamConstraints = {
                 video: {
                     ...(deviceId ? { deviceId: { exact: deviceId } } : { facingMode: { ideal: 'environment' } }),
-                    width: { ideal: 1280 },
+                    width:  { ideal: 1280 },
                     height: { ideal: 720 },
                 },
                 audio: false,
@@ -345,19 +345,19 @@ export default function BarcodeCamera({
                         }}
                     >
                         {/* Corner marks */}
-                        {(['tl', 'tr', 'bl', 'br'] as const).map(pos => (
+                        {(['tl','tr','bl','br'] as const).map(pos => (
                             <span
                                 key={pos}
                                 className="absolute w-4 h-4"
                                 style={{
-                                    top: pos.startsWith('t') ? -2 : undefined,
+                                    top:    pos.startsWith('t') ? -2 : undefined,
                                     bottom: pos.startsWith('b') ? -2 : undefined,
-                                    left: pos.endsWith('l') ? -2 : undefined,
-                                    right: pos.endsWith('r') ? -2 : undefined,
-                                    borderTop: pos.startsWith('t') ? `3px solid ${C.accent}` : undefined,
+                                    left:   pos.endsWith('l')   ? -2 : undefined,
+                                    right:  pos.endsWith('r')   ? -2 : undefined,
+                                    borderTop:    pos.startsWith('t') ? `3px solid ${C.accent}` : undefined,
                                     borderBottom: pos.startsWith('b') ? `3px solid ${C.accent}` : undefined,
-                                    borderLeft: pos.endsWith('l') ? `3px solid ${C.accent}` : undefined,
-                                    borderRight: pos.endsWith('r') ? `3px solid ${C.accent}` : undefined,
+                                    borderLeft:   pos.endsWith('l')   ? `3px solid ${C.accent}` : undefined,
+                                    borderRight:  pos.endsWith('r')   ? `3px solid ${C.accent}` : undefined,
                                     borderRadius: pos === 'tl' ? '4px 0 0 0' : pos === 'tr' ? '0 4px 0 0' : pos === 'bl' ? '0 0 0 4px' : '0 0 4px 0',
                                 }}
                             />

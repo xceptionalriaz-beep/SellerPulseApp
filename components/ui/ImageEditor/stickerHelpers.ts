@@ -10,53 +10,53 @@ import type { StickerItem, StickerColorScheme, StickerShape } from './types'
 export const COLOR_SCHEMES: Record<StickerColorScheme, {
     bg: string; text: string; accent: string; shadow: string
 }> = {
-    red: { bg: '#ef4444', text: '#ffffff', accent: '#991b1b', shadow: 'rgba(185,28,28,0.45)' },
-    green: { bg: '#22c55e', text: '#ffffff', accent: '#166534', shadow: 'rgba(21,128,61,0.45)' },
-    blue: { bg: '#3b82f6', text: '#ffffff', accent: '#1e3a8a', shadow: 'rgba(29,78,216,0.45)' },
-    yellow: { bg: '#fbbf24', text: '#1c1917', accent: '#92400e', shadow: 'rgba(146,64,14,0.35)' },
-    purple: { bg: '#a855f7', text: '#ffffff', accent: '#581c87', shadow: 'rgba(88,28,135,0.45)' },
-    orange: { bg: '#f97316', text: '#ffffff', accent: '#7c2d12', shadow: 'rgba(124,45,18,0.45)' },
-    black: { bg: '#1f2937', text: '#ffffff', accent: '#030712', shadow: 'rgba(0,0,0,0.5)' },
+    red:    { bg: '#ef4444', text: '#ffffff', accent: '#991b1b', shadow: 'rgba(185,28,28,0.45)'  },
+    green:  { bg: '#22c55e', text: '#ffffff', accent: '#166534', shadow: 'rgba(21,128,61,0.45)'  },
+    blue:   { bg: '#3b82f6', text: '#ffffff', accent: '#1e3a8a', shadow: 'rgba(29,78,216,0.45)'  },
+    yellow: { bg: '#fbbf24', text: '#1c1917', accent: '#92400e', shadow: 'rgba(146,64,14,0.35)'  },
+    purple: { bg: '#a855f7', text: '#ffffff', accent: '#581c87', shadow: 'rgba(88,28,135,0.45)'  },
+    orange: { bg: '#f97316', text: '#ffffff', accent: '#7c2d12', shadow: 'rgba(124,45,18,0.45)'  },
+    black:  { bg: '#1f2937', text: '#ffffff', accent: '#030712', shadow: 'rgba(0,0,0,0.5)'       },
 }
 
 // ── Shape dimensions (viewBox w × h) ─────────────────────────
 export const SHAPE_DIMS: Record<StickerShape, { w: number; h: number }> = {
-    burst: { w: 100, h: 100 },
+    burst:  { w: 100, h: 100 },
     circle: { w: 100, h: 100 },
-    badge: { w: 110, h: 72 },
-    pill: { w: 140, h: 52 },
-    ribbon: { w: 120, h: 58 },
+    badge:  { w: 110, h: 72  },
+    pill:   { w: 140, h: 52  },
+    ribbon: { w: 120, h: 58  },
 }
 
 // ── Pre-built sticker presets ─────────────────────────────────
 export interface StickerPreset {
-    key: string
-    label: string
-    subLabel: string
-    shape: StickerShape
+    key:          string
+    label:        string
+    subLabel:     string
+    shape:        StickerShape
     defaultColor: StickerColorScheme
-    category: 'badge' | 'discount'
+    category:     'badge' | 'discount'
 }
 
 export const STICKER_PRESETS: StickerPreset[] = [
     // ── Text badges ────────────────────────────────────────────
-    { key: 'sale', label: 'SALE', subLabel: '', shape: 'burst', defaultColor: 'red', category: 'badge' },
-    { key: 'new', label: 'NEW', subLabel: '', shape: 'badge', defaultColor: 'green', category: 'badge' },
-    { key: 'hot', label: '🔥 HOT', subLabel: '', shape: 'badge', defaultColor: 'red', category: 'badge' },
-    { key: 'freeship', label: 'FREE', subLabel: 'SHIPPING', shape: 'pill', defaultColor: 'blue', category: 'badge' },
-    { key: 'bestprice', label: 'BEST', subLabel: 'PRICE', shape: 'ribbon', defaultColor: 'orange', category: 'badge' },
-    { key: 'limited', label: 'LIMITED', subLabel: 'OFFER', shape: 'ribbon', defaultColor: 'black', category: 'badge' },
-    { key: 'fastship', label: 'FAST', subLabel: 'SHIPPING', shape: 'badge', defaultColor: 'blue', category: 'badge' },
-    { key: 'clearance', label: 'CLEAR-', subLabel: 'ANCE', shape: 'burst', defaultColor: 'purple', category: 'badge' },
+    { key: 'sale',       label: 'SALE',    subLabel: '',         shape: 'burst',  defaultColor: 'red',    category: 'badge'    },
+    { key: 'new',        label: 'NEW',     subLabel: '',         shape: 'badge',  defaultColor: 'green',  category: 'badge'    },
+    { key: 'hot',        label: '🔥 HOT',  subLabel: '',         shape: 'badge',  defaultColor: 'red',    category: 'badge'    },
+    { key: 'freeship',   label: 'FREE',    subLabel: 'SHIPPING', shape: 'pill',   defaultColor: 'blue',   category: 'badge'    },
+    { key: 'bestprice',  label: 'BEST',    subLabel: 'PRICE',    shape: 'ribbon', defaultColor: 'orange', category: 'badge'    },
+    { key: 'limited',    label: 'LIMITED', subLabel: 'OFFER',    shape: 'ribbon', defaultColor: 'black',  category: 'badge'    },
+    { key: 'fastship',   label: 'FAST',    subLabel: 'SHIPPING', shape: 'badge',  defaultColor: 'blue',   category: 'badge'    },
+    { key: 'clearance',  label: 'CLEAR-',  subLabel: 'ANCE',     shape: 'burst',  defaultColor: 'purple', category: 'badge'    },
     // ── Discount badges ────────────────────────────────────────
-    { key: '10off', label: '10%', subLabel: 'OFF', shape: 'circle', defaultColor: 'yellow', category: 'discount' },
-    { key: '15off', label: '15%', subLabel: 'OFF', shape: 'circle', defaultColor: 'yellow', category: 'discount' },
-    { key: '20off', label: '20%', subLabel: 'OFF', shape: 'circle', defaultColor: 'orange', category: 'discount' },
-    { key: '25off', label: '25%', subLabel: 'OFF', shape: 'circle', defaultColor: 'orange', category: 'discount' },
-    { key: '30off', label: '30%', subLabel: 'OFF', shape: 'burst', defaultColor: 'red', category: 'discount' },
-    { key: '40off', label: '40%', subLabel: 'OFF', shape: 'burst', defaultColor: 'red', category: 'discount' },
-    { key: '50off', label: '50%', subLabel: 'OFF', shape: 'burst', defaultColor: 'red', category: 'discount' },
-    { key: '70off', label: '70%', subLabel: 'OFF', shape: 'burst', defaultColor: 'purple', category: 'discount' },
+    { key: '10off',  label: '10%',  subLabel: 'OFF', shape: 'circle', defaultColor: 'yellow', category: 'discount' },
+    { key: '15off',  label: '15%',  subLabel: 'OFF', shape: 'circle', defaultColor: 'yellow', category: 'discount' },
+    { key: '20off',  label: '20%',  subLabel: 'OFF', shape: 'circle', defaultColor: 'orange', category: 'discount' },
+    { key: '25off',  label: '25%',  subLabel: 'OFF', shape: 'circle', defaultColor: 'orange', category: 'discount' },
+    { key: '30off',  label: '30%',  subLabel: 'OFF', shape: 'burst',  defaultColor: 'red',    category: 'discount' },
+    { key: '40off',  label: '40%',  subLabel: 'OFF', shape: 'burst',  defaultColor: 'red',    category: 'discount' },
+    { key: '50off',  label: '50%',  subLabel: 'OFF', shape: 'burst',  defaultColor: 'red',    category: 'discount' },
+    { key: '70off',  label: '70%',  subLabel: 'OFF', shape: 'burst',  defaultColor: 'purple', category: 'discount' },
 ]
 
 // ── Starburst polygon points ──────────────────────────────────
@@ -64,7 +64,7 @@ function burstPoints(cx: number, cy: number, outerR: number, innerR: number, spi
     const pts: string[] = []
     for (let i = 0; i < spikes * 2; i++) {
         const angle = (i * Math.PI) / spikes - Math.PI / 2
-        const r = i % 2 === 0 ? outerR : innerR
+        const r     = i % 2 === 0 ? outerR : innerR
         pts.push(`${(cx + r * Math.cos(angle)).toFixed(2)},${(cy + r * Math.sin(angle)).toFixed(2)}`)
     }
     return pts.join(' ')
@@ -74,14 +74,14 @@ const BURST12 = burstPoints(50, 50, 49, 33, 12)
 
 // ── SVG string builder ────────────────────────────────────────
 export function buildStickerSvg(sticker: Pick<StickerItem, 'label' | 'subLabel' | 'shape' | 'colorScheme'>): string {
-    const c = COLOR_SCHEMES[sticker.colorScheme]
+    const c    = COLOR_SCHEMES[sticker.colorScheme]
     const dims = SHAPE_DIMS[sticker.shape]
     const { label, subLabel, shape } = sticker
     const twoLine = subLabel.length > 0
 
     // font sizes based on label length
-    const mainFs = (s: string, base: number) => s.length > 5 ? base - 4 : s.length > 3 ? base - 2 : base
-    const shd = `<filter id="s"><feDropShadow dx="0" dy="1.5" stdDeviation="2.5" flood-color="${c.shadow}"/></filter>`
+    const mainFs  = (s: string, base: number) => s.length > 5 ? base - 4 : s.length > 3 ? base - 2 : base
+    const shd     = `<filter id="s"><feDropShadow dx="0" dy="1.5" stdDeviation="2.5" flood-color="${c.shadow}"/></filter>`
 
     const hdr = `<svg xmlns="http://www.w3.org/2000/svg" width="${dims.w}" height="${dims.h}" viewBox="0 0 ${dims.w} ${dims.h}">`
 
@@ -152,32 +152,32 @@ export function buildStickerSvg(sticker: Pick<StickerItem, 'label' | 'subLabel' 
 
 // ── Emoji sticker categories ──────────────────────────────────
 export interface EmojiCategory {
-    id: string
-    label: string
+    id:     string
+    label:  string
     emojis: string[]
 }
 
 export const EMOJI_CATEGORIES: EmojiCategory[] = [
-    { id: 'shopping', label: '🛍️ Shopping', emojis: ['🛍️', '💎', '👑', '💰', '💯', '✅', '🔝', '🚀', '🏆', '🥇', '💲', '🎯'] },
-    { id: 'stars', label: '⭐ Stars', emojis: ['⭐', '🌟', '✨', '💫', '⚡', '🌠', '🌙', '☀️', '🌤️', '🌈', '❄️', '🔥'] },
-    { id: 'celebrations', label: '🎉 Celebrate', emojis: ['🎉', '🎊', '🎁', '🎈', '🥂', '🎖️', '🏅', '🎗️', '🎀', '🎆', '🎇', '🥳'] },
-    { id: 'hearts', label: '❤️ Hearts', emojis: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🤍', '🖤', '💕', '💖', '💗', '💝'] },
-    { id: 'faces', label: '😊 Faces', emojis: ['😊', '😍', '🥰', '😎', '🤩', '🥳', '😋', '🤑', '😄', '🤗', '😇', '🤩'] },
-    { id: 'hands', label: '👍 Reactions', emojis: ['👍', '👏', '🙌', '✌️', '🤝', '💪', '🤜', '👌', '☝️', '🖐️', '🤞', '👋'] },
-    { id: 'nature', label: '🌸 Nature', emojis: ['🌸', '🌺', '🌹', '🌻', '🍀', '🌿', '🍃', '🌲', '🌴', '🦋', '🐝', '🌊'] },
-    { id: 'food', label: '🍕 Food', emojis: ['🍕', '🍔', '🍦', '🎂', '🍰', '🍩', '☕', '🧃', '🍷', '🎁', '🍫', '🍓'] },
+    { id: 'shopping',     label: '🛍️ Shopping',    emojis: ['🛍️','💎','👑','💰','💯','✅','🔝','🚀','🏆','🥇','💲','🎯'] },
+    { id: 'stars',        label: '⭐ Stars',        emojis: ['⭐','🌟','✨','💫','⚡','🌠','🌙','☀️','🌤️','🌈','❄️','🔥'] },
+    { id: 'celebrations', label: '🎉 Celebrate',   emojis: ['🎉','🎊','🎁','🎈','🥂','🎖️','🏅','🎗️','🎀','🎆','🎇','🥳'] },
+    { id: 'hearts',       label: '❤️ Hearts',      emojis: ['❤️','🧡','💛','💚','💙','💜','🤍','🖤','💕','💖','💗','💝'] },
+    { id: 'faces',        label: '😊 Faces',       emojis: ['😊','😍','🥰','😎','🤩','🥳','😋','🤑','😄','🤗','😇','🤩'] },
+    { id: 'hands',        label: '👍 Reactions',   emojis: ['👍','👏','🙌','✌️','🤝','💪','🤜','👌','☝️','🖐️','🤞','👋'] },
+    { id: 'nature',       label: '🌸 Nature',      emojis: ['🌸','🌺','🌹','🌻','🍀','🌿','🍃','🌲','🌴','🦋','🐝','🌊'] },
+    { id: 'food',         label: '🍕 Food',        emojis: ['🍕','🍔','🍦','🎂','🍰','🍩','☕','🧃','🍷','🎁','🍫','🍓'] },
 ]
 
 // ── Render emoji to canvas data URL (browser-only) ────────────
 export function emojiToDataUrl(emoji: string, size = 120): string {
     if (typeof document === 'undefined') return ''
     const canvas = document.createElement('canvas')
-    canvas.width = size
+    canvas.width  = size
     canvas.height = size
     const ctx = canvas.getContext('2d')
     if (!ctx) return ''
-    ctx.font = `${Math.floor(size * 0.72)}px serif`
-    ctx.textAlign = 'center'
+    ctx.font         = `${Math.floor(size * 0.72)}px serif`
+    ctx.textAlign    = 'center'
     ctx.textBaseline = 'middle'
     ctx.fillText(emoji, size / 2, size / 2 + size * 0.04)
     return canvas.toDataURL()
@@ -196,12 +196,12 @@ export function stickerToDataUrl(
 // ── Canvas draw helper ────────────────────────────────────────
 // Loads sticker as an Image and draws it on ctx, centered at (cx, cy), rotated.
 export function drawStickerOnCanvas(
-    ctx: CanvasRenderingContext2D,
+    ctx:     CanvasRenderingContext2D,
     sticker: StickerItem,
-    cx: number,  // center x on canvas
-    cy: number,  // center y on canvas
-    w: number,  // display width
-    h: number,  // display height
+    cx:      number,  // center x on canvas
+    cy:      number,  // center y on canvas
+    w:       number,  // display width
+    h:       number,  // display height
 ): Promise<void> {
     return new Promise(resolve => {
         // Emoji stickers: draw directly with canvas text API (no CORS issues)
@@ -210,8 +210,8 @@ export function drawStickerOnCanvas(
             ctx.translate(cx, cy)
             if (sticker.rotation) ctx.rotate(sticker.rotation * Math.PI / 180)
             const fontSize = Math.floor(Math.min(w, h) * 0.82)
-            ctx.font = `${fontSize}px serif`
-            ctx.textAlign = 'center'
+            ctx.font         = `${fontSize}px serif`
+            ctx.textAlign    = 'center'
             ctx.textBaseline = 'middle'
             ctx.fillText(sticker.emoji, 0, fontSize * 0.04)
             ctx.restore()

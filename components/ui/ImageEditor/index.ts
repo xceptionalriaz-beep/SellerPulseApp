@@ -7,7 +7,7 @@
 
 // ── Main shell ────────────────────────────────────────────────
 export { default as ImageEditorModal } from './ImageEditorModal'
-export type { ImageEditorModalProps } from './ImageEditorModal'
+export type { ImageEditorModalProps }  from './ImageEditorModal'
 
 // ── State & defaults ──────────────────────────────────────────
 export { DEFAULT_STATE } from './types'

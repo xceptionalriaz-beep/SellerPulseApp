@@ -20,104 +20,104 @@ import type { BulkRow, ParsedRow } from './BulkUploadModal'
 // ─────────────────────────────────────────────────────────────
 
 export interface ColumnMeta {
-    key: string
-    label: string
+    key:         string
+    label:       string
     description: string
-    required: 'one_of_pair' | 'optional'
-    pair?: string         // the other column in a "one of these two" pair
-    type: 'string' | 'number' | 'enum' | 'url_list'
+    required:    'one_of_pair' | 'optional'
+    pair?:       string         // the other column in a "one of these two" pair
+    type:        'string' | 'number' | 'enum' | 'url_list'
     enumValues?: string[]
-    maxLength?: number
-    min?: number
-    max?: number
-    example: string
+    maxLength?:  number
+    min?:        number
+    max?:        number
+    example:     string
 }
 
 export const COLUMN_META: ColumnMeta[] = [
     {
-        key: 'title',
-        label: 'Title',
+        key:         'title',
+        label:       'Title',
         description: 'Product title — AI will optimise it for Cassini SEO',
-        required: 'one_of_pair',
-        pair: 'barcode',
-        type: 'string',
-        maxLength: 80,
-        example: 'Vintage Canon AE-1 35mm Film Camera Body',
+        required:    'one_of_pair',
+        pair:        'barcode',
+        type:        'string',
+        maxLength:   80,
+        example:     'Vintage Canon AE-1 35mm Film Camera Body',
     },
     {
-        key: 'barcode',
-        label: 'Barcode (EAN / UPC)',
+        key:         'barcode',
+        label:       'Barcode (EAN / UPC)',
         description: 'EAN-13 or UPC-A — triggers automatic barcode lookup',
-        required: 'one_of_pair',
-        pair: 'title',
-        type: 'string',
-        maxLength: 14,
-        example: '5055002556371',
+        required:    'one_of_pair',
+        pair:        'title',
+        type:        'string',
+        maxLength:   14,
+        example:     '5055002556371',
     },
     {
-        key: 'buy_price',
-        label: 'Buy Price (£)',
+        key:         'buy_price',
+        label:       'Buy Price (£)',
         description: 'Your cost — used for margin calculation',
-        required: 'optional',
-        type: 'number',
-        min: 0,
-        max: 999999,
-        example: '12.50',
+        required:    'optional',
+        type:        'number',
+        min:         0,
+        max:         999999,
+        example:     '12.50',
     },
     {
-        key: 'sell_price',
-        label: 'Sell Price (£)',
+        key:         'sell_price',
+        label:       'Sell Price (£)',
         description: 'Override the AI suggested sell price',
-        required: 'optional',
-        type: 'number',
-        min: 0,
-        max: 999999,
-        example: '34.99',
+        required:    'optional',
+        type:        'number',
+        min:         0,
+        max:         999999,
+        example:     '34.99',
     },
     {
-        key: 'sku',
-        label: 'SKU',
+        key:         'sku',
+        label:       'SKU',
         description: 'Your internal stock-keeping unit reference',
-        required: 'optional',
-        type: 'string',
-        maxLength: 40,
-        example: 'CAM-001',
+        required:    'optional',
+        type:        'string',
+        maxLength:   40,
+        example:     'CAM-001',
     },
     {
-        key: 'condition',
-        label: 'Condition',
+        key:         'condition',
+        label:       'Condition',
         description: 'Item condition — must be one of the allowed values',
-        required: 'optional',
-        type: 'enum',
-        enumValues: ['new', 'used', 'refurbished'],
-        example: 'used',
+        required:    'optional',
+        type:        'enum',
+        enumValues:  ['new', 'used', 'refurbished'],
+        example:     'used',
     },
     {
-        key: 'quantity',
-        label: 'Quantity',
+        key:         'quantity',
+        label:       'Quantity',
         description: 'Stock count to list',
-        required: 'optional',
-        type: 'number',
-        min: 0,
-        max: 9999,
-        example: '3',
+        required:    'optional',
+        type:        'number',
+        min:         0,
+        max:         9999,
+        example:     '3',
     },
     {
-        key: 'category_id',
-        label: 'eBay Category ID',
+        key:         'category_id',
+        label:       'eBay Category ID',
         description: 'eBay leaf category numeric ID — AI will suggest one if omitted',
-        required: 'optional',
-        type: 'string',
-        maxLength: 10,
-        example: '31388',
+        required:    'optional',
+        type:        'string',
+        maxLength:   10,
+        example:     '31388',
     },
     {
-        key: 'images',
-        label: 'Image URLs',
+        key:         'images',
+        label:       'Image URLs',
         description: 'Comma-separated https:// image URLs (max 12)',
-        required: 'optional',
-        type: 'url_list',
-        example: 'https://example.com/img1.jpg,https://example.com/img2.jpg',
+        required:    'optional',
+        type:        'url_list',
+        example:     'https://example.com/img1.jpg,https://example.com/img2.jpg',
     },
 ]
 
@@ -128,7 +128,7 @@ export const TEMPLATE_HEADERS = COLUMN_META.map(c => c.key)
 // ─────────────────────────────────────────────────────────────
 
 export function generateCSVTemplate(): string {
-    const header = TEMPLATE_HEADERS.join(',')
+    const header  = TEMPLATE_HEADERS.join(',')
     const example = COLUMN_META.map(c => {
         // Wrap in quotes if value contains a comma
         const v = c.example
@@ -148,8 +148,8 @@ function parseCSVText(text: string): string[][] {
     for (const line of lines) {
         if (!line.trim()) continue
         const cols: string[] = []
-        let cur = ''
-        let inQ = false
+        let cur  = ''
+        let inQ  = false
 
         for (let i = 0; i < line.length; i++) {
             const ch = line[i]
@@ -205,7 +205,7 @@ export function validateRow(raw: BulkRow): ParsedRow {
     const errors: string[] = []
 
     // ── Required: title OR barcode ────────────────────────────
-    const hasTitle = !!raw.title?.trim()
+    const hasTitle   = !!raw.title?.trim()
     const hasBarcode = !!raw.barcode?.trim()
     if (!hasTitle && !hasBarcode) {
         errors.push('Row needs a title or a barcode — at least one is required')
@@ -286,14 +286,14 @@ export function validateRow(raw: BulkRow): ParsedRow {
 // ─────────────────────────────────────────────────────────────
 
 export interface ParseResult {
-    ok: boolean
-    error?: string         // top-level file error (not per-row)
-    rows: ParsedRow[]
-    totalRows: number
-    validRows: number
-    invalidRows: number
-    missingColumns: string[]       // expected template columns not found in file
-    extraColumns: string[]       // columns in file not in template (info only)
+    ok:            boolean
+    error?:        string         // top-level file error (not per-row)
+    rows:          ParsedRow[]
+    totalRows:     number
+    validRows:     number
+    invalidRows:   number
+    missingColumns:string[]       // expected template columns not found in file
+    extraColumns:  string[]       // columns in file not in template (info only)
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -362,8 +362,8 @@ export async function parseFile(file: File): Promise<ParseResult> {
 
     const missingColumns = TEMPLATE_HEADERS.filter(h =>
         !fileHeaders.includes(h) &&
-            // Only warn about columns that are actually needed
-            ['title', 'barcode'].includes(h)
+        // Only warn about columns that are actually needed
+        ['title', 'barcode'].includes(h)
             ? false   // handled per-row in validateRow
             : false   // all columns are optional at file level
     )
@@ -382,17 +382,17 @@ export async function parseFile(file: File): Promise<ParseResult> {
     }
 
     // ── Map + validate every row ──────────────────────────────
-    const rawRows = matrixToRows(matrix)
-    const rows = rawRows.map(validateRow)
-    const valid = rows.filter(r => r._valid).length
-    const invalid = rows.filter(r => !r._valid).length
+    const rawRows  = matrixToRows(matrix)
+    const rows     = rawRows.map(validateRow)
+    const valid    = rows.filter(r => r._valid).length
+    const invalid  = rows.filter(r => !r._valid).length
 
     return {
-        ok: true,
+        ok:             true,
         rows,
-        totalRows: rows.length,
-        validRows: valid,
-        invalidRows: invalid,
+        totalRows:      rows.length,
+        validRows:      valid,
+        invalidRows:    invalid,
         missingColumns: [],
         extraColumns,
     }
@@ -404,8 +404,8 @@ export async function parseFile(file: File): Promise<ParseResult> {
 
 /** Apply the plan row cap and return the subset that will be sent to AI */
 export function applyPlanLimit(rows: ParsedRow[], limit: number): {
-    allowed: ParsedRow[]
-    blocked: ParsedRow[]
+    allowed:  ParsedRow[]
+    blocked:  ParsedRow[]
 } {
     const valid = rows.filter(r => r._valid)
     if (limit <= 0) return { allowed: valid, blocked: [] }
@@ -417,15 +417,15 @@ export function applyPlanLimit(rows: ParsedRow[], limit: number): {
 
 /** Summarise a finished queue for the summary screen */
 export interface QueueSummary {
-    total: number
-    done: number
+    total:    number
+    done:     number
     warnings: number   // generated but has VeRO warning / missing data
-    failed: number
+    failed:   number
 }
 
 export function summariseQueue(rows: Array<{ _status: string; _message: string }>): QueueSummary {
-    const done = rows.filter(r => r._status === 'done').length
-    const failed = rows.filter(r => r._status === 'error').length
+    const done     = rows.filter(r => r._status === 'done').length
+    const failed   = rows.filter(r => r._status === 'error').length
     const warnings = rows.filter(r => r._status === 'done' && r._message.toLowerCase().includes('warn')).length
     return { total: rows.length, done, warnings, failed }
 }

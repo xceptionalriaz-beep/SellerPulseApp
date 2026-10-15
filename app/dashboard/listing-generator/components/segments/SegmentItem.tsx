@@ -23,15 +23,15 @@ import type { Segment } from '../../types/segments.types'
 
 // ── Design tokens ─────────────────────────────────────────────
 const C = {
-    bg: '#f8f7ff',
-    surface: '#ffffff',
-    border: '#ede9fe',
-    primary: '#7530fb',
-    primaryLight: '#f3eeff',
-    dark: '#1e1535',
-    muted: '#9ca3af',
-    danger: '#ef4444',
-    dangerBg: '#fee2e2',
+    bg:          '#f8f7ff',
+    surface:     '#ffffff',
+    border:      '#ede9fe',
+    primary:     '#7530fb',
+    primaryLight:'#f3eeff',
+    dark:        '#1e1535',
+    muted:       '#9ca3af',
+    danger:      '#ef4444',
+    dangerBg:    '#fee2e2',
 }
 
 // ── Icon map (lucide name → component) ───────────────────────
@@ -49,12 +49,12 @@ function SegmentIcon({ name, color, size = 14 }: { name: string; color: string; 
 
 // ── Props ─────────────────────────────────────────────────────
 interface SegmentItemProps {
-    segment: Segment
+    segment:  Segment
     isActive: boolean
-    count: number
+    count:    number
     onSelect: () => void
-    onEdit?: () => void   // only for custom segments
-    onDelete?: () => void   // only for custom segments
+    onEdit?:  () => void   // only for custom segments
+    onDelete?:() => void   // only for custom segments
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -66,9 +66,9 @@ export function SegmentItem({
     onEdit,
     onDelete,
 }: SegmentItemProps) {
-    const [hovered, setHovered] = useState(false)
-    const [deleteConfirm, setDeleteConfirm] = useState(false)
-    const [deleteLoading, setDeleteLoading] = useState(false)
+    const [hovered,        setHovered]        = useState(false)
+    const [deleteConfirm,  setDeleteConfirm]  = useState(false)
+    const [deleteLoading,  setDeleteLoading]  = useState(false)
 
     const isCustom = !segment.isBuiltIn
 
@@ -88,29 +88,29 @@ export function SegmentItem({
             onMouseLeave={() => { setHovered(false); setDeleteConfirm(false) }}
             onClick={() => { if (!deleteConfirm) onSelect() }}
             style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '6px 10px',
-                borderRadius: 8,
-                cursor: deleteConfirm ? 'default' : 'pointer',
-                background: isActive ? C.primaryLight : hovered ? '#f3f0ff' : 'transparent',
-                transition: 'background 0.12s',
-                userSelect: 'none',
-                minHeight: 32,
+                display:       'flex',
+                alignItems:    'center',
+                gap:           8,
+                padding:       '6px 10px',
+                borderRadius:  8,
+                cursor:        deleteConfirm ? 'default' : 'pointer',
+                background:    isActive ? C.primaryLight : hovered ? '#f3f0ff' : 'transparent',
+                transition:    'background 0.12s',
+                userSelect:    'none',
+                minHeight:     32,
             }}
         >
             {/* ── Colored dot + icon ───────────────────────── */}
             <div
                 style={{
-                    width: 24,
-                    height: 24,
+                    width:        24,
+                    height:       24,
                     borderRadius: 6,
-                    background: segment.color + '1a',   // 10% opacity tint
-                    display: 'flex',
-                    alignItems: 'center',
+                    background:   segment.color + '1a',   // 10% opacity tint
+                    display:      'flex',
+                    alignItems:   'center',
                     justifyContent: 'center',
-                    flexShrink: 0,
+                    flexShrink:   0,
                 }}
             >
                 <SegmentIcon name={segment.icon} color={segment.color} size={13} />
@@ -119,14 +119,14 @@ export function SegmentItem({
             {/* ── Name ─────────────────────────────────────── */}
             <span
                 style={{
-                    flex: 1,
-                    fontSize: 13,
+                    flex:       1,
+                    fontSize:   13,
                     fontWeight: isActive ? 600 : 400,
-                    color: isActive ? C.primary : C.dark,
-                    overflow: 'hidden',
+                    color:      isActive ? C.primary : C.dark,
+                    overflow:   'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
-                    minWidth: 0,
+                    minWidth:   0,
                 }}
             >
                 {segment.name}
@@ -163,17 +163,17 @@ export function SegmentItem({
                     {/* ── Count badge ──────────────────────── */}
                     <span
                         style={{
-                            fontSize: 11,
-                            fontWeight: 500,
-                            color: isActive ? C.primary : C.muted,
-                            background: isActive ? C.primaryLight : C.bg,
-                            border: `1px solid ${isActive ? C.primary + '33' : C.border}`,
+                            fontSize:     11,
+                            fontWeight:   500,
+                            color:        isActive ? C.primary : C.muted,
+                            background:   isActive ? C.primaryLight : C.bg,
+                            border:       `1px solid ${isActive ? C.primary + '33' : C.border}`,
                             borderRadius: 20,
-                            padding: '1px 7px',
-                            minWidth: 24,
-                            textAlign: 'center',
-                            flexShrink: 0,
-                            lineHeight: '18px',
+                            padding:      '1px 7px',
+                            minWidth:     24,
+                            textAlign:    'center',
+                            flexShrink:   0,
+                            lineHeight:   '18px',
                         }}
                     >
                         {count}
@@ -197,11 +197,11 @@ export function SegmentItem({
                                     }}
                                     onMouseEnter={e => {
                                         (e.currentTarget as HTMLButtonElement).style.background = C.primaryLight
-                                            ; (e.currentTarget as HTMLButtonElement).style.color = C.primary
+                                        ;(e.currentTarget as HTMLButtonElement).style.color = C.primary
                                     }}
                                     onMouseLeave={e => {
                                         (e.currentTarget as HTMLButtonElement).style.background = 'transparent'
-                                            ; (e.currentTarget as HTMLButtonElement).style.color = C.muted
+                                        ;(e.currentTarget as HTMLButtonElement).style.color = C.muted
                                     }}
                                 >
                                     <Pencil size={11} />
@@ -219,11 +219,11 @@ export function SegmentItem({
                                     }}
                                     onMouseEnter={e => {
                                         (e.currentTarget as HTMLButtonElement).style.background = C.dangerBg
-                                            ; (e.currentTarget as HTMLButtonElement).style.color = C.danger
+                                        ;(e.currentTarget as HTMLButtonElement).style.color = C.danger
                                     }}
                                     onMouseLeave={e => {
                                         (e.currentTarget as HTMLButtonElement).style.background = 'transparent'
-                                            ; (e.currentTarget as HTMLButtonElement).style.color = C.muted
+                                        ;(e.currentTarget as HTMLButtonElement).style.color = C.muted
                                     }}
                                 >
                                     <Trash2 size={11} />

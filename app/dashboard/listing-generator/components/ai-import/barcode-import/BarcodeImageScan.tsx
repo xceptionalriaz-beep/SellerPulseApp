@@ -14,18 +14,18 @@ import { NotFoundException } from '@zxing/library'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
-    primary: '#7530fb',
+    primary:      '#7530fb',
     primaryLight: '#f3eeff',
-    accent: '#b8fa33',
-    bg: '#f8f7ff',
-    surface: '#ffffff',
-    border: '#ede9fe',
-    text: '#1a1523',
-    muted: '#6b7280',
-    error: '#ef4444',
-    errorLight: '#fef2f2',
-    warning: '#f59e0b',
-    success: '#22c55e',
+    accent:       '#b8fa33',
+    bg:           '#f8f7ff',
+    surface:      '#ffffff',
+    border:       '#ede9fe',
+    text:         '#1a1523',
+    muted:        '#6b7280',
+    error:        '#ef4444',
+    errorLight:   '#fef2f2',
+    warning:      '#f59e0b',
+    success:      '#22c55e',
     successLight: '#f0fdf4',
 } as const
 
@@ -47,9 +47,9 @@ export default function BarcodeImageScan({
     className = '',
 }: BarcodeImageScanProps) {
     const fileRef = useRef<HTMLInputElement>(null)
-    const [state, setState] = useState<ScanState>('idle')
+    const [state, setState]           = useState<ScanState>('idle')
     const [lastBarcode, setLastBarcode] = useState<string | null>(null)
-    const [preview, setPreview] = useState<string | null>(null)
+    const [preview, setPreview]       = useState<string | null>(null)
 
     const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -91,35 +91,35 @@ export default function BarcodeImageScan({
 
     // ── Button label & style based on state ───────────────────────────────────
     const label = {
-        idle: 'Scan from Image',
-        scanning: 'Reading image…',
-        found: `✓ ${lastBarcode ?? 'Found'}`,
+        idle:      'Scan from Image',
+        scanning:  'Reading image…',
+        found:     `✓ ${lastBarcode ?? 'Found'}`,
         not_found: 'No barcode found — try another photo',
-        error: 'Could not read image',
+        error:     'Could not read image',
     }[state]
 
     const buttonBg = {
-        idle: C.surface,
-        scanning: C.surface,
-        found: C.successLight,
+        idle:      C.surface,
+        scanning:  C.surface,
+        found:     C.successLight,
         not_found: '#fffbeb',
-        error: '#fef2f2',
+        error:     '#fef2f2',
     }[state]
 
     const buttonBorder = {
-        idle: C.border,
-        scanning: C.primary,
-        found: C.success,
+        idle:      C.border,
+        scanning:  C.primary,
+        found:     C.success,
         not_found: C.warning,
-        error: C.error,
+        error:     C.error,
     }[state]
 
     const labelColor = {
-        idle: C.primary,
-        scanning: C.primary,
-        found: C.success,
+        idle:      C.primary,
+        scanning:  C.primary,
+        found:     C.success,
         not_found: C.warning,
-        error: C.error,
+        error:     C.error,
     }[state]
 
     return (
@@ -141,9 +141,9 @@ export default function BarcodeImageScan({
                 className="w-full flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-80"
                 style={{
                     backgroundColor: buttonBg,
-                    border: `1.5px dashed ${buttonBorder}`,
-                    color: labelColor,
-                    fontFamily: 'DM Sans, sans-serif',
+                    border:          `1.5px dashed ${buttonBorder}`,
+                    color:           labelColor,
+                    fontFamily:      'DM Sans, sans-serif',
                 }}
                 title="Upload a photo of a barcode to scan it"
             >

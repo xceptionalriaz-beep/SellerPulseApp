@@ -10,32 +10,32 @@ import type { ToolPanelProps, TextOverlay } from '../types'
 
 // ── Tokens ─────────────────────────────────────────────────────
 const C = {
-    primary: '#7530fb',
+    primary:      '#7530fb',
     primaryLight: '#f3eeff',
-    primaryBorder: '#c4a8fd',
-    border: '#ede9fe',
-    borderMid: '#e5e7eb',
-    label: '#111827',
-    sub: '#6b7280',
-    muted: '#9ca3af',
-    surface: '#ffffff',
-    sectionBg: '#fafafa',
-    hover: '#f3f4f6',
-    danger: '#ef4444',
-    dangerLight: '#fef2f2',
+    primaryBorder:'#c4a8fd',
+    border:       '#ede9fe',
+    borderMid:    '#e5e7eb',
+    label:        '#111827',
+    sub:          '#6b7280',
+    muted:        '#9ca3af',
+    surface:      '#ffffff',
+    sectionBg:    '#fafafa',
+    hover:        '#f3f4f6',
+    danger:       '#ef4444',
+    dangerLight:  '#fef2f2',
     dangerBorder: '#fca5a5',
 }
 
 // ── Font options ───────────────────────────────────────────────
 const FONTS = [
-    { label: 'Arial', value: 'Arial, sans-serif' },
-    { label: 'Georgia', value: 'Georgia, serif' },
-    { label: 'Impact', value: 'Impact, sans-serif' },
-    { label: 'Verdana', value: 'Verdana, sans-serif' },
-    { label: 'Trebuchet', value: "'Trebuchet MS', sans-serif" },
-    { label: 'Palatino', value: "'Palatino Linotype', serif" },
-    { label: 'Courier', value: "'Courier New', monospace" },
-    { label: 'Comic Sans', value: "'Comic Sans MS', cursive" },
+    { label: 'Arial',        value: 'Arial, sans-serif' },
+    { label: 'Georgia',      value: 'Georgia, serif' },
+    { label: 'Impact',       value: 'Impact, sans-serif' },
+    { label: 'Verdana',      value: 'Verdana, sans-serif' },
+    { label: 'Trebuchet',    value: "'Trebuchet MS', sans-serif" },
+    { label: 'Palatino',     value: "'Palatino Linotype', serif" },
+    { label: 'Courier',      value: "'Courier New', monospace" },
+    { label: 'Comic Sans',   value: "'Comic Sans MS', cursive" },
 ]
 
 // ── Colour palette ─────────────────────────────────────────────
@@ -143,7 +143,7 @@ function ColorSwatch({ color, active, onClick }: {
                 border: active
                     ? `2.5px solid ${C.primary}`
                     : hov ? `2px solid ${C.sub}`
-                        : color === '#ffffff' ? `1.5px solid ${C.borderMid}` : '2px solid transparent',
+                    : color === '#ffffff' ? `1.5px solid ${C.borderMid}` : '2px solid transparent',
                 cursor: 'pointer', transition: 'border 0.1s',
                 boxShadow: active ? `0 0 0 2px ${C.primaryLight}` : 'none',
                 outline: 'none', padding: 0,
@@ -241,16 +241,16 @@ export default function TextTool({ state, onChange }: ToolPanelProps) {
 
     function addOverlay() {
         const newOverlay: TextOverlay = {
-            id: uid(),
-            text: 'Your text here',
-            x: 0.5,
-            y: 0.5,
-            fontSize: 36,
+            id:         uid(),
+            text:       'Your text here',
+            x:          0.5,
+            y:          0.5,
+            fontSize:   36,
             fontFamily: 'Arial, sans-serif',
-            color: '#ffffff',
-            bold: false,
-            italic: false,
-            align: 'center',
+            color:      '#ffffff',
+            bold:       false,
+            italic:     false,
+            align:      'center',
         }
         onChange({ textOverlays: [...overlays, newOverlay] })
     }

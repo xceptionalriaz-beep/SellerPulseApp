@@ -10,38 +10,38 @@ import type { ToolPanelProps } from '../types'
 
 // ── Tokens ────────────────────────────────────────────────────
 const C = {
-    primary: '#7530fb',
+    primary:      '#7530fb',
     primaryLight: '#f3eeff',
-    border: '#ede9fe',
-    borderMid: '#e5e7eb',
-    label: '#111827',
-    sub: '#6b7280',
-    muted: '#9ca3af',
-    surface: '#ffffff',
-    sectionBg: '#fafafa',
-    danger: '#ef4444',
-    dangerLight: '#fef2f2',
+    border:       '#ede9fe',
+    borderMid:    '#e5e7eb',
+    label:        '#111827',
+    sub:          '#6b7280',
+    muted:        '#9ca3af',
+    surface:      '#ffffff',
+    sectionBg:    '#fafafa',
+    danger:       '#ef4444',
+    dangerLight:  '#fef2f2',
     dangerBorder: '#fca5a5',
-    btnBg: '#f9fafb',
-    btnHov: '#f3eeff',
-    btnBorder: '#e5e7eb',
+    btnBg:        '#f9fafb',
+    btnHov:       '#f3eeff',
+    btnBorder:    '#e5e7eb',
 }
 
 // ── Aspect ratio definitions ──────────────────────────────────
 const RATIOS = [
-    { id: 'free', label: 'Free', w: 28, h: 22 },
+    { id: 'free',     label: 'Free',     w: 28, h: 22 },
     { id: 'original', label: 'Original', w: 28, h: 22 },
-    { id: '1:1', label: '1 : 1', w: 22, h: 22 },
-    { id: '4:3', label: '4 : 3', w: 28, h: 21 },
-    { id: '3:2', label: '3 : 2', w: 27, h: 18 },
-    { id: '16:9', label: '16 : 9', w: 32, h: 18 },
-    { id: '5:4', label: '5 : 4', w: 25, h: 20 },
-    { id: '4:5', label: '4 : 5', w: 20, h: 25 },
-    { id: '3:4', label: '3 : 4', w: 18, h: 24 },
-    { id: '2:3', label: '2 : 3', w: 16, h: 24 },
-    { id: '9:16', label: '9 : 16', w: 16, h: 28 },
-    { id: '21:9', label: '21 : 9', w: 36, h: 14 },
-    { id: 'golden', label: 'Golden', w: 30, h: 18 },
+    { id: '1:1',      label: '1 : 1',    w: 22, h: 22 },
+    { id: '4:3',      label: '4 : 3',    w: 28, h: 21 },
+    { id: '3:2',      label: '3 : 2',    w: 27, h: 18 },
+    { id: '16:9',     label: '16 : 9',   w: 32, h: 18 },
+    { id: '5:4',      label: '5 : 4',    w: 25, h: 20 },
+    { id: '4:5',      label: '4 : 5',    w: 20, h: 25 },
+    { id: '3:4',      label: '3 : 4',    w: 18, h: 24 },
+    { id: '2:3',      label: '2 : 3',    w: 16, h: 24 },
+    { id: '9:16',     label: '9 : 16',   w: 16, h: 28 },
+    { id: '21:9',     label: '21 : 9',   w: 36, h: 14 },
+    { id: 'golden',   label: 'Golden',   w: 30, h: 18 },
 ] as const
 
 type RatioId = typeof RATIOS[number]['id']
@@ -168,7 +168,7 @@ function SliderRow({ label, hint, value, min, max, step = 1, def = 0, onChange, 
 }) {
     const [hovReset, setHovReset] = React.useState(false)
     const isDirty = value !== def
-    const pct = ((value - min) / (max - min)) * 100
+    const pct     = ((value - min) / (max - min)) * 100
     const display = format ? format(value) : (value > 0 && min < 0 ? `+${value}` : String(value))
 
     return (
@@ -230,10 +230,10 @@ function SliderRow({ label, hint, value, min, max, step = 1, def = 0, onChange, 
 export default function CropTool({ state, onChange }: ToolPanelProps) {
     const [hovReset, setHovReset] = React.useState(false)
 
-    const straighten = state.straighten ?? 0
+    const straighten   = state.straighten   ?? 0
     const cornerRadius = state.cornerRadius ?? 0
-    const cropGrid = state.cropGrid ?? 'none'
-    const aspectLock = (state.aspectLock ?? 'free') as RatioId
+    const cropGrid     = state.cropGrid     ?? 'none'
+    const aspectLock   = (state.aspectLock  ?? 'free') as RatioId
 
     const hasChanges =
         aspectLock !== 'free' ||

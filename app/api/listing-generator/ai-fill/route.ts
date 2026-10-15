@@ -16,9 +16,9 @@
 // ─────────────────────────────────────────────────────────────
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { createClient }              from '@supabase/supabase-js'
+import { createServerClient }        from '@supabase/ssr'
+import { cookies }                   from 'next/headers'
 
 export const maxDuration = 60
 
@@ -35,9 +35,9 @@ const supabaseAdmin = createClient(
 type SlotRole = 'headline' | 'key_features' | 'description' | 'condition_note' | 'trust_statement'
 
 interface TemplateSlot {
-    role: SlotRole
+    role:    SlotRole
     blockId: string
-    label: string
+    label:   string
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -91,10 +91,10 @@ function buildAiFillPrompt(
     slots: TemplateSlot[]
 ): string {
     const roleDescriptions: Record<SlotRole, string> = {
-        headline: 'A catchy 1-sentence listing headline (max 80 chars), keyword-rich for eBay Cassini SEO',
-        key_features: 'Exactly 5 bullet points, each starting with "✓ ", separated by newline characters (\\n). No HTML.',
-        description: '2–3 short sentences of persuasive product copy. No HTML tags.',
-        condition_note: '1–2 sentences describing the item\'s condition naturally. No HTML.',
+        headline:        'A catchy 1-sentence listing headline (max 80 chars), keyword-rich for eBay Cassini SEO',
+        key_features:    'Exactly 5 bullet points, each starting with "✓ ", separated by newline characters (\\n). No HTML.',
+        description:     '2–3 short sentences of persuasive product copy. No HTML tags.',
+        condition_note:  '1–2 sentences describing the item\'s condition naturally. No HTML.',
         trust_statement: '1 short buyer-confidence sentence (e.g. "Fast shipping · 30-day returns"). No HTML.',
     }
 
@@ -103,7 +103,7 @@ function buildAiFillPrompt(
         .join(',\n')
 
     const condNote = conditionDescription ? `\nCondition details: ${conditionDescription}` : ''
-    const catNote = category ? `\nCategory: ${category}` : ''
+    const catNote  = category ? `\nCategory: ${category}` : ''
 
     return `You are an expert eBay listing writer. Generate content for these template slots.
 
@@ -129,14 +129,14 @@ async function callAnthropic(apiKey: string, prompt: string): Promise<Record<str
     const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey,
+            'Content-Type':      'application/json',
+            'x-api-key':         apiKey,
             'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
-            model: 'claude-haiku-4-5-20251001',
+            model:      'claude-haiku-4-5-20251001',
             max_tokens: 800,
-            messages: [{ role: 'user', content: prompt }],
+            messages:   [{ role: 'user', content: prompt }],
         }),
         signal: AbortSignal.timeout(25_000),
     })
@@ -156,7 +156,7 @@ async function callGemini(apiKey: string, prompt: string): Promise<Record<string
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }],
+                contents:         [{ parts: [{ text: prompt }] }],
                 generationConfig: { maxOutputTokens: 800, temperature: 0.7 },
             }),
             signal: AbortSignal.timeout(25_000),
@@ -339,10 +339,10 @@ export async function POST(req: NextRequest) {
 
     // ── 5. Build prompt ──────────────────────────────────────────────────────
     const prompt = buildAiFillPrompt(
-        draft.title ?? 'Untitled product',
-        draft.condition ?? 'New',
+        draft.title         ?? 'Untitled product',
+        draft.condition     ?? 'New',
         draft.condition_description ?? null,
-        draft.category ?? null,
+        draft.category      ?? null,
         slots
     )
 
@@ -396,7 +396,7 @@ export async function POST(req: NextRequest) {
 
     // ── 8. Return ────────────────────────────────────────────────────────────
     return NextResponse.json({
-        ok: true,
+        ok:         true,
         filledHtml,
         provider,
         slotsApplied: slots.map(s => s.role),

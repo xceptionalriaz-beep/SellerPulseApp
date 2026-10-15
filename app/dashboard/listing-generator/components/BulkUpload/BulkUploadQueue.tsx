@@ -46,9 +46,9 @@ function exportQueueCSV(rows: QueueRow[]) {
         lines.push(cells.join(','))
     }
     const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href     = url
     a.download = `bulk-results-${new Date().toISOString().slice(0, 10)}.csv`
     a.click()
     URL.revokeObjectURL(url)
@@ -56,75 +56,75 @@ function exportQueueCSV(rows: QueueRow[]) {
 
 // ── Design tokens ─────────────────────────────────────────────
 const C = {
-    bg: '#f8f7ff',
-    surface: '#ffffff',
-    border: '#ede9fe',
-    primary: '#7530fb',
+    bg:           '#f8f7ff',
+    surface:      '#ffffff',
+    border:       '#ede9fe',
+    primary:      '#7530fb',
     primaryLight: '#f3eeff',
-    accent: '#b8fa33',
-    accentText: '#1e1535',
-    dark: '#1e1535',
-    secondary: '#6b7280',
-    muted: '#9ca3af',
-    success: '#16a34a',
-    successBg: '#dcfce7',
-    warning: '#d97706',
-    warningBg: '#fef3c7',
-    danger: '#ef4444',
-    dangerBg: '#fee2e2',
-    info: '#0ea5e9',
-    infoBg: '#e0f2fe',
+    accent:       '#b8fa33',
+    accentText:   '#1e1535',
+    dark:         '#1e1535',
+    secondary:    '#6b7280',
+    muted:        '#9ca3af',
+    success:      '#16a34a',
+    successBg:    '#dcfce7',
+    warning:      '#d97706',
+    warningBg:    '#fef3c7',
+    danger:       '#ef4444',
+    dangerBg:     '#fee2e2',
+    info:         '#0ea5e9',
+    infoBg:       '#e0f2fe',
 }
 
 // ── Status config ─────────────────────────────────────────────
 const STATUS_CFG = {
     pending: {
-        icon: <Clock size={15} style={{ color: '#9ca3af' }} />,
+        icon:  <Clock size={15} style={{ color: '#9ca3af' }} />,
         color: '#9ca3af',
-        bg: 'transparent',
+        bg:    'transparent',
         label: 'Waiting',
     },
     generating: {
-        icon: <Loader2 size={15} style={{ color: '#7530fb', animation: 'spin 1s linear infinite' }} />,
+        icon:  <Loader2 size={15} style={{ color: '#7530fb', animation: 'spin 1s linear infinite' }} />,
         color: C.primary,
-        bg: C.primaryLight,
+        bg:    C.primaryLight,
         label: 'Generating…',
     },
     done: {
-        icon: <CheckCircle2 size={15} style={{ color: '#16a34a' }} />,
+        icon:  <CheckCircle2 size={15} style={{ color: '#16a34a' }} />,
         color: C.success,
-        bg: C.successBg,
+        bg:    C.successBg,
         label: 'Done',
     },
     error: {
-        icon: <XCircle size={15} style={{ color: '#ef4444' }} />,
+        icon:  <XCircle size={15} style={{ color: '#ef4444' }} />,
         color: C.danger,
-        bg: C.dangerBg,
+        bg:    C.dangerBg,
         label: 'Failed',
     },
 } as const
 
 // ── Props ─────────────────────────────────────────────────────
 interface BulkUploadQueueProps {
-    rows: QueueRow[]
+    rows:     QueueRow[]
     onCancel: () => void
-    onDone: () => void
+    onDone:   () => void
 }
 
 // ─────────────────────────────────────────────────────────────
 export function BulkUploadQueue({ rows, onCancel, onDone }: BulkUploadQueueProps) {
-    const listRef = useRef<HTMLDivElement>(null)
-    const prevDoneRef = useRef(0)
+    const listRef      = useRef<HTMLDivElement>(null)
+    const prevDoneRef  = useRef(0)
     const doneFiredRef = useRef(false)   // guard: fire onDone exactly once
 
     // ── Derived stats ─────────────────────────────────────────
-    const total = rows.length
-    const done = rows.filter(r => r._status === 'done').length
-    const failed = rows.filter(r => r._status === 'error').length
+    const total      = rows.length
+    const done       = rows.filter(r => r._status === 'done').length
+    const failed     = rows.filter(r => r._status === 'error').length
     const generating = rows.filter(r => r._status === 'generating').length
-    const pending = rows.filter(r => r._status === 'pending').length
-    const settled = done + failed
-    const pct = total > 0 ? Math.round((settled / total) * 100) : 0
+    const pending    = rows.filter(r => r._status === 'pending').length
+    const settled    = done + failed
+    const pct        = total > 0 ? Math.round((settled / total) * 100) : 0
     const isFinished = settled === total && total > 0
 
     // ── Auto-scroll to the active row ─────────────────────────
@@ -156,7 +156,7 @@ export function BulkUploadQueue({ rows, onCancel, onDone }: BulkUploadQueueProps
 
     // ── Row label ─────────────────────────────────────────────
     function rowLabel(row: QueueRow): string {
-        if (row.title) return row.title.length > 52 ? row.title.slice(0, 52) + '…' : row.title
+        if (row.title)   return row.title.length > 52 ? row.title.slice(0, 52) + '…' : row.title
         if (row.barcode) return `Barcode: ${row.barcode}`
         return `Row ${row._rowIndex}`
     }
@@ -166,36 +166,36 @@ export function BulkUploadQueue({ rows, onCancel, onDone }: BulkUploadQueueProps
         <>
             {/* Backdrop */}
             <div style={{
-                position: 'fixed', inset: 0,
+                position:   'fixed', inset: 0,
                 background: 'rgba(30,21,53,0.45)',
                 backdropFilter: 'blur(4px)',
-                zIndex: 1000,
-                display: 'flex',
+                zIndex:     1000,
+                display:    'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
             }}>
                 {/* Panel */}
                 <div style={{
-                    width: '100%',
-                    maxWidth: 520,
-                    maxHeight: '88vh',
-                    background: C.surface,
+                    width:        '100%',
+                    maxWidth:     520,
+                    maxHeight:    '88vh',
+                    background:   C.surface,
                     borderRadius: 20,
-                    boxShadow: '0 24px 64px rgba(117,48,251,0.18)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    overflow: 'hidden',
-                    margin: '0 16px',
+                    boxShadow:    '0 24px 64px rgba(117,48,251,0.18)',
+                    display:      'flex',
+                    flexDirection:'column',
+                    overflow:     'hidden',
+                    margin:       '0 16px',
                 }}>
 
                     {/* ── Header ──────────────────────────────── */}
                     <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
+                        display:        'flex',
+                        alignItems:     'center',
                         justifyContent: 'space-between',
-                        padding: '18px 22px',
-                        borderBottom: `1px solid ${C.border}`,
-                        flexShrink: 0,
+                        padding:        '18px 22px',
+                        borderBottom:   `1px solid ${C.border}`,
+                        flexShrink:     0,
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                             <div style={{
@@ -270,13 +270,13 @@ export function BulkUploadQueue({ rows, onCancel, onDone }: BulkUploadQueueProps
                         }}>
                             {/* Fill */}
                             <div style={{
-                                height: '100%',
-                                width: `${pct}%`,
+                                height:     '100%',
+                                width:      `${pct}%`,
                                 borderRadius: 99,
-                                background: isFinished && failed === 0
+                                background:   isFinished && failed === 0
                                     ? `linear-gradient(90deg, ${C.success}, #4ade80)`
                                     : `linear-gradient(90deg, ${C.primary}, #a78bfa)`,
-                                transition: 'width 0.4s ease',
+                                transition:   'width 0.4s ease',
                             }} />
                         </div>
 
@@ -286,10 +286,10 @@ export function BulkUploadQueue({ rows, onCancel, onDone }: BulkUploadQueueProps
                             flexWrap: 'wrap',
                         }}>
                             {[
-                                { label: 'Done', value: done, color: C.success, bg: C.successBg, show: true },
-                                { label: 'Generating', value: generating, color: C.primary, bg: C.primaryLight, show: !isFinished },
-                                { label: 'Waiting', value: pending, color: C.muted, bg: C.bg, show: !isFinished },
-                                { label: 'Failed', value: failed, color: C.danger, bg: C.dangerBg, show: failed > 0 },
+                                { label: 'Done',       value: done,       color: C.success, bg: C.successBg,    show: true         },
+                                { label: 'Generating', value: generating,  color: C.primary, bg: C.primaryLight, show: !isFinished  },
+                                { label: 'Waiting',    value: pending,     color: C.muted,   bg: C.bg,           show: !isFinished  },
+                                { label: 'Failed',     value: failed,      color: C.danger,  bg: C.dangerBg,     show: failed > 0   },
                             ].filter(s => s.show).map(stat => (
                                 <div key={stat.label} style={{
                                     display: 'flex', alignItems: 'center', gap: 5,
@@ -316,22 +316,22 @@ export function BulkUploadQueue({ rows, onCancel, onDone }: BulkUploadQueueProps
                         }}
                     >
                         {rows.map((row, i) => {
-                            const cfg = STATUS_CFG[row._status]
+                            const cfg    = STATUS_CFG[row._status]
                             const active = row._status === 'generating'
                             return (
                                 <div
                                     key={row._rowIndex}
                                     data-active={active}
                                     style={{
-                                        display: 'flex',
-                                        alignItems: 'flex-start',
-                                        gap: 10,
-                                        padding: '9px 10px',
+                                        display:      'flex',
+                                        alignItems:   'flex-start',
+                                        gap:          10,
+                                        padding:      '9px 10px',
                                         borderRadius: 10,
                                         marginBottom: 2,
-                                        background: active ? C.primaryLight : i % 2 === 0 ? C.bg : 'transparent',
-                                        border: active ? `1px solid ${C.primary}33` : '1px solid transparent',
-                                        transition: 'background 0.2s, border 0.2s',
+                                        background:   active ? C.primaryLight : i % 2 === 0 ? C.bg : 'transparent',
+                                        border:       active ? `1px solid ${C.primary}33` : '1px solid transparent',
+                                        transition:   'background 0.2s, border 0.2s',
                                     }}
                                 >
                                     {/* Status icon */}
@@ -347,30 +347,30 @@ export function BulkUploadQueue({ rows, onCancel, onDone }: BulkUploadQueueProps
                                     {/* Row info */}
                                     <div style={{ flex: 1, minWidth: 0 }}>
                                         <div style={{
-                                            fontSize: 13,
-                                            fontWeight: active ? 600 : 400,
-                                            color: active ? C.primary : C.dark,
-                                            overflow: 'hidden',
+                                            fontSize:     13,
+                                            fontWeight:   active ? 600 : 400,
+                                            color:        active ? C.primary : C.dark,
+                                            overflow:     'hidden',
                                             textOverflow: 'ellipsis',
-                                            whiteSpace: 'nowrap',
-                                            fontFamily: 'DM Sans, sans-serif',
-                                            transition: 'color 0.2s',
+                                            whiteSpace:   'nowrap',
+                                            fontFamily:   'DM Sans, sans-serif',
+                                            transition:   'color 0.2s',
                                         }}>
                                             {rowLabel(row)}
                                         </div>
                                         {row._message && (
                                             <div style={{
-                                                fontSize: 11,
-                                                marginTop: 2,
-                                                color: row._status === 'error'
+                                                fontSize:   11,
+                                                marginTop:  2,
+                                                color:      row._status === 'error'
                                                     ? C.danger
                                                     : row._status === 'done'
                                                         ? C.success
                                                         : C.muted,
                                                 fontFamily: 'DM Sans, sans-serif',
-                                                display: 'flex',
+                                                display:    'flex',
                                                 alignItems: 'center',
-                                                gap: 4,
+                                                gap:        4,
                                             }}>
                                                 {row._status === 'error' && (
                                                     <AlertTriangle size={10} style={{ flexShrink: 0 }} />
@@ -382,11 +382,11 @@ export function BulkUploadQueue({ rows, onCancel, onDone }: BulkUploadQueueProps
 
                                     {/* Row number */}
                                     <span style={{
-                                        fontSize: 11,
-                                        color: C.muted,
+                                        fontSize:   11,
+                                        color:      C.muted,
                                         fontFamily: 'DM Sans, sans-serif',
                                         flexShrink: 0,
-                                        marginTop: 2,
+                                        marginTop:  2,
                                     }}>
                                         #{row._rowIndex}
                                     </span>
@@ -398,15 +398,15 @@ export function BulkUploadQueue({ rows, onCancel, onDone }: BulkUploadQueueProps
                     {/* ── Footer (only when finished) ───────────── */}
                     {isFinished && (
                         <div style={{
-                            padding: '14px 22px',
-                            borderTop: `1px solid ${C.border}`,
-                            flexShrink: 0,
-                            display: 'flex',
-                            alignItems: 'center',
+                            padding:      '14px 22px',
+                            borderTop:    `1px solid ${C.border}`,
+                            flexShrink:   0,
+                            display:      'flex',
+                            alignItems:   'center',
                             justifyContent: 'space-between',
-                            gap: 10,
-                            background: C.surface,
-                            flexWrap: 'wrap',
+                            gap:          10,
+                            background:   C.surface,
+                            flexWrap:     'wrap',
                         }}>
                             {/* Export CSV */}
                             <button
@@ -432,10 +432,10 @@ export function BulkUploadQueue({ rows, onCancel, onDone }: BulkUploadQueueProps
                                     fontSize: 13, fontWeight: 700,
                                     border: 'none',
                                     background: C.accent,
-                                    color: C.accentText,
-                                    cursor: 'pointer',
+                                    color:      C.accentText,
+                                    cursor:     'pointer',
                                     fontFamily: 'Syne, sans-serif',
-                                    boxShadow: '0 4px 12px rgba(184,250,51,0.35)',
+                                    boxShadow:  '0 4px 12px rgba(184,250,51,0.35)',
                                 }}
                             >
                                 View in Dashboard

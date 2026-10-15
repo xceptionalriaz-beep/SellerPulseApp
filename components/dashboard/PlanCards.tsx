@@ -9,55 +9,55 @@ import { Check, X, ArrowRight, RefreshCw } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 
 const T = {
-  surface: '#ffffff',
-  bg: '#f9fdf4',
-  border: '#e8ede2',
+  surface:      '#ffffff',
+  bg:           '#f9fdf4',
+  border:       '#e8ede2',
   accentBorder: 'rgba(143,255,0,0.35)',
-  lime: '#8fff00',
-  limeDeep: '#4a8f00',
-  limeTint: '#f4ffe6',
-  dark: '#0a0d08',
-  muted: '#8a9e78',
-  text: '#1a2410',
+  lime:         '#8fff00',
+  limeDeep:     '#4a8f00',
+  limeTint:     '#f4ffe6',
+  dark:         '#0a0d08',
+  muted:        '#8a9e78',
+  text:         '#1a2410',
 }
 
 interface DBPlan {
-  id: string
-  plan_id: string
-  sort_order: number
-  name: string
-  price: string
-  period: string
-  price_annual: string | null
+  id:                 string
+  plan_id:            string
+  sort_order:         number
+  name:               string
+  price:              string
+  period:             string
+  price_annual:       string | null
   price_annual_total: string | null
-  description: string
-  features: { text: string; included: boolean }[]
-  cta_text: string
-  highlight: boolean
-  is_active: boolean
+  description:        string
+  features:           { text: string; included: boolean }[]
+  cta_text:           string
+  highlight:          boolean
+  is_active:          boolean
 }
 
 const PLAN_STYLE: Record<string, { bg: string; border: string; badge?: string }> = {
-  free: { bg: T.surface, border: T.border },
-  starter: { bg: T.surface, border: T.accentBorder },
-  growth: { bg: T.dark, border: T.lime, badge: 'MOST POPULAR' },
-  custom: { bg: '#0f172a', border: '#6366f1', badge: 'ENTERPRISE' },
+  free:    { bg: T.surface, border: T.border                          },
+  starter: { bg: T.surface, border: T.accentBorder                   },
+  growth:  { bg: T.dark,    border: T.lime,    badge: 'MOST POPULAR' },
+  custom:  { bg: '#0f172a', border: '#6366f1', badge: 'ENTERPRISE'   },
 }
 
 interface Props {
   currentPlan: string
-  isAnnual: boolean
+  isAnnual:    boolean
   onBillingToggle: () => void
 }
 
 export default function PlanCards({ currentPlan, isAnnual, onBillingToggle }: Props) {
   const supabase = createClient()
-  const router = useRouter()
+  const router   = useRouter()
 
-  const [plans, setPlans] = useState<DBPlan[]>([])
-  const [loaded, setLoaded] = useState(false)
+  const [plans,           setPlans]           = useState<DBPlan[]>([])
+  const [loaded,          setLoaded]          = useState(false)
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null)
-  const [hoveredPlan, setHoveredPlan] = useState<string | null>(null)
+  const [hoveredPlan,     setHoveredPlan]     = useState<string | null>(null)
 
   useEffect(() => { loadPlans() }, [])
 
@@ -89,7 +89,7 @@ export default function PlanCards({ currentPlan, isAnnual, onBillingToggle }: Pr
   if (!loaded) return (
     <div className="flex items-center justify-center py-10">
       <div className="w-6 h-6 rounded-full border-2 border-transparent animate-spin"
-        style={{ borderTopColor: T.lime }} />
+           style={{ borderTopColor: T.lime }} />
     </div>
   )
 
@@ -116,13 +116,13 @@ export default function PlanCards({ currentPlan, isAnnual, onBillingToggle }: Pr
           style={{ backgroundColor: isAnnual ? T.dark : T.border }}
         >
           <div style={{
-            position: 'absolute',
-            top: 2, left: 2,
-            width: 20, height: 20,
-            borderRadius: '50%',
+            position:        'absolute',
+            top:             2, left: 2,
+            width:           20, height: 20,
+            borderRadius:    '50%',
             backgroundColor: isAnnual ? T.lime : T.surface,
-            transform: isAnnual ? 'translateX(24px)' : 'translateX(0)',
-            transition: 'transform 0.2s ease',
+            transform:       isAnnual ? 'translateX(24px)' : 'translateX(0)',
+            transition:      'transform 0.2s ease',
           }} />
         </button>
         <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 600, color: isAnnual ? T.dark : T.muted }}>
@@ -141,12 +141,12 @@ export default function PlanCards({ currentPlan, isAnnual, onBillingToggle }: Pr
       {/* Cards grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         {plans.map((plan, index) => {
-          const style = PLAN_STYLE[plan.plan_id] ?? PLAN_STYLE.free
-          const isDark = plan.plan_id === 'growth' || plan.plan_id === 'custom'
-          const isCustom = plan.plan_id === 'custom'
+          const style     = PLAN_STYLE[plan.plan_id] ?? PLAN_STYLE.free
+          const isDark    = plan.plan_id === 'growth' || plan.plan_id === 'custom'
+          const isCustom  = plan.plan_id === 'custom'
           const isCurrent = currentPlan?.toLowerCase() === plan.plan_id
-          const yes = plan.features.filter(f => f.included)
-          const no = plan.features.filter(f => !f.included)
+          const yes       = plan.features.filter(f => f.included)
+          const no        = plan.features.filter(f => !f.included)
 
           const isHovered = hoveredPlan === plan.plan_id
 
@@ -159,42 +159,43 @@ export default function PlanCards({ currentPlan, isAnnual, onBillingToggle }: Pr
               style={{
                 animationDelay: `${index * 80}ms`,
                 backgroundColor: style.bg,
-                border: `${isCurrent || plan.highlight ? 2 : 1}px solid ${isCurrent && isHovered ? T.lime :
-                    isCurrent ? T.lime :
-                      isHovered && !isDark ? 'rgba(143,255,0,0.4)' :
-                        style.border
-                  }`,
+                border: `${isCurrent || plan.highlight ? 2 : 1}px solid ${
+                  isCurrent && isHovered ? T.lime :
+                  isCurrent ? T.lime :
+                  isHovered && !isDark ? 'rgba(143,255,0,0.4)' :
+                  style.border
+                }`,
                 boxShadow: isCurrent && isHovered ? `0 12px 32px rgba(143,255,0,0.2)` :
-                  isCurrent ? `0 8px 24px rgba(143,255,0,0.12)` :
-                    plan.highlight ? '0 8px 24px rgba(143,255,0,0.1)' :
-                      isCustom ? '0 8px 24px rgba(99,102,241,0.1)' : 'none',
+                           isCurrent      ? `0 8px 24px rgba(143,255,0,0.12)` :
+                           plan.highlight ? '0 8px 24px rgba(143,255,0,0.1)'  :
+                           isCustom       ? '0 8px 24px rgba(99,102,241,0.1)' : 'none',
                 transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
                 transition: 'all 0.2s ease',
                 cursor: isCurrent ? 'default' : 'pointer',
               }}
             >
-              {/* Hover shimmer for current plan */}
-              {isCurrent && isHovered && (
-                <div
-                  className="absolute inset-0 pointer-events-none"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(143,255,0,0.04) 0%, transparent 60%)',
-                    borderRadius: 'inherit',
-                  }}
-                />
-              )}
+            {/* Hover shimmer for current plan */}
+            {isCurrent && isHovered && (
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(143,255,0,0.04) 0%, transparent 60%)',
+                  borderRadius: 'inherit',
+                }}
+              />
+            )}
               {/* Badge */}
               {(style.badge || isCurrent) && (
                 <div className="px-4 pt-4">
                   <span
                     className="inline-flex items-center gap-1.5 font-black rounded-full"
                     style={{
-                      backgroundColor: isCurrent ? T.lime : isCustom ? '#6366f1' : T.lime,
-                      color: isCurrent ? T.dark : isCustom ? '#fff' : T.dark,
-                      fontSize: isCurrent ? 11 : 9,
-                      padding: isCurrent ? '4px 12px' : '2px 8px',
-                      boxShadow: isCurrent ? `0 0 12px rgba(143,255,0,0.5)` : 'none',
-                      letterSpacing: '0.06em',
+                      backgroundColor: isCurrent ? T.lime    : isCustom ? '#6366f1' : T.lime,
+                      color:           isCurrent ? T.dark    : isCustom ? '#fff'    : T.dark,
+                      fontSize:        isCurrent ? 11        : 9,
+                      padding:         isCurrent ? '4px 12px': '2px 8px',
+                      boxShadow:       isCurrent ? `0 0 12px rgba(143,255,0,0.5)` : 'none',
+                      letterSpacing:   '0.06em',
                     }}
                   >
                     {isCurrent && (
@@ -303,22 +304,22 @@ export default function PlanCards({ currentPlan, isAnnual, onBillingToggle }: Pr
                   disabled={isCurrent || checkoutLoading === plan.plan_id}
                   className="w-full py-2.5 rounded-xl font-black text-[12px] flex items-center justify-center gap-1.5 disabled:cursor-default mt-1 overflow-hidden relative"
                   style={{
-                    backgroundColor: isCurrent ? T.limeTint :
-                      plan.highlight ? T.lime :
-                        isCustom ? '#6366f1' :
-                          plan.plan_id === 'free' ? T.dark : T.limeTint,
-                    color: isCurrent ? T.limeDeep :
-                      plan.highlight ? T.dark :
-                        isCustom ? '#fff' :
-                          plan.plan_id === 'free' ? T.lime : T.limeDeep,
-                    opacity: isCurrent ? 0.8 : 1,
-                    transform: !isCurrent && isHovered ? 'scale(1.02)' : 'scale(1)',
-                    transition: 'transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease',
-                    boxShadow: !isCurrent && isHovered
-                      ? plan.highlight ? '0 6px 20px rgba(143,255,0,0.4)'
-                        : isCustom ? '0 6px 20px rgba(99,102,241,0.4)'
-                          : '0 4px 12px rgba(143,255,0,0.2)'
-                      : 'none',
+                    backgroundColor: isCurrent      ? T.limeTint  :
+                                     plan.highlight ? T.lime      :
+                                     isCustom       ? '#6366f1'   :
+                                     plan.plan_id === 'free' ? T.dark : T.limeTint,
+                    color:           isCurrent      ? T.limeDeep  :
+                                     plan.highlight ? T.dark      :
+                                     isCustom       ? '#fff'      :
+                                     plan.plan_id === 'free' ? T.lime : T.limeDeep,
+                    opacity:         isCurrent ? 0.8 : 1,
+                    transform:       !isCurrent && isHovered ? 'scale(1.02)' : 'scale(1)',
+                    transition:      'transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease',
+                    boxShadow:       !isCurrent && isHovered
+                                       ? plan.highlight ? '0 6px 20px rgba(143,255,0,0.4)'
+                                         : isCustom     ? '0 6px 20px rgba(99,102,241,0.4)'
+                                         : '0 4px 12px rgba(143,255,0,0.2)'
+                                       : 'none',
                   }}
                   onMouseEnter={e => {
                     if (!isCurrent) {

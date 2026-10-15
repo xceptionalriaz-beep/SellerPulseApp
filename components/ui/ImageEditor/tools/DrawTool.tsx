@@ -7,19 +7,19 @@ import type { ToolPanelProps } from '../types'
 
 // ── Tokens ─────────────────────────────────────────────────────
 const C = {
-    primary: '#7530fb',
+    primary:      '#7530fb',
     primaryLight: '#f3eeff',
-    primaryBorder: '#c4a8fd',
-    border: '#ede9fe',
-    borderMid: '#e5e7eb',
-    label: '#111827',
-    sub: '#6b7280',
-    muted: '#9ca3af',
-    surface: '#ffffff',
-    sectionBg: '#fafafa',
-    hover: '#f3f4f6',
-    danger: '#ef4444',
-    dangerLight: '#fef2f2',
+    primaryBorder:'#c4a8fd',
+    border:       '#ede9fe',
+    borderMid:    '#e5e7eb',
+    label:        '#111827',
+    sub:          '#6b7280',
+    muted:        '#9ca3af',
+    surface:      '#ffffff',
+    sectionBg:    '#fafafa',
+    hover:        '#f3f4f6',
+    danger:       '#ef4444',
+    dangerLight:  '#fef2f2',
     dangerBorder: '#fca5a5',
 }
 
@@ -115,17 +115,17 @@ export default function DrawTool({ state, onChange }: ToolPanelProps) {
     const [hovClear, setHovClear] = useState(false)
 
     const ds = state.drawSettings
-    const mode = ds.mode
-    const color = ds.color
+    const mode      = ds.mode
+    const color     = ds.color
     const lineWidth = ds.lineWidth
-    const opacity = ds.opacity
+    const opacity   = ds.opacity
 
     function patch(partial: Partial<typeof ds>) {
         onChange({ drawSettings: { ...ds, ...partial } })
     }
 
     // Slider fill pct helpers
-    const widthPct = ((lineWidth - 1) / 39) * 100
+    const widthPct   = ((lineWidth - 1) / 39) * 100
     const opacityPct = opacity * 100
 
     return (
@@ -280,7 +280,7 @@ export default function DrawTool({ state, onChange }: ToolPanelProps) {
                             borderRadius: '50%',
                             background: mode === 'eraser' ? C.border : color,
                             opacity: mode === 'eraser' ? 0.5 : opacity,
-                            width: Math.min(lineWidth, 44),
+                            width:  Math.min(lineWidth, 44),
                             height: Math.min(lineWidth, 44),
                             transition: 'all 0.1s',
                         }} />

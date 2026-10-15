@@ -15,27 +15,27 @@ import { BarcodeQueueItem, barcodTypeLabel } from '../../../types/barcode-import
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
-    primary: '#7530fb',
+    primary:      '#7530fb',
     primaryLight: '#f3eeff',
-    accent: '#b8fa33',
-    accentDark: '#8abf1f',
-    bg: '#f8f7ff',
-    surface: '#ffffff',
-    border: '#ede9fe',
-    text: '#1a1523',
-    muted: '#6b7280',
-    error: '#ef4444',
-    errorLight: '#fef2f2',
-    warning: '#f59e0b',
+    accent:       '#b8fa33',
+    accentDark:   '#8abf1f',
+    bg:           '#f8f7ff',
+    surface:      '#ffffff',
+    border:       '#ede9fe',
+    text:         '#1a1523',
+    muted:        '#6b7280',
+    error:        '#ef4444',
+    errorLight:   '#fef2f2',
+    warning:      '#f59e0b',
     warningLight: '#fffbeb',
-    success: '#22c55e',
+    success:      '#22c55e',
     successLight: '#f0fdf4',
 } as const
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 interface BarcodeImportPreviewProps {
-    item: BarcodeQueueItem
-    onClose: () => void
+    item:     BarcodeQueueItem
+    onClose:  () => void
     onRemove: (id: string) => void
 }
 
@@ -136,7 +136,7 @@ function ManualPriceInput({ value, onChange }: { value: string; onChange: (v: st
                         fontFamily: 'DM Mono, monospace',
                     }}
                     onFocus={e => (e.currentTarget.style.borderColor = C.primary)}
-                    onBlur={e => (e.currentTarget.style.borderColor = C.border)}
+                    onBlur={e  => (e.currentTarget.style.borderColor = C.border)}
                 />
                 {value && parseFloat(value) > 0 && (
                     <span className="text-[11px] font-semibold" style={{ color: C.success }}>
@@ -217,14 +217,14 @@ function ImageStrip({ images }: { images: string[] }) {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function BarcodeImportPreview({ item, onClose, onRemove }: BarcodeImportPreviewProps) {
-    const panelRef = useRef<HTMLDivElement>(null)
-    const product = item.result?.product
-    const isVeRO = item.status === 'vero_risk'
+    const panelRef    = useRef<HTMLDivElement>(null)
+    const product     = item.result?.product
+    const isVeRO      = item.status === 'vero_risk'
     const [manualPrice, setManualPrice] = useState('')
 
     const noPriceData = product && (
         product.price_suggested === undefined &&
-        product.price_avg_sold === undefined &&
+        product.price_avg_sold  === undefined &&
         product.price_range_low === undefined &&
         product.price_range_high === undefined
     )
@@ -342,7 +342,7 @@ export default function BarcodeImportPreview({ item, onClose, onRemove }: Barcod
                         >
                             <BookOpen size={13} style={{ color: C.primary, flexShrink: 0, marginTop: 1 }} />
                             <div className="text-[11px] space-y-0.5" style={{ color: C.text }}>
-                                {product.author && <p><strong>Author:</strong> {product.author}</p>}
+                                {product.author    && <p><strong>Author:</strong> {product.author}</p>}
                                 {product.publisher && <p><strong>Publisher:</strong> {product.publisher}</p>}
                                 {product.page_count && <p><strong>Pages:</strong> {product.page_count}</p>}
                             </div>
@@ -364,10 +364,10 @@ export default function BarcodeImportPreview({ item, onClose, onRemove }: Barcod
                             </span>
                         </div>
                         <div className="px-3 divide-y divide-[#ede9fe]">
-                            <PriceRow label="Suggested list price" value={product.price_suggested} />
-                            <PriceRow label="Avg eBay sold price" value={product.price_avg_sold} />
-                            <PriceRow label="Sold price range low" value={product.price_range_low} />
-                            <PriceRow label="Sold price range high" value={product.price_range_high} />
+                            <PriceRow label="Suggested list price"    value={product.price_suggested} />
+                            <PriceRow label="Avg eBay sold price"     value={product.price_avg_sold} />
+                            <PriceRow label="Sold price range low"    value={product.price_range_low} />
+                            <PriceRow label="Sold price range high"   value={product.price_range_high} />
                             {product.sold_last_30_days !== undefined && (
                                 <div className="flex items-center justify-between py-1">
                                     <span className="text-[11px]" style={{ color: C.muted }}>Sold last 30 days</span>

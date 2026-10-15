@@ -1,4 +1,4 @@
-﻿// app/auth/ebay/callback/route.ts
+// app/auth/ebay/callback/route.ts
 // Handles eBay OAuth callback – exchanges code for token,
 // auto-detects marketplace via Trading API GetUser,
 // then saves everything to the profiles table.
@@ -15,7 +15,7 @@ const adminClient = createClient(
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
-  const code = searchParams.get('code')
+  const code  = searchParams.get('code')
   const state = searchParams.get('state') // user_id passed via state param
   const error = searchParams.get('error')
 
@@ -29,21 +29,21 @@ export async function GET(req: NextRequest) {
 
   try {
     // Exchange code for access token
-    const clientId = process.env.NEXT_PUBLIC_EBAY_CLIENT_ID!
+    const clientId     = process.env.NEXT_PUBLIC_EBAY_CLIENT_ID!
     const clientSecret = process.env.EBAY_CLIENT_SECRET!
-    const redirectUri = process.env.EBAY_REDIRECT_URI!
-    const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64')
+    const redirectUri  = process.env.EBAY_REDIRECT_URI!
+    const credentials  = Buffer.from(`${clientId}:${clientSecret}`).toString('base64')
 
     const tokenRes = await fetch('https://api.ebay.com/identity/v1/oauth2/token', {
-      method: 'POST',
+      method:  'POST',
       headers: {
         'Authorization': `Basic ${credentials}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type':  'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
-        grant_type: 'authorization_code',
-        code: code,
-        redirect_uri: redirectUri,
+        grant_type:   'authorization_code',
+        code:          code,
+        redirect_uri:  redirectUri,
       }).toString(),
     })
 
@@ -63,24 +63,24 @@ export async function GET(req: NextRequest) {
 
     // Get eBay username + userId from REST Identity API
     let ebayUsername = ''
-    let ebayUserId = ''
+    let ebayUserId   = ''
     try {
       const userRes = await fetch('https://apiz.ebay.com/commerce/identity/v1/user/', {
         headers: { Authorization: `Bearer ${access_token}` }
       })
       if (userRes.ok) {
         const userData = await userRes.json()
-        ebayUsername = userData.username ?? ''
-        ebayUserId = userData.userId ?? ''
+        ebayUsername   = userData.username ?? ''
+        ebayUserId     = userData.userId   ?? ''
       }
-    } catch { }
+    } catch {}
 
     // Auto-detect marketplace via Trading API GetUser
     // eBay returns <RegistrationSite>UK</RegistrationSite> → 'EBAY_GB'
     let ebayMarketplace = 'EBAY_US' // safe default
     try {
-      const devId = process.env.EBAY_DEV_ID ?? ''
-      const appId = process.env.NEXT_PUBLIC_EBAY_CLIENT_ID ?? ''
+      const devId  = process.env.EBAY_DEV_ID  ?? ''
+      const appId  = process.env.NEXT_PUBLIC_EBAY_CLIENT_ID ?? ''
       const certId = process.env.EBAY_CERT_ID ?? ''
 
       const getUserXml = `<?xml version="1.0" encoding="utf-8"?>
@@ -93,13 +93,13 @@ export async function GET(req: NextRequest) {
       const tradingRes = await fetch('https://api.ebay.com/ws/api.dll', {
         method: 'POST',
         headers: {
-          'X-EBAY-API-CALL-NAME': 'GetUser',
-          'X-EBAY-API-SITEID': '0',
+          'X-EBAY-API-CALL-NAME':           'GetUser',
+          'X-EBAY-API-SITEID':              '0',
           'X-EBAY-API-COMPATIBILITY-LEVEL': '967',
-          'X-EBAY-API-APP-NAME': appId,
-          'X-EBAY-API-DEV-NAME': devId,
-          'X-EBAY-API-CERT-NAME': certId,
-          'Content-Type': 'text/xml',
+          'X-EBAY-API-APP-NAME':            appId,
+          'X-EBAY-API-DEV-NAME':            devId,
+          'X-EBAY-API-CERT-NAME':           certId,
+          'Content-Type':                   'text/xml',
         },
         body: getUserXml,
       })
@@ -119,28 +119,28 @@ export async function GET(req: NextRequest) {
     // Save everything to profiles
     if (state) {
       await (adminClient.from('profiles') as any).update({
-        ebay_access_token: access_token,
-        ebay_refresh_token: refresh_token,
-        ebay_token_expires_at: expiresAt,
-        ebay_refresh_token_expires_at: refreshExpiresAt,
-        ebay_username: ebayUsername,
-        ebay_user_id: ebayUserId,
-        ebay_marketplace: ebayMarketplace,
-        ebay_connected_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        ebay_access_token:              access_token,
+        ebay_refresh_token:             refresh_token,
+        ebay_token_expires_at:          expiresAt,
+        ebay_refresh_token_expires_at:  refreshExpiresAt,
+        ebay_username:                  ebayUsername,
+        ebay_user_id:                   ebayUserId,
+        ebay_marketplace:               ebayMarketplace,
+        ebay_connected_at:              new Date().toISOString(),
+        updated_at:                     new Date().toISOString(),
       }).eq('id', state)
 
       // Auto-sync orders after connecting
       try {
         await fetch(`${appUrl}/api/ebay/sync-orders`, {
-          method: 'POST',
+          method:  'POST',
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type':      'application/json',
             'x-internal-secret': process.env.INTERNAL_API_SECRET ?? '',
           },
           body: JSON.stringify({ user_id: state }),
         })
-      } catch { }
+      } catch {}
     }
 
     // Redirect back to profile with success

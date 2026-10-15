@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 // app/dashboard/profile/tabs/EbayManagerTab.tsx
 
 import { useState, useEffect, useCallback } from 'react'
@@ -15,44 +15,44 @@ import { getTokenStatus } from '@/lib/ebay-refresh'
 
 // ── Color tokens — Riazify v2 ─────────────────────────────────────────
 const C = {
-  primary: '#7530fb',
+  primary:      '#7530fb',
   primaryHover: '#6020e0',
   primaryLight: '#f3eeff',
-  accent: '#b8fa33',
-  dark: '#1e1535',
-  border: '#ede9fe',
-  surface: '#ffffff',
-  bg: '#f8f7ff',
-  txt1: '#1e1535',
-  txt2: '#6b7280',
-  txt3: '#9ca3af',
-  green: '#16a34a',
-  orange: '#d97706',
-  red: '#ef4444',
-  blue: '#3b82f6',
+  accent:       '#b8fa33',
+  dark:         '#1e1535',
+  border:       '#ede9fe',
+  surface:      '#ffffff',
+  bg:           '#f8f7ff',
+  txt1:         '#1e1535',
+  txt2:         '#6b7280',
+  txt3:         '#9ca3af',
+  green:        '#16a34a',
+  orange:       '#d97706',
+  red:          '#ef4444',
+  blue:         '#3b82f6',
 }
 
 // ── Marketplaces ────────────────────────────────────────────────────────
 const MARKETPLACES = [
-  { id: 'EBAY_US', code: 'us', label: 'United States', currencyCode: 'USD', currencySymbol: '$', signatureThreshold: 750, siteId: 0 },
-  { id: 'EBAY_UK', code: 'gb', label: 'United Kingdom', currencyCode: 'GBP', currencySymbol: '£', signatureThreshold: 450, siteId: 3 },
-  { id: 'EBAY_DE', code: 'de', label: 'Germany', currencyCode: 'EUR', currencySymbol: '€', signatureThreshold: 600, siteId: 77 },
-  { id: 'EBAY_AU', code: 'au', label: 'Australia', currencyCode: 'AUD', currencySymbol: 'A$', signatureThreshold: 900, siteId: 15 },
-  { id: 'EBAY_CA', code: 'ca', label: 'Canada', currencyCode: 'CAD', currencySymbol: 'C$', signatureThreshold: 800, siteId: 2 },
-  { id: 'EBAY_FR', code: 'fr', label: 'France', currencyCode: 'EUR', currencySymbol: '€', signatureThreshold: 600, siteId: 71 },
-  { id: 'EBAY_IT', code: 'it', label: 'Italy', currencyCode: 'EUR', currencySymbol: '€', signatureThreshold: 600, siteId: 101 },
-  { id: 'EBAY_ES', code: 'es', label: 'Spain', currencyCode: 'EUR', currencySymbol: '€', signatureThreshold: 600, siteId: 186 },
-  { id: 'EBAY_IE', code: 'ie', label: 'Ireland', currencyCode: 'EUR', currencySymbol: '€', signatureThreshold: 600, siteId: 205 },
-  { id: 'EBAY_NL', code: 'nl', label: 'Netherlands', currencyCode: 'EUR', currencySymbol: '€', signatureThreshold: 600, siteId: 146 },
-  { id: 'EBAY_AT', code: 'at', label: 'Austria', currencyCode: 'EUR', currencySymbol: '€', signatureThreshold: 600, siteId: 16 },
-  { id: 'EBAY_BE', code: 'be', label: 'Belgium', currencyCode: 'EUR', currencySymbol: '€', signatureThreshold: 600, siteId: 123 },
-  { id: 'EBAY_CH', code: 'ch', label: 'Switzerland', currencyCode: 'CHF', currencySymbol: 'CHF', signatureThreshold: 600, siteId: 193 },
-  { id: 'EBAY_PL', code: 'pl', label: 'Poland', currencyCode: 'PLN', currencySymbol: 'zł', signatureThreshold: 2000, siteId: 212 },
-  { id: 'EBAY_HK', code: 'hk', label: 'Hong Kong', currencyCode: 'HKD', currencySymbol: 'HK$', signatureThreshold: 5000, siteId: 201 },
-  { id: 'EBAY_SG', code: 'sg', label: 'Singapore', currencyCode: 'SGD', currencySymbol: 'S$', signatureThreshold: 1000, siteId: 216 },
-  { id: 'EBAY_MY', code: 'my', label: 'Malaysia', currencyCode: 'MYR', currencySymbol: 'RM', signatureThreshold: 3000, siteId: 207 },
-  { id: 'EBAY_PH', code: 'ph', label: 'Philippines', currencyCode: 'PHP', currencySymbol: '₱', signatureThreshold: 40000, siteId: 211 },
-  { id: 'EBAY_IN', code: 'in', label: 'India', currencyCode: 'INR', currencySymbol: '₹', signatureThreshold: 60000, siteId: 203 },
+  { id: 'EBAY_US', code: 'us', label: 'United States',  currencyCode: 'USD', currencySymbol: '$',   signatureThreshold: 750,   siteId: 0   },
+  { id: 'EBAY_UK', code: 'gb', label: 'United Kingdom', currencyCode: 'GBP', currencySymbol: '£',   signatureThreshold: 450,   siteId: 3   },
+  { id: 'EBAY_DE', code: 'de', label: 'Germany',        currencyCode: 'EUR', currencySymbol: '€',   signatureThreshold: 600,   siteId: 77  },
+  { id: 'EBAY_AU', code: 'au', label: 'Australia',      currencyCode: 'AUD', currencySymbol: 'A$',  signatureThreshold: 900,   siteId: 15  },
+  { id: 'EBAY_CA', code: 'ca', label: 'Canada',         currencyCode: 'CAD', currencySymbol: 'C$',  signatureThreshold: 800,   siteId: 2   },
+  { id: 'EBAY_FR', code: 'fr', label: 'France',         currencyCode: 'EUR', currencySymbol: '€',   signatureThreshold: 600,   siteId: 71  },
+  { id: 'EBAY_IT', code: 'it', label: 'Italy',          currencyCode: 'EUR', currencySymbol: '€',   signatureThreshold: 600,   siteId: 101 },
+  { id: 'EBAY_ES', code: 'es', label: 'Spain',          currencyCode: 'EUR', currencySymbol: '€',   signatureThreshold: 600,   siteId: 186 },
+  { id: 'EBAY_IE', code: 'ie', label: 'Ireland',        currencyCode: 'EUR', currencySymbol: '€',   signatureThreshold: 600,   siteId: 205 },
+  { id: 'EBAY_NL', code: 'nl', label: 'Netherlands',    currencyCode: 'EUR', currencySymbol: '€',   signatureThreshold: 600,   siteId: 146 },
+  { id: 'EBAY_AT', code: 'at', label: 'Austria',        currencyCode: 'EUR', currencySymbol: '€',   signatureThreshold: 600,   siteId: 16  },
+  { id: 'EBAY_BE', code: 'be', label: 'Belgium',        currencyCode: 'EUR', currencySymbol: '€',   signatureThreshold: 600,   siteId: 123 },
+  { id: 'EBAY_CH', code: 'ch', label: 'Switzerland',    currencyCode: 'CHF', currencySymbol: 'CHF', signatureThreshold: 600,   siteId: 193 },
+  { id: 'EBAY_PL', code: 'pl', label: 'Poland',         currencyCode: 'PLN', currencySymbol: 'zł',  signatureThreshold: 2000,  siteId: 212 },
+  { id: 'EBAY_HK', code: 'hk', label: 'Hong Kong',      currencyCode: 'HKD', currencySymbol: 'HK$', signatureThreshold: 5000,  siteId: 201 },
+  { id: 'EBAY_SG', code: 'sg', label: 'Singapore',      currencyCode: 'SGD', currencySymbol: 'S$',  signatureThreshold: 1000,  siteId: 216 },
+  { id: 'EBAY_MY', code: 'my', label: 'Malaysia',       currencyCode: 'MYR', currencySymbol: 'RM',  signatureThreshold: 3000,  siteId: 207 },
+  { id: 'EBAY_PH', code: 'ph', label: 'Philippines',    currencyCode: 'PHP', currencySymbol: '₱',   signatureThreshold: 40000, siteId: 211 },
+  { id: 'EBAY_IN', code: 'in', label: 'India',          currencyCode: 'INR', currencySymbol: '₹',   signatureThreshold: 60000, siteId: 203 },
 ]
 
 function FlagImg({ code, size = 20 }: { code: string; size?: number }) {
@@ -72,17 +72,17 @@ type Marketplace = typeof MARKETPLACES[0]
 
 // ── Coming soon platforms ───────────────────────────────────────────────
 const PLATFORMS = [
-  { name: 'Amazon Seller', icon: ShoppingCart, color: '#FF9900', feature: 'FBA inventory sync' },
-  { name: 'Shopify', icon: Store, color: '#96BF48', feature: 'Multi-store management' },
-  { name: 'Walmart', icon: Warehouse, color: '#0071DC', feature: 'Marketplace analytics' },
-  { name: 'Etsy', icon: Scissors, color: '#F56400', feature: 'Handmade item tracking' },
+  { name: 'Amazon Seller', icon: ShoppingCart, color: '#FF9900', feature: 'FBA inventory sync'      },
+  { name: 'Shopify',       icon: Store,        color: '#96BF48', feature: 'Multi-store management'  },
+  { name: 'Walmart',       icon: Warehouse,    color: '#0071DC', feature: 'Marketplace analytics'   },
+  { name: 'Etsy',          icon: Scissors,     color: '#F56400', feature: 'Handmade item tracking'  },
 ]
 
 // ── Info pill ───────────────────────────────────────────────────────────
 function InfoPill({ icon: Icon, text, color }: { icon: React.ElementType; text: string; color: string }) {
   return (
     <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold border"
-      style={{ backgroundColor: color + '14', borderColor: color + '33', color }}>
+          style={{ backgroundColor: color + '14', borderColor: color + '33', color }}>
       <Icon size={10} />{text}
     </span>
   )
@@ -117,7 +117,7 @@ function WarningBanner({ icon: Icon, color, message, action, onTap }: {
 }) {
   return (
     <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl border mb-5"
-      style={{ backgroundColor: color + '1F', borderColor: color + '4D' }}>
+         style={{ backgroundColor: color + '1F', borderColor: color + '4D' }}>
       <Icon size={15} style={{ color }} />
       <p className="flex-1 text-[12px] font-medium" style={{ color }}>{message}</p>
       <button onClick={onTap} className="text-[12px] font-bold shrink-0 hover:underline" style={{ color }}>{action}</button>
@@ -137,7 +137,7 @@ function ComingSoonCard({ name, icon: Icon, color, feature }: { name: string; ic
         <p className="text-[10px] truncate" style={{ color: C.txt3 }}>{feature}</p>
       </div>
       <span className="px-2 py-1 rounded-lg text-[10px] font-semibold shrink-0"
-        style={{ backgroundColor: C.primaryLight, color: C.primary }}>Soon</span>
+            style={{ backgroundColor: C.primaryLight, color: C.primary }}>Soon</span>
     </div>
   )
 }
@@ -147,18 +147,18 @@ function ComingSoonCard({ name, icon: Icon, color, feature }: { name: string; ic
 // ══════════════════════════════════════════════════════════════════
 export default function EbayManagerTab() {
   const supabase = createClient()
-  const toast = useToast()
+  const toast    = useToast()
 
-  const [isLoading, setIsLoading] = useState(true)
-  const [isConnecting, setIsConnecting] = useState(false)
-  const [isSyncing, setIsSyncing] = useState(false)
-  const [isRefreshing, setIsRefreshing] = useState(false)
-  const [connected, setConnected] = useState(false)
-  const [connData, setConnData] = useState<any>(null)
-  const [syncHistory, setSyncHistory] = useState<any[]>([])
-  const [safeBuyerPct, setSafeBuyerPct] = useState(0)
-  const [selectedMp, setSelectedMp] = useState(MARKETPLACES[0])
-  const [showDisconnect, setShowDisconnect] = useState(false)
+  const [isLoading,        setIsLoading]        = useState(true)
+  const [isConnecting,     setIsConnecting]     = useState(false)
+  const [isSyncing,        setIsSyncing]        = useState(false)
+  const [isRefreshing,     setIsRefreshing]     = useState(false)
+  const [connected,        setConnected]        = useState(false)
+  const [connData,         setConnData]         = useState<any>(null)
+  const [syncHistory,      setSyncHistory]      = useState<any[]>([])
+  const [safeBuyerPct,     setSafeBuyerPct]     = useState(0)
+  const [selectedMp,       setSelectedMp]       = useState(MARKETPLACES[0])
+  const [showDisconnect,   setShowDisconnect]   = useState(false)
 
   // ── Load all data ────────────────────────────────────────────────────
   const loadAll = useCallback(async () => {
@@ -230,7 +230,7 @@ export default function EbayManagerTab() {
       localStorage.setItem('riazify_pending_currency_code', selectedMp.currencyCode)
       localStorage.setItem('riazify_pending_currency_symbol', selectedMp.currencySymbol)
 
-      const clientId = process.env.NEXT_PUBLIC_EBAY_CLIENT_ID
+      const clientId    = process.env.NEXT_PUBLIC_EBAY_CLIENT_ID
       const redirectUri = encodeURIComponent(
         (process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin) + '/auth/ebay/callback'
       )
@@ -275,7 +275,7 @@ export default function EbayManagerTab() {
       const res = await fetch('/api/ebay/refresh-token', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type':  'application/json',
           'Authorization': `Bearer ${session?.access_token}`,
         },
       })
@@ -301,9 +301,9 @@ export default function EbayManagerTab() {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/ebay/sync-orders', {
-        method: 'POST',
+        method:  'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type':  'application/json',
           'Authorization': `Bearer ${session?.access_token}`,
         },
       })
@@ -335,10 +335,10 @@ export default function EbayManagerTab() {
     if (!iso) return ''
     const diff = Date.now() - new Date(iso).getTime()
     const m = Math.floor(diff / 60000)
-    if (m < 60) return `${m}m ago`
+    if (m < 60)  return `${m}m ago`
     const h = Math.floor(m / 60)
-    if (h < 24) return `${h}h ago`
-    return `${Math.floor(h / 24)}d ago`
+    if (h < 24)  return `${h}h ago`
+    return `${Math.floor(h/24)}d ago`
   }
 
   // ── Skeleton ─────────────────────────────────────────────────────────
@@ -364,12 +364,12 @@ export default function EbayManagerTab() {
       ══════════════════════════════════════════════════════════ */}
       {!connected ? (
         <div className="rounded-2xl border shadow-[0_4px_16px_rgba(117,48,251,0.06)] overflow-hidden"
-          style={{ backgroundColor: C.surface, borderColor: C.border }}>
+             style={{ backgroundColor: C.surface, borderColor: C.border }}>
           <div className="p-7">
             {/* Title row */}
             <div className="flex items-start gap-4 mb-6">
               <div className="w-[52px] h-[52px] rounded-[14px] border flex items-center justify-center shrink-0"
-                style={{ backgroundColor: C.primaryLight, borderColor: C.border }}>
+                   style={{ backgroundColor: C.primaryLight, borderColor: C.border }}>
                 <ShoppingBag size={24} style={{ color: C.primary }} />
               </div>
               <div className="flex-1 min-w-0">
@@ -379,7 +379,7 @@ export default function EbayManagerTab() {
                 </p>
               </div>
               <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold shrink-0"
-                style={{ backgroundColor: C.primaryLight, color: C.primary }}>Not Connected</span>
+                    style={{ backgroundColor: C.primaryLight, color: C.primary }}>Not Connected</span>
             </div>
 
             {/* Marketplace pills */}
@@ -392,11 +392,11 @@ export default function EbayManagerTab() {
                     className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-[11px] font-medium transition-all"
                     style={{
                       backgroundColor: isSel ? C.primary : C.bg,
-                      borderColor: isSel ? C.primary : C.border,
-                      borderWidth: isSel ? '2px' : '1px',
-                      color: isSel ? '#fff' : C.txt1,
-                      fontWeight: isSel ? 800 : 500,
-                      boxShadow: isSel ? `0 0 8px ${C.primary}40` : undefined,
+                      borderColor:     isSel ? C.primary : C.border,
+                      borderWidth:     isSel ? '2px' : '1px',
+                      color:           isSel ? '#fff' : C.txt1,
+                      fontWeight:      isSel ? 800 : 500,
+                      boxShadow:       isSel ? `0 0 8px ${C.primary}40` : undefined,
                     }}>
                     <span className="text-[13px]"><FlagImg code={mp.code} /></span>
                     {mp.label}
@@ -408,17 +408,17 @@ export default function EbayManagerTab() {
 
             {/* Info pills */}
             <div className="flex flex-wrap gap-1.5 mb-6">
-              <InfoPill icon={Key} text={`${selectedMp.currencySymbol} ${selectedMp.currencyCode}`} color={C.green} />
-              <InfoPill icon={Shield} text={`Sig. > ${selectedMp.currencySymbol}${selectedMp.signatureThreshold}`} color={C.orange} />
-              <InfoPill icon={Link} text={`Site ${selectedMp.siteId}`} color={C.blue} />
+              <InfoPill icon={Key}    text={`${selectedMp.currencySymbol} ${selectedMp.currencyCode}`} color={C.green}  />
+              <InfoPill icon={Shield} text={`Sig. > ${selectedMp.currencySymbol}${selectedMp.signatureThreshold}`}       color={C.orange} />
+              <InfoPill icon={Link}   text={`Site ${selectedMp.siteId}`}                               color={C.blue}   />
             </div>
 
             {/* Features 2x2 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-              <FeatureRow icon={TrendingUp} text="Real-time AI velocity" color={C.blue} />
-              <FeatureRow icon={RefreshCw} text="Auto order sync" color={C.orange} />
-              <FeatureRow icon={Shield} text="Buyer risk scoring" color={C.green} />
-              <FeatureRow icon={Bell} text="Risk alerts" color={C.red} />
+              <FeatureRow icon={TrendingUp} text="Real-time AI velocity"  color={C.blue}    />
+              <FeatureRow icon={RefreshCw}  text="Auto order sync"        color={C.orange}  />
+              <FeatureRow icon={Shield}     text="Buyer risk scoring"     color={C.green}   />
+              <FeatureRow icon={Bell}       text="Risk alerts"            color={C.red}     />
             </div>
 
             {/* Locked stats preview */}
@@ -465,15 +465,15 @@ export default function EbayManagerTab() {
             CONNECTED CARD — dark purple gradient
         ══════════════════════════════════════════════════════════ */
         <div className="rounded-2xl overflow-hidden"
-          style={{
-            background: `linear-gradient(135deg, ${C.dark} 0%, #2d1f5e 100%)`,
-            boxShadow: `0 8px 32px ${C.primary}30`,
-          }}>
+             style={{
+               background: `linear-gradient(135deg, ${C.dark} 0%, #2d1f5e 100%)`,
+               boxShadow: `0 8px 32px ${C.primary}30`,
+             }}>
           <div className="p-7">
             {/* Header */}
             <div className="flex items-start gap-4 mb-6">
               <div className="w-14 h-14 rounded-full flex items-center justify-center text-[24px] border-2 shrink-0"
-                style={{ borderColor: C.accent, backgroundColor: '#fff' }}>
+                   style={{ borderColor: C.accent, backgroundColor: '#fff' }}>
                 <FlagImg code={selectedMp.code} />
               </div>
               <div className="flex-1 min-w-0">
@@ -487,15 +487,15 @@ export default function EbayManagerTab() {
                   <p className="text-[12px] text-gray-400 mb-1">{connData.storeName}</p>
                 )}
                 <span className="inline-block px-2 py-1 rounded-md text-[11px] font-semibold border"
-                  style={{ backgroundColor: C.accent + '26', borderColor: C.accent + '4D', color: C.accent }}>
+                      style={{ backgroundColor: C.accent + '26', borderColor: C.accent + '4D', color: C.accent }}>
                   <FlagImg code={selectedMp.code} />  {selectedMp.label}  •  {selectedMp.currencySymbol} {selectedMp.currencyCode}
                 </span>
               </div>
               {/* Live badge */}
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border shrink-0"
-                style={{ backgroundColor: C.accent + '20', borderColor: C.accent + '55' }}>
+                   style={{ backgroundColor: C.accent + '20', borderColor: C.accent + '55' }}>
                 <div className={`w-2 h-2 rounded-full ${isSyncing ? 'animate-pulse' : ''}`}
-                  style={{ backgroundColor: isSyncing ? C.orange : C.accent }} />
+                     style={{ backgroundColor: isSyncing ? C.orange : C.accent }} />
                 <span className="text-[11px] font-bold" style={{ color: isSyncing ? C.orange : C.accent }}>
                   {isSyncing ? 'Syncing' : 'Live'}
                 </span>
@@ -516,10 +516,10 @@ export default function EbayManagerTab() {
 
             {/* Stats grid */}
             <div className="flex gap-3 mb-5">
-              <DarkStat label="Orders Synced" value={connData?.ordersSynced?.toString() || '0'} icon={ShoppingBag} color={C.blue} />
-              <DarkStat label="Safe Buyers" value={safeBuyerPct > 0 ? `${safeBuyerPct}%` : '—'} icon={Shield} color={C.green} />
-              <DarkStat label="Last Sync" value={connData?.lastSyncText || 'Never'} icon={RefreshCw} color={C.accent} />
-              <DarkStat label="Token" value={connData?.expiryText || '—'} icon={Key} color={connData?.tokenIsExpired ? C.red : connData?.needsReconnect ? C.orange : C.green} />
+              <DarkStat label="Orders Synced"  value={connData?.ordersSynced?.toString() || '0'} icon={ShoppingBag} color={C.blue}    />
+              <DarkStat label="Safe Buyers"    value={safeBuyerPct > 0 ? `${safeBuyerPct}%` : '—'}                  icon={Shield}     color={C.green}   />
+              <DarkStat label="Last Sync"      value={connData?.lastSyncText || 'Never'}                            icon={RefreshCw}  color={C.accent}  />
+              <DarkStat label="Token"          value={connData?.expiryText || '—'}                                  icon={Key}        color={connData?.tokenIsExpired ? C.red : connData?.needsReconnect ? C.orange : C.green} />
             </div>
 
             <div className="border-t border-white/10 my-5" />
@@ -531,7 +531,7 @@ export default function EbayManagerTab() {
             </div>
             <div className="h-[5px] rounded-full overflow-hidden mb-1.5" style={{ backgroundColor: 'rgba(255,255,255,0.10)' }}>
               <div className="h-full rounded-full transition-all"
-                style={{ width: `${Math.min(100, ((connData?.ordersSynced || 0) / 500) * 100)}%`, backgroundColor: C.accent }} />
+                   style={{ width: `${Math.min(100, ((connData?.ordersSynced || 0) / 500) * 100)}%`, backgroundColor: C.accent }} />
             </div>
             <p className="text-[10px] text-gray-500">{connData?.ordersSynced || 0}/500 order limit</p>
 
@@ -582,16 +582,16 @@ export default function EbayManagerTab() {
               </div>
               <div className="space-y-2.5">
                 {syncHistory.map((log, i) => {
-                  const success = log.status === 'success'
-                  const found = log.orders_found || 0
-                  const newOrds = log.orders_new || 0
-                  const timeAgo = fmtTimeAgo(log.started_at)
-                  const started = log.started_at ? new Date(log.started_at) : null
+                  const success   = log.status === 'success'
+                  const found     = log.orders_found || 0
+                  const newOrds   = log.orders_new   || 0
+                  const timeAgo   = fmtTimeAgo(log.started_at)
+                  const started   = log.started_at   ? new Date(log.started_at)   : null
                   const completed = log.completed_at ? new Date(log.completed_at) : null
                   let duration = ''
                   if (started && completed) {
                     const secs = Math.floor((completed.getTime() - started.getTime()) / 1000)
-                    duration = secs < 60 ? `${secs}s` : `${Math.floor(secs / 60)}m ${secs % 60}s`
+                    duration = secs < 60 ? `${secs}s` : `${Math.floor(secs/60)}m ${secs%60}s`
                   }
                   return (
                     <div key={i} className="flex items-center gap-2.5">
@@ -618,7 +618,7 @@ export default function EbayManagerTab() {
         <div className="flex items-center gap-3 mb-4">
           <h2 className="text-[16px] font-bold" style={{ color: C.txt1, fontFamily: 'Inter, sans-serif' }}>Coming Soon</h2>
           <span className="px-2.5 py-1 rounded-xl text-[11px] font-bold"
-            style={{ backgroundColor: C.dark, color: C.accent }}>
+                style={{ backgroundColor: C.dark, color: C.accent }}>
             4 Platforms
           </span>
         </div>
@@ -632,9 +632,9 @@ export default function EbayManagerTab() {
       {/* Disconnect dialog */}
       {showDisconnect && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-          onClick={e => e.target === e.currentTarget && setShowDisconnect(false)}>
+             onClick={e => e.target === e.currentTarget && setShowDisconnect(false)}>
           <div className="rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl border"
-            style={{ backgroundColor: C.surface, borderColor: C.border }}>
+               style={{ backgroundColor: C.surface, borderColor: C.border }}>
             <h3 className="text-[17px] font-bold mb-2" style={{ color: C.txt1, fontFamily: 'Inter, sans-serif' }}>Disconnect eBay?</h3>
             <p className="text-[13px] mb-5" style={{ color: C.txt2 }}>Your synced orders and data will remain. You can reconnect anytime.</p>
             <div className="flex gap-3">

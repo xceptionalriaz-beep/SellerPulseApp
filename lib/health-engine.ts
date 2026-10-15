@@ -209,9 +209,9 @@ export function calcHealth(draft: Record<string, any>): HealthBreakdown {
     }
 
     // Design Template — 5pts (2pts if attached but non-compliant, 5pts if compliant)
-    const hasTemplate = !!draft.template_id
-    const isCompliant = hasTemplate && draft.template_is_compliant === true
-    const templatePts = isCompliant ? 5 : hasTemplate ? 2 : 0
+    const hasTemplate    = !!draft.template_id
+    const isCompliant    = hasTemplate && draft.template_is_compliant === true
+    const templatePts    = isCompliant ? 5 : hasTemplate ? 2 : 0
     boost.push({
         key: 'template', label: 'Design Template',
         points: templatePts, max: 5,

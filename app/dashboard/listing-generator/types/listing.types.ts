@@ -379,9 +379,9 @@ export type TemplateSlotRole =
     | 'trust_statement' // Shipping / returns / seller trust line
 
 export interface TemplateSlot {
-    role: TemplateSlotRole   // semantic role of this slot
+    role:    TemplateSlotRole   // semantic role of this slot
     blockId: string             // visual editor block ID this slot maps to
-    label: string             // human-readable label shown in UI
+    label:   string             // human-readable label shown in UI
 }
 
 // ─────────────────────────────────────────────────────────────

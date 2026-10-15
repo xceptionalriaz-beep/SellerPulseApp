@@ -7,30 +7,30 @@ import type { ToolPanelProps } from '../types'
 
 // ── Tokens ────────────────────────────────────────────────────
 const C = {
-    primary: '#7530fb',
+    primary:      '#7530fb',
     primaryLight: '#f3eeff',
-    border: '#ede9fe',
-    borderMid: '#e5e7eb',
-    label: '#111827',
-    sub: '#6b7280',
-    muted: '#9ca3af',
-    surface: '#ffffff',
-    sectionBg: '#fafafa',
-    danger: '#ef4444',
-    dangerLight: '#fef2f2',
+    border:       '#ede9fe',
+    borderMid:    '#e5e7eb',
+    label:        '#111827',
+    sub:          '#6b7280',
+    muted:        '#9ca3af',
+    surface:      '#ffffff',
+    sectionBg:    '#fafafa',
+    danger:       '#ef4444',
+    dangerLight:  '#fef2f2',
     dangerBorder: '#fca5a5',
 }
 
 // ── Slider row ────────────────────────────────────────────────
 interface SliderRowProps {
-    label: string
-    hint: string
-    value: number
-    min: number
-    max: number
-    step?: number
+    label:    string
+    hint:     string
+    value:    number
+    min:      number
+    max:      number
+    step?:    number
     onChange: (v: number) => void
-    onReset: () => void
+    onReset:  () => void
     default?: number
 }
 
@@ -40,7 +40,7 @@ function SliderRow({
 }: SliderRowProps) {
     const [hov, setHov] = React.useState(false)
     const isDirty = value !== def
-    const pct = ((value - min) / (max - min)) * 100
+    const pct     = ((value - min) / (max - min)) * 100
 
     return (
         <div style={{ marginBottom: 18 }}>
@@ -52,15 +52,15 @@ function SliderRow({
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{
-                        fontSize: 12,
-                        fontWeight: 700,
-                        color: isDirty ? C.primary : C.muted,
-                        background: isDirty ? C.primaryLight : 'transparent',
-                        padding: isDirty ? '1px 8px' : '1px 0',
+                        fontSize:     12,
+                        fontWeight:   700,
+                        color:        isDirty ? C.primary : C.muted,
+                        background:   isDirty ? C.primaryLight : 'transparent',
+                        padding:      isDirty ? '1px 8px' : '1px 0',
                         borderRadius: 5,
-                        minWidth: 34,
-                        textAlign: 'right',
-                        transition: 'all 0.15s',
+                        minWidth:     34,
+                        textAlign:    'right',
+                        transition:   'all 0.15s',
                         fontVariantNumeric: 'tabular-nums',
                     }}>
                         {value > 0 ? `+${value}` : value}
@@ -73,20 +73,20 @@ function SliderRow({
                             onMouseLeave={() => setHov(false)}
                             title="Reset"
                             style={{
-                                display: 'flex',
-                                alignItems: 'center',
+                                display:      'flex',
+                                alignItems:   'center',
                                 justifyContent: 'center',
-                                width: 20,
-                                height: 20,
-                                background: hov ? C.dangerLight : 'transparent',
-                                border: `1px solid ${hov ? C.dangerBorder : C.border}`,
+                                width:        20,
+                                height:       20,
+                                background:   hov ? C.dangerLight : 'transparent',
+                                border:       `1px solid ${hov ? C.dangerBorder : C.border}`,
                                 borderRadius: 4,
-                                cursor: 'pointer',
-                                color: hov ? C.danger : C.muted,
-                                fontSize: 13,
-                                lineHeight: 1,
-                                transition: 'all 0.12s',
-                                padding: 0,
+                                cursor:       'pointer',
+                                color:        hov ? C.danger : C.muted,
+                                fontSize:     13,
+                                lineHeight:   1,
+                                transition:   'all 0.12s',
+                                padding:      0,
                             }}
                         >
                             ×
@@ -139,20 +139,20 @@ function Section({ icon, title, children }: {
 }) {
     return (
         <div style={{
-            background: C.surface,
-            border: `1px solid ${C.border}`,
+            background:   C.surface,
+            border:       `1px solid ${C.border}`,
             borderRadius: 10,
             marginBottom: 10,
-            overflow: 'hidden',
+            overflow:     'hidden',
         }}>
             {/* Section header */}
             <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 7,
-                padding: '10px 14px',
-                background: C.sectionBg,
-                borderBottom: `1px solid ${C.border}`,
+                display:     'flex',
+                alignItems:  'center',
+                gap:         7,
+                padding:     '10px 14px',
+                background:  C.sectionBg,
+                borderBottom:`1px solid ${C.border}`,
             }}>
                 <span style={{ color: C.primary, display: 'flex', alignItems: 'center' }}>
                     {icon}
@@ -176,18 +176,18 @@ export default function AdjustTool({ state, onChange }: ToolPanelProps) {
 
     const allDirty =
         state.brightness !== 0 ||
-        state.contrast !== 0 ||
+        state.contrast   !== 0 ||
         state.saturation !== 0 ||
-        state.sharpness !== 0
+        state.sharpness  !== 0
 
     return (
         <div>
             {/* Panel header */}
             <div style={{
-                display: 'flex',
+                display:        'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: 14,
+                alignItems:     'center',
+                marginBottom:   14,
             }}>
                 <div>
                     <div style={{ fontSize: 13, fontWeight: 700, color: C.label }}>Adjustments</div>
@@ -202,15 +202,15 @@ export default function AdjustTool({ state, onChange }: ToolPanelProps) {
                         onMouseEnter={() => setHovReset(true)}
                         onMouseLeave={() => setHovReset(false)}
                         style={{
-                            background: hovReset ? C.dangerLight : C.sectionBg,
-                            border: `1px solid ${hovReset ? C.dangerBorder : C.border}`,
+                            background:   hovReset ? C.dangerLight : C.sectionBg,
+                            border:       `1px solid ${hovReset ? C.dangerBorder : C.border}`,
                             borderRadius: 6,
-                            padding: '4px 10px',
-                            fontSize: 11,
-                            fontWeight: 600,
-                            color: hovReset ? C.danger : C.sub,
-                            cursor: 'pointer',
-                            transition: 'all 0.15s',
+                            padding:      '4px 10px',
+                            fontSize:     11,
+                            fontWeight:   600,
+                            color:        hovReset ? C.danger : C.sub,
+                            cursor:       'pointer',
+                            transition:   'all 0.15s',
                         }}
                     >
                         Reset all

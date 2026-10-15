@@ -41,7 +41,7 @@ const C = {
 // ── Cassini Score chip ─────────────────────────────────────────
 function CassiniScore({ score }: { score: number }) {
     const color = score >= 80 ? C.success : score >= 60 ? C.warning : C.danger
-    const bg = score >= 80 ? C.successBg : score >= 60 ? C.warningBg : C.dangerBg
+    const bg    = score >= 80 ? C.successBg : score >= 60 ? C.warningBg : C.dangerBg
     const label = score >= 80 ? 'Great' : score >= 60 ? 'OK' : 'Weak'
 
     return (
@@ -207,12 +207,12 @@ export default function ImageImportPreview({ result, photoCount, onConfirm, onBa
         listing.price_suggested != null ? String(listing.price_suggested) : ''
     )
     const [showDescription, setShowDescription] = useState(false)
-    const [showSpecifics, setShowSpecifics] = useState(false)
+    const [showSpecifics, setShowSpecifics]     = useState(false)
 
     const currentPrice = parseFloat(price) || 0
-    const ebayFeeEst = currentPrice * 0.1275 + 0.3
+    const ebayFeeEst   = currentPrice * 0.1275 + 0.3
 
-    const titleLen = title.length
+    const titleLen  = title.length
     const titleOver = titleLen > 80
     const titleColor = titleOver ? C.danger : titleLen >= 65 ? C.success : C.warning
 
@@ -460,9 +460,9 @@ export default function ImageImportPreview({ result, photoCount, onConfirm, onBa
                                 <Label>Product details</Label>
                                 <div className="grid grid-cols-2 gap-x-6 gap-y-3">
                                     {[
-                                        { label: 'Condition', value: listing.condition },
-                                        { label: 'Category', value: listing.category_label },
-                                        { label: 'Brand', value: listing.brand ?? 'Not identified' },
+                                        { label: 'Condition',   value: listing.condition },
+                                        { label: 'Category',    value: listing.category_label },
+                                        { label: 'Brand',       value: listing.brand ?? 'Not identified' },
                                         { label: 'EAN / Barcode', value: listing.ean ?? 'Not found' },
                                     ].map(({ label, value }) => (
                                         <div key={label}>

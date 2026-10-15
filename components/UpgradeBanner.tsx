@@ -22,10 +22,10 @@ import { Sparkles, X, ArrowRight, Lock } from 'lucide-react'
 
 // ── Props ─────────────────────────────────────────────────────
 interface UpgradeBannerProps {
-    tool: string
-    limitType: string
-    used: number
-    limit: number
+    tool:       string
+    limitType:  string
+    used:       number
+    limit:      number
     onUpgrade?: () => void
 }
 
@@ -37,8 +37,8 @@ export function UpgradeBanner({
 
     if (limit === 0 || dismissed) return null
 
-    const pct = limit > 0 ? used / limit : 0
-    const atLimit = used >= limit
+    const pct       = limit > 0 ? used / limit : 0
+    const atLimit   = used >= limit
     const nearLimit = pct >= 0.8 && !atLimit
 
     if (!atLimit && !nearLimit) return null
@@ -54,7 +54,7 @@ export function UpgradeBanner({
             limit={limit}
             onUpgrade={onUpgrade}
             onDismiss={() => setDismissed(true)}
-        />
+          />
         : <NearLimitStrip
             limitType={limitType}
             used={used}
@@ -62,7 +62,7 @@ export function UpgradeBanner({
             remaining={remaining}
             onUpgrade={onUpgrade}
             onDismiss={() => setDismissed(true)}
-        />
+          />
 }
 
 // ── Shared layout shell ───────────────────────────────────────
@@ -75,15 +75,15 @@ function BannerShell({
 }) {
     return (
         <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            padding: '0 18px',
-            height: 50,
-            position: 'relative',
-            overflow: 'hidden',
-            flexShrink: 0,
-            userSelect: 'none',
+            display:     'flex',
+            alignItems:  'center',
+            gap:         10,
+            padding:     '0 18px',
+            height:      50,
+            position:    'relative',
+            overflow:    'hidden',
+            flexShrink:  0,
+            userSelect:  'none',
             ...style,
         }}>
             {children}
@@ -101,15 +101,15 @@ function IconBadge({
 }) {
     return (
         <div style={{
-            width: 28,
-            height: 28,
-            borderRadius: 8,
-            background: bg,
-            border: `1px solid ${border}`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
+            width:           28,
+            height:          28,
+            borderRadius:    8,
+            background:      bg,
+            border:          `1px solid ${border}`,
+            display:         'flex',
+            alignItems:      'center',
+            justifyContent:  'center',
+            flexShrink:      0,
         }}>
             {icon}
         </div>
@@ -126,27 +126,27 @@ function UsagePill({
 }) {
     return (
         <div style={{
-            display: 'flex',
-            alignItems: 'baseline',
-            gap: 2,
-            padding: '3px 9px',
-            borderRadius: 20,
-            background: bg,
-            border: `1px solid ${border}`,
-            flexShrink: 0,
+            display:        'flex',
+            alignItems:     'baseline',
+            gap:            2,
+            padding:        '3px 9px',
+            borderRadius:   20,
+            background:     bg,
+            border:         `1px solid ${border}`,
+            flexShrink:     0,
         }}>
             <span style={{
-                fontSize: 12,
+                fontSize:   12,
                 fontWeight: 800,
-                color: usedColor,
+                color:      usedColor,
                 fontFamily: 'Syne, sans-serif',
                 lineHeight: 1,
             }}>
                 {used}
             </span>
             <span style={{
-                fontSize: 11,
-                color: limitColor,
+                fontSize:   11,
+                color:      limitColor,
                 fontFamily: 'DM Sans, sans-serif',
                 lineHeight: 1,
             }}>
@@ -167,30 +167,30 @@ function UpgradeButton({
         <button
             onClick={onUpgrade}
             style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 5,
-                padding: '6px 13px',
-                borderRadius: 9,
-                border: 'none',
-                background: bg,
+                display:        'flex',
+                alignItems:     'center',
+                gap:            5,
+                padding:        '6px 13px',
+                borderRadius:   9,
+                border:         'none',
+                background:     bg,
                 color,
-                fontSize: 12,
-                fontWeight: 700,
-                fontFamily: 'Syne, sans-serif',
-                cursor: 'pointer',
-                flexShrink: 0,
-                whiteSpace: 'nowrap',
-                boxShadow: shadow,
-                transition: 'opacity 0.15s, transform 0.1s',
+                fontSize:       12,
+                fontWeight:     700,
+                fontFamily:     'Syne, sans-serif',
+                cursor:         'pointer',
+                flexShrink:     0,
+                whiteSpace:     'nowrap',
+                boxShadow:      shadow,
+                transition:     'opacity 0.15s, transform 0.1s',
             }}
             onMouseEnter={e => {
                 (e.currentTarget as HTMLButtonElement).style.opacity = '0.9'
-                    ; (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.02)'
+                ;(e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.02)'
             }}
             onMouseLeave={e => {
                 (e.currentTarget as HTMLButtonElement).style.opacity = '1'
-                    ; (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)'
+                ;(e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)'
             }}
         >
             Upgrade Plan
@@ -210,20 +210,20 @@ function DismissButton({
             onClick={onDismiss}
             title="Dismiss"
             style={{
-                width: 26,
-                height: 26,
-                borderRadius: 7,
-                border: 'none',
-                background: bg,
+                width:           26,
+                height:          26,
+                borderRadius:    7,
+                border:          'none',
+                background:      bg,
                 color,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                marginLeft: 2,
-                transition: 'opacity 0.15s',
-                opacity: 0.7,
+                cursor:          'pointer',
+                display:         'flex',
+                alignItems:      'center',
+                justifyContent:  'center',
+                flexShrink:      0,
+                marginLeft:      2,
+                transition:      'opacity 0.15s',
+                opacity:         0.7,
             }}
             onMouseEnter={e => ((e.currentTarget as HTMLButtonElement).style.opacity = '1')}
             onMouseLeave={e => ((e.currentTarget as HTMLButtonElement).style.opacity = '0.7')}
@@ -248,21 +248,21 @@ function AtLimitStrip({
         }}>
             {/* Decorative background shimmer — large faded icon */}
             <div style={{
-                position: 'absolute',
-                right: 60,
-                top: '50%',
-                transform: 'translateY(-50%) rotate(12deg)',
-                opacity: 0.05,
+                position:      'absolute',
+                right:         60,
+                top:           '50%',
+                transform:     'translateY(-50%) rotate(12deg)',
+                opacity:       0.05,
                 pointerEvents: 'none',
             }}>
                 <Sparkles size={90} color="#b8fa33" />
             </div>
             <div style={{
-                position: 'absolute',
-                right: -20,
-                top: '50%',
-                transform: 'translateY(-50%) rotate(-8deg)',
-                opacity: 0.04,
+                position:      'absolute',
+                right:         -20,
+                top:           '50%',
+                transform:     'translateY(-50%) rotate(-8deg)',
+                opacity:       0.04,
                 pointerEvents: 'none',
             }}>
                 <Lock size={100} color="#b8fa33" />
@@ -278,14 +278,14 @@ function AtLimitStrip({
             {/* Text block */}
             <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{
-                    display: 'flex',
+                    display:    'flex',
                     alignItems: 'baseline',
-                    gap: 8,
+                    gap:        8,
                 }}>
                     <span style={{
-                        fontSize: 13,
+                        fontSize:   13,
                         fontWeight: 700,
-                        color: '#ffffff',
+                        color:      '#ffffff',
                         fontFamily: 'Syne, sans-serif',
                         whiteSpace: 'nowrap',
                         lineHeight: 1.2,
@@ -293,13 +293,13 @@ function AtLimitStrip({
                         {tool} limit reached
                     </span>
                     <span style={{
-                        fontSize: 12,
-                        color: 'rgba(255,255,255,0.42)',
-                        fontFamily: 'DM Sans, sans-serif',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
+                        fontSize:     12,
+                        color:        'rgba(255,255,255,0.42)',
+                        fontFamily:   'DM Sans, sans-serif',
+                        whiteSpace:   'nowrap',
+                        overflow:     'hidden',
                         textOverflow: 'ellipsis',
-                        lineHeight: 1.2,
+                        lineHeight:   1.2,
                     }}>
                         You've used all {limit} {limitType} on your plan
                     </span>
@@ -345,7 +345,7 @@ function NearLimitStrip({
 }) {
     return (
         <BannerShell style={{
-            background: 'linear-gradient(90deg, #fef8e7 0%, #fffdf8 60%, #ffffff 100%)',
+            background:   'linear-gradient(90deg, #fef8e7 0%, #fffdf8 60%, #ffffff 100%)',
             borderBottom: '1px solid #fde68a',
         }}>
             {/* Icon badge */}
@@ -358,14 +358,14 @@ function NearLimitStrip({
             {/* Text block */}
             <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{
-                    display: 'flex',
+                    display:    'flex',
                     alignItems: 'baseline',
-                    gap: 8,
+                    gap:        8,
                 }}>
                     <span style={{
-                        fontSize: 13,
+                        fontSize:   13,
                         fontWeight: 700,
-                        color: '#92400e',
+                        color:      '#92400e',
                         fontFamily: 'Syne, sans-serif',
                         whiteSpace: 'nowrap',
                         lineHeight: 1.2,
@@ -373,13 +373,13 @@ function NearLimitStrip({
                         Running low on {limitType}
                     </span>
                     <span style={{
-                        fontSize: 12,
-                        color: '#b45309',
-                        fontFamily: 'DM Sans, sans-serif',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
+                        fontSize:     12,
+                        color:        '#b45309',
+                        fontFamily:   'DM Sans, sans-serif',
+                        whiteSpace:   'nowrap',
+                        overflow:     'hidden',
                         textOverflow: 'ellipsis',
-                        lineHeight: 1.2,
+                        lineHeight:   1.2,
                     }}>
                         {remaining} of {limit} remaining — upgrade before you run out
                     </span>
