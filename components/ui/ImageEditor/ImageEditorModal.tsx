@@ -5,7 +5,7 @@ import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import {
     Undo2, Redo2, ZoomIn, ZoomOut,
     SlidersHorizontal, Sliders, Crop, Maximize2,
-    RotateCw, Pencil, Type, Square, Scissors, Image as ImageIcon, Download,
+    RotateCw, Pencil, Type, Square, Scissors, Image as ImageIcon, Download, Tag,
 } from 'lucide-react'
 import { ToolId, ImageEditorState, DEFAULT_STATE, CropRect } from './types'
 
@@ -20,6 +20,7 @@ import TextTool    from './tools/TextTool'
 import FrameTool       from './tools/FrameTool'
 import BackgroundTool  from './tools/BackgroundTool'
 import WatermarkTool   from './tools/WatermarkTool'
+import StickerTool     from './tools/StickerTool'
 import ExportTool      from './tools/ExportTool'
 
 // ── Design tokens ──────────────────────────────────────────────
@@ -76,6 +77,7 @@ const TOOLS: ToolDef[] = [
     { id: 'frame',      label: 'Frame',     icon: <Square size={19} /> },
     { id: 'background', label: 'BG',       icon: <Scissors size={19} /> },
     { id: 'watermark',  label: 'Watermark', icon: <ImageIcon size={19} /> },
+    { id: 'sticker',    label: 'Stickers',  icon: <Tag size={19} /> },
     { id: 'export',     label: 'Export',    icon: <Download size={19} /> },
 ]
 
@@ -276,6 +278,7 @@ export default function ImageEditorModal({
             case 'frame':      return <FrameTool       {...common} />
             case 'background': return <BackgroundTool  {...common} />
             case 'watermark':  return <WatermarkTool   {...common} />
+            case 'sticker':    return <StickerTool     {...common} />
             case 'export':     return <ExportTool      {...common} />
             default:
                 return <PlaceholderPanel tool={TOOLS.find(t => t.id === activeTool)!} />
@@ -419,6 +422,16 @@ export default function ImageEditorModal({
                                 imgEl={imgEl}
                                 drawSettings={editorState.drawSettings}
                                 active={activeTool === 'draw'}
+                            />
+                        )}
+
+                        {/* Sticker overlays — draggable when sticker tool active */}
+                        {imgEl && (editorState.stickers ?? []).length > 0 && (
+                            <StickerLayer
+                                imgEl={imgEl}
+                                stickers={editorState.stickers ?? []}
+                                active={activeTool === 'sticker'}
+                                onChange={stickers => pushState({ stickers })}
                             />
                         )}
                         </div>
@@ -774,7 +787,8 @@ function ZoomPillButton({ children, onClick, disabled }: {
 // ── DrawCanvas ─────────────────────────────────────────────────
 // Sits absolutely over the image; captures pointer events only when active.
 // Persists strokes when the user switches to another tool and back.
-import type { DrawSettings, TextOverlay } from './types'
+import type { DrawSettings, TextOverlay, StickerItem } from './types'
+import { SHAPE_DIMS, stickerToDataUrl } from './stickerHelpers'
 
 function DrawCanvas({ imgEl, drawSettings, active }: {
     imgEl:        HTMLImageElement
@@ -1036,6 +1050,106 @@ function TextOverlayLayer({ imgEl, overlays, active, onChange }: {
                         }}
                     >
                         {ov.text || ''}
+                    </div>
+                )
+            })}
+        </div>
+    )
+}
+
+// ── StickerLayer ───────────────────────────────────────────────
+// Renders draggable sticker overlays absolutely over the image.
+// Active (sticker tool): draggable. Inactive: visible but non-interactive.
+function StickerLayer({ imgEl, stickers, active, onChange }: {
+    imgEl:    HTMLImageElement
+    stickers: StickerItem[]
+    active:   boolean
+    onChange: (stickers: StickerItem[]) => void
+}) {
+    const [size, setSize] = useState({ w: 0, h: 0 })
+    const dragRef         = useRef<{ id: string; ox: number; oy: number } | null>(null)
+    const stickersRef     = useRef(stickers)
+    const onChangeRef     = useRef(onChange)
+    useEffect(() => { stickersRef.current = stickers }, [stickers])
+    useEffect(() => { onChangeRef.current = onChange  }, [onChange])
+
+    useEffect(() => {
+        const sync = () => setSize({ w: imgEl.offsetWidth, h: imgEl.offsetHeight })
+        if (imgEl.complete && imgEl.naturalWidth) sync()
+        else imgEl.addEventListener('load', sync)
+        const ro = new ResizeObserver(sync)
+        ro.observe(imgEl)
+        return () => { imgEl.removeEventListener('load', sync); ro.disconnect() }
+    }, [imgEl])
+
+    function onPointerDown(e: React.PointerEvent<HTMLDivElement>, id: string) {
+        if (!active) return
+        e.stopPropagation()
+        e.currentTarget.setPointerCapture(e.pointerId)
+        const ov = stickersRef.current.find(s => s.id === id)!
+        const r  = (e.currentTarget.parentElement as HTMLElement).getBoundingClientRect()
+        dragRef.current = {
+            id,
+            ox: e.clientX / r.width  - ov.x,
+            oy: e.clientY / r.height - ov.y,
+        }
+    }
+
+    function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
+        if (!dragRef.current) return
+        const { id, ox, oy } = dragRef.current
+        const r = (e.currentTarget.parentElement as HTMLElement).getBoundingClientRect()
+        const nx = Math.max(0, Math.min(1, e.clientX / r.width  - ox))
+        const ny = Math.max(0, Math.min(1, e.clientY / r.height - oy))
+        onChangeRef.current(stickersRef.current.map(s =>
+            s.id === id ? { ...s, x: nx, y: ny } : s
+        ))
+    }
+
+    function onPointerUp() { dragRef.current = null }
+
+    if (!size.w || !size.h) return null
+
+    return (
+        <div style={{
+            position:      'absolute', top: 0, left: 0,
+            width:         size.w, height: size.h,
+            pointerEvents: active ? 'auto' : 'none',
+            zIndex:        11,
+        }}>
+            {stickers.map(s => {
+                const dims    = SHAPE_DIMS[s.shape]
+                const baseW   = size.w * 0.15   // 15% of image width at scale=1
+                const displayW = baseW * s.scale
+                const displayH = displayW * (dims.h / dims.w)
+                const dataUrl  = stickerToDataUrl(s)
+                return (
+                    <div
+                        key={s.id}
+                        onPointerDown={e => onPointerDown(e, s.id)}
+                        onPointerMove={onPointerMove}
+                        onPointerUp={onPointerUp}
+                        style={{
+                            position:    'absolute',
+                            left:        `${s.x * 100}%`,
+                            top:         `${s.y * 100}%`,
+                            transform:   `translate(-50%, -50%) rotate(${s.rotation}deg)`,
+                            cursor:      active ? 'move' : 'default',
+                            userSelect:  'none',
+                            touchAction: 'none',
+                            width:       displayW,
+                            height:      displayH,
+                            outline:     active ? '1.5px dashed rgba(117,48,251,0.5)' : 'none',
+                            outlineOffset: 2,
+                            borderRadius: 4,
+                        }}
+                    >
+                        <img
+                            src={dataUrl}
+                            alt={s.label}
+                            draggable={false}
+                            style={{ width: '100%', height: '100%', display: 'block' }}
+                        />
                     </div>
                 )
             })}

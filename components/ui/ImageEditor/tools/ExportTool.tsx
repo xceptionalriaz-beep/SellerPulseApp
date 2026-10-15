@@ -4,6 +4,7 @@
 import React, { useState } from 'react'
 import { Download, CheckCircle2 } from 'lucide-react'
 import type { ToolPanelProps, ExportPreset, ExportFormat, ImageEditorState } from '../types'
+import { SHAPE_DIMS, drawStickerOnCanvas } from '../stickerHelpers'
 
 // ── Tokens ─────────────────────────────────────────────────────
 const C = {
@@ -280,11 +281,25 @@ async function exportToCanvas(
             ctx.drawImage(img, sx, sy, sw, sh, -outW / 2, -outH / 2, outW, outH)
             ctx.restore()
 
-            // ── Watermark ──────────────────────────────────────
+            // ── Watermark then stickers (sequential async) ─────
+            const drawStickers = async () => {
+                const stickers = state.stickers ?? []
+                for (const s of stickers) {
+                    const dims     = SHAPE_DIMS[s.shape]
+                    const baseW    = canvasW * 0.15   // 15% of canvas width at scale=1
+                    const displayW = baseW * s.scale
+                    const displayH = displayW * (dims.h / dims.w)
+                    const cx       = s.x * canvasW
+                    const cy       = s.y * canvasH
+                    await drawStickerOnCanvas(ctx, s, cx, cy, displayW, displayH)
+                }
+                resolve(canvas)
+            }
+
             const wm = state.watermark
             if (wm?.enabled && wm.dataUrl) {
                 const wmImg = new Image()
-                wmImg.onload = () => {
+                wmImg.onload = async () => {
                     const wmW   = Math.round(canvasW * (wm.size / 100))
                     const wmH   = Math.round(wmW * (wmImg.naturalHeight / wmImg.naturalWidth))
                     const mg    = wm.margin
@@ -297,12 +312,12 @@ async function exportToCanvas(
                     ctx.globalAlpha = wm.opacity
                     ctx.drawImage(wmImg, col, row, wmW, wmH)
                     ctx.globalAlpha = 1
-                    resolve(canvas)
+                    await drawStickers()
                 }
-                wmImg.onerror = () => resolve(canvas)  // watermark load failed → still export
+                wmImg.onerror = async () => { await drawStickers() }
                 wmImg.src = wm.dataUrl
             } else {
-                resolve(canvas)
+                await drawStickers()
             }
         }
 
@@ -495,6 +510,13 @@ export default function ExportTool({ state, onChange, imageUrl }: ToolPanelProps
                         background: '#7530fb', padding: '2px 6px', borderRadius: 4,
                         flexShrink: 0,
                     }}>WATERMARK</div>
+                )}
+                {(state.stickers ?? []).length > 0 && (
+                    <div style={{
+                        fontSize: 9, fontWeight: 700, color: '#1c1917',
+                        background: '#b8fa33', padding: '2px 6px', borderRadius: 4,
+                        flexShrink: 0,
+                    }}>{(state.stickers ?? []).length} STICKER{(state.stickers ?? []).length > 1 ? 'S' : ''}</div>
                 )}
             </div>
 
