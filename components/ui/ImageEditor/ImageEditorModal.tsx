@@ -1057,18 +1057,38 @@ function TextOverlayLayer({ imgEl, overlays, active, onChange }: {
 }
 
 // ── StickerLayer ───────────────────────────────────────────────
-// Renders draggable sticker overlays absolutely over the image.
-// Active (sticker tool): draggable. Inactive: visible but non-interactive.
+// Renders sticker overlays with selection handles and action toolbar.
+// Active (sticker tool): selectable, draggable, resizable.
+// Inactive: visible but non-interactive.
+
+type StickerDragState =
+    | { kind: 'move';   id: string; ox: number; oy: number }
+    | { kind: 'resize'; id: string; startScale: number; startDist: number; cx: number; cy: number }
+
+// 8 handle descriptors
+const HANDLES = [
+    { id: 'tl', x: 0,   y: 0,   cursor: 'nwse-resize' },
+    { id: 't',  x: 0.5, y: 0,   cursor: 'ns-resize'   },
+    { id: 'tr', x: 1,   y: 0,   cursor: 'nesw-resize' },
+    { id: 'r',  x: 1,   y: 0.5, cursor: 'ew-resize'   },
+    { id: 'br', x: 1,   y: 1,   cursor: 'nwse-resize' },
+    { id: 'b',  x: 0.5, y: 1,   cursor: 'ns-resize'   },
+    { id: 'bl', x: 0,   y: 1,   cursor: 'nesw-resize' },
+    { id: 'l',  x: 0,   y: 0.5, cursor: 'ew-resize'   },
+]
+
 function StickerLayer({ imgEl, stickers, active, onChange }: {
     imgEl:    HTMLImageElement
     stickers: StickerItem[]
     active:   boolean
     onChange: (stickers: StickerItem[]) => void
 }) {
-    const [size, setSize] = useState({ w: 0, h: 0 })
-    const dragRef         = useRef<{ id: string; ox: number; oy: number } | null>(null)
-    const stickersRef     = useRef(stickers)
-    const onChangeRef     = useRef(onChange)
+    const [size,       setSize]       = useState({ w: 0, h: 0 })
+    const [selectedId, setSelectedId] = useState<string | null>(null)
+    const dragRef      = useRef<StickerDragState | null>(null)
+    const stickersRef  = useRef(stickers)
+    const onChangeRef  = useRef(onChange)
+    const containerRef = useRef<HTMLDivElement>(null)
     useEffect(() => { stickersRef.current = stickers }, [stickers])
     useEffect(() => { onChangeRef.current = onChange  }, [onChange])
 
@@ -1081,53 +1101,117 @@ function StickerLayer({ imgEl, stickers, active, onChange }: {
         return () => { imgEl.removeEventListener('load', sync); ro.disconnect() }
     }, [imgEl])
 
-    function onPointerDown(e: React.PointerEvent<HTMLDivElement>, id: string) {
+    // Deselect when clicking outside any sticker
+    function onContainerPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+        if (e.target === containerRef.current) setSelectedId(null)
+    }
+
+    // Sticker body: select + start move
+    function onBodyPointerDown(e: React.PointerEvent<HTMLDivElement>, id: string) {
         if (!active) return
         e.stopPropagation()
         e.currentTarget.setPointerCapture(e.pointerId)
+        setSelectedId(id)
         const ov = stickersRef.current.find(s => s.id === id)!
-        const r  = (e.currentTarget.parentElement as HTMLElement).getBoundingClientRect()
+        const r  = containerRef.current!.getBoundingClientRect()
         dragRef.current = {
+            kind: 'move',
             id,
             ox: e.clientX / r.width  - ov.x,
             oy: e.clientY / r.height - ov.y,
         }
     }
 
+    // Handle: start resize
+    function onHandlePointerDown(e: React.PointerEvent<HTMLDivElement>, id: string) {
+        if (!active) return
+        e.stopPropagation()
+        e.currentTarget.setPointerCapture(e.pointerId)
+        const ov = stickersRef.current.find(s => s.id === id)!
+        const r  = containerRef.current!.getBoundingClientRect()
+        const cx = r.left + ov.x * r.width
+        const cy = r.top  + ov.y * r.height
+        const dx = e.clientX - cx
+        const dy = e.clientY - cy
+        dragRef.current = {
+            kind: 'resize',
+            id,
+            startScale: ov.scale,
+            startDist:  Math.max(10, Math.sqrt(dx * dx + dy * dy)),
+            cx, cy,
+        }
+    }
+
     function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
-        if (!dragRef.current) return
-        const { id, ox, oy } = dragRef.current
-        const r = (e.currentTarget.parentElement as HTMLElement).getBoundingClientRect()
-        const nx = Math.max(0, Math.min(1, e.clientX / r.width  - ox))
-        const ny = Math.max(0, Math.min(1, e.clientY / r.height - oy))
-        onChangeRef.current(stickersRef.current.map(s =>
-            s.id === id ? { ...s, x: nx, y: ny } : s
-        ))
+        const d = dragRef.current
+        if (!d) return
+        const r = containerRef.current!.getBoundingClientRect()
+        if (d.kind === 'move') {
+            const nx = Math.max(0, Math.min(1, e.clientX / r.width  - d.ox))
+            const ny = Math.max(0, Math.min(1, e.clientY / r.height - d.oy))
+            onChangeRef.current(stickersRef.current.map(s =>
+                s.id === d.id ? { ...s, x: nx, y: ny } : s
+            ))
+        } else {
+            const dx   = e.clientX - d.cx
+            const dy   = e.clientY - d.cy
+            const dist = Math.max(10, Math.sqrt(dx * dx + dy * dy))
+            const ns   = Math.max(0.3, Math.min(4, d.startScale * dist / d.startDist))
+            onChangeRef.current(stickersRef.current.map(s =>
+                s.id === d.id ? { ...s, scale: Math.round(ns * 10) / 10 } : s
+            ))
+        }
     }
 
     function onPointerUp() { dragRef.current = null }
 
+    function deleteSticker(id: string) {
+        const next = stickersRef.current.filter(s => s.id !== id)
+        onChangeRef.current(next)
+        setSelectedId(null)
+    }
+
+    function duplicateSticker(id: string) {
+        const src = stickersRef.current.find(s => s.id === id)
+        if (!src) return
+        const clone: StickerItem = {
+            ...src,
+            id: `sticker-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,
+            x:  Math.min(0.9, src.x + 0.05),
+            y:  Math.min(0.9, src.y + 0.05),
+        }
+        onChangeRef.current([...stickersRef.current, clone])
+        setSelectedId(clone.id)
+    }
+
     if (!size.w || !size.h) return null
 
     return (
-        <div style={{
-            position:      'absolute', top: 0, left: 0,
-            width:         size.w, height: size.h,
-            pointerEvents: active ? 'auto' : 'none',
-            zIndex:        11,
-        }}>
+        <div
+            ref={containerRef}
+            onPointerDown={onContainerPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            style={{
+                position:      'absolute', top: 0, left: 0,
+                width:         size.w, height: size.h,
+                pointerEvents: active ? 'auto' : 'none',
+                zIndex:        11,
+            }}
+        >
             {stickers.map(s => {
-                const dims    = SHAPE_DIMS[s.shape]
-                const baseW   = size.w * 0.15   // 15% of image width at scale=1
+                const isEmoji  = s.type === 'emoji'
+                const dims     = SHAPE_DIMS[s.shape]
+                const baseW    = size.w * 0.15
                 const displayW = baseW * s.scale
-                const displayH = displayW * (dims.h / dims.w)
-                const dataUrl  = stickerToDataUrl(s)
+                const displayH = isEmoji ? displayW : displayW * (dims.h / dims.w)
+                const isSelected = active && selectedId === s.id
+                const HANDLE_SZ  = 10
+
                 return (
                     <div
                         key={s.id}
-                        onPointerDown={e => onPointerDown(e, s.id)}
-                        onPointerMove={onPointerMove}
-                        onPointerUp={onPointerUp}
+                        onPointerDown={e => onBodyPointerDown(e, s.id)}
                         style={{
                             position:    'absolute',
                             left:        `${s.x * 100}%`,
@@ -1138,17 +1222,129 @@ function StickerLayer({ imgEl, stickers, active, onChange }: {
                             touchAction: 'none',
                             width:       displayW,
                             height:      displayH,
-                            outline:     active ? '1.5px dashed rgba(117,48,251,0.5)' : 'none',
-                            outlineOffset: 2,
-                            borderRadius: 4,
                         }}
                     >
-                        <img
-                            src={dataUrl}
-                            alt={s.label}
-                            draggable={false}
-                            style={{ width: '100%', height: '100%', display: 'block' }}
-                        />
+                        {/* Sticker image or emoji */}
+                        {isEmoji ? (
+                            <div style={{
+                                width:          '100%',
+                                height:         '100%',
+                                display:        'flex',
+                                alignItems:     'center',
+                                justifyContent: 'center',
+                                fontSize:       displayW * 0.72,
+                                lineHeight:     1,
+                                userSelect:     'none',
+                            }}>
+                                {s.emoji}
+                            </div>
+                        ) : (
+                            <img
+                                src={stickerToDataUrl(s)}
+                                alt={s.label}
+                                draggable={false}
+                                style={{ width: '100%', height: '100%', display: 'block' }}
+                            />
+                        )}
+
+                        {/* Selection border */}
+                        {isSelected && (
+                            <div style={{
+                                position:     'absolute',
+                                inset:        -1,
+                                border:       '1.5px solid #3b82f6',
+                                borderRadius: 3,
+                                pointerEvents: 'none',
+                            }} />
+                        )}
+
+                        {/* Resize handles */}
+                        {isSelected && HANDLES.map(h => (
+                            <div
+                                key={h.id}
+                                onPointerDown={e => onHandlePointerDown(e, s.id)}
+                                style={{
+                                    position:   'absolute',
+                                    left:       `${h.x * 100}%`,
+                                    top:        `${h.y * 100}%`,
+                                    transform:  'translate(-50%, -50%)',
+                                    width:      HANDLE_SZ,
+                                    height:     HANDLE_SZ,
+                                    background: '#ffffff',
+                                    border:     '2px solid #3b82f6',
+                                    borderRadius: 2,
+                                    cursor:     h.cursor,
+                                    zIndex:     1,
+                                }}
+                            />
+                        ))}
+
+                        {/* Toolbar — counter-rotated so it stays horizontal */}
+                        {isSelected && (
+                            <div
+                                style={{
+                                    position:       'absolute',
+                                    left:           '50%',
+                                    bottom:         '100%',
+                                    marginBottom:   10,
+                                    transform:      `translateX(-50%) rotate(-${s.rotation}deg)`,
+                                    display:        'flex',
+                                    alignItems:     'center',
+                                    gap:            2,
+                                    background:     '#1e1535',
+                                    borderRadius:   8,
+                                    padding:        '4px 6px',
+                                    boxShadow:      '0 4px 16px rgba(0,0,0,0.35)',
+                                    pointerEvents:  'auto',
+                                    whiteSpace:     'nowrap',
+                                    zIndex:         20,
+                                }}
+                            >
+                                {/* Duplicate */}
+                                <button
+                                    onPointerDown={e => e.stopPropagation()}
+                                    onClick={e => { e.stopPropagation(); duplicateSticker(s.id) }}
+                                    title="Duplicate"
+                                    style={{
+                                        background: 'transparent',
+                                        border:     'none',
+                                        color:      '#e2e8f0',
+                                        cursor:     'pointer',
+                                        padding:    '3px 7px',
+                                        borderRadius: 5,
+                                        fontSize:   14,
+                                        lineHeight:  1,
+                                    }}
+                                >⧉</button>
+
+                                <div style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.15)' }} />
+
+                                {/* Scale display */}
+                                <span style={{ fontSize: 10, color: '#94a3b8', padding: '0 4px', fontWeight: 600 }}>
+                                    ×{s.scale.toFixed(1)}
+                                </span>
+
+                                <div style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.15)' }} />
+
+                                {/* Delete */}
+                                <button
+                                    onPointerDown={e => e.stopPropagation()}
+                                    onClick={e => { e.stopPropagation(); deleteSticker(s.id) }}
+                                    title="Delete"
+                                    style={{
+                                        background: 'transparent',
+                                        border:     'none',
+                                        color:      '#f87171',
+                                        cursor:     'pointer',
+                                        padding:    '3px 7px',
+                                        borderRadius: 5,
+                                        fontSize:   14,
+                                        fontWeight: 700,
+                                        lineHeight:  1,
+                                    }}
+                                >✕</button>
+                            </div>
+                        )}
                     </div>
                 )
             })}
