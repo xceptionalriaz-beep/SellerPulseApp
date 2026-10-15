@@ -44,17 +44,53 @@ export function buildCssFilter(s: ImageEditorState): string {
     return parts.length ? parts.join(' ') : 'none'
 }
 
+// ── Load image safely (fetch → blob URL avoids canvas taint) ──
+async function loadImageSafe(imageUrl: string): Promise<HTMLImageElement> {
+    // Try fetch first → blob URL is same-origin, never taints canvas
+    let src = imageUrl
+    let blobUrl: string | null = null
+    try {
+        const resp = await fetch(imageUrl, { mode: 'cors', cache: 'force-cache' })
+        if (resp.ok) {
+            const blob = await resp.blob()
+            blobUrl = URL.createObjectURL(blob)
+            src = blobUrl
+        }
+    } catch {
+        // fetch failed (network or CORS); fall back to direct load
+    }
+
+    return new Promise<HTMLImageElement>((resolve, reject) => {
+        const img = new Image()
+        if (!blobUrl) img.crossOrigin = 'anonymous'
+        img.onload  = () => { resolve(img) }
+        img.onerror = () => {
+            if (blobUrl) URL.revokeObjectURL(blobUrl)
+            // Last resort: try without crossOrigin (canvas may be tainted,
+            // but at least the image loads so we can still draw)
+            if (!blobUrl && img.crossOrigin) {
+                const img2 = new Image()
+                img2.onload  = () => resolve(img2)
+                img2.onerror = () => reject(new Error(`Image load failed: ${imageUrl}`))
+                img2.src = imageUrl
+            } else {
+                reject(new Error(`Image load failed: ${imageUrl}`))
+            }
+        }
+        img.src = src
+    })
+}
+
 // ── Export to canvas (bakes crop, rotation, filters, watermark, stickers) ──
 export async function exportToCanvas(
     imageUrl: string,
     state:    ImageEditorState,
     targetW:  number | null,   // null = keep natural width
 ): Promise<HTMLCanvasElement> {
-    return new Promise((resolve, reject) => {
-        const img = new Image()
-        img.crossOrigin = 'anonymous'
+    const img = await loadImageSafe(imageUrl)
 
-        img.onload = async () => {
+    return new Promise((resolve, reject) => {
+        const run = async () => {
             const natW = img.naturalWidth
             const natH = img.naturalHeight
 
@@ -144,8 +180,7 @@ export async function exportToCanvas(
             }
         }
 
-        img.onerror = reject
-        img.src = imageUrl
+        run().catch(reject)
     })
 }
 
