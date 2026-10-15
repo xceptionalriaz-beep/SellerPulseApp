@@ -13,7 +13,6 @@ export type ToolId =
     | 'draw'
     | 'text'
     | 'frame'
-    | 'background'
     | 'watermark'
     | 'export'
     | 'sticker'

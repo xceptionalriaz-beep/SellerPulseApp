@@ -5,7 +5,7 @@ import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import {
     Undo2, Redo2, ZoomIn, ZoomOut,
     SlidersHorizontal, Sliders, Crop, Maximize2,
-    RotateCw, Pencil, Type, Square, Scissors, Image as ImageIcon, Download, Tag,
+    RotateCw, Pencil, Type, Square, Image as ImageIcon, Download, Tag,
 } from 'lucide-react'
 import { ToolId, ImageEditorState, DEFAULT_STATE, CropRect, DrawSettings, TextOverlay, StickerItem, WatermarkSettings } from './types'
 import { SHAPE_DIMS, stickerToDataUrl } from './stickerHelpers'
@@ -19,7 +19,6 @@ import RotateTool  from './tools/RotateTool'
 import DrawTool    from './tools/DrawTool'
 import TextTool    from './tools/TextTool'
 import FrameTool       from './tools/FrameTool'
-import BackgroundTool  from './tools/BackgroundTool'
 import WatermarkTool   from './tools/WatermarkTool'
 import StickerTool     from './tools/StickerTool'
 import ExportTool      from './tools/ExportTool'
@@ -76,7 +75,6 @@ const TOOLS: ToolDef[] = [
     { id: 'draw',   label: 'Draw',   icon: <Pencil size={19} /> },
     { id: 'text',   label: 'Text',   icon: <Type size={19} /> },
     { id: 'frame',      label: 'Frame',     icon: <Square size={19} /> },
-    { id: 'background', label: 'BG',       icon: <Scissors size={19} /> },
     { id: 'watermark',  label: 'Watermark', icon: <ImageIcon size={19} /> },
     { id: 'sticker',    label: 'Stickers',  icon: <Tag size={19} /> },
     { id: 'export',     label: 'Export',    icon: <Download size={19} /> },
@@ -277,7 +275,6 @@ export default function ImageEditorModal({
             case 'draw':   return <DrawTool   {...common} />
             case 'text':   return <TextTool   {...common} />
             case 'frame':      return <FrameTool       {...common} />
-            case 'background': return <BackgroundTool  {...common} />
             case 'watermark':  return <WatermarkTool   {...common} />
             case 'sticker':    return <StickerTool     {...common} />
             case 'export':     return <ExportTool      {...common} />
@@ -375,14 +372,10 @@ export default function ImageEditorModal({
                             position: 'relative',
                             borderRadius: cssFrame.inner.borderRadius,
                             overflow: 'hidden',
-                            // Show chosen background color through transparent-PNG after bg removal
-                            backgroundColor: editorState.background?.processedUrl
-                                ? (editorState.background?.color ?? '#ffffff')
-                                : undefined,
                         }}>
                         <img
                             ref={imgCallbackRef}
-                            src={editorState.background?.processedUrl ?? imageUrl}
+                            src={imageUrl}
                             alt={imageName || 'Editing'}
                             draggable={false}
                             style={{
