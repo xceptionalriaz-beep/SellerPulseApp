@@ -119,7 +119,7 @@ export default function BackgroundTool({ state, onChange, imageUrl }: ToolPanelP
     const [hovRemove, setHovRemove] = useState(false)
     const [hovRestore, setHovRestore] = useState(false)
 
-    const bg             = state.background
+    const bg             = state.background ?? { processedUrl: null, color: '#ffffff' }
     const { processedUrl, color } = bg
 
     function patch(partial: Partial<typeof bg>) {

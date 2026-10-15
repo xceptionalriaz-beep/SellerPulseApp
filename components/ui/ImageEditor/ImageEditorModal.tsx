@@ -367,7 +367,7 @@ export default function ImageEditorModal({
                             overflow: 'hidden',
                             // Show chosen background color through transparent-PNG after bg removal
                             backgroundColor: editorState.background?.processedUrl
-                                ? (editorState.background.color ?? '#ffffff')
+                                ? (editorState.background?.color ?? '#ffffff')
                                 : undefined,
                         }}>
                         <img
