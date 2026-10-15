@@ -117,6 +117,9 @@ export interface StickerItem {
     y:           number           // 0–1 fraction of image height
     scale:       number           // 0.5–3, default 1
     rotation:    number           // -45 to 45 deg
+    // emoji sticker fields (type === 'emoji')
+    type?:       'badge' | 'emoji'
+    emoji?:      string           // the emoji character, e.g. '⭐'
 }
 
 // ── Export ────────────────────────────────────────────────────

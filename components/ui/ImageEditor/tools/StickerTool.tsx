@@ -2,23 +2,24 @@
 // components/ui/ImageEditor/tools/StickerTool.tsx
 // ─────────────────────────────────────────────────────────────
 // Sticker / Badge overlay tool.
-// Lets users pick from 16 pre-built sticker presets, then
-// customize color, scale, and rotation of each placed sticker.
+// Tab 1 & 2 : pre-built SVG promotional badges (SALE, NEW, %, …)
+// Tab 3      : real emoji stickers in 8 themed categories
 // ─────────────────────────────────────────────────────────────
 
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import type { ToolPanelProps } from '../types'
 import type { StickerItem, StickerColorScheme, StickerShape } from '../types'
 import {
     STICKER_PRESETS,
     COLOR_SCHEMES,
     SHAPE_DIMS,
+    EMOJI_CATEGORIES,
     stickerToDataUrl,
+    emojiToDataUrl,
 } from '../stickerHelpers'
 import type { StickerPreset } from '../stickerHelpers'
 
-// ── Sub-components (separate components to avoid hooks-in-map) ──
-
+// ── Badge preset thumb ─────────────────────────────────────────
 interface PresetThumbProps {
     pKey:         string
     label:        string
@@ -31,7 +32,6 @@ function PresetThumb({ pKey, label, subLabel, shape, defaultColor, onAdd }: Pres
     const [hovered, setHovered] = useState(false)
     const dataUrl = stickerToDataUrl({ label, subLabel, shape, colorScheme: defaultColor })
     const dims    = SHAPE_DIMS[shape]
-    const aspect  = dims.h / dims.w
 
     return (
         <button
@@ -40,16 +40,16 @@ function PresetThumb({ pKey, label, subLabel, shape, defaultColor, onAdd }: Pres
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
             style={{
-                background:   hovered ? '#ede9fe' : '#f8f7ff',
-                border:       hovered ? '2px solid #7530fb' : '2px solid #ede9fe',
-                borderRadius: 10,
-                padding:      6,
-                cursor:       'pointer',
-                display:      'flex',
-                alignItems:   'center',
+                background:     hovered ? '#ede9fe' : '#f8f7ff',
+                border:         hovered ? '2px solid #7530fb' : '2px solid #ede9fe',
+                borderRadius:   10,
+                padding:        6,
+                cursor:         'pointer',
+                display:        'flex',
+                alignItems:     'center',
                 justifyContent: 'center',
-                aspectRatio:  '1',
-                transition:   'all 0.15s',
+                aspectRatio:    '1',
+                transition:     'all 0.15s',
             }}
         >
             <img
@@ -57,23 +57,57 @@ function PresetThumb({ pKey, label, subLabel, shape, defaultColor, onAdd }: Pres
                 alt={label}
                 draggable={false}
                 style={{
-                    width:     '100%',
-                    height:    'auto',
-                    maxHeight: '100%',
-                    objectFit: 'contain',
+                    width:       '100%',
+                    height:      'auto',
+                    maxHeight:   '100%',
+                    objectFit:   'contain',
                     aspectRatio: `${dims.w}/${dims.h}`,
-                    display:   'block',
+                    display:     'block',
                 }}
             />
         </button>
     )
 }
 
-// ── Color chip for the color selector ─────────────────────────
+// ── Emoji sticker thumb ────────────────────────────────────────
+interface EmojiThumbProps {
+    emoji:  string
+    onAdd:  (emoji: string) => void
+}
+function EmojiThumb({ emoji, onAdd }: EmojiThumbProps) {
+    const [hovered, setHovered] = useState(false)
+    return (
+        <button
+            title={emoji}
+            onClick={() => onAdd(emoji)}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+            style={{
+                background:     hovered ? '#ede9fe' : '#f8f7ff',
+                border:         hovered ? '2px solid #7530fb' : '2px solid transparent',
+                borderRadius:   10,
+                padding:        4,
+                cursor:         'pointer',
+                display:        'flex',
+                alignItems:     'center',
+                justifyContent: 'center',
+                aspectRatio:    '1',
+                fontSize:       28,
+                lineHeight:     1,
+                transition:     'all 0.12s',
+                userSelect:     'none',
+            }}
+        >
+            {emoji}
+        </button>
+    )
+}
+
+// ── Color chip ─────────────────────────────────────────────────
 interface ColorChipProps {
-    scheme:    StickerColorScheme
-    selected:  boolean
-    onSelect:  (s: StickerColorScheme) => void
+    scheme:   StickerColorScheme
+    selected: boolean
+    onSelect: (s: StickerColorScheme) => void
 }
 function ColorChip({ scheme, selected, onSelect }: ColorChipProps) {
     const [hovered, setHovered] = useState(false)
@@ -85,8 +119,8 @@ function ColorChip({ scheme, selected, onSelect }: ColorChipProps) {
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
             style={{
-                width:        28,
-                height:       28,
+                width:        26,
+                height:       26,
                 borderRadius: '50%',
                 background:   col.bg,
                 border:       selected ? '3px solid #7530fb' : hovered ? '3px solid #b8fa33' : '3px solid transparent',
@@ -107,11 +141,11 @@ interface StickerRowProps {
     onRemove: () => void
 }
 function StickerRow({ sticker, onUpdate, onRemove }: StickerRowProps) {
-    const [expanded, setExpanded] = useState(false)
+    const [expanded,  setExpanded]  = useState(false)
     const [removeHov, setRemoveHov] = useState(false)
-    const [hdr, setHdr]   = useState(false)
+    const [hdr,       setHdr]       = useState(false)
 
-    const thumb = stickerToDataUrl(sticker)
+    const isEmoji = sticker.type === 'emoji'
 
     return (
         <div style={{
@@ -120,7 +154,7 @@ function StickerRow({ sticker, onUpdate, onRemove }: StickerRowProps) {
             borderRadius: 10,
             overflow:     'hidden',
         }}>
-            {/* Header row */}
+            {/* Header */}
             <div
                 onClick={() => setExpanded(e => !e)}
                 onMouseEnter={() => setHdr(true)}
@@ -135,18 +169,24 @@ function StickerRow({ sticker, onUpdate, onRemove }: StickerRowProps) {
                     transition: 'background 0.12s',
                 }}
             >
-                <img
-                    src={thumb}
-                    alt={sticker.label}
-                    draggable={false}
-                    style={{ width: 36, height: 36, objectFit: 'contain', flexShrink: 0 }}
-                />
+                {isEmoji ? (
+                    <div style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, flexShrink: 0 }}>
+                        {sticker.emoji}
+                    </div>
+                ) : (
+                    <img
+                        src={stickerToDataUrl(sticker)}
+                        alt={sticker.label}
+                        draggable={false}
+                        style={{ width: 36, height: 36, objectFit: 'contain', flexShrink: 0 }}
+                    />
+                )}
                 <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 12, fontWeight: 700, color: '#1e1535', lineHeight: 1.2 }}>
-                        {sticker.label}{sticker.subLabel ? ` ${sticker.subLabel}` : ''}
+                        {isEmoji ? sticker.emoji : `${sticker.label}${sticker.subLabel ? ` ${sticker.subLabel}` : ''}`}
                     </div>
                     <div style={{ fontSize: 10, color: '#6b7280', marginTop: 2 }}>
-                        {sticker.colorScheme} · ×{sticker.scale.toFixed(1)} · {sticker.rotation}°
+                        {isEmoji ? 'emoji' : sticker.colorScheme} · ×{sticker.scale.toFixed(1)} · {sticker.rotation}°
                     </div>
                 </div>
                 <span style={{ fontSize: 11, color: '#7530fb', fontWeight: 700, userSelect: 'none' }}>
@@ -173,23 +213,25 @@ function StickerRow({ sticker, onUpdate, onRemove }: StickerRowProps) {
                 </button>
             </div>
 
-            {/* Expanded controls */}
+            {/* Controls */}
             {expanded && (
                 <div style={{ padding: '10px 12px 12px', borderTop: '1px solid #ede9fe' }}>
-                    {/* Color */}
-                    <div style={{ marginBottom: 10 }}>
-                        <div style={{ fontSize: 11, fontWeight: 600, color: '#374151', marginBottom: 6 }}>Color</div>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                            {(Object.keys(COLOR_SCHEMES) as StickerColorScheme[]).map(s => (
-                                <ColorChip
-                                    key={s}
-                                    scheme={s}
-                                    selected={sticker.colorScheme === s}
-                                    onSelect={scheme => onUpdate({ colorScheme: scheme })}
-                                />
-                            ))}
+                    {/* Color — only for badge stickers */}
+                    {!isEmoji && (
+                        <div style={{ marginBottom: 10 }}>
+                            <div style={{ fontSize: 11, fontWeight: 600, color: '#374151', marginBottom: 6 }}>Color</div>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                                {(Object.keys(COLOR_SCHEMES) as StickerColorScheme[]).map(s => (
+                                    <ColorChip
+                                        key={s}
+                                        scheme={s}
+                                        selected={sticker.colorScheme === s}
+                                        onSelect={scheme => onUpdate({ colorScheme: scheme })}
+                                    />
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* Scale */}
                     <div style={{ marginBottom: 10 }}>
@@ -231,117 +273,179 @@ function StickerRow({ sticker, onUpdate, onRemove }: StickerRowProps) {
 }
 
 // ── Main tool panel ────────────────────────────────────────────
-export default function StickerTool({ state, onChange }: ToolPanelProps) {
-    const stickers = state.stickers ?? []
-    const [activeTab, setActiveTab] = useState<'badge' | 'discount'>('badge')
+type MainTab = 'badge' | 'discount' | 'emoji'
 
-    function addSticker(
+export default function StickerTool({ state, onChange }: ToolPanelProps) {
+    const stickers  = state.stickers ?? []
+    const [mainTab,     setMainTab]     = useState<MainTab>('badge')
+    const [emojiCatIdx, setEmojiCatIdx] = useState(0)
+
+    // Add a badge/discount sticker
+    function addBadgeSticker(
         key:      string,
         label:    string,
         subLabel: string,
         shape:    StickerShape,
         color:    StickerColorScheme,
     ) {
-        const newSticker: StickerItem = {
+        const item: StickerItem = {
             id:          `sticker-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
             key,
             label,
             subLabel,
             shape,
             colorScheme: color,
-            x:           0.12,   // near top-left by default
+            x:           0.12,
             y:           0.12,
             scale:       1,
             rotation:    0,
+            type:        'badge',
         }
-        onChange({ stickers: [...stickers, newSticker] })
+        onChange({ stickers: [...stickers, item] })
     }
 
+    // Add an emoji sticker
+    const addEmojiSticker = useCallback((emoji: string) => {
+        const item: StickerItem = {
+            id:          `sticker-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            key:         `emoji-${emoji}`,
+            label:       emoji,
+            subLabel:    '',
+            shape:       'circle',    // placeholder — not used for emoji
+            colorScheme: 'red',       // placeholder
+            x:           0.12,
+            y:           0.12,
+            scale:       1,
+            rotation:    0,
+            type:        'emoji',
+            emoji,
+        }
+        onChange({ stickers: [...stickers, item] })
+    }, [stickers, onChange])
+
     function updateSticker(id: string, patch: Partial<StickerItem>) {
-        onChange({
-            stickers: stickers.map(s => s.id === id ? { ...s, ...patch } : s),
-        })
+        onChange({ stickers: stickers.map(s => s.id === id ? { ...s, ...patch } : s) })
     }
 
     function removeSticker(id: string) {
         onChange({ stickers: stickers.filter(s => s.id !== id) })
     }
 
-    const filtered = STICKER_PRESETS.filter((p: StickerPreset) => p.category === activeTab)
+    const filteredBadges = STICKER_PRESETS.filter((p: StickerPreset) => p.category === (mainTab === 'discount' ? 'discount' : 'badge'))
+    const currentEmojiCat = EMOJI_CATEGORIES[emojiCatIdx]
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {/* Header */}
             <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#1e1535', marginBottom: 4 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#1e1535', marginBottom: 3 }}>
                     Sticker &amp; Badge Overlays
                 </div>
                 <div style={{ fontSize: 11, color: '#6b7280', lineHeight: 1.5 }}>
-                    Add promotional badges to secondary listing images. Click a sticker to place it, then drag to reposition.
+                    Click to place · drag to reposition · use on secondary images
                 </div>
             </div>
 
-            {/* Tabs */}
-            <div style={{
-                display:      'flex',
-                background:   '#ede9fe',
-                borderRadius: 8,
-                padding:      3,
-                gap:          3,
-            }}>
-                {(['badge', 'discount'] as const).map(tab => (
+            {/* Main tabs */}
+            <div style={{ display: 'flex', background: '#ede9fe', borderRadius: 8, padding: 3, gap: 3 }}>
+                {([
+                    { id: 'badge',    label: '🏷 Badges'   },
+                    { id: 'discount', label: '% Discounts' },
+                    { id: 'emoji',    label: '😊 Stickers' },
+                ] as const).map(tab => (
                     <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
+                        key={tab.id}
+                        onClick={() => setMainTab(tab.id)}
                         style={{
                             flex:         1,
                             padding:      '6px 0',
                             borderRadius: 6,
                             border:       'none',
-                            background:   activeTab === tab ? '#7530fb' : 'transparent',
-                            color:        activeTab === tab ? '#ffffff' : '#7530fb',
+                            background:   mainTab === tab.id ? '#7530fb' : 'transparent',
+                            color:        mainTab === tab.id ? '#ffffff' : '#7530fb',
                             fontWeight:   700,
-                            fontSize:     12,
+                            fontSize:     11,
                             cursor:       'pointer',
                             transition:   'all 0.15s',
-                            textTransform: 'capitalize',
+                            whiteSpace:   'nowrap',
                         }}
                     >
-                        {tab === 'badge' ? '🏷 Badges' : '% Discounts'}
+                        {tab.label}
                     </button>
                 ))}
             </div>
 
-            {/* Preset grid */}
-            <div>
-                <div style={{
-                    display:             'grid',
-                    gridTemplateColumns: 'repeat(4, 1fr)',
-                    gap:                 8,
-                }}>
-                    {filtered.map((p: StickerPreset) => (
-                        <PresetThumb
-                            key={p.key}
-                            pKey={p.key}
-                            label={p.label}
-                            subLabel={p.subLabel}
-                            shape={p.shape}
-                            defaultColor={p.defaultColor}
-                            onAdd={addSticker}
-                        />
-                    ))}
+            {/* Badge / Discount preset grid */}
+            {(mainTab === 'badge' || mainTab === 'discount') && (
+                <div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                        {filteredBadges.map((p: StickerPreset) => (
+                            <PresetThumb
+                                key={p.key}
+                                pKey={p.key}
+                                label={p.label}
+                                subLabel={p.subLabel}
+                                shape={p.shape}
+                                defaultColor={p.defaultColor}
+                                onAdd={addBadgeSticker}
+                            />
+                        ))}
+                    </div>
+                    <div style={{ fontSize: 10, color: '#9ca3af', marginTop: 6, textAlign: 'center' }}>
+                        Tap a badge to place it on your image
+                    </div>
                 </div>
-                <div style={{ fontSize: 10, color: '#9ca3af', marginTop: 6, textAlign: 'center' }}>
-                    Tap a sticker to add it to your image
-                </div>
-            </div>
-
-            {/* Divider */}
-            {stickers.length > 0 && (
-                <div style={{ height: 1, background: '#ede9fe' }} />
             )}
 
-            {/* Active stickers */}
+            {/* Emoji sticker panel */}
+            {mainTab === 'emoji' && (
+                <div>
+                    {/* Category scroll */}
+                    <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4, scrollbarWidth: 'none' }}>
+                        {EMOJI_CATEGORIES.map((cat, idx) => (
+                            <button
+                                key={cat.id}
+                                onClick={() => setEmojiCatIdx(idx)}
+                                style={{
+                                    flexShrink:   0,
+                                    padding:      '5px 10px',
+                                    borderRadius: 20,
+                                    border:       emojiCatIdx === idx ? '2px solid #7530fb' : '2px solid #ede9fe',
+                                    background:   emojiCatIdx === idx ? '#7530fb' : '#f8f7ff',
+                                    color:        emojiCatIdx === idx ? '#ffffff' : '#374151',
+                                    fontWeight:   600,
+                                    fontSize:     11,
+                                    cursor:       'pointer',
+                                    whiteSpace:   'nowrap',
+                                    transition:   'all 0.12s',
+                                }}
+                            >
+                                {cat.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Emoji grid */}
+                    <div style={{
+                        display:             'grid',
+                        gridTemplateColumns: 'repeat(6, 1fr)',
+                        gap:                 6,
+                        marginTop:           10,
+                    }}>
+                        {currentEmojiCat.emojis.map(emoji => (
+                            <EmojiThumb key={emoji} emoji={emoji} onAdd={addEmojiSticker} />
+                        ))}
+                    </div>
+                    <div style={{ fontSize: 10, color: '#9ca3af', marginTop: 6, textAlign: 'center' }}>
+                        Tap an emoji to add it · drag to reposition
+                    </div>
+                </div>
+            )}
+
+            {/* Divider */}
+            {stickers.length > 0 && <div style={{ height: 1, background: '#ede9fe' }} />}
+
+            {/* Active stickers list */}
             {stickers.length > 0 && (
                 <div>
                     <div style={{
@@ -351,19 +455,11 @@ export default function StickerTool({ state, onChange }: ToolPanelProps) {
                         marginBottom:   8,
                     }}>
                         <div style={{ fontSize: 12, fontWeight: 700, color: '#1e1535' }}>
-                            Active Stickers ({stickers.length})
+                            Active ({stickers.length})
                         </div>
                         <button
                             onClick={() => onChange({ stickers: [] })}
-                            style={{
-                                background: 'none',
-                                border:     'none',
-                                color:      '#ef4444',
-                                fontSize:   11,
-                                fontWeight: 600,
-                                cursor:     'pointer',
-                                padding:    '2px 6px',
-                            }}
+                            style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: 11, fontWeight: 600, cursor: 'pointer', padding: '2px 6px' }}
                         >
                             Clear all
                         </button>
@@ -381,11 +477,11 @@ export default function StickerTool({ state, onChange }: ToolPanelProps) {
                 </div>
             )}
 
-            {/* Empty state hint */}
+            {/* Empty state */}
             {stickers.length === 0 && (
                 <div style={{
                     textAlign:    'center',
-                    padding:      '16px 8px',
+                    padding:      '14px 8px',
                     color:        '#9ca3af',
                     fontSize:     12,
                     background:   '#f8f7ff',
@@ -393,7 +489,7 @@ export default function StickerTool({ state, onChange }: ToolPanelProps) {
                     border:       '1.5px dashed #ede9fe',
                 }}>
                     No stickers added yet.<br />
-                    <span style={{ color: '#7530fb', fontWeight: 600 }}>Click any badge above</span> to place it.
+                    <span style={{ color: '#7530fb', fontWeight: 600 }}>Click any sticker above</span> to place it.
                 </div>
             )}
 
@@ -406,7 +502,7 @@ export default function StickerTool({ state, onChange }: ToolPanelProps) {
                 padding:      '8px 10px',
                 lineHeight:   1.5,
             }}>
-                💡 <strong>Tip:</strong> Drag stickers directly on the image to reposition them. Use on secondary product images, not the main hero shot.
+                💡 <strong>Tip:</strong> Drag stickers on the image to reposition. Best used on secondary product images, not the main hero shot.
             </div>
         </div>
     )
