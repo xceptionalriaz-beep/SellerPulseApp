@@ -18,7 +18,7 @@
 // template's theme rather than a generic pet-brush placeholder.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { Block, IMAGE_PLACEHOLDER_SVG } from './blocks'
+import { Block } from './blocks'
 import { getBannerVariant } from './variants/banner.variants'
 
 // ── Category identifier ──────────────────────────────────────────────────────
@@ -724,21 +724,31 @@ export function renderForCanvas(
         return tokenMap[name] ?? full
     })
 
-    // 2) Replace any <img src="...{{TOKEN}}..."> with the SVG placeholder.
-    //    Remove the inner dashed rect border so only the container border shows.
-    const borderlessSvg = IMAGE_PLACEHOLDER_SVG.replace(/<rect\b[^>]*stroke-dasharray[^>]*\/?>/gi, '')
-
+    // 2) Replace any <img src="...{{TOKEN}}..."> with a real category-matched sample image.
+    //    Token name drives which image to pick:
+    //      MAIN_IMAGE_URL / unknown          → data.mainImage
+    //      THUMBNAIL_1..4                    → data.thumbnails[0..3]
+    //      GALLERY_IMAGE_*, LIFESTYLE_*      → data.galleryImages[tokenName] || data.mainImage
+    //      RELATED_IMAGE_*                   → data.related.images[tokenName] || data.thumbnails[0]
+    //    All other attributes (width, height, style, border, …) are preserved as-is
+    //    so the block's own layout controls the display size.
     out = out.replace(
-        /<img\b([^>]*)src="[^"]*\{\{[^}]*\}\}[^"]*"([^>]*)>/gi,
-        (_m, before, after) => {
-            const attrs = (before + after)
-            const isAbsolute = /position\s*:\s*absolute/i.test(attrs)
-            if (isAbsolute) {
-                // Fill the fixed-height parent cell completely
-                return `<div style="position:absolute;top:0;left:0;width:100%;height:100%;cursor:pointer;">${borderlessSvg.replace('preserveAspectRatio="xMidYMid meet" width="100%"', 'preserveAspectRatio="xMidYMid slice" width="100%" height="100%" style="display:block;border-radius:6px;position:absolute;top:0;left:0;"')}</div>`
+        /<img\b([^>]*)src="[^"]*\{\{([A-Z_][A-Z0-9_]*)\}\}[^"]*"([^>]*)>/gi,
+        (_m, before, tokenName, after) => {
+            let imgUrl: string = data.mainImage
+            if (data.galleryImages[tokenName]) {
+                imgUrl = data.galleryImages[tokenName]
+            } else if (data.related.images[tokenName]) {
+                imgUrl = data.related.images[tokenName]
+            } else {
+                // THUMBNAIL_1 … THUMBNAIL_4  (also THUMB_1, THUMBNAIL1 etc.)
+                const tMatch = tokenName.match(/THUMBNAIL_?(\d)/i)
+                if (tMatch) {
+                    const idx = parseInt(tMatch[1], 10) - 1
+                    imgUrl = data.thumbnails[idx] ?? data.mainImage
+                }
             }
-            // Normal flow — natural 4:3 block so the block has visible height
-            return `<div style="width:100%;cursor:pointer;">${borderlessSvg.replace('preserveAspectRatio="xMidYMid meet" width="100%"', 'preserveAspectRatio="xMidYMid slice" width="100%" height="100%" style="display:block;border-radius:6px;"')}</div>`
+            return `<img${before}src="${imgUrl}"${after}>`
         }
     )
 
