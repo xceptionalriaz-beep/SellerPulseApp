@@ -509,7 +509,7 @@ function VisualEditorInner() {
             document.body.removeChild(iframe)
             setThumbnailStatus('uploading')
             const blob = await new Promise<Blob>((resolve, reject) =>
-                canvas.toBlob(b => b ? resolve(b) : reject(new Error('Canvas toBlob failed')), 'image/png')
+                canvas.toBlob((b: Blob | null) => b ? resolve(b) : reject(new Error('Canvas toBlob failed')), 'image/png')
             )
             await uploadThumbnailBlob(blob, 'png')
             setThumbnailStatus('done')
