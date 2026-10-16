@@ -81,6 +81,8 @@ interface ListingTemplate {
     updated_at: string | null
     tags: string[] | null
     sort_order: number | null
+    is_featured: boolean | null
+    is_new_badge: boolean | null
 }
 
 // ── Category definitions ─────────────────────────────────────────────────────
@@ -299,7 +301,7 @@ function DesignStudioInner() {
             // System templates
             const { data: sys } = await rawDb
                 .from('listing_templates')
-                .select('id, user_id, name, description, category, description_html, is_system, is_shared, thumbnail_url, use_count, created_at, updated_at, tags, sort_order')
+                .select('id, user_id, name, description, category, description_html, is_system, is_shared, thumbnail_url, use_count, created_at, updated_at, tags, sort_order, is_featured, is_new_badge')
                 .eq('is_system', true)
                 .order('sort_order', { ascending: true })
 
@@ -332,6 +334,8 @@ function DesignStudioInner() {
                         updated_at: vt.updated_at,
                         tags: null,
                         sort_order: null,
+                        is_featured: null,
+                        is_new_badge: null,
                     }
                 })
             }
@@ -952,11 +956,16 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy
     const [hovered, setHovered] = useState(false)
     const copied = copiedId === template.id
     const deleting = deletingId === template.id
+    const isFeaturedCard = !!template.is_featured
 
     const badge = (() => {
         if (!template.is_system) return null
+        // Admin-controlled badges take priority over auto-computed ones
+        if (template.is_featured) return { label: 'FEATURED', bg: '#fef3c7', text: '#92400e' }
+        if (template.is_new_badge) return { label: 'NEW', bg: '#16a34a', text: '#fff' }
+        // Auto-computed badges
         if ((template.use_count || 0) > 10) return { label: 'POPULAR', bg: '#b8fa33', text: '#1e1535' }
-        // Only show NEW for templates created within 30 days
+        // Only show auto-NEW for templates created within 30 days
         const createdAt = template.created_at ? new Date(template.created_at).getTime() : 0
         const isNew = createdAt > 0 && (Date.now() - createdAt) < 30 * 24 * 60 * 60 * 1000
         if (isNew) return { label: 'NEW', bg: '#16a34a', text: '#fff' }
@@ -969,9 +978,13 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy
             onMouseLeave={() => setHovered(false)}
             className="rounded-2xl overflow-hidden flex flex-col"
             style={{
-                border: `2px solid ${hovered ? C.primary : C.border}`,
+                border: `2px solid ${hovered ? C.primary : isFeaturedCard ? '#f59e0b' : C.border}`,
                 backgroundColor: C.surface,
-                boxShadow: hovered ? '0 8px 32px rgba(117,48,251,0.18)' : '0 1px 4px rgba(117,48,251,0.05)',
+                boxShadow: hovered
+                    ? '0 8px 32px rgba(117,48,251,0.18)'
+                    : isFeaturedCard
+                        ? '0 2px 12px rgba(245,158,11,0.15)'
+                        : '0 1px 4px rgba(117,48,251,0.05)',
                 transition: 'all 0.2s ease',
             }}
         >

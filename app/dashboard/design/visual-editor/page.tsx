@@ -26,9 +26,10 @@ import { createClient as createRawClient } from '@supabase/supabase-js'
 import {
     ChevronLeft, Save, Check, Loader2,
     Globe, LayoutTemplate, Code2, Download, History, EyeOff,
-    Image, Upload, Tag, X,
+    Image, Upload, Tag, X, Eye, Copy,
 } from 'lucide-react'
 import VisualEditor from '@/components/ui/VisualEditor'
+import TemplatePreviewModal from '@/components/ui/TemplatePreviewModal'
 import ProDropdown, { DropdownOption } from '@/components/ui/ProDropdown'
 import { auditHtml } from '@/components/ui/VisualEditor/audit'
 import type { TemplateSlot } from '@/app/dashboard/listing-generator/types/listing.types'
@@ -206,6 +207,15 @@ function VisualEditorInner() {
     const [tags, setTags] = useState<string[]>([])
     const [tagInput, setTagInput] = useState('')
     const [sortOrder, setSortOrder] = useState<number>(0)
+    // Featured / New badge toggles & usage stats — admin only
+    const [isFeatured, setIsFeatured] = useState(false)
+    const [isNewBadge, setIsNewBadge] = useState(false)
+    const [useCount, setUseCount] = useState(0)
+    // Preview as User modal
+    const [showPreview, setShowPreview] = useState(false)
+    const [previewCopied, setPreviewCopied] = useState(false)
+    // Duplicate
+    const [duplicating, setDuplicating] = useState(false)
 
     // ── Close action menu on outside click ───────────────────────────────────
     useEffect(() => {
@@ -234,7 +244,7 @@ function VisualEditorInner() {
                 try {
                     const { data } = await rawDb
                         .from('listing_templates')
-                        .select('id, name, category, description_html, slots, description, is_system, thumbnail_url, tags, sort_order')
+                        .select('id, name, category, description_html, slots, description, is_system, thumbnail_url, use_count, tags, sort_order, is_featured, is_new_badge')
                         .eq('id', templateId)
                         .single()
                     if (data) {
@@ -249,6 +259,9 @@ function VisualEditorInner() {
                             setThumbnailUrl(data.thumbnail_url || null)
                             setTags(Array.isArray(data.tags) ? data.tags : [])
                             setSortOrder(typeof data.sort_order === 'number' ? data.sort_order : 0)
+                            setUseCount(data.use_count || 0)
+                            setIsFeatured(!!data.is_featured)
+                            setIsNewBadge(!!data.is_new_badge)
                         }
                     }
                 } catch (err) {
@@ -300,7 +313,7 @@ function VisualEditorInner() {
                         description_html: html,
                         is_ebay_compliant: isEbayCompliant,
                         slots,
-                        ...(isAdmin ? { description, tags, sort_order: sortOrder } : {}),
+                        ...(isAdmin ? { description, tags, sort_order: sortOrder, is_featured: isFeatured, is_new_badge: isNewBadge } : {}),
                         updated_at: new Date().toISOString(),
                     })
                     .eq('id', savedId)
@@ -319,7 +332,7 @@ function VisualEditorInner() {
                         is_system: false,
                         is_shared: false,
                         use_count: 0,
-                        ...(isAdmin ? { tags, sort_order: sortOrder } : {}),
+                        ...(isAdmin ? { tags, sort_order: sortOrder, is_featured: isFeatured, is_new_badge: isNewBadge } : {}),
                     })
                     .select('id')
                     .single()
@@ -340,7 +353,7 @@ function VisualEditorInner() {
             console.error('[visual-editor] auto-save error:', err)
             setAutoSaveLabel('idle')
         }
-    }, [savedId, name, category, html, slots, tags, sortOrder, supabase])
+    }, [savedId, name, category, html, slots, tags, sortOrder, isFeatured, isNewBadge, supabase])
 
     // ── Manual Save Draft ─────────────────────────────────────────────────────
     const handleSaveDraft = useCallback(async () => {
@@ -361,7 +374,7 @@ function VisualEditorInner() {
                         description_html: html,
                         is_ebay_compliant: isEbayCompliant,
                         slots,
-                        ...(isAdmin ? { description, tags, sort_order: sortOrder } : {}),
+                        ...(isAdmin ? { description, tags, sort_order: sortOrder, is_featured: isFeatured, is_new_badge: isNewBadge } : {}),
                         updated_at: new Date().toISOString(),
                     })
                     .eq('id', savedId)
@@ -381,7 +394,7 @@ function VisualEditorInner() {
                         is_system: false,
                         is_shared: false,
                         use_count: 0,
-                        ...(isAdmin ? { tags, sort_order: sortOrder } : {}),
+                        ...(isAdmin ? { tags, sort_order: sortOrder, is_featured: isFeatured, is_new_badge: isNewBadge } : {}),
                     })
                     .select('id')
                     .single()
@@ -399,7 +412,7 @@ function VisualEditorInner() {
         } finally {
             setSaving(false)
         }
-    }, [savedId, name, category, html, slots, tags, sortOrder, supabase])
+    }, [savedId, name, category, html, slots, tags, sortOrder, isFeatured, isNewBadge, supabase])
 
     // ── Publish ───────────────────────────────────────────────────────────────
     const handlePublish = useCallback(async () => {
@@ -417,7 +430,7 @@ function VisualEditorInner() {
                 is_shared: true,
                 is_system: isAdmin,
                 thumbnail_url: thumbnailUrl ?? null,
-                ...(isAdmin ? { description, tags, sort_order: sortOrder } : {}),
+                ...(isAdmin ? { description, tags, sort_order: sortOrder, is_featured: isFeatured, is_new_badge: isNewBadge } : {}),
             }
 
             if (savedId) {
@@ -461,7 +474,7 @@ function VisualEditorInner() {
             console.error('[visual-editor] publish error:', err)
             setPublishStatus('idle')
         }
-    }, [savedId, name, category, html, slots, tags, sortOrder, supabase, isAdmin])
+    }, [savedId, name, category, html, slots, tags, sortOrder, isFeatured, isNewBadge, supabase, isAdmin])
 
     // ── Unpublish (admin only) ────────────────────────────────────────────────
     const handleUnpublish = useCallback(async () => {
@@ -476,6 +489,42 @@ function VisualEditorInner() {
             console.error('[visual-editor] unpublish error:', err)
         }
     }, [savedId, supabase])
+
+    // ── Duplicate template (admin only) ──────────────────────────────────────
+    const handleDuplicate = useCallback(async () => {
+        if (!savedId) { alert('Save the template first before duplicating.'); return }
+        setDuplicating(true)
+        try {
+            const { data, error } = await (supabase as any)
+                .from('listing_templates')
+                .insert({
+                    user_id: null,
+                    name: `Copy of ${name}`,
+                    category,
+                    description_html: html,
+                    is_ebay_compliant: auditHtml(html).count === 0,
+                    slots,
+                    description,
+                    is_system: false,
+                    is_shared: false,
+                    use_count: 0,
+                    thumbnail_url: thumbnailUrl,
+                    tags,
+                    sort_order: sortOrder,
+                    is_featured: false,
+                    is_new_badge: false,
+                })
+                .select('id')
+                .single()
+            if (!error && data) {
+                router.push(`/dashboard/design/visual-editor?id=${data.id}&admin=true`)
+            }
+        } catch (err) {
+            console.error('[visual-editor] duplicate error:', err)
+        } finally {
+            setDuplicating(false)
+        }
+    }, [savedId, name, category, html, slots, description, thumbnailUrl, tags, sortOrder, supabase, router])
 
     // ── Thumbnail helpers (admin only) ────────────────────────────────────────
     const uploadThumbnailBlob = useCallback(async (blob: Blob, ext: 'png' | 'jpg' = 'png') => {
@@ -608,6 +657,18 @@ function VisualEditorInner() {
                                         backgroundColor: isLive ? '#16a34a' : '#9ca3af',
                                     }} />
                                     {isLive ? 'Live' : 'Draft'}
+                                </div>
+                            )}
+                            {/* Usage count — admin only */}
+                            {isAdmin && useCount > 0 && (
+                                <div style={{
+                                    display: 'flex', alignItems: 'center', gap: 4,
+                                    padding: '4px 10px', borderRadius: 20,
+                                    backgroundColor: '#f3f4f6', border: '1px solid #e5e7eb',
+                                    fontFamily: 'DM Sans, sans-serif', fontSize: 11,
+                                    color: '#6b7280', fontWeight: 600, flexShrink: 0,
+                                }}>
+                                    Used {useCount}×
                                 </div>
                             )}
                             {/* History button — disabled until template has been saved at least once */}
@@ -943,6 +1004,49 @@ function VisualEditorInner() {
                                                     </div>
                                                 </div>
                                             )}
+                                            {/* Featured / New badge toggles — admin only */}
+                                            {isAdmin && (
+                                                <div style={{ marginTop: 10 }}>
+                                                    <p style={{
+                                                        margin: '0 0 7px', fontFamily: 'DM Sans, sans-serif',
+                                                        fontSize: 10, fontWeight: 700, color: C.muted,
+                                                        textTransform: 'uppercase', letterSpacing: 0.8,
+                                                    }}>
+                                                        Gallery Badges
+                                                    </p>
+                                                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', marginBottom: 7 }}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={isFeatured}
+                                                            onChange={e => setIsFeatured(e.target.checked)}
+                                                            style={{ width: 14, height: 14, accentColor: C.primary, cursor: 'pointer' }}
+                                                        />
+                                                        <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: C.body, display: 'flex', alignItems: 'center', gap: 5 }}>
+                                                            Featured
+                                                            <span style={{ fontSize: 9, fontWeight: 800, padding: '1px 6px', borderRadius: 20, backgroundColor: '#fef3c7', color: '#92400e', letterSpacing: '0.04em' }}>
+                                                                FEATURED
+                                                            </span>
+                                                        </span>
+                                                    </label>
+                                                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={isNewBadge}
+                                                            onChange={e => setIsNewBadge(e.target.checked)}
+                                                            style={{ width: 14, height: 14, accentColor: C.primary, cursor: 'pointer' }}
+                                                        />
+                                                        <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: C.body, display: 'flex', alignItems: 'center', gap: 5 }}>
+                                                            New badge
+                                                            <span style={{ fontSize: 9, fontWeight: 800, padding: '1px 6px', borderRadius: 20, backgroundColor: '#dcfce7', color: '#15803d', letterSpacing: '0.04em' }}>
+                                                                NEW
+                                                            </span>
+                                                        </span>
+                                                    </label>
+                                                    <p style={{ margin: '5px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 9, color: C.muted }}>
+                                                        Badges override the auto-computed POPULAR/NEW logic
+                                                    </p>
+                                                </div>
+                                            )}
                                         </div>
                                         {/* Action buttons */}
                                         <div style={{ padding: '8px 8px' }}>
@@ -982,6 +1086,66 @@ function VisualEditorInner() {
                                                     </p>
                                                 </div>
                                             </button>
+                                            {/* Preview as User — admin only */}
+                                            {isAdmin && (
+                                                <button
+                                                    onClick={() => { setShowPreview(true); setActionMenuOpen(false) }}
+                                                    style={{
+                                                        width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                                                        padding: '9px 10px', border: 'none', borderRadius: 8,
+                                                        backgroundColor: 'transparent', color: C.body,
+                                                        fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 500,
+                                                        cursor: 'pointer', textAlign: 'left', transition: 'background 0.12s',
+                                                    }}
+                                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = C.bg }}
+                                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
+                                                >
+                                                    <span style={{
+                                                        width: 28, height: 28, borderRadius: 7,
+                                                        backgroundColor: C.bg, border: `1px solid ${C.border}`,
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                                                    }}>
+                                                        <Eye size={13} style={{ color: C.secondary }} />
+                                                    </span>
+                                                    <div>
+                                                        <p style={{ margin: 0, fontWeight: 600, fontSize: 12 }}>Preview as User</p>
+                                                        <p style={{ margin: 0, fontSize: 10, color: C.muted }}>See exactly what users see</p>
+                                                    </div>
+                                                </button>
+                                            )}
+                                            {/* Duplicate — admin only */}
+                                            {isAdmin && (
+                                                <button
+                                                    onClick={() => { handleDuplicate(); setActionMenuOpen(false) }}
+                                                    disabled={duplicating}
+                                                    style={{
+                                                        width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                                                        padding: '9px 10px', border: 'none', borderRadius: 8,
+                                                        backgroundColor: 'transparent', color: C.body,
+                                                        fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 500,
+                                                        cursor: duplicating ? 'default' : 'pointer', textAlign: 'left', transition: 'background 0.12s',
+                                                        opacity: duplicating ? 0.6 : 1,
+                                                    }}
+                                                    onMouseEnter={e => { if (!duplicating) e.currentTarget.style.backgroundColor = C.bg }}
+                                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
+                                                >
+                                                    <span style={{
+                                                        width: 28, height: 28, borderRadius: 7,
+                                                        backgroundColor: C.bg, border: `1px solid ${C.border}`,
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                                                    }}>
+                                                        {duplicating
+                                                            ? <Loader2 size={13} style={{ color: C.muted, animation: 'spin 1s linear infinite' }} />
+                                                            : <Copy size={13} style={{ color: C.secondary }} />}
+                                                    </span>
+                                                    <div>
+                                                        <p style={{ margin: 0, fontWeight: 600, fontSize: 12 }}>
+                                                            {duplicating ? 'Duplicating…' : 'Duplicate Template'}
+                                                        </p>
+                                                        <p style={{ margin: 0, fontSize: 10, color: C.muted }}>Create a copy to tweak</p>
+                                                    </div>
+                                                </button>
+                                            )}
                                             <button
                                                 onClick={() => { handleOpenInCodeEditor(); setActionMenuOpen(false) }}
                                                 style={{
@@ -1159,6 +1323,41 @@ function VisualEditorInner() {
                         setShowVersionHistory(false)
                     }}
                     onClose={() => setShowVersionHistory(false)}
+                />
+            )}
+
+            {/* Preview as User modal — renders template exactly as gallery users see it */}
+            {isAdmin && showPreview && (
+                <TemplatePreviewModal
+                    template={{
+                        id: savedId || 'preview',
+                        user_id: null,
+                        name,
+                        description,
+                        category,
+                        description_html: html,
+                        is_system: true,
+                        is_shared: true,
+                        thumbnail_url: thumbnailUrl,
+                        use_count: useCount,
+                        created_at: null,
+                        updated_at: null,
+                        tags,
+                        sort_order: sortOrder,
+                        is_featured: isFeatured,
+                        is_new_badge: isNewBadge,
+                    } as any}
+                    templates={[]}
+                    onClose={() => setShowPreview(false)}
+                    onEdit={() => setShowPreview(false)}
+                    onCopy={async (t: any) => {
+                        try {
+                            await navigator.clipboard.writeText(t.description_html || html)
+                            setPreviewCopied(true)
+                            setTimeout(() => setPreviewCopied(false), 2000)
+                        } catch { /* clipboard blocked */ }
+                    }}
+                    copiedId={previewCopied ? (savedId || 'preview') : null}
                 />
             )}
         </div>
