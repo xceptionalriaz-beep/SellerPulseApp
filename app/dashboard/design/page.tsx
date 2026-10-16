@@ -79,6 +79,8 @@ interface ListingTemplate {
     use_count: number | null
     created_at: string | null
     updated_at: string | null
+    tags: string[] | null
+    sort_order: number | null
 }
 
 // ── Category definitions ─────────────────────────────────────────────────────
@@ -297,9 +299,9 @@ function DesignStudioInner() {
             // System templates
             const { data: sys } = await rawDb
                 .from('listing_templates')
-                .select('id, user_id, name, description, category, description_html, is_system, is_shared, thumbnail_url, use_count, created_at, updated_at')
+                .select('id, user_id, name, description, category, description_html, is_system, is_shared, thumbnail_url, use_count, created_at, updated_at, tags, sort_order')
                 .eq('is_system', true)
-                .order('use_count', { ascending: false })
+                .order('sort_order', { ascending: true })
 
             // User's own templates — from visual_templates (where Visual Builder saves)
             // Must use the typed supabase client (not rawDb) — visual_templates RLS needs auth.uid()
@@ -352,15 +354,20 @@ function DesignStudioInner() {
     const filtered = allVisible.filter(t => {
         const matchCat = activeCategory === 'all' || matchesCategoryFilter(t.category, activeCategory)
         const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase()) ||
-            (t.description || '').toLowerCase().includes(search.toLowerCase())
+            (t.description || '').toLowerCase().includes(search.toLowerCase()) ||
+            (t.tags || []).some(tag => tag.toLowerCase().includes(search.toLowerCase()))
         return matchCat && matchSearch
     })
-    // System templates only — sorted
+    // System templates only — sorted: sort_order primary, then popular/newest secondary
     const sortedTemplates = templates.filter(t => {
         const matchCat = activeCategory === 'all' || matchesCategoryFilter(t.category, activeCategory)
-        const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase())
+        const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase()) ||
+            (t.tags || []).some(tag => tag.toLowerCase().includes(search.toLowerCase()))
         return matchCat && matchSearch
     }).sort((a, b) => {
+        const oa = a.sort_order ?? 9999
+        const ob = b.sort_order ?? 9999
+        if (oa !== ob) return oa - ob
         if (sort === 'popular') return (b.use_count || 0) - (a.use_count || 0)
         return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
     })
@@ -1022,8 +1029,22 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy
                     <p className="text-[12px] font-bold truncate" style={{ color: C.dark, fontFamily: 'DM Sans, sans-serif' }}>
                         {template.name}
                     </p>
-                    <div className="flex items-center gap-1.5 mt-0.5">
+                    <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                         <CategoryBadge category={template.category} />
+                        {template.tags && template.tags.length > 0 && template.tags.slice(0, 3).map(tag => (
+                            <span key={tag} style={{
+                                fontSize: 9, fontWeight: 600, padding: '1px 6px', borderRadius: 20,
+                                backgroundColor: C.primaryLight, color: C.primary,
+                                fontFamily: 'DM Sans, sans-serif',
+                            }}>
+                                {tag}
+                            </span>
+                        ))}
+                        {template.tags && template.tags.length > 3 && (
+                            <span style={{ fontSize: 9, color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                +{template.tags.length - 3}
+                            </span>
+                        )}
                     </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
