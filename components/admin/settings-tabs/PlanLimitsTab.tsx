@@ -19,19 +19,19 @@ import PricingEditorModal from '@/components/admin/PricingEditorModal'
 
 // ── Design tokens ──────────────────────────────────────────────
 const C = {
-  dark:     '#0a0d08',
-  lime:     '#8fff00',
-  limeDeep: '#4a8f00',
-  limeTint: '#f4ffe6',
-  border:   '#e8ede2',
-  bg:       '#f7f9f5',
-  text:     '#1a2410',
-  muted:    '#8a9e78',
+  dark:     '#1e1535',
+  lime:     '#b8fa33',
+  limeDeep: '#7530fb',
+  limeTint: '#f3eeff',
+  border:   '#ede9fe',
+  bg:       '#f8f7ff',
+  text:     '#1f1d2e',
+  muted:    '#9ca3af',
   surface:  '#ffffff',
-  red:      '#b91c1c',
+  red:      '#ef4444',
   amber:    '#d97706',
   green:    '#16a34a',
-  blue:     '#1d4ed8',
+  blue:     '#7530fb',
 }
 
 // ── Types ──────────────────────────────────────────────────────
@@ -305,7 +305,7 @@ function CustomDropdown({
             backgroundColor: C.bg,
             borderColor:     open ? C.lime : C.border,
             color:           C.text,
-            boxShadow:       open ? '0 0 0 3px rgba(143,255,0,0.12)' : 'none',
+            boxShadow:       open ? '0 0 0 3px rgba(117,48,251,0.12)' : 'none',
           }}>
           <span>{selected?.label ?? value}</span>
           <ChevronDown size={13} style={{ color: C.muted, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
@@ -317,7 +317,7 @@ function CustomDropdown({
                  style={{ backgroundColor: C.surface, borderColor: C.border }}>
               {options.map(o => (
                 <button key={o.value} onClick={() => { onChange(o.value); setOpen(false) }}
-                  className="w-full flex items-center justify-between px-3 py-2 text-[12px] font-semibold hover:bg-[#f4ffe6] transition-colors"
+                  className="w-full flex items-center justify-between px-3 py-2 text-[12px] font-semibold hover:bg-[#f3eeff] transition-colors"
                   style={{ color: o.value === value ? C.limeDeep : C.text }}>
                   {o.label}
                   {o.value === value && <Check size={12} style={{ color: C.limeDeep }} />}
@@ -367,7 +367,7 @@ function NumericInput({
           borderColor:     focused ? C.lime : C.border,
           backgroundColor: C.bg,
           color:           value === '-1' ? C.limeDeep : C.text,
-          boxShadow:       focused ? '0 0 0 3px rgba(143,255,0,0.12)' : 'none',
+          boxShadow:       focused ? '0 0 0 3px rgba(117,48,251,0.12)' : 'none',
           transition:      'border-color 0.2s, box-shadow 0.2s',
         }}
       />
@@ -427,7 +427,7 @@ function PlanRow({
 
   return (
     <div
-      className="grid items-center px-4 py-3 border-b last:border-b-0 cursor-pointer hover:bg-[#fafcf8] transition-colors"
+      className="grid items-center px-4 py-3 border-b last:border-b-0 cursor-pointer hover:bg-[#f8f7ff] transition-colors"
       style={{
         gridTemplateColumns: PLAN_GRID,
         gap:             10,
@@ -821,7 +821,7 @@ function EditPanel({
           </button>
           {canEdit && <button onClick={handleSave} disabled={saving}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
-            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
+            style={{ backgroundColor: '#7530fb', color: '#ffffff' }}>
             {saving
               ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
               : <><Save size={14} /> Save Limits</>}
@@ -1294,7 +1294,7 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
 
             return (
               <div key={entry.id}
-                   className="grid items-start px-4 py-3 border-b last:border-b-0 hover:bg-[#fafcf8] transition-colors"
+                   className="grid items-start px-4 py-3 border-b last:border-b-0 hover:bg-[#f8f7ff] transition-colors"
                    style={{ gridTemplateColumns: '0.8fr 1.8fr 0.8fr 0.6fr 0.5fr', gap: 12, borderColor: C.border }}>
 
                 {/* PLAN */}
