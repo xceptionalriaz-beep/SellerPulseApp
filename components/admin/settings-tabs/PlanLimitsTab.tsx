@@ -1120,33 +1120,43 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
         border: `1px solid ${C.border}`,
         alignSelf: 'flex-start',
       }}>
-        {(['tool_plans', 'ai_credits'] as const).map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveSubTab(tab)}
-            style={{
-              padding: '6px 16px',
-              borderRadius: 9,
-              border: 'none',
-              fontSize: 12,
-              fontWeight: 700,
-              cursor: 'pointer',
-              transition: 'all 0.15s',
-              background: activeSubTab === tab ? C.surface : 'transparent',
-              color: activeSubTab === tab ? C.text : C.muted,
-              boxShadow: activeSubTab === tab ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-            }}
-          >
-            {tab === 'tool_plans' ? (
-              <><Shield size={12} /> Tool Plans</>
-            ) : (
-              <><Zap size={12} fill="currentColor" /> AI Credits</>
-            )}
-          </button>
-        ))}
+        {(['tool_plans', 'ai_credits'] as const).map(tab => {
+          const isActive = activeSubTab === tab
+          const isLime   = tab === 'ai_credits'
+          const activeBg = isLime ? '#b8fa33' : '#7530fb'
+          const activeColor = isLime ? '#0a0614' : '#ffffff'
+          return (
+            <button
+              key={tab}
+              onClick={() => setActiveSubTab(tab)}
+              style={{
+                padding: '6px 16px',
+                borderRadius: 9,
+                border: 'none',
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+                background: isActive ? activeBg : 'transparent',
+                color: isActive ? activeColor : C.muted,
+                boxShadow: isActive
+                  ? isLime
+                    ? '0 2px 8px rgba(184,250,51,0.35)'
+                    : '0 2px 8px rgba(117,48,251,0.30)'
+                  : 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+              }}
+            >
+              {tab === 'tool_plans' ? (
+                <><Shield size={12} /> Tool Plans</>
+              ) : (
+                <><Zap size={12} fill="currentColor" /> AI Credits</>
+              )}
+            </button>
+          )
+        })}
       </div>
 
       {/* ── AI Credits Panel ─────────────────────────────────────── */}
