@@ -7785,6 +7785,16 @@ function AITab({
     const [policyResult, setPolicyResult] = useState<string>('')
     const [copyError, setCopyError] = useState<string | null>(null)
     const [policyError, setPolicyError] = useState<string | null>(null)
+
+    // ── Photo Studio state ────────────────────────────────────────────────────
+    const [photoOpen, setPhotoOpen] = useState(false)
+    const [photoPrompt, setPhotoPrompt] = useState('')
+    const [photoStyle, setPhotoStyle] = useState<'product' | 'white-bg' | 'lifestyle' | 'infographic'>('product')
+    const [photoLoading, setPhotoLoading] = useState(false)
+    const [photoResult, setPhotoResult] = useState<{ url: string; revisedPrompt: string } | null>(null)
+    const [photoError, setPhotoError] = useState<string | null>(null)
+    const [photoApplied, setPhotoApplied] = useState(false)
+
     // track which field is being edited inside the preview
     const [copyApplied, setCopyApplied] = useState(false)
 
@@ -7888,6 +7898,57 @@ function AITab({
         } finally {
             setPolicyLoading(false)
         }
+    }
+
+    // ── Photo Studio handlers ─────────────────────────────────────────────────
+    const handlePhotoGenerate = async () => {
+        if (!photoPrompt.trim()) {
+            setPhotoError('Please describe the image you want to generate.')
+            return
+        }
+        setPhotoLoading(true)
+        setPhotoResult(null)
+        setPhotoError(null)
+        setPhotoApplied(false)
+
+        try {
+            const res = await fetch('/api/ai/photo-studio', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    prompt: photoPrompt,
+                    style: photoStyle,
+                    blockId: block.id,
+                    blockType: block.type,
+                    category: templateCategory,
+                }),
+            })
+            const data = await res.json()
+            if (!res.ok || data.error) {
+                const userMsg = data.code === 'NO_AI_KEY'
+                    ? 'AI features are currently unavailable. Please try again later.'
+                    : (data.error ?? 'Something went wrong. Please try again.')
+                setPhotoError(userMsg)
+            } else {
+                // Append cache-buster for preview so browser doesn't show old image
+                setPhotoResult({ url: data.url, revisedPrompt: data.revisedPrompt })
+            }
+        } catch {
+            setPhotoError('Something went wrong. Please try again.')
+        } finally {
+            setPhotoLoading(false)
+        }
+    }
+
+    const applyPhotoResult = () => {
+        if (!photoResult) return
+        const props = block.props as unknown as Record<string, unknown>
+        // Priority order for image props — pick the first one that exists on this block
+        const imageKeys = ['src', 'mainImageSrc', 'imageUrl', 'heroImage', 'bgImage', 'logoUrl', 'image2Url']
+        const targetKey = imageKeys.find(k => typeof props[k] === 'string') ?? 'src'
+        onChange({ ...block, props: { ...block.props, [targetKey]: photoResult.url } as BlockProps })
+        setPhotoApplied(true)
+        setTimeout(() => { setPhotoResult(null); setPhotoApplied(false); setPhotoOpen(false) }, 1200)
     }
 
     const applyPolicyResult = () => {
@@ -8022,16 +8083,170 @@ function AITab({
                     )}
                 </div>
 
-                {/* ── AI Photo Studio — coming soon ── */}
-                <AIToolButton
-                    Icon={Wand2}
-                    label="AI Photo Studio"
-                    description="Generate or enhance product images for this block"
-                    color="#d97706"
-                    bg="#fef3c7"
-                    border="#fde68a"
-                    comingSoon
-                />
+                {/* ── AI Photo Studio ── */}
+                <div style={{ marginBottom: 10 }}>
+                    <button
+                        onClick={() => { setPhotoOpen(o => !o); setPhotoError(null) }}
+                        style={{
+                            width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                            padding: '10px 12px', border: `1px solid #fde68a`,
+                            borderRadius: photoOpen ? '10px 10px 0 0' : 10,
+                            backgroundColor: '#fef3c7',
+                            cursor: 'pointer', textAlign: 'left',
+                            transition: 'border-radius 0.15s',
+                        }}
+                    >
+                        <div style={{
+                            width: 34, height: 34, borderRadius: 9,
+                            backgroundColor: '#fef9c3', border: `1px solid #fde68a`,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                        }}>
+                            <Wand2 size={16} style={{ color: '#d97706' }} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700, color: '#d97706' }}>
+                                AI Photo Studio
+                            </p>
+                            <p style={{ margin: '2px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, lineHeight: 1.4 }}>
+                                Generate product images with AI
+                            </p>
+                        </div>
+                        <div style={{ fontSize: 10, color: '#d97706', fontWeight: 700, opacity: 0.7 }}>
+                            {photoOpen ? '▲' : '▼'}
+                        </div>
+                    </button>
+
+                    {/* Expandable panel */}
+                    {photoOpen && (
+                        <div className="ai-result-fade" style={{
+                            border: `1px solid #fde68a`, borderTop: 'none',
+                            borderRadius: '0 0 10px 10px',
+                            backgroundColor: C.surface, padding: '12px 12px 10px',
+                        }}>
+                            {/* Prompt input */}
+                            <p style={{ margin: '0 0 5px', fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 700, color: C.secondary, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                Describe your image
+                            </p>
+                            <textarea
+                                value={photoPrompt}
+                                onChange={e => setPhotoPrompt(e.target.value)}
+                                placeholder='e.g. "wireless earbuds on a wooden desk, natural light"'
+                                rows={3}
+                                style={{
+                                    width: '100%', boxSizing: 'border-box',
+                                    padding: '8px 10px', fontFamily: 'DM Sans, sans-serif',
+                                    fontSize: 11, color: C.body, lineHeight: 1.5,
+                                    border: `1px solid ${C.border}`, borderRadius: 7,
+                                    backgroundColor: C.bg, resize: 'vertical',
+                                    outline: 'none',
+                                }}
+                            />
+
+                            {/* Style chips */}
+                            <p style={{ margin: '10px 0 5px', fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 700, color: C.secondary, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                Style
+                            </p>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 12 }}>
+                                {([
+                                    { id: 'product',    label: '📦 Product Shot' },
+                                    { id: 'white-bg',   label: '⬜ White BG' },
+                                    { id: 'lifestyle',  label: '🌿 Lifestyle' },
+                                    { id: 'infographic',label: '📊 Infographic' },
+                                ] as const).map(s => (
+                                    <button
+                                        key={s.id}
+                                        onClick={() => setPhotoStyle(s.id)}
+                                        style={{
+                                            padding: '4px 9px',
+                                            fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 600,
+                                            border: `1px solid ${photoStyle === s.id ? '#d97706' : C.border}`,
+                                            borderRadius: 20,
+                                            backgroundColor: photoStyle === s.id ? '#fef3c7' : C.bg,
+                                            color: photoStyle === s.id ? '#d97706' : C.secondary,
+                                            cursor: 'pointer', transition: 'all 0.15s',
+                                        }}
+                                    >
+                                        {s.label}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Generate button */}
+                            <button
+                                onClick={handlePhotoGenerate}
+                                disabled={photoLoading}
+                                style={{
+                                    width: '100%', padding: '9px 0',
+                                    fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700,
+                                    color: '#fff', backgroundColor: photoLoading ? '#f59e0b99' : '#d97706',
+                                    border: 'none', borderRadius: 8, cursor: photoLoading ? 'default' : 'pointer',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                                    transition: 'background 0.2s',
+                                }}
+                            >
+                                {photoLoading
+                                    ? <><span style={{ ...spinnerStyle, margin: 0, color: '#fff' }} /> Generating…</>
+                                    : <><Wand2 size={13} /> Generate Image</>
+                                }
+                            </button>
+
+                            {/* Error */}
+                            {photoError && (
+                                <div style={{ margin: '8px 0 0', padding: '8px 10px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: 7 }}>
+                                    <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.danger, lineHeight: 1.4 }}>{photoError}</p>
+                                </div>
+                            )}
+
+                            {/* Image preview */}
+                            {photoResult && (
+                                <div className="ai-result-fade" style={{ marginTop: 10 }}>
+                                    {/* Image */}
+                                    <div style={{ position: 'relative', borderRadius: 8, overflow: 'hidden', border: `1px solid ${C.border}` }}>
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img
+                                            src={`${photoResult.url}?v=${Date.now()}`}
+                                            alt="AI generated"
+                                            style={{ width: '100%', height: 'auto', display: 'block', maxHeight: 220, objectFit: 'cover' }}
+                                        />
+                                    </div>
+                                    {/* Revised prompt tooltip */}
+                                    {photoResult.revisedPrompt && photoResult.revisedPrompt !== photoPrompt && (
+                                        <p style={{ margin: '5px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 9, color: C.muted, lineHeight: 1.4, fontStyle: 'italic' }}>
+                                            AI refined: &ldquo;{photoResult.revisedPrompt.slice(0, 100)}{photoResult.revisedPrompt.length > 100 ? '…' : ''}&rdquo;
+                                        </p>
+                                    )}
+                                    {/* Apply / Re-generate */}
+                                    <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+                                        <button
+                                            onClick={applyPhotoResult}
+                                            style={{
+                                                flex: 2, padding: '8px 0',
+                                                fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700,
+                                                color: photoApplied ? C.success : '#fff',
+                                                backgroundColor: photoApplied ? C.successLight : '#d97706',
+                                                border: 'none', borderRadius: 7, cursor: 'pointer',
+                                                transition: 'all 0.2s',
+                                            }}
+                                        >
+                                            {photoApplied ? '✓ Applied!' : '✓ Use this image'}
+                                        </button>
+                                        <button
+                                            onClick={() => { setPhotoResult(null); setPhotoApplied(false) }}
+                                            style={{
+                                                flex: 1, padding: '8px 0',
+                                                fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 600,
+                                                color: C.secondary, backgroundColor: C.surface,
+                                                border: `1px solid ${C.border}`, borderRadius: 7, cursor: 'pointer',
+                                            }}
+                                        >
+                                            Try again
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
 
                 {/* ── AI Policy Writer ── */}
                 <div style={{ marginBottom: 8 }}>
