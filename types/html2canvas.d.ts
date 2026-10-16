@@ -26,7 +26,8 @@ declare module 'html2canvas' {
         windowHeight?: number
     }
 
-    function html2canvas(element: HTMLElement, options?: Options): Promise<HTMLCanvasElement>
-
-    export = html2canvas
+    export default function html2canvas(
+        element: HTMLElement,
+        options?: Options
+    ): Promise<HTMLCanvasElement>
 }
