@@ -19,16 +19,16 @@ import PricingEditorModal from '@/components/admin/PricingEditorModal'
 
 // ── Design tokens ──────────────────────────────────────────────
 const C = {
-  dark:     '#1e1535',
-  lime:     '#b8fa33',
-  limeDeep: '#7530fb',
-  limeTint: '#f3eeff',
-  border:   '#ede9fe',
-  bg:       '#f8f7ff',
-  text:     '#1f1d2e',
-  muted:    '#9ca3af',
-  surface:  '#ffffff',
-  red:      '#ef4444',
+  dark:     '#0a0614',          // near-black for headings
+  lime:     '#b8fa33',          // accent yellow-green
+  limeDeep: '#7530fb',          // primary violet
+  limeTint: '#f5f1ff',          // very light violet tint — only for selected/active states
+  border:   '#e8e3f4',          // subtle border, not too purple
+  bg:       '#f5f4f8',          // off-white page bg — fresh, neutral
+  text:     '#111118',          // near-black body text — max readability
+  muted:    '#6b7280',          // medium gray — readable but subordinate
+  surface:  '#ffffff',          // pure white card/surface
+  red:      '#dc2626',
   amber:    '#d97706',
   green:    '#16a34a',
   blue:     '#7530fb',
@@ -317,7 +317,7 @@ function CustomDropdown({
               style={{ backgroundColor: C.surface, borderColor: C.border }}>
               {options.map(o => (
                 <button key={o.value} onClick={() => { onChange(o.value); setOpen(false) }}
-                  className="w-full flex items-center justify-between px-3 py-2 text-[12px] font-semibold hover:bg-[#f3eeff] transition-colors"
+                  className="w-full flex items-center justify-between px-3 py-2 text-[12px] font-semibold hover:bg-[#f5f1ff] transition-colors"
                   style={{ color: o.value === value ? C.limeDeep : C.text }}>
                   {o.label}
                   {o.value === value && <Check size={12} style={{ color: C.limeDeep }} />}
@@ -427,7 +427,7 @@ function PlanRow({
 
   return (
     <div
-      className="grid items-center px-4 py-3 border-b last:border-b-0 cursor-pointer hover:bg-[#f8f7ff] transition-colors"
+      className="grid items-center px-4 py-3 border-b last:border-b-0 cursor-pointer hover:bg-[#f5f4f8] transition-colors"
       style={{
         gridTemplateColumns: PLAN_GRID,
         gap: 10,
@@ -1294,7 +1294,7 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
 
             return (
               <div key={entry.id}
-                   className="grid items-start px-4 py-3 border-b last:border-b-0 hover:bg-[#f8f7ff] transition-colors"
+                   className="grid items-start px-4 py-3 border-b last:border-b-0 hover:bg-[#f5f4f8] transition-colors"
                    style={{ gridTemplateColumns: '0.8fr 1.8fr 0.8fr 0.6fr 0.5fr', gap: 12, borderColor: C.border }}>
 
                     {/* PLAN */}
@@ -1554,7 +1554,7 @@ function AiCreditsPanel({
               {packages.map(pkg => {
                 const isEditing = editingPkg === pkg.id
                 return (
-                  <tr key={pkg.id} style={{ background: isEditing ? 'rgba(99,102,241,0.03)' : 'transparent' }}>
+                  <tr key={pkg.id} style={{ background: isEditing ? 'rgba(117,48,251,0.03)' : 'transparent' }}>
                     <td style={cell}>
                       {isEditing
                         ? <input style={input} value={pkgEdits.name ?? pkg.name}
@@ -1587,7 +1587,7 @@ function AiCreditsPanel({
                           value={pkgEdits.bonus_credits ?? pkg.bonus_credits}
                           onChange={e => setPkgEdits(p => ({ ...p, bonus_credits: parseInt(e.target.value, 10) }))} />
                         : (pkg.bonus_credits > 0
-                          ? <span style={{ color: '#10b981', fontWeight: 600 }}>+{pkg.bonus_credits}</span>
+                          ? <span style={{ color: '#7530fb', fontWeight: 700 }}>+{pkg.bonus_credits}</span>
                           : <span style={{ color: C.muted }}>0</span>)}
                     </td>
                     <td style={cell}>
@@ -1596,7 +1596,7 @@ function AiCreditsPanel({
                           checked={pkgEdits.is_active ?? pkg.is_active}
                           onChange={e => setPkgEdits(p => ({ ...p, is_active: e.target.checked }))} />
                         : (pkg.is_active
-                          ? <Check size={14} color="#10b981" />
+                          ? <Check size={14} color="#7530fb" />
                           : <X size={14} color="#ef4444" />)}
                     </td>
                     <td style={{ ...cell, whiteSpace: 'nowrap' as const }}>
@@ -1668,7 +1668,7 @@ function AiCreditsPanel({
                         ? <input style={{ ...input, width: 70 }} type="number"
                           value={costEdits.credits_cost ?? cost.credits_cost}
                           onChange={e => setCostEdits(p => ({ ...p, credits_cost: parseInt(e.target.value, 10) }))} />
-                        : <span style={{ fontWeight: 700, color: '#6366f1' }}>{cost.credits_cost}</span>}
+                        : <span style={{ fontWeight: 700, color: '#7530fb' }}>{cost.credits_cost}</span>}
                     </td>
                     <td style={cell}>
                       {isEditing
@@ -1682,7 +1682,7 @@ function AiCreditsPanel({
                           checked={costEdits.is_enabled ?? cost.is_enabled}
                           onChange={e => setCostEdits(p => ({ ...p, is_enabled: e.target.checked }))} />
                         : (cost.is_enabled
-                          ? <Check size={14} color="#10b981" />
+                          ? <Check size={14} color="#7530fb" />
                           : <span style={{ fontSize: 11, color: '#ef4444', fontWeight: 600 }}>OFF</span>)}
                     </td>
                     <td style={{ ...cell, whiteSpace: 'nowrap' as const }}>
