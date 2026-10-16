@@ -3,7 +3,13 @@
 // Riazify — Visual Editor Block System
 //
 // Pure TypeScript — no React.
-import _qrcodeGenerator from 'qrcode-generator'
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const _qrcodeGenerator: (typeNumber: number, eccLevel: 'L'|'M'|'Q'|'H') => {
+    addData(data: string): void
+    make(): void
+    getModuleCount(): number
+    isDark(row: number, col: number): boolean
+} = require('qrcode-generator')
 // Every other VisualEditor file imports from here.
 //
 // Each block has:
