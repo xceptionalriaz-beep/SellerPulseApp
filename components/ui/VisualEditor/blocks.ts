@@ -2,7 +2,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Riazify — Visual Editor Block System
 //
-// Pure TypeScript — no React, no imports.
+// Pure TypeScript — no React.
+import _qrcodeGenerator from 'qrcode-generator'
 // Every other VisualEditor file imports from here.
 //
 // Each block has:
@@ -101,6 +102,9 @@ export type BlockType =
     | 'authenticity_guarantee'
     | 'condition_badge'
     | 'item_specifics'
+    | 'size_guide'
+    | 'variation_builder'
+    | 'shipping_rate_table'
     // Conversion
     | 'policy_tabs'
     | 'nav_bar'
@@ -135,6 +139,8 @@ export type BlockType =
     | 'payment_methods_block'
     | 'urgency_timer_block'
     | 'trust_badge_block'
+    | 'competitor_comparison'
+    | 'qr_code'
 
 // ── Base block instance ─────────────────────────────────────────────────────
 export interface Block {
@@ -202,6 +208,8 @@ export type BlockProps =
     | HighlightTextProps
     | WhyBuyFromUsProps
     | InfoBoxProps
+    | CompetitorComparisonProps
+    | QrCodeProps
 
 // ── Shared common props (present on every block) ────────────────────────────
 export interface CommonProps {
@@ -1184,10 +1192,73 @@ export interface InfoBoxProps extends CommonProps {
     accentColor?: string
 }
 
+// ── Competitor Comparison Table ───────────────────────────────────────────────
+export interface CompetitorComparisonProps extends CommonProps {
+    // Title bar
+    titleText: string
+    showTitle: boolean
+    titleBg: string
+    titleColor: string
+    // Column labels
+    ourLabel: string
+    col2Label: string
+    col3Label: string
+    showThirdCol: boolean
+    // Rows
+    rows: Array<{ feature: string; ourValue: string; col2Value: string; col3Value: string }>
+    // Our column highlight
+    ourColBg: string
+    ourHeaderBg: string
+    ourHeaderText: string
+    // Other header row
+    headerBg: string
+    headerTextColor: string
+    // Indicators
+    checkColor: string
+    crossColor: string
+    partialColor: string
+    // Table
+    altRowBg: string
+    borderColor: string
+    textColor: string
+    featureColor: string
+    fontSize: number
+}
+
+// ── QR Code ───────────────────────────────────────────────────────────────────
+export interface QrCodeProps extends CommonProps {
+    targetUrl: string             // eBay URL to encode
+    qrSize: number                // rendered size in px (100–300)
+    qrFgColor: string             // dark module colour
+    qrBgColor: string             // light / background colour
+    showLabel: boolean            // show caption below QR
+    labelText: string             // caption text
+    labelColor: string            // caption text colour
+    labelFontSize: number         // caption font size
+    alignment: 'left' | 'center' | 'right'
+    showBorder: boolean
+    borderColor: string
+    borderRadius: number
+}
+
 // ── Raw HTML ──────────────────────────────────────────────────────────────────
 export interface RawHtmlProps extends CommonProps {
     code: string              // raw HTML — passed through sanitiseHtml on export
     label: string             // internal label shown on canvas card
+}
+
+// ── QR code generator — qrcode-generator (pure JS, browser + Node safe) ──────
+function _qrCreate(text: string): { modules: { size: number; data: Uint8Array } } {
+    // typeNumber 0 = auto-detect minimum version; errorCorrectionLevel M
+    const qr = _qrcodeGenerator(0, 'M')
+    qr.addData(text)
+    qr.make()
+    const n = qr.getModuleCount()
+    const data = new Uint8Array(n * n)
+    for (let r = 0; r < n; r++)
+        for (let c = 0; c < n; c++)
+            data[r * n + c] = qr.isDark(r, c) ? 1 : 0
+    return { modules: { size: n, data } }
 }
 
 // Variant system imports
@@ -4063,6 +4134,461 @@ ${thumbCells}
                 return wrapBlock('testimonial_block' as BlockType, id, getTestimonialsVariant(variantId).toHtml(p, id), p)
             },
         },
+
+        // ── Variation Builder ───────────────────────────────────────────────────
+        {
+            type: 'variation_builder' as BlockType,
+            label: 'Variation Builder',
+            category: 'eBay Specific' as BlockCategory,
+            icon: 'grid',
+            description: 'Visual grid showing available Size/Colour combinations',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                bgColor: '#ffffff',
+                titleText: 'Available Variations',
+                showTitle: true,
+                axis1Label: 'Colour',
+                axis2Label: 'Size',
+                axis1Options: ['Red', 'Blue', 'Black', 'White'],
+                axis2Options: ['S', 'M', 'L', 'XL'],
+                availability: {} as Record<string, boolean>,
+                displayStyle: 'grid',
+                noteText: 'Select your options using the dropdowns above ↑',
+                showNote: true,
+                headerBg: '#7530fb',
+                headerText: '#ffffff',
+                inStockColor: '#22c55e',
+                outStockColor: '#ef4444',
+                altRowBg: '#f8f7ff',
+                borderColor: '#ede9fe',
+            } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps & { [key: string]: any }
+                const axis1: string[] = Array.isArray(p.axis1Options) && p.axis1Options.length > 0 ? p.axis1Options : ['Red', 'Blue', 'Black']
+                const axis2: string[] = Array.isArray(p.axis2Options) && p.axis2Options.length > 0 ? p.axis2Options : ['S', 'M', 'L', 'XL']
+                const avail: Record<string, boolean> = (p.availability && typeof p.availability === 'object') ? p.availability : {}
+
+                const headerBg = p.headerBg ?? '#7530fb'
+                const headerText = p.headerText ?? '#ffffff'
+                const altRowBg = p.altRowBg ?? '#f8f7ff'
+                const borderColor = p.borderColor ?? '#ede9fe'
+                const inStockColor = p.inStockColor ?? '#22c55e'
+                const outStockColor = p.outStockColor ?? '#ef4444'
+
+                const thStyle = `padding:8px 12px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:${headerText};text-align:center;border:1px solid ${borderColor};`
+                const cornerStyle = `padding:8px 12px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:${headerText};text-align:center;border:1px solid ${borderColor};background-color:${headerBg};`
+
+                // Header row: corner cell + axis2 options
+                const headerRow = `<tr style="background-color:${headerBg};"><th style="${cornerStyle}">${p.axis1Label ?? 'Colour'} \\ ${p.axis2Label ?? 'Size'}</th>${axis2.map(s => `<th style="${thStyle}">${s}</th>`).join('')}</tr>`
+
+                // Data rows
+                const dataRows = axis1.map((colour, ri) => {
+                    const rowBg = ri % 2 === 0 ? '#ffffff' : altRowBg
+                    const rowHeaderStyle = `padding:8px 12px;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#374151;border:1px solid ${borderColor};background-color:${rowBg};`
+                    const cells = axis2.map(size => {
+                        const key = `${colour}||${size}`
+                        const isOut = avail[key] === false
+                        const symbol = isOut ? '✗' : '✓'
+                        const color = isOut ? outStockColor : inStockColor
+                        const cellStyle = `padding:8px 12px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:${color};text-align:center;border:1px solid ${borderColor};background-color:${rowBg};`
+                        return `<td style="${cellStyle}">${symbol}</td>`
+                    }).join('')
+                    return `<tr><td style="${rowHeaderStyle}">${colour}</td>${cells}</tr>`
+                }).join('')
+
+                const titleHtml = (p.showTitle ?? true) && p.titleText
+                    ? `<tr><td colspan="${axis2.length + 1}" style="padding-bottom:12px;"><h3 style="margin:0;font-family:Arial,sans-serif;font-size:18px;font-weight:700;color:#1e1535;">${p.titleText}</h3></td></tr>`
+                    : ''
+
+                const noteHtml = (p.showNote ?? true) && p.noteText
+                    ? `<tr><td colspan="${axis2.length + 1}" style="padding-top:10px;"><p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;font-style:italic;">${p.noteText}</p></td></tr>`
+                    : ''
+
+                const inner = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;margin:0;border-collapse:collapse;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;">${titleHtml}<tr><td><table width="100%" cellpadding="0" cellspacing="0" border="1" style="width:100%;border-collapse:collapse;border:1px solid ${borderColor};">${headerRow}${dataRows}</table></td></tr>${noteHtml}</table></td></tr></table>`
+
+                return wrapBlock('variation_builder' as BlockType, id, inner, p)
+            },
+        },
+
+        // ── Shipping Rate Table ──────────────────────────────────────────────────
+        {
+            type: 'shipping_rate_table' as BlockType,
+            label: 'Shipping Rate Table',
+            category: 'eBay Specific' as BlockCategory,
+            icon: 'truck',
+            description: 'Shipping costs by destination and service with delivery times',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                bgColor: '#ffffff',
+                titleText: 'Shipping Information',
+                subtitle: 'All orders dispatched within 1 working day',
+                showDispatchBanner: true,
+                dispatchBannerText: '🚚 Fast Dispatch — Orders placed before 2pm shipped same day',
+                dispatchBannerBg: '#f3eeff',
+                dispatchBannerColor: '#7530fb',
+                headerBg: '#7530fb',
+                headerText: '#ffffff',
+                altRowBg: '#f8f7ff',
+                borderColor: '#ede9fe',
+                textColor: '#374151',
+                freeColor: '#16a34a',
+                rows: [
+                    { destination: 'UK Mainland', service: 'Royal Mail 1st Class', cost: 'Free', time: '1–2 days' },
+                    { destination: 'UK Mainland', service: 'Royal Mail Tracked 48', cost: '£2.99', time: '2–3 days' },
+                    { destination: 'Scotland / N. Ireland', service: 'Royal Mail 2nd Class', cost: '£1.50', time: '3–5 days' },
+                    { destination: 'Europe', service: 'Royal Mail Airmail', cost: '£4.99', time: '5–10 days' },
+                    { destination: 'Worldwide', service: 'Royal Mail International', cost: '£8.99', time: '7–14 days' },
+                ],
+            } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps & { [key: string]: any }
+                const rows: Array<{ destination: string; service: string; cost: string; time: string }> =
+                    Array.isArray(p.rows) && p.rows.length > 0 ? p.rows : [
+                        { destination: 'UK Mainland', service: 'Royal Mail 1st Class', cost: 'Free', time: '1–2 days' },
+                    ]
+
+                const headerBg = p.headerBg ?? '#7530fb'
+                const headerText = p.headerText ?? '#ffffff'
+                const altRowBg = p.altRowBg ?? '#f8f7ff'
+                const borderColor = p.borderColor ?? '#ede9fe'
+                const textColor = p.textColor ?? '#374151'
+                const freeColor = p.freeColor ?? '#16a34a'
+
+                const thStyle = `padding:9px 14px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:${headerText};text-align:left;border:1px solid ${borderColor};`
+                const headerRow = `<tr style="background-color:${headerBg};"><th style="${thStyle}">Destination</th><th style="${thStyle}">Service</th><th style="${thStyle}">Cost</th><th style="${thStyle}">Est. Delivery</th></tr>`
+
+                const dataRows = rows.map((r, i) => {
+                    const rowBg = i % 2 === 0 ? '#ffffff' : altRowBg
+                    const tdBase = `padding:8px 14px;font-family:Arial,sans-serif;font-size:13px;border:1px solid ${borderColor};background-color:${rowBg};`
+                    const isFree = r.cost.toLowerCase().trim() === 'free'
+                    const costStyle = `${tdBase}color:${isFree ? freeColor : textColor};font-weight:${isFree ? '700' : '400'};`
+                    return `<tr><td style="${tdBase}color:${textColor};font-weight:600;">${r.destination}</td><td style="${tdBase}color:${textColor};">${r.service}</td><td style="${costStyle}">${r.cost}</td><td style="${tdBase}color:${textColor};">${r.time}</td></tr>`
+                }).join('')
+
+                const dispatchHtml = (p.showDispatchBanner ?? true) && p.dispatchBannerText
+                    ? `<tr><td colspan="4" style="padding-bottom:10px;"><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:${p.dispatchBannerColor ?? '#7530fb'};background-color:${p.dispatchBannerBg ?? '#f3eeff'};padding:8px 14px;border-left:3px solid ${p.dispatchBannerColor ?? '#7530fb'};">${p.dispatchBannerText}</p></td></tr>`
+                    : ''
+
+                const titleHtml = p.titleText
+                    ? `<tr><td colspan="4" style="padding-bottom:4px;"><h3 style="margin:0;font-family:Arial,sans-serif;font-size:18px;font-weight:700;color:#1e1535;">${p.titleText}</h3></td></tr>`
+                    : ''
+
+                const subtitleHtml = p.subtitle
+                    ? `<tr><td colspan="4" style="padding-bottom:12px;"><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#6b7280;">${p.subtitle}</p></td></tr>`
+                    : ''
+
+                const inner = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;margin:0;border-collapse:collapse;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;">${dispatchHtml}${titleHtml}${subtitleHtml}<tr><td colspan="4"><table width="100%" cellpadding="0" cellspacing="0" border="1" style="width:100%;border-collapse:collapse;border:1px solid ${borderColor};">${headerRow}${dataRows}</table></td></tr></table></td></tr></table>`
+
+                return wrapBlock('shipping_rate_table' as BlockType, id, inner, p)
+            },
+        },
+
+        // ── Size Guide ──────────────────────────────────────────────────────────
+        {
+            type: 'size_guide' as BlockType,
+            label: 'Size Guide',
+            category: 'eBay Specific' as BlockCategory,
+            icon: 'ruler',
+            description: 'Clothing size chart with UK/US/EU columns and measurements',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                bgColor: '#ffffff',
+                titleText: 'Size Guide',
+                headerBg: '#7530fb',
+                headerText: '#ffffff',
+                altRowBg: '#f8f7ff',
+                borderColor: '#ede9fe',
+                textColor: '#374151',
+                fitNote: 'This item runs true to size. If in doubt, size up.',
+                showFitNote: true,
+                showMeasureGuide: true,
+                measureGuideText: 'How to measure: Use a soft tape measure. For chest, measure around the fullest part. For waist, measure around your natural waistline.',
+                sizeCategory: 'tops',
+                unit: 'cm',
+                columns: ['Size', 'UK', 'US', 'EU', 'Chest (cm)', 'Waist (cm)'],
+                rows: [
+                    ['XS', '6', '2', '34', '80', '62'],
+                    ['S', '8', '4', '36', '84', '66'],
+                    ['M', '10', '6', '38', '88', '70'],
+                    ['L', '12', '8', '40', '92', '74'],
+                    ['XL', '14', '10', '42', '96', '78'],
+                    ['XXL', '16', '12', '44', '100', '82'],
+                ],
+            } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps & { [key: string]: any }
+                const columns: string[] = Array.isArray(p.columns) && p.columns.length > 0
+                    ? p.columns
+                    : ['Size', 'UK', 'US', 'EU', 'Chest (cm)', 'Waist (cm)']
+                const rows: string[][] = Array.isArray(p.rows) && p.rows.length > 0
+                    ? p.rows
+                    : [['S', '8', '4', '36', '84', '66'], ['M', '10', '6', '38', '88', '70'], ['L', '12', '8', '40', '92', '74']]
+
+                const headerBg = p.headerBg ?? '#7530fb'
+                const headerText = p.headerText ?? '#ffffff'
+                const altRowBg = p.altRowBg ?? '#f8f7ff'
+                const borderColor = p.borderColor ?? '#ede9fe'
+                const textColor = p.textColor ?? '#374151'
+
+                const thStyle = `padding:9px 12px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:${headerText};text-align:center;border:1px solid ${borderColor};`
+                const headerRow = `<tr style="background-color:${headerBg};">${columns.map(c => `<th style="${thStyle}">${c}</th>`).join('')}</tr>`
+
+                const dataRows = rows.map((row, i) => {
+                    const rowBg = i % 2 === 0 ? '#ffffff' : altRowBg
+                    const tdStyle = `padding:8px 12px;font-family:Arial,sans-serif;font-size:13px;color:${textColor};text-align:center;border:1px solid ${borderColor};`
+                    const cells = columns.map((_, ci) => `<td style="${tdStyle}">${row[ci] ?? ''}</td>`).join('')
+                    return `<tr style="background-color:${rowBg};">${cells}</tr>`
+                }).join('')
+
+                const fitNoteHtml = p.showFitNote && p.fitNote
+                    ? `<tr><td style="padding-bottom:12px;"><p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:${headerBg};background-color:#f3eeff;padding:8px 14px;border-left:3px solid ${headerBg};">${p.fitNote}</p></td></tr>`
+                    : ''
+
+                const measureHtml = p.showMeasureGuide && p.measureGuideText
+                    ? `<tr><td style="padding-top:12px;"><p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#6b7280;font-style:italic;">${p.measureGuideText}</p></td></tr>`
+                    : ''
+
+                const titleHtml = p.titleText
+                    ? `<tr><td style="padding-bottom:14px;"><h3 style="margin:0;font-family:Arial,sans-serif;font-size:18px;font-weight:700;color:#1e1535;">${p.titleText}</h3></td></tr>`
+                    : ''
+
+                const inner = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;margin:0;border-collapse:collapse;"><tr><td style="background-color:${p.bgColor};${pad(p)}"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;">${titleHtml}${fitNoteHtml}<tr><td><table width="100%" cellpadding="0" cellspacing="0" border="1" style="width:100%;border-collapse:collapse;border:1px solid ${borderColor};">${headerRow}${dataRows}</table></td></tr>${measureHtml}</table></td></tr></table>`
+
+                return wrapBlock('size_guide' as BlockType, id, inner, p)
+            },
+        },
+
+        // ── Competitor Comparison Table ──────────────────────────────────────
+        {
+            type: 'competitor_comparison' as BlockType,
+            label: 'Competitor Comparison',
+            category: 'Conversion',
+            icon: 'table-2',
+            description: '"Why buy from us vs others" conversion table',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                bgColor: '#ffffff',
+                paddingTop: 24,
+                paddingBottom: 24,
+                paddingLeft: 20,
+                paddingRight: 20,
+                titleText: 'Why Buy From Us?',
+                showTitle: true,
+                titleBg: '#7530fb',
+                titleColor: '#ffffff',
+                ourLabel: '⭐ Our Store',
+                col2Label: 'Other Sellers',
+                col3Label: 'High Street',
+                showThirdCol: true,
+                ourColBg: '#f3eeff',
+                ourHeaderBg: '#7530fb',
+                ourHeaderText: '#ffffff',
+                headerBg: '#f3eeff',
+                headerTextColor: '#1e1535',
+                checkColor: '#16a34a',
+                crossColor: '#ef4444',
+                partialColor: '#d97706',
+                altRowBg: '#f8f7ff',
+                borderColor: '#ede9fe',
+                textColor: '#6b7280',
+                featureColor: '#1e1535',
+                fontSize: 13,
+                rows: [
+                    { feature: 'Fast UK Dispatch', ourValue: 'yes', col2Value: 'partial', col3Value: 'no' },
+                    { feature: 'Free Returns', ourValue: 'yes', col2Value: 'no', col3Value: 'partial' },
+                    { feature: 'Genuine Products', ourValue: 'yes', col2Value: 'partial', col3Value: 'yes' },
+                    { feature: 'UK Stock', ourValue: 'yes', col2Value: 'no', col3Value: 'yes' },
+                    { feature: 'Warranty', ourValue: '2 Years', col2Value: '1 Year', col3Value: 'None' },
+                    { feature: 'Expert Support', ourValue: 'yes', col2Value: 'no', col3Value: 'no' },
+                ],
+            } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps & { [key: string]: any }
+
+                const titleText = p.titleText ?? 'Why Buy From Us?'
+                const showTitle = p.showTitle !== false
+                const titleBg = p.titleBg ?? '#7530fb'
+                const titleColor = p.titleColor ?? '#ffffff'
+
+                const ourLabel = p.ourLabel ?? '&#11088; Our Store'
+                const col2Label = p.col2Label ?? 'Other Sellers'
+                const col3Label = p.col3Label ?? 'High Street'
+                const showThirdCol = p.showThirdCol !== false
+                const numCols = showThirdCol ? 4 : 3
+
+                const ourColBg = p.ourColBg ?? '#f3eeff'
+                const ourHeaderBg = p.ourHeaderBg ?? '#7530fb'
+                const ourHeaderText = p.ourHeaderText ?? '#ffffff'
+                const headerBg = p.headerBg ?? '#f3eeff'
+                const headerTxtCol = p.headerTextColor ?? '#1e1535'
+
+                const checkColor = p.checkColor ?? '#16a34a'
+                const crossColor = p.crossColor ?? '#ef4444'
+                const partialColor = p.partialColor ?? '#d97706'
+                const altRowBg = p.altRowBg ?? '#f8f7ff'
+                const borderColor = p.borderColor ?? '#ede9fe'
+                const textColor = p.textColor ?? '#6b7280'
+                const featureColor = p.featureColor ?? '#1e1535'
+                const fontSize = p.fontSize ?? 13
+
+                const rows: Array<{ feature: string; ourValue: string; col2Value: string; col3Value: string }> =
+                    Array.isArray(p.rows) ? p.rows : []
+
+                function cellValue(val: string): string {
+                    const v = (val ?? '').toLowerCase().trim()
+                    if (v === 'yes') return `<span style="color:${checkColor};font-size:17px;font-weight:700;line-height:1;">&#10003;</span>`
+                    if (v === 'no') return `<span style="color:${crossColor};font-size:17px;font-weight:700;line-height:1;">&#10007;</span>`
+                    if (v === 'partial') return `<span style="color:${partialColor};font-size:15px;font-weight:700;line-height:1;">&#126;</span>`
+                    return `<span style="font-family:Arial,sans-serif;font-size:${fontSize}px;color:${textColor};">${val ?? ''}</span>`
+                }
+
+                const b = `border:1px solid ${borderColor};`
+
+                // Title row
+                const titleRow = showTitle ? `
+  <tr>
+    <td colspan="${numCols}" style="${b}background-color:${titleBg};padding:14px 20px;text-align:center;">
+      <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:19px;font-weight:800;color:${titleColor};letter-spacing:0.01em;">${titleText}</p>
+    </td>
+  </tr>` : ''
+
+                // Column headers
+                const fTh = `${b}background-color:${headerBg};padding:11px 14px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:${headerTxtCol};text-align:left;`
+                const oTh = `${b}background-color:${ourHeaderBg};padding:11px 14px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:${ourHeaderText};text-align:center;`
+                const cTh = `${b}background-color:${headerBg};padding:11px 14px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:${headerTxtCol};text-align:center;opacity:0.7;`
+
+                const headerRow = `
+  <tr>
+    <th style="${fTh}">Feature</th>
+    <th style="${oTh}">${ourLabel}</th>
+    <th style="${cTh}">${col2Label}</th>
+    ${showThirdCol ? `<th style="${cTh}">${col3Label}</th>` : ''}
+  </tr>`
+
+                // Data rows
+                const baseTd = `padding:10px 14px;${b}text-align:center;vertical-align:middle;`
+                const dataRows = rows.map((row, i) => {
+                    const rowBg = i % 2 === 0 ? '#ffffff' : altRowBg
+                    const fTd = `<td style="${baseTd}text-align:left;font-family:Arial,sans-serif;font-size:${fontSize}px;font-weight:600;color:${featureColor};background-color:${rowBg};">${row.feature}</td>`
+                    const oTd = `<td style="${baseTd}background-color:${ourColBg};">${cellValue(row.ourValue)}</td>`
+                    const c2Td = `<td style="${baseTd}background-color:${rowBg};">${cellValue(row.col2Value)}</td>`
+                    const c3Td = showThirdCol ? `<td style="${baseTd}background-color:${rowBg};">${cellValue(row.col3Value)}</td>` : ''
+                    return `  <tr>${fTd}${oTd}${c2Td}${c3Td}</tr>`
+                }).join('\n')
+
+                const inner = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;background-color:${p.bgColor};${pad(p)}">
+  <tr><td>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;">
+      ${titleRow}
+      ${headerRow}
+      ${dataRows}
+    </table>
+  </td></tr>
+</table>`
+
+                return wrapBlock('competitor_comparison' as BlockType, id, inner, p)
+            },
+        },
+        // ── QR Code ───────────────────────────────────────────────────────────
+        {
+            type: 'qr_code' as BlockType,
+            label: 'QR Code',
+            category: 'Conversion',
+            icon: 'qr-code',
+            description: 'Scannable QR code linking to your eBay store page',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                bgColor: '#ffffff',
+                paddingTop: 24,
+                paddingBottom: 24,
+                paddingLeft: 20,
+                paddingRight: 20,
+                targetUrl: 'https://www.ebay.co.uk/str/your-store-name',
+                qrSize: 180,
+                qrFgColor: '#1e1535',
+                qrBgColor: '#ffffff',
+                showLabel: true,
+                labelText: 'Scan to visit our eBay store',
+                labelColor: '#6b7280',
+                labelFontSize: 13,
+                alignment: 'center',
+                showBorder: true,
+                borderColor: '#ede9fe',
+                borderRadius: 8,
+            } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as CommonProps & { [key: string]: any }
+
+                const targetUrl = (p.targetUrl ?? 'https://www.ebay.co.uk').trim()
+                const size = Number(p.qrSize ?? 180)
+                const fg = p.qrFgColor ?? '#1e1535'
+                const bg = p.qrBgColor ?? '#ffffff'
+                const showLabel = p.showLabel !== false
+                const labelText = p.labelText ?? 'Scan to visit our eBay store'
+                const labelColor = p.labelColor ?? '#6b7280'
+                const labelFontSize = Number(p.labelFontSize ?? 13)
+                const alignment = p.alignment ?? 'center'
+                const showBorder = p.showBorder !== false
+                const borderColor = p.borderColor ?? '#ede9fe'
+                const borderRadius = Number(p.borderRadius ?? 8)
+
+                // ── Generate QR code as inline SVG ────────────────────────────
+                let qrSvg = ''
+                try {
+                    const qrData = _qrCreate(targetUrl)
+                    const n = qrData.modules.size
+                    const data = qrData.modules.data
+                    const quiet = 4                       // quiet-zone modules
+                    const total = n + quiet * 2
+                    const cs = size / total            // cell size in px
+
+                    let rects = ''
+                    for (let y = 0; y < n; y++) {
+                        for (let x = 0; x < n; x++) {
+                            if (data[y * n + x]) {
+                                const rx = ((x + quiet) * cs).toFixed(2)
+                                const ry = ((y + quiet) * cs).toFixed(2)
+                                const rs = (cs + 0.3).toFixed(2)   // tiny overlap prevents sub-pixel gaps
+                                rects += `<rect x="${rx}" y="${ry}" width="${rs}" height="${rs}"/>`
+                            }
+                        }
+                    }
+                    qrSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><rect width="${size}" height="${size}" fill="${bg}"/><g fill="${fg}">${rects}</g></svg>`
+                } catch {
+                    // Fallback placeholder if QR generation fails
+                    qrSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><rect width="${size}" height="${size}" fill="${bg}" stroke="${fg}" stroke-width="3" rx="4"/><text x="50%" y="48%" font-family="Arial,sans-serif" font-size="13" fill="${fg}" text-anchor="middle" dominant-baseline="middle">QR Code</text><text x="50%" y="62%" font-family="Arial,sans-serif" font-size="9" fill="${fg}" text-anchor="middle" dominant-baseline="middle">${targetUrl}</text></svg>`
+                }
+
+                // URI-encode so it works inline as <img src="data:…"> in any HTML context
+                const imgSrc = 'data:image/svg+xml,' + encodeURIComponent(qrSvg)
+
+                const borderStyle = showBorder
+                    ? `border:2px solid ${borderColor};border-radius:${borderRadius}px;`
+                    : `border-radius:${borderRadius}px;`
+
+                const imgTag = `<img src="${imgSrc}" width="${size}" height="${size}" alt="QR Code - scan to visit our eBay store" style="display:block;width:${size}px;height:${size}px;${borderStyle}" />`
+
+                const labelRow = showLabel ? `
+  <tr>
+    <td style="padding:10px 0 0 0;text-align:${alignment};">
+      <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:${labelFontSize}px;color:${labelColor};line-height:1.5;">${labelText}</p>
+    </td>
+  </tr>` : ''
+
+                const inner = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;background-color:${p.bgColor};${pad(p)}">
+  <tr>
+    <td style="text-align:${alignment};padding:0;">
+      <table cellpadding="0" cellspacing="0" border="0" style="display:inline-table;">
+        <tr><td style="padding:0;">${imgTag}</td></tr>
+        ${labelRow}
+      </table>
+    </td>
+  </tr>
+</table>`
+
+                return wrapBlock('qr_code' as BlockType, id, inner, p)
+            },
+        },
     )
 
 
@@ -4138,6 +4664,9 @@ export interface CanvasSettings {
 
     // ── Color Palette ─────────────────────────────────────────────────────────
     palette: string[]            // saved brand swatches (max 10)
+
+    // ── eBay Listing Context ───────────────────────────────────────────────────
+    ebayCategory?: string        // eBay top-level category — affects audit rules & token suggestions
 }
 
 export const DEFAULT_CANVAS_SETTINGS: CanvasSettings = {
@@ -4161,6 +4690,9 @@ export const DEFAULT_CANVAS_SETTINGS: CanvasSettings = {
 
     // Color palette — pre-seeded with brand colors
     palette: ['#7530fb', '#b8fa33', '#1e1535', '#ffffff', '#6b7280'],
+
+    // eBay category — defaults to Fashion (most common for clothing sellers)
+    ebayCategory: 'fashion',
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
