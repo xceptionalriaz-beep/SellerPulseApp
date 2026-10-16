@@ -330,6 +330,8 @@ function DesignStudioInner() {
                         use_count: 0,
                         created_at: vt.updated_at,
                         updated_at: vt.updated_at,
+                        tags: null,
+                        sort_order: null,
                     }
                 })
             }
