@@ -78,7 +78,6 @@ import {
     ConditionBadgeProps,
     ItemSpecificsProps,
     CompetitorComparisonProps,
-    QrCodeProps,
 } from './blocks'
 import ProDropdown, { type DropdownOption } from '@/components/ui/ProDropdown'
 import { auditHtml } from './audit'
@@ -104,6 +103,65 @@ const C = {
     warning: '#d97706',
     warningLight: '#fef3c7',
 }
+
+// ── Item Specifics Token Groups ───────────────────────────────────────────────
+// Tokens that sellers can insert into any text field via the + Token button.
+// These are eBay item specifics that get substituted at listing-generation time.
+export const TOKEN_GROUPS: Array<{ group: string; emoji: string; items: Array<{ label: string; value: string; hint?: string }> }> = [
+    {
+        group: 'Product',
+        emoji: '📦',
+        items: [
+            { label: 'Brand', value: '{{BRAND}}', hint: 'e.g. Nike, Sony' },
+            { label: 'Model', value: '{{MODEL}}', hint: 'Model name or number' },
+            { label: 'MPN', value: '{{MPN}}', hint: 'Manufacturer Part Number' },
+            { label: 'EAN / UPC', value: '{{EAN}}', hint: 'Barcode number' },
+        ],
+    },
+    {
+        group: 'Condition',
+        emoji: '🔍',
+        items: [
+            { label: 'Item Condition', value: '{{ITEM_CONDITION}}', hint: 'New, Used, Refurbished…' },
+            { label: 'Condition Notes', value: '{{CONDITION_NOTES}}', hint: 'Seller condition description' },
+        ],
+    },
+    {
+        group: 'Variations',
+        emoji: '🎨',
+        items: [
+            { label: 'Colour', value: '{{COLOR}}', hint: 'e.g. Red, Navy Blue' },
+            { label: 'Size', value: '{{SIZE}}', hint: 'e.g. M, XL, UK 10' },
+            { label: 'Material', value: '{{MATERIAL}}', hint: 'e.g. Cotton, Leather' },
+        ],
+    },
+    {
+        group: 'Seller',
+        emoji: '🏪',
+        items: [
+            { label: 'Seller Name', value: '{{SELLER_NAME}}', hint: 'eBay username' },
+            { label: 'Store Name', value: '{{STORE_NAME}}', hint: 'eBay store name' },
+            { label: 'Feedback Score', value: '{{FEEDBACK_SCORE}}', hint: 'Positive feedback %' },
+        ],
+    },
+    {
+        group: 'Shipping',
+        emoji: '🚚',
+        items: [
+            { label: 'Dispatch Time', value: '{{DISPATCH_TIME}}', hint: 'e.g. Same day, 1 day' },
+            { label: 'Returns Policy', value: '{{RETURNS_POLICY}}', hint: 'e.g. 30-day free returns' },
+        ],
+    },
+    {
+        group: 'Price',
+        emoji: '💰',
+        items: [
+            { label: 'Price', value: '{{PRICE}}', hint: 'Current selling price' },
+            { label: 'Was Price', value: '{{WAS_PRICE}}', hint: 'Original / RRP price' },
+            { label: 'Saving', value: '{{SAVING}}', hint: 'e.g. Save £10 (20%)' },
+        ],
+    },
+]
 
 // ── Block types that can carry AI-filled text content ─────────────────────────
 const TEXT_BEARING_TYPES: BlockType[] = [
@@ -3296,29 +3354,6 @@ function BlockStyleProps({ block, props, updateProps }: {
                 </>
             )
 
-        case 'qr_code': {
-            const qp = props as QrCodeProps
-            return (
-                <>
-                    <Section title="QR Colours">
-                        <ColorRow label="Module colour (dark)" value={qp.qrFgColor ?? '#1e1535'} onChange={v => updateProps({ qrFgColor: v } as any)} />
-                        <ColorRow label="Background colour" value={qp.qrBgColor ?? '#ffffff'} onChange={v => updateProps({ qrBgColor: v } as any)} />
-                    </Section>
-                    <Section title="Border">
-                        <ColorRow label="Border colour" value={qp.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v } as any)} />
-                        <SliderInput label="Border radius" value={qp.borderRadius ?? 8} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v } as any)} />
-                    </Section>
-                    <Section title="Caption">
-                        <ColorRow label="Caption text colour" value={qp.labelColor ?? '#6b7280'} onChange={v => updateProps({ labelColor: v } as any)} />
-                        <SliderInput label="Caption font size" value={qp.labelFontSize ?? 13} min={10} max={20} suffix="px" onChange={v => updateProps({ labelFontSize: v } as any)} />
-                    </Section>
-                    <Section title="Size & Spacing">
-                        <SliderInput label="QR size" value={qp.qrSize ?? 180} min={100} max={300} suffix="px" onChange={v => updateProps({ qrSize: v } as any)} />
-                    </Section>
-                </>
-            )
-        }
-
         case 'numbered_list':
             return (
                 <>
@@ -5973,6 +6008,71 @@ function BlockAttributeProps({ block, props, updateProps, phButton, tokenButton,
                 </>
             )
 
+        case 'competitor_comparison': {
+            const ccProps = props as any
+            const ccRows: Array<{ feature: string; ourValue: string; col2Value: string; col3Value: string }> =
+                Array.isArray(ccProps.rows) ? ccProps.rows : []
+            const showThird = ccProps.showThirdCol !== false
+
+            function ccUpdateRow(i: number, key: string, val: string) {
+                const newRows = [...ccRows]
+                newRows[i] = { ...newRows[i], [key]: val }
+                updateProps({ rows: newRows } as any)
+            }
+            function ccAddRow() {
+                updateProps({ rows: [...ccRows, { feature: 'New Feature', ourValue: 'yes', col2Value: 'no', col3Value: 'no' }] } as any)
+            }
+            function ccRemoveRow(i: number) {
+                updateProps({ rows: ccRows.filter((_, ri) => ri !== i) } as any)
+            }
+
+            return (
+                <>
+                    <Section title="Title">
+                        <ToggleRow label="Show title bar" value={ccProps.showTitle !== false} onChange={v => updateProps({ showTitle: v } as any)} />
+                        <TextInput label="Title text" value={ccProps.titleText ?? 'Why Buy From Us?'} onChange={v => updateProps({ titleText: v } as any)} />
+                    </Section>
+                    <Section title="Column Labels">
+                        <TextInput label="Our store label" value={ccProps.ourLabel ?? '⭐ Our Store'} onChange={v => updateProps({ ourLabel: v } as any)} />
+                        <TextInput label="Competitor label" value={ccProps.col2Label ?? 'Other Sellers'} onChange={v => updateProps({ col2Label: v } as any)} />
+                        <ToggleRow label="Show 3rd column" value={showThird} onChange={v => updateProps({ showThirdCol: v } as any)} />
+                        {showThird && (
+                            <TextInput label="3rd column label" value={ccProps.col3Label ?? 'High Street'} onChange={v => updateProps({ col3Label: v } as any)} />
+                        )}
+                    </Section>
+                    <Section title="Comparison Rows">
+                        {ccRows.map((row, i) => (
+                            <ComparisonRowEditor
+                                key={i}
+                                row={row}
+                                index={i}
+                                showThird={showThird}
+                                onUpdate={(key, val) => ccUpdateRow(i, key, val)}
+                                onRemove={() => ccRemoveRow(i)}
+                            />
+                        ))}
+                        <button
+                            onClick={ccAddRow}
+                            style={{
+                                marginTop: 10,
+                                padding: '7px 16px',
+                                background: C.primary,
+                                color: '#fff',
+                                border: 'none',
+                                borderRadius: 6,
+                                cursor: 'pointer',
+                                fontSize: 12,
+                                fontWeight: 600,
+                                width: '100%',
+                            }}
+                        >
+                            + Add Row
+                        </button>
+                    </Section>
+                </>
+            )
+        }
+
         case 'satisfaction_guarantee':
             return (
                 <>
@@ -6194,6 +6294,244 @@ function BlockAttributeProps({ block, props, updateProps, phButton, tokenButton,
                             phButton={rowPhButton}
                         />
                         <InfoBox>Use eBay tokens like {`{{BRAND}}`}, {`{{MPN}}`}, {`{{EAN}}`} as values — replaced at listing time.</InfoBox>
+                    </Section>
+                </>
+            )
+        }
+
+        case 'variation_builder': {
+            const vbAxis1: string[] = Array.isArray(props.axis1Options) && props.axis1Options.length > 0
+                ? props.axis1Options as string[]
+                : ['Red', 'Blue', 'Black', 'White']
+            const vbAxis2: string[] = Array.isArray(props.axis2Options) && props.axis2Options.length > 0
+                ? props.axis2Options as string[]
+                : ['S', 'M', 'L', 'XL']
+            const vbAvail: Record<string, boolean> = (props.availability && typeof props.availability === 'object')
+                ? props.availability as Record<string, boolean>
+                : {}
+
+            const toggleAvail = (a1: string, a2: string) => {
+                const key = `${a1}||${a2}`
+                const cur = vbAvail[key] !== false // default true
+                updateProps({ availability: { ...vbAvail, [key]: !cur } })
+            }
+            const updateAxis = (which: 1 | 2, val: string) => {
+                const items = val.split('\n').map(s => s.trim()).filter(Boolean)
+                updateProps(which === 1 ? { axis1Options: items } : { axis2Options: items })
+            }
+
+            return (
+                <>
+                    <Section title="Axis labels">
+                        <TextInput
+                            label="Row axis label (e.g. Colour)"
+                            value={props.axis1Label ?? 'Colour'}
+                            onChange={v => updateProps({ axis1Label: v })}
+                        />
+                        <TextInput
+                            label="Column axis label (e.g. Size)"
+                            value={props.axis2Label ?? 'Size'}
+                            onChange={v => updateProps({ axis2Label: v })}
+                        />
+                    </Section>
+                    <Section title={`${props.axis1Label ?? 'Row'} options`}>
+                        <InfoBox>One option per line</InfoBox>
+                        <TextareaInput
+                            label={`${props.axis1Label ?? 'Colour'} options`}
+                            value={vbAxis1.join('\n')}
+                            rows={4}
+                            onChange={v => updateAxis(1, v)}
+                        />
+                    </Section>
+                    <Section title={`${props.axis2Label ?? 'Column'} options`}>
+                        <InfoBox>One option per line</InfoBox>
+                        <TextareaInput
+                            label={`${props.axis2Label ?? 'Size'} options`}
+                            value={vbAxis2.join('\n')}
+                            rows={3}
+                            onChange={v => updateAxis(2, v)}
+                        />
+                    </Section>
+                    <Section title="Availability (click to toggle ✓/✗)">
+                        <VariationMatrixEditor
+                            axis1={vbAxis1}
+                            axis2={vbAxis2}
+                            availability={vbAvail}
+                            onToggle={toggleAvail}
+                        />
+                        <InfoBox>✓ = in stock · ✗ = out of stock. Click any cell to toggle.</InfoBox>
+                    </Section>
+                    <Section title="Title & note">
+                        <ToggleRow label="Show title" value={props.showTitle ?? true} onChange={v => updateProps({ showTitle: v })} />
+                        {(props.showTitle ?? true) && (
+                            <TextInput label="Title text" value={props.titleText ?? 'Available Variations'} onChange={v => updateProps({ titleText: v })} />
+                        )}
+                        <ToggleRow label="Show note" value={props.showNote ?? true} onChange={v => updateProps({ showNote: v })} />
+                        {(props.showNote ?? true) && (
+                            <TextInput label="Note text" value={props.noteText ?? 'Select your options using the dropdowns above ↑'} onChange={v => updateProps({ noteText: v })} />
+                        )}
+                    </Section>
+                </>
+            )
+        }
+
+        case 'shipping_rate_table': {
+            const srtRows: Array<{ destination: string; service: string; cost: string; time: string }> =
+                Array.isArray(props.rows) && props.rows.length > 0
+                    ? props.rows as any[]
+                    : [{ destination: 'UK Mainland', service: 'Royal Mail 1st Class', cost: 'Free', time: '1–2 days' }]
+
+            const SHIPPING_PRESETS: Record<string, Array<{ destination: string; service: string; cost: string; time: string }>> = {
+                uk: [
+                    { destination: 'UK Mainland', service: 'Royal Mail 1st Class', cost: 'Free', time: '1–2 days' },
+                    { destination: 'UK Mainland', service: 'Royal Mail Tracked 48', cost: '£2.99', time: '2–3 days' },
+                    { destination: 'Scotland / N. Ireland', service: 'Royal Mail 2nd Class', cost: '£1.50', time: '3–5 days' },
+                ],
+                uk_europe: [
+                    { destination: 'UK Mainland', service: 'Royal Mail 1st Class', cost: 'Free', time: '1–2 days' },
+                    { destination: 'UK Mainland', service: 'Royal Mail Tracked 48', cost: '£2.99', time: '2–3 days' },
+                    { destination: 'Scotland / N. Ireland', service: 'Royal Mail 2nd Class', cost: '£1.50', time: '3–5 days' },
+                    { destination: 'Europe', service: 'Royal Mail Airmail', cost: '£4.99', time: '5–10 days' },
+                ],
+                worldwide: [
+                    { destination: 'UK Mainland', service: 'Royal Mail 1st Class', cost: 'Free', time: '1–2 days' },
+                    { destination: 'UK Mainland', service: 'Royal Mail Tracked 48', cost: '£2.99', time: '2–3 days' },
+                    { destination: 'Scotland / N. Ireland', service: 'Royal Mail 2nd Class', cost: '£1.50', time: '3–5 days' },
+                    { destination: 'Europe', service: 'Royal Mail Airmail', cost: '£4.99', time: '5–10 days' },
+                    { destination: 'Worldwide', service: 'Royal Mail International', cost: '£8.99', time: '7–14 days' },
+                ],
+            }
+
+            return (
+                <>
+                    <Section title="Title & subtitle">
+                        <TextInput label="Title" value={props.titleText ?? 'Shipping Information'} onChange={v => updateProps({ titleText: v })} />
+                        <TextInput label="Subtitle" value={props.subtitle ?? 'All orders dispatched within 1 working day'} onChange={v => updateProps({ subtitle: v })} />
+                    </Section>
+                    <Section title="Dispatch banner">
+                        <ToggleRow label="Show dispatch banner" value={props.showDispatchBanner ?? true} onChange={v => updateProps({ showDispatchBanner: v })} />
+                        {(props.showDispatchBanner ?? true) && (
+                            <TextInput label="Banner text" value={props.dispatchBannerText ?? '🚚 Fast Dispatch — Orders placed before 2pm shipped same day'} onChange={v => updateProps({ dispatchBannerText: v })} />
+                        )}
+                    </Section>
+                    <Section title="Quick presets">
+                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                            {([['uk', 'UK Only'], ['uk_europe', 'UK + Europe'], ['worldwide', 'Worldwide']] as const).map(([key, label]) => (
+                                <button
+                                    key={key}
+                                    onClick={() => updateProps({ rows: SHIPPING_PRESETS[key] })}
+                                    style={{ padding: '5px 10px', borderRadius: 6, border: `1px solid ${C.primaryBorder}`, background: C.primaryLight, color: C.primary, fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans,sans-serif' }}
+                                >{label}</button>
+                            ))}
+                        </div>
+                    </Section>
+                    <Section title={`Shipping rows (${srtRows.length})`}>
+                        <ShippingRowEditor rows={srtRows} onChange={r => updateProps({ rows: r })} />
+                        <InfoBox>Set cost to "Free" and it will be highlighted in green automatically.</InfoBox>
+                    </Section>
+                </>
+            )
+        }
+
+        case 'size_guide': {
+            const sgCols: string[] = Array.isArray(props.columns) && props.columns.length > 0
+                ? props.columns
+                : ['Size', 'UK', 'US', 'EU', 'Chest (cm)', 'Waist (cm)']
+            const sgRows: string[][] = Array.isArray(props.rows) && props.rows.length > 0
+                ? props.rows
+                : [['S', '8', '4', '36', '84', '66'], ['M', '10', '6', '38', '88', '70'], ['L', '12', '8', '40', '92', '74']]
+
+            const CATEGORY_PRESETS: Record<string, { columns: string[]; rows: string[][] }> = {
+                tops: {
+                    columns: ['Size', 'UK', 'US', 'EU', 'Chest (cm)', 'Waist (cm)'],
+                    rows: [['XS', '6', '2', '34', '80', '62'], ['S', '8', '4', '36', '84', '66'], ['M', '10', '6', '38', '88', '70'], ['L', '12', '8', '40', '92', '74'], ['XL', '14', '10', '42', '96', '78'], ['XXL', '16', '12', '44', '100', '82']],
+                },
+                bottoms: {
+                    columns: ['Size', 'UK', 'US', 'EU', 'Waist (cm)', 'Hip (cm)', 'Leg (cm)'],
+                    rows: [['XS', '6', '0', '34', '62', '87', '78'], ['S', '8', '2', '36', '66', '91', '79'], ['M', '10', '4', '38', '70', '95', '80'], ['L', '12', '6', '40', '74', '99', '81'], ['XL', '14', '8', '42', '78', '103', '82']],
+                },
+                shoes: {
+                    columns: ['UK', 'US', 'EU', 'Length (cm)'],
+                    rows: [['4', '6.5', '37', '23.5'], ['5', '7.5', '38', '24'], ['6', '8.5', '39', '24.5'], ['7', '9.5', '40', '25.5'], ['8', '10.5', '41', '26'], ['9', '11.5', '42', '27']],
+                },
+                dresses: {
+                    columns: ['Size', 'UK', 'US', 'EU', 'Chest (cm)', 'Waist (cm)', 'Hip (cm)'],
+                    rows: [['XS', '6', '2', '34', '80', '62', '87'], ['S', '8', '4', '36', '84', '66', '91'], ['M', '10', '6', '38', '88', '70', '95'], ['L', '12', '8', '40', '92', '74', '99'], ['XL', '14', '10', '42', '96', '78', '103']],
+                },
+                custom: { columns: sgCols, rows: sgRows },
+            }
+            return (
+                <>
+                    <Section title="Title">
+                        <TextInput label="Title text" value={props.titleText ?? 'Size Guide'} onChange={v => updateProps({ titleText: v })} />
+                    </Section>
+                    <Section title="Category">
+                        <SelectInput
+                            label="Clothing type"
+                            value={props.sizeCategory ?? 'tops'}
+                            options={[
+                                { v: 'tops', l: 'Tops / Shirts / Jackets' },
+                                { v: 'bottoms', l: 'Bottoms / Jeans / Trousers' },
+                                { v: 'shoes', l: 'Shoes / Footwear' },
+                                { v: 'dresses', l: 'Dresses / Jumpsuits' },
+                                { v: 'custom', l: 'Custom (manual columns)' },
+                            ]}
+                            onChange={v => {
+                                const preset = CATEGORY_PRESETS[v]
+                                if (preset && v !== 'custom') {
+                                    updateProps({ sizeCategory: v, columns: preset.columns, rows: preset.rows })
+                                } else {
+                                    updateProps({ sizeCategory: v })
+                                }
+                            }}
+                        />
+                    </Section>
+                    <Section title="Size rows">
+                        <SizeRowEditor
+                            columns={sgCols}
+                            rows={sgRows}
+                            onColumnsChange={cols => updateProps({ columns: cols })}
+                            onRowsChange={rows => updateProps({ rows })}
+                            allowEditColumns={props.sizeCategory === 'custom'}
+                        />
+                    </Section>
+                    <Section title="Fit note">
+                        <ToggleRow label="Show fit note" value={props.showFitNote ?? true} onChange={v => updateProps({ showFitNote: v })} />
+                        {(props.showFitNote ?? true) && (
+                            <TextareaInput
+                                label="Fit note text"
+                                value={props.fitNote ?? 'This item runs true to size. If in doubt, size up.'}
+                                rows={2}
+                                onChange={v => updateProps({ fitNote: v })}
+                            />
+                        )}
+                    </Section>
+                    <Section title="How to measure">
+                        <ToggleRow label="Show measure guide" value={props.showMeasureGuide ?? true} onChange={v => updateProps({ showMeasureGuide: v })} />
+                        {(props.showMeasureGuide ?? true) && (
+                            <TextareaInput
+                                label="Measure guide text"
+                                value={props.measureGuideText ?? 'How to measure: Use a soft tape measure. For chest, measure around the fullest part. For waist, measure around your natural waistline.'}
+                                rows={3}
+                                onChange={v => updateProps({ measureGuideText: v })}
+                            />
+                        )}
+                    </Section>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Header background" value={(props as any).headerBg ?? '#7530fb'} onChange={v => updateProps({ headerBg: v } as any)} />
+                        <ColorRow label="Header text" value={(props as any).headerText ?? '#ffffff'} onChange={v => updateProps({ headerText: v } as any)} />
+                        <ColorRow label="Alt row background" value={(props as any).altRowBg ?? '#f8f7ff'} onChange={v => updateProps({ altRowBg: v } as any)} />
+                        <ColorRow label="Border colour" value={(props as any).borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v } as any)} />
+                        <ColorRow label="Cell text" value={(props as any).textColor ?? '#374151'} onChange={v => updateProps({ textColor: v } as any)} />
+                    </Section>
+                    <Section title="Spacing">
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                            <NumberInput label="Top (px)" value={(props as any).paddingTop ?? 16} min={0} max={80} onChange={v => updateProps({ paddingTop: v } as any)} />
+                            <NumberInput label="Bottom (px)" value={(props as any).paddingBottom ?? 16} min={0} max={80} onChange={v => updateProps({ paddingBottom: v } as any)} />
+                            <NumberInput label="Left (px)" value={(props as any).paddingLeft ?? 24} min={0} max={80} onChange={v => updateProps({ paddingLeft: v } as any)} />
+                            <NumberInput label="Right (px)" value={(props as any).paddingRight ?? 24} min={0} max={80} onChange={v => updateProps({ paddingRight: v } as any)} />
+                        </div>
                     </Section>
                 </>
             )
@@ -8530,6 +8868,448 @@ function UniversalTypography({
                 onChange={v => updateProps({ fontFamily: v })}
             />
         </Section>
+    )
+}
+
+// ── VariationMatrixEditor ─────────────────────────────────────────────────────
+function VariationMatrixEditor({
+    axis1, axis2, availability, onToggle,
+}: {
+    axis1: string[]
+    axis2: string[]
+    availability: Record<string, boolean>
+    onToggle: (a1: string, a2: string) => void
+}) {
+    if (axis1.length === 0 || axis2.length === 0) {
+        return <p style={{ fontSize: 11, color: '#9ca3af', fontFamily: 'DM Sans,sans-serif', margin: '4px 0' }}>Add options above to see the availability grid.</p>
+    }
+    const colW = Math.max(34, Math.floor(180 / Math.max(axis2.length, 1)))
+    return (
+        <div style={{ overflowX: 'auto' }}>
+            {/* Header row */}
+            <div style={{ display: 'flex', gap: 3, marginBottom: 3, alignItems: 'center' }}>
+                <div style={{ width: 60, flexShrink: 0 }} />
+                {axis2.map((s, ci) => (
+                    <div key={ci} style={{ width: colW, flexShrink: 0, textAlign: 'center' }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: C.body, fontFamily: 'DM Sans,sans-serif' }}>{s}</span>
+                    </div>
+                ))}
+            </div>
+            {/* Data rows */}
+            {axis1.map((a1, ri) => (
+                <div key={ri} style={{ display: 'flex', gap: 3, marginBottom: 3, alignItems: 'center' }}>
+                    <div style={{ width: 60, flexShrink: 0 }}>
+                        <span style={{ fontSize: 11, fontWeight: 600, color: C.body, fontFamily: 'DM Sans,sans-serif', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a1}</span>
+                    </div>
+                    {axis2.map((a2, ci) => {
+                        const key = `${a1}||${a2}`
+                        const inStock = availability[key] !== false
+                        return (
+                            <button
+                                key={ci}
+                                onClick={() => onToggle(a1, a2)}
+                                style={{
+                                    width: colW, height: 28, flexShrink: 0, border: `1.5px solid ${inStock ? '#86efac' : '#fca5a5'}`,
+                                    background: inStock ? '#f0fdf4' : '#fff1f1', color: inStock ? '#16a34a' : '#dc2626',
+                                    fontSize: 13, fontWeight: 700, cursor: 'pointer', borderRadius: 5, padding: 0,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                }}
+                                title={inStock ? 'In stock — click to mark out of stock' : 'Out of stock — click to mark in stock'}
+                            >{inStock ? '✓' : '✗'}</button>
+                        )
+                    })}
+                </div>
+            ))}
+        </div>
+    )
+}
+
+// ── ShippingRowEditor ─────────────────────────────────────────────────────────
+function ShippingRowEditor({
+    rows, onChange,
+}: {
+    rows: Array<{ destination: string; service: string; cost: string; time: string }>
+    onChange: (rows: Array<{ destination: string; service: string; cost: string; time: string }>) => void
+}) {
+    const upd = (i: number, field: keyof typeof rows[0], val: string) =>
+        onChange(rows.map((r, j) => j === i ? { ...r, [field]: val } : r))
+    const remove = (i: number) => onChange(rows.filter((_, j) => j !== i))
+    const add = () => onChange([...rows, { destination: '', service: '', cost: '', time: '' }])
+
+    return (
+        <div>
+            {rows.map((row, i) => (
+                <div key={i} style={{ marginBottom: 8, padding: '8px 8px 6px', border: '1.5px solid #e5e7eb', borderRadius: 8, background: '#fafafa' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 6, gap: 6 }}>
+                        <span style={{ width: 18, height: 18, borderRadius: '50%', background: C.primaryLight, color: C.primary, fontSize: 10, fontWeight: 700, fontFamily: 'DM Sans,sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{i + 1}</span>
+                        <span style={{ flex: 1 }} />
+                        <button onClick={() => remove(i)} style={{ padding: '2px 7px', borderRadius: 4, border: '1px solid #fca5a5', background: '#fff1f1', color: '#dc2626', fontSize: 11, cursor: 'pointer', fontFamily: 'DM Sans,sans-serif' }}>✕</button>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5 }}>
+                        <div>
+                            <p style={{ margin: '0 0 2px', fontSize: 10, color: C.body, fontFamily: 'DM Sans,sans-serif' }}>Destination</p>
+                            <input type="text" value={row.destination} placeholder="e.g. UK Mainland" onChange={e => upd(i, 'destination', e.target.value)} style={inputStyle} />
+                        </div>
+                        <div>
+                            <p style={{ margin: '0 0 2px', fontSize: 10, color: C.body, fontFamily: 'DM Sans,sans-serif' }}>Service</p>
+                            <input type="text" value={row.service} placeholder="e.g. Royal Mail 1st" onChange={e => upd(i, 'service', e.target.value)} style={inputStyle} />
+                        </div>
+                        <div>
+                            <p style={{ margin: '0 0 2px', fontSize: 10, color: C.body, fontFamily: 'DM Sans,sans-serif' }}>Cost</p>
+                            <input type="text" value={row.cost} placeholder="Free or £2.99" onChange={e => upd(i, 'cost', e.target.value)} style={{ ...inputStyle, color: row.cost.toLowerCase() === 'free' ? '#16a34a' : undefined, fontWeight: row.cost.toLowerCase() === 'free' ? 700 : 400 }} />
+                        </div>
+                        <div>
+                            <p style={{ margin: '0 0 2px', fontSize: 10, color: C.body, fontFamily: 'DM Sans,sans-serif' }}>Est. Delivery</p>
+                            <input type="text" value={row.time} placeholder="e.g. 1–2 days" onChange={e => upd(i, 'time', e.target.value)} style={inputStyle} />
+                        </div>
+                    </div>
+                </div>
+            ))}
+            <button onClick={add} style={{ marginTop: 4, padding: '6px 0', borderRadius: 7, width: '100%', border: `1.5px dashed ${C.primary}`, background: C.primaryLight, color: C.primary, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans,sans-serif' }}>
+                + Add Shipping Row
+            </button>
+            {rows.length === 0 && <p style={{ fontSize: 11, color: '#9ca3af', fontFamily: 'DM Sans,sans-serif', textAlign: 'center', margin: '8px 0' }}>No rows — click "+ Add Shipping Row"</p>}
+        </div>
+    )
+}
+
+// ── SizeRowEditor ─────────────────────────────────────────────────────────────
+// Multi-column row editor for the Size Guide block
+function SizeRowEditor({
+    columns, rows, onColumnsChange, onRowsChange, allowEditColumns = false,
+}: {
+    columns: string[]
+    rows: string[][]
+    onColumnsChange: (cols: string[]) => void
+    onRowsChange: (rows: string[][]) => void
+    allowEditColumns?: boolean
+}) {
+    const addRow = () => {
+        const blank = columns.map(() => '')
+        onRowsChange([...rows, blank])
+    }
+    const removeRow = (i: number) => onRowsChange(rows.filter((_, j) => j !== i))
+    const updateCell = (ri: number, ci: number, val: string) => {
+        const next = rows.map((row, j) => j === ri ? row.map((c, k) => k === ci ? val : c) : row)
+        onRowsChange(next)
+    }
+    const updateColHeader = (ci: number, val: string) => {
+        onColumnsChange(columns.map((c, k) => k === ci ? val : c))
+    }
+    const addColumn = () => {
+        onColumnsChange([...columns, 'Col'])
+        onRowsChange(rows.map(row => [...row, '']))
+    }
+    const removeColumn = (ci: number) => {
+        onColumnsChange(columns.filter((_, k) => k !== ci))
+        onRowsChange(rows.map(row => row.filter((_, k) => k !== ci)))
+    }
+
+    const colW = Math.max(52, Math.floor(200 / Math.max(columns.length, 1)))
+
+    return (
+        <div style={{ overflowX: 'auto' }}>
+            {/* Column headers */}
+            <div style={{ display: 'flex', gap: 4, marginBottom: 4, alignItems: 'center' }}>
+                <div style={{ width: 22, flexShrink: 0 }} />
+                {columns.map((col, ci) => (
+                    <div key={ci} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: colW, flexShrink: 0 }}>
+                        {allowEditColumns ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+                                <input
+                                    type="text"
+                                    value={col}
+                                    onChange={e => updateColHeader(ci, e.target.value)}
+                                    style={{ ...inputStyle, fontSize: 10, fontWeight: 700, padding: '3px 5px', flex: 1, minWidth: 0, textAlign: 'center' }}
+                                />
+                                {columns.length > 1 && (
+                                    <button
+                                        onClick={() => removeColumn(ci)}
+                                        style={{ padding: '1px 4px', border: '1px solid #fca5a5', background: '#fff1f1', color: '#dc2626', fontSize: 9, cursor: 'pointer', borderRadius: 3 }}
+                                    >✕</button>
+                                )}
+                            </div>
+                        ) : (
+                            <span style={{ fontSize: 10, fontWeight: 700, color: C.body, fontFamily: 'DM Sans,sans-serif', textAlign: 'center', display: 'block', padding: '3px 0' }}>{col}</span>
+                        )}
+                    </div>
+                ))}
+                {allowEditColumns && (
+                    <button
+                        onClick={addColumn}
+                        style={{ padding: '2px 6px', border: `1px dashed ${C.primary}`, background: C.primaryLight, color: C.primary, fontSize: 10, cursor: 'pointer', borderRadius: 4, flexShrink: 0 }}
+                    >+Col</button>
+                )}
+            </div>
+
+            {/* Rows */}
+            {rows.map((row, ri) => (
+                <div key={ri} style={{ display: 'flex', gap: 4, marginBottom: 4, alignItems: 'center' }}>
+                    <button
+                        onClick={() => removeRow(ri)}
+                        style={{ width: 18, height: 18, padding: 0, border: '1px solid #fca5a5', background: '#fff1f1', color: '#dc2626', fontSize: 10, cursor: 'pointer', borderRadius: 3, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    >✕</button>
+                    {columns.map((_, ci) => (
+                        <input
+                            key={ci}
+                            type="text"
+                            value={row[ci] ?? ''}
+                            onChange={e => updateCell(ri, ci, e.target.value)}
+                            style={{ ...inputStyle, width: colW, flexShrink: 0, minWidth: 0, padding: '4px 5px', textAlign: 'center', fontSize: 12 }}
+                        />
+                    ))}
+                </div>
+            ))}
+
+            {/* Add row */}
+            <button
+                onClick={addRow}
+                style={{ marginTop: 4, padding: '6px 0', borderRadius: 7, width: '100%', border: `1.5px dashed ${C.primary}`, background: C.primaryLight, color: C.primary, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans,sans-serif' }}
+            >+ Add Size</button>
+
+            {rows.length === 0 && (
+                <p style={{ fontSize: 11, color: '#9ca3af', fontFamily: 'DM Sans,sans-serif', textAlign: 'center', margin: '8px 0' }}>No rows yet — click "+ Add Size"</p>
+            )}
+        </div>
+    )
+}
+
+// ── ComparisonRowEditor ───────────────────────────────────────────────────────
+// Inline row editor for the competitor_comparison block Attributes tab
+// ─────────────────────────────────────────────────────────────────────────────
+function ComparisonRowEditor({
+    row,
+    index,
+    showThird,
+    onUpdate,
+    onRemove,
+}: {
+    row: { feature: string; ourValue: string; col2Value: string; col3Value: string }
+    index: number
+    showThird: boolean
+    onUpdate: (key: string, val: string) => void
+    onRemove: () => void
+}) {
+    const valueOptions = [
+        { v: 'yes', l: '✓  Yes' },
+        { v: 'no', l: '✗  No' },
+        { v: 'partial', l: '~  Partial' },
+        { v: '_custom', l: 'Custom text…' },
+    ]
+    const isPreset = (v: string) => ['yes', 'no', 'partial'].includes(v)
+
+    function ColValue({ fieldKey, label, value }: { fieldKey: string; label: string; value: string }) {
+        const using = isPreset(value) ? value : '_custom'
+        return (
+            <div style={{ marginBottom: 6 }}>
+                <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: '#6b7280', marginBottom: 3, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    {label}
+                </label>
+                <select
+                    value={using}
+                    onChange={e => {
+                        const v = e.target.value
+                        if (v !== '_custom') onUpdate(fieldKey, v)
+                        else onUpdate(fieldKey, '')
+                    }}
+                    style={{ width: '100%', padding: '5px 8px', fontSize: 12, border: '1px solid #ede9fe', borderRadius: 5, background: '#fff', color: '#374151', marginBottom: isPreset(value) ? 0 : 4 }}
+                >
+                    {valueOptions.map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
+                </select>
+                {!isPreset(value) && (
+                    <input
+                        type="text"
+                        value={value}
+                        placeholder="e.g. 2 Years, Email only…"
+                        onChange={e => onUpdate(fieldKey, e.target.value)}
+                        style={{ width: '100%', padding: '5px 8px', fontSize: 12, border: '1px solid #ede9fe', borderRadius: 5, background: '#fff', color: '#374151', boxSizing: 'border-box' }}
+                    />
+                )}
+            </div>
+        )
+    }
+
+    return (
+        <div style={{ background: '#f8f7ff', borderRadius: 7, padding: '10px 12px', marginBottom: 8, border: '1px solid #ede9fe' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    Row {index + 1}
+                </span>
+                <button
+                    onClick={onRemove}
+                    style={{ background: '#fff1f1', border: '1px solid #fca5a5', color: '#ef4444', fontSize: 11, fontWeight: 700, borderRadius: 4, cursor: 'pointer', padding: '1px 6px', lineHeight: '16px' }}
+                >
+                    ✕
+                </button>
+            </div>
+            <div style={{ marginBottom: 6 }}>
+                <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: '#6b7280', marginBottom: 3, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Feature name
+                </label>
+                <input
+                    type="text"
+                    value={row.feature}
+                    onChange={e => onUpdate('feature', e.target.value)}
+                    placeholder="e.g. Fast Dispatch"
+                    style={{ width: '100%', padding: '5px 8px', fontSize: 12, border: '1px solid #ede9fe', borderRadius: 5, background: '#fff', color: '#374151', boxSizing: 'border-box' }}
+                />
+            </div>
+            <ColValue fieldKey="ourValue" label="Our store" value={row.ourValue} />
+            <ColValue fieldKey="col2Value" label="Competitor" value={row.col2Value} />
+            {showThird && <ColValue fieldKey="col3Value" label="3rd column" value={row.col3Value} />}
+        </div>
+    )
+}
+
+// ── TokenPickerOverlay ────────────────────────────────────────────────────────
+// Floating overlay for inserting eBay Item Specifics tokens into text fields
+// ─────────────────────────────────────────────────────────────────────────────
+function TokenPickerOverlay({
+    onInsert,
+    onClose,
+}: {
+    onInsert: (value: string) => void
+    onClose: () => void
+}) {
+    const [search, setSearch] = useState('')
+    const q = search.toLowerCase().trim()
+
+    return (
+        <div style={{
+            position: 'absolute',
+            top: 8,
+            left: 8,
+            right: 8,
+            zIndex: 101,
+            backgroundColor: C.surface,
+            border: '1px solid #fde68a',
+            borderRadius: 10,
+            boxShadow: '0 8px 24px rgba(180,83,9,0.12)',
+            overflow: 'hidden',
+        }}>
+            {/* Header */}
+            <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '10px 12px 8px',
+                borderBottom: '1px solid #fde68a',
+                backgroundColor: '#fffbeb',
+            }}>
+                <div>
+                    <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700, color: '#b45309', display: 'flex', alignItems: 'center', gap: 5 }}>
+                        <Zap size={12} />
+                        Insert Token
+                    </span>
+                    <span style={{ display: 'block', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: '#d97706', marginTop: 1 }}>
+                        eBay Item Specifics — substituted at generation time
+                    </span>
+                </div>
+                <button
+                    onClick={onClose}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: 16, padding: 0 }}
+                >
+                    ×
+                </button>
+            </div>
+
+            {/* Search */}
+            <div style={{ padding: '8px 10px', borderBottom: '1px solid #fde68a' }}>
+                <input
+                    autoFocus
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    placeholder="Search tokens…"
+                    style={{ ...inputStyle, fontSize: 11 }}
+                />
+            </div>
+
+            {/* Token groups */}
+            <div style={{ maxHeight: 280, overflowY: 'auto' }}>
+                {TOKEN_GROUPS.map(group => {
+                    const filtered = q
+                        ? group.items.filter(i =>
+                            i.label.toLowerCase().includes(q) ||
+                            i.value.toLowerCase().includes(q) ||
+                            (i.hint ?? '').toLowerCase().includes(q)
+                        )
+                        : group.items
+                    if (filtered.length === 0) return null
+                    return (
+                        <div key={group.group}>
+                            <p style={{
+                                margin: 0,
+                                padding: '6px 12px 3px',
+                                fontFamily: 'DM Sans, sans-serif',
+                                fontSize: 9,
+                                fontWeight: 700,
+                                color: '#b45309',
+                                textTransform: 'uppercase' as const,
+                                letterSpacing: '0.06em',
+                                backgroundColor: '#fffbeb',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 5,
+                            }}>
+                                <span>{group.emoji}</span>
+                                {group.group}
+                            </p>
+                            {filtered.map(item => (
+                                <button
+                                    key={item.value}
+                                    onClick={() => onInsert(item.value)}
+                                    style={{
+                                        width: '100%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        padding: '7px 12px',
+                                        border: 'none',
+                                        borderBottom: `1px solid ${C.border}`,
+                                        backgroundColor: 'transparent',
+                                        cursor: 'pointer',
+                                        textAlign: 'left' as const,
+                                        gap: 8,
+                                    }}
+                                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#fffbeb')}
+                                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                                >
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: C.body, display: 'block' }}>
+                                            {item.label}
+                                        </span>
+                                        {item.hint && (
+                                            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted }}>
+                                                {item.hint}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <code style={{
+                                        fontFamily: 'monospace',
+                                        fontSize: 10,
+                                        color: '#b45309',
+                                        backgroundColor: '#fef3c7',
+                                        padding: '2px 6px',
+                                        borderRadius: 4,
+                                        flexShrink: 0,
+                                        whiteSpace: 'nowrap' as const,
+                                    }}>
+                                        {item.value}
+                                    </code>
+                                </button>
+                            ))}
+                        </div>
+                    )
+                })}
+                {q && TOKEN_GROUPS.every(g => g.items.filter(i =>
+                    i.label.toLowerCase().includes(q) || i.value.toLowerCase().includes(q)
+                ).length === 0) && (
+                        <p style={{ padding: 16, textAlign: 'center' as const, fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: C.muted }}>
+                            No tokens match &quot;{search}&quot;
+                        </p>
+                    )}
+            </div>
+        </div>
     )
 }
 
