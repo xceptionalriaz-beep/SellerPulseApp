@@ -26,6 +26,7 @@ import { createClient as createRawClient } from '@supabase/supabase-js'
 import {
     ChevronLeft, Save, Check, Loader2,
     Globe, LayoutTemplate, Code2, Download, History, EyeOff,
+    Image, Upload, RefreshCw,
 } from 'lucide-react'
 import VisualEditor from '@/components/ui/VisualEditor'
 import ProDropdown, { DropdownOption } from '@/components/ui/ProDropdown'
@@ -198,6 +199,9 @@ function VisualEditorInner() {
     // Admin-only state
     const [description, setDescription] = useState('')
     const [isLive, setIsLive] = useState(false) // true when is_system = true in DB
+    const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null)
+    const [thumbnailStatus, setThumbnailStatus] = useState<'idle' | 'generating' | 'uploading' | 'done' | 'error'>('idle')
+    const thumbnailInputRef = useRef<HTMLInputElement>(null)
 
     // ── Close action menu on outside click ───────────────────────────────────
     useEffect(() => {
@@ -226,7 +230,7 @@ function VisualEditorInner() {
                 try {
                     const { data } = await rawDb
                         .from('listing_templates')
-                        .select('id, name, category, description_html, slots, description, is_system')
+                        .select('id, name, category, description_html, slots, description, is_system, thumbnail_url')
                         .eq('id', templateId)
                         .single()
                     if (data) {
@@ -238,6 +242,7 @@ function VisualEditorInner() {
                         if (isAdmin) {
                             setDescription(data.description || '')
                             setIsLive(!!data.is_system)
+                            setThumbnailUrl(data.thumbnail_url || null)
                         }
                     }
                 } catch (err) {
@@ -403,7 +408,7 @@ function VisualEditorInner() {
                 slots,
                 is_shared: true,
                 is_system: isAdmin,
-                thumbnail_url: null, // auto-generated or set later
+                thumbnail_url: thumbnailUrl ?? null,
                 ...(isAdmin ? { description } : {}),
             }
 
@@ -463,6 +468,73 @@ function VisualEditorInner() {
             console.error('[visual-editor] unpublish error:', err)
         }
     }, [savedId, supabase])
+
+    // ── Thumbnail helpers (admin only) ────────────────────────────────────────
+    const uploadThumbnailBlob = useCallback(async (blob: Blob, ext: 'png' | 'jpg' = 'png') => {
+        const id = savedId
+        if (!id) throw new Error('Save the template first')
+        const path = `thumbnails/${id}.${ext}`
+        const { error: upErr } = await supabase.storage
+            .from('template-assets')
+            .upload(path, blob, { upsert: true, contentType: blob.type || `image/${ext}` })
+        if (upErr) throw upErr
+        const { data: { publicUrl } } = supabase.storage
+            .from('template-assets').getPublicUrl(path)
+        await (supabase as any)
+            .from('listing_templates')
+            .update({ thumbnail_url: publicUrl, updated_at: new Date().toISOString() })
+            .eq('id', id)
+        setThumbnailUrl(publicUrl)
+        return publicUrl
+    }, [savedId, supabase])
+
+    const handleGenerateThumbnail = useCallback(async () => {
+        if (!savedId) { alert('Save the template first before generating a thumbnail.'); return }
+        setThumbnailStatus('generating')
+        try {
+            const iframe = document.createElement('iframe')
+            iframe.style.cssText = 'position:fixed;top:-99999px;left:-99999px;width:1000px;height:700px;border:none;pointer-events:none;visibility:hidden;'
+            iframe.srcdoc = html
+            document.body.appendChild(iframe)
+            await new Promise<void>((resolve) => {
+                iframe.onload = () => resolve()
+                setTimeout(resolve, 3000)
+            })
+            const h2c = (await import('html2canvas')).default
+            const canvas = await h2c(iframe.contentDocument!.body, {
+                width: 1000, height: 700, scale: 0.5,
+                useCORS: true, allowTaint: true,
+                backgroundColor: '#ffffff', logging: false, imageTimeout: 4000,
+            })
+            document.body.removeChild(iframe)
+            setThumbnailStatus('uploading')
+            const blob = await new Promise<Blob>((resolve, reject) =>
+                canvas.toBlob(b => b ? resolve(b) : reject(new Error('Canvas toBlob failed')), 'image/png')
+            )
+            await uploadThumbnailBlob(blob, 'png')
+            setThumbnailStatus('done')
+            setTimeout(() => setThumbnailStatus('idle'), 2500)
+        } catch (err) {
+            console.error('[thumbnail] generate error:', err)
+            setThumbnailStatus('error')
+            setTimeout(() => setThumbnailStatus('idle'), 3000)
+        }
+    }, [savedId, html, uploadThumbnailBlob])
+
+    const handleUploadThumbnail = useCallback(async (file: File) => {
+        if (!savedId) { alert('Save the template first before uploading a thumbnail.'); return }
+        setThumbnailStatus('uploading')
+        try {
+            const ext = file.type === 'image/jpeg' ? 'jpg' : 'png'
+            await uploadThumbnailBlob(file, ext)
+            setThumbnailStatus('done')
+            setTimeout(() => setThumbnailStatus('idle'), 2500)
+        } catch (err) {
+            console.error('[thumbnail] upload error:', err)
+            setThumbnailStatus('error')
+            setTimeout(() => setThumbnailStatus('idle'), 3000)
+        }
+    }, [savedId, uploadThumbnailBlob])
 
     // ── Name edit ─────────────────────────────────────────────────────────────
     const startEditingName = () => {
@@ -664,6 +736,123 @@ function VisualEditorInner() {
                                                         }}
                                                         onFocus={e => { e.target.style.borderColor = C.primary }}
                                                         onBlur={e => { e.target.style.borderColor = C.borderInput }}
+                                                    />
+                                                </div>
+                                            )}
+                                            {/* Thumbnail — admin only */}
+                                            {isAdmin && (
+                                                <div style={{ marginTop: 10 }}>
+                                                    <p style={{
+                                                        margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif',
+                                                        fontSize: 10, fontWeight: 700, color: C.muted,
+                                                        textTransform: 'uppercase', letterSpacing: 0.8,
+                                                    }}>
+                                                        Gallery Thumbnail
+                                                    </p>
+                                                    {/* Thumbnail preview */}
+                                                    <div style={{
+                                                        width: '100%', height: 110, borderRadius: 8,
+                                                        border: `1px dashed ${thumbnailUrl ? C.primary : C.borderInput}`,
+                                                        backgroundColor: thumbnailUrl ? 'transparent' : C.bg,
+                                                        overflow: 'hidden', marginBottom: 6,
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                        position: 'relative',
+                                                    }}>
+                                                        {thumbnailUrl ? (
+                                                            // eslint-disable-next-line @next/next/no-img-element
+                                                            <img
+                                                                src={thumbnailUrl}
+                                                                alt="Template thumbnail"
+                                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                            />
+                                                        ) : (
+                                                            <div style={{
+                                                                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                                                                color: C.muted,
+                                                            }}>
+                                                                <Image size={22} />
+                                                                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10 }}>
+                                                                    No thumbnail yet
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                        {(thumbnailStatus === 'generating' || thumbnailStatus === 'uploading') && (
+                                                            <div style={{
+                                                                position: 'absolute', inset: 0,
+                                                                backgroundColor: 'rgba(255,255,255,0.85)',
+                                                                display: 'flex', flexDirection: 'column',
+                                                                alignItems: 'center', justifyContent: 'center', gap: 6,
+                                                            }}>
+                                                                <Loader2 size={18} style={{ color: C.primary, animation: 'spin 1s linear infinite' }} />
+                                                                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.secondary }}>
+                                                                    {thumbnailStatus === 'generating' ? 'Rendering canvas…' : 'Uploading…'}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                        {thumbnailStatus === 'done' && (
+                                                            <div style={{
+                                                                position: 'absolute', top: 6, right: 6,
+                                                                backgroundColor: C.success, borderRadius: 20,
+                                                                padding: '2px 8px', display: 'flex', alignItems: 'center', gap: 4,
+                                                            }}>
+                                                                <Check size={10} style={{ color: '#fff' }} />
+                                                                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 9, color: '#fff', fontWeight: 700 }}>Saved</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    {/* Generate + Upload buttons */}
+                                                    <div style={{ display: 'flex', gap: 6 }}>
+                                                        <button
+                                                            onClick={handleGenerateThumbnail}
+                                                            disabled={thumbnailStatus === 'generating' || thumbnailStatus === 'uploading'}
+                                                            style={{
+                                                                flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                                                                padding: '6px 8px', borderRadius: 7,
+                                                                border: `1px solid ${C.primary}`,
+                                                                backgroundColor: C.primaryLight,
+                                                                color: C.primary, cursor: (thumbnailStatus === 'idle' || thumbnailStatus === 'done' || thumbnailStatus === 'error') ? 'pointer' : 'default',
+                                                                fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 600,
+                                                                transition: 'all 0.12s',
+                                                                opacity: (thumbnailStatus === 'generating' || thumbnailStatus === 'uploading') ? 0.6 : 1,
+                                                            }}
+                                                            title="Auto-generate thumbnail from canvas"
+                                                        >
+                                                            <RefreshCw size={11} />
+                                                            Generate
+                                                        </button>
+                                                        <button
+                                                            onClick={() => thumbnailInputRef.current?.click()}
+                                                            disabled={thumbnailStatus === 'generating' || thumbnailStatus === 'uploading'}
+                                                            style={{
+                                                                flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                                                                padding: '6px 8px', borderRadius: 7,
+                                                                border: `1px solid ${C.border}`,
+                                                                backgroundColor: 'transparent',
+                                                                color: C.secondary, cursor: 'pointer',
+                                                                fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 600,
+                                                                transition: 'all 0.12s',
+                                                            }}
+                                                            title="Upload your own thumbnail image"
+                                                        >
+                                                            <Upload size={11} />
+                                                            Upload
+                                                        </button>
+                                                    </div>
+                                                    {thumbnailStatus === 'error' && (
+                                                        <p style={{ margin: '5px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.danger }}>
+                                                            Failed — try again or upload manually.
+                                                        </p>
+                                                    )}
+                                                    <input
+                                                        ref={thumbnailInputRef}
+                                                        type="file"
+                                                        accept="image/png,image/jpeg,image/webp"
+                                                        style={{ display: 'none' }}
+                                                        onChange={e => {
+                                                            const file = e.target.files?.[0]
+                                                            if (file) handleUploadThumbnail(file)
+                                                            e.target.value = ''
+                                                        }}
                                                     />
                                                 </div>
                                             )}
