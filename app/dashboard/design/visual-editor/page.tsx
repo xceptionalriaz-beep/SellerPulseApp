@@ -26,7 +26,7 @@ import { createClient as createRawClient } from '@supabase/supabase-js'
 import {
     ChevronLeft, Save, Check, Loader2,
     Globe, LayoutTemplate, Code2, Download, History, EyeOff,
-    Image, Upload,
+    Image, Upload, Tag, X,
 } from 'lucide-react'
 import VisualEditor from '@/components/ui/VisualEditor'
 import ProDropdown, { DropdownOption } from '@/components/ui/ProDropdown'
@@ -202,6 +202,10 @@ function VisualEditorInner() {
     const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null)
     const [thumbnailStatus, setThumbnailStatus] = useState<'idle' | 'uploading' | 'done' | 'error'>('idle')
     const thumbnailInputRef = useRef<HTMLInputElement>(null)
+    // Tags & sort order — admin only
+    const [tags, setTags] = useState<string[]>([])
+    const [tagInput, setTagInput] = useState('')
+    const [sortOrder, setSortOrder] = useState<number>(0)
 
     // ── Close action menu on outside click ───────────────────────────────────
     useEffect(() => {
@@ -230,7 +234,7 @@ function VisualEditorInner() {
                 try {
                     const { data } = await rawDb
                         .from('listing_templates')
-                        .select('id, name, category, description_html, slots, description, is_system, thumbnail_url')
+                        .select('id, name, category, description_html, slots, description, is_system, thumbnail_url, tags, sort_order')
                         .eq('id', templateId)
                         .single()
                     if (data) {
@@ -243,6 +247,8 @@ function VisualEditorInner() {
                             setDescription(data.description || '')
                             setIsLive(!!data.is_system)
                             setThumbnailUrl(data.thumbnail_url || null)
+                            setTags(Array.isArray(data.tags) ? data.tags : [])
+                            setSortOrder(typeof data.sort_order === 'number' ? data.sort_order : 0)
                         }
                     }
                 } catch (err) {
@@ -294,7 +300,7 @@ function VisualEditorInner() {
                         description_html: html,
                         is_ebay_compliant: isEbayCompliant,
                         slots,
-                        ...(isAdmin ? { description } : {}),
+                        ...(isAdmin ? { description, tags, sort_order: sortOrder } : {}),
                         updated_at: new Date().toISOString(),
                     })
                     .eq('id', savedId)
@@ -313,6 +319,7 @@ function VisualEditorInner() {
                         is_system: false,
                         is_shared: false,
                         use_count: 0,
+                        ...(isAdmin ? { tags, sort_order: sortOrder } : {}),
                     })
                     .select('id')
                     .single()
@@ -333,7 +340,7 @@ function VisualEditorInner() {
             console.error('[visual-editor] auto-save error:', err)
             setAutoSaveLabel('idle')
         }
-    }, [savedId, name, category, html, slots, supabase])
+    }, [savedId, name, category, html, slots, tags, sortOrder, supabase])
 
     // ── Manual Save Draft ─────────────────────────────────────────────────────
     const handleSaveDraft = useCallback(async () => {
@@ -354,7 +361,7 @@ function VisualEditorInner() {
                         description_html: html,
                         is_ebay_compliant: isEbayCompliant,
                         slots,
-                        ...(isAdmin ? { description } : {}),
+                        ...(isAdmin ? { description, tags, sort_order: sortOrder } : {}),
                         updated_at: new Date().toISOString(),
                     })
                     .eq('id', savedId)
@@ -374,6 +381,7 @@ function VisualEditorInner() {
                         is_system: false,
                         is_shared: false,
                         use_count: 0,
+                        ...(isAdmin ? { tags, sort_order: sortOrder } : {}),
                     })
                     .select('id')
                     .single()
@@ -391,7 +399,7 @@ function VisualEditorInner() {
         } finally {
             setSaving(false)
         }
-    }, [savedId, name, category, html, slots, supabase])
+    }, [savedId, name, category, html, slots, tags, sortOrder, supabase])
 
     // ── Publish ───────────────────────────────────────────────────────────────
     const handlePublish = useCallback(async () => {
@@ -409,7 +417,7 @@ function VisualEditorInner() {
                 is_shared: true,
                 is_system: isAdmin,
                 thumbnail_url: thumbnailUrl ?? null,
-                ...(isAdmin ? { description } : {}),
+                ...(isAdmin ? { description, tags, sort_order: sortOrder } : {}),
             }
 
             if (savedId) {
@@ -453,7 +461,7 @@ function VisualEditorInner() {
             console.error('[visual-editor] publish error:', err)
             setPublishStatus('idle')
         }
-    }, [savedId, name, category, html, slots, supabase, isAdmin])
+    }, [savedId, name, category, html, slots, tags, sortOrder, supabase, isAdmin])
 
     // ── Unpublish (admin only) ────────────────────────────────────────────────
     const handleUnpublish = useCallback(async () => {
@@ -802,6 +810,137 @@ function VisualEditorInner() {
                                                             e.target.value = ''
                                                         }}
                                                     />
+                                                </div>
+                                            )}
+                                            {/* Tags — admin only */}
+                                            {isAdmin && (
+                                                <div style={{ marginTop: 10 }}>
+                                                    <p style={{
+                                                        margin: '0 0 6px', fontFamily: 'DM Sans, sans-serif',
+                                                        fontSize: 10, fontWeight: 700, color: C.muted,
+                                                        textTransform: 'uppercase', letterSpacing: 0.8,
+                                                    }}>
+                                                        Tags / Keywords
+                                                    </p>
+                                                    {/* Tag chips */}
+                                                    {tags.length > 0 && (
+                                                        <div style={{
+                                                            display: 'flex', flexWrap: 'wrap', gap: 4,
+                                                            marginBottom: 6,
+                                                        }}>
+                                                            {tags.map(tag => (
+                                                                <span key={tag} style={{
+                                                                    display: 'inline-flex', alignItems: 'center', gap: 3,
+                                                                    padding: '2px 7px 2px 8px', borderRadius: 20,
+                                                                    backgroundColor: C.primaryLight,
+                                                                    border: `1px solid ${C.border}`,
+                                                                    fontFamily: 'DM Sans, sans-serif', fontSize: 10,
+                                                                    fontWeight: 600, color: C.primary,
+                                                                }}>
+                                                                    {tag}
+                                                                    <button
+                                                                        onClick={() => setTags(prev => prev.filter(t => t !== tag))}
+                                                                        style={{
+                                                                            display: 'flex', alignItems: 'center',
+                                                                            background: 'none', border: 'none',
+                                                                            padding: 0, cursor: 'pointer',
+                                                                            color: C.primary, opacity: 0.7,
+                                                                            lineHeight: 1,
+                                                                        }}
+                                                                    >
+                                                                        <X size={9} />
+                                                                    </button>
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                    {/* Tag input */}
+                                                    <div style={{ display: 'flex', gap: 5 }}>
+                                                        <input
+                                                            value={tagInput}
+                                                            onChange={e => setTagInput(e.target.value)}
+                                                            onKeyDown={e => {
+                                                                if (e.key === 'Enter' || e.key === ',') {
+                                                                    e.preventDefault()
+                                                                    const t = tagInput.trim().toLowerCase().replace(/,/g, '')
+                                                                    if (t && !tags.includes(t)) setTags(prev => [...prev, t])
+                                                                    setTagInput('')
+                                                                }
+                                                            }}
+                                                            placeholder="e.g. minimal, clean…"
+                                                            style={{
+                                                                flex: 1, padding: '6px 9px', borderRadius: 7,
+                                                                border: `1px solid ${C.borderInput}`,
+                                                                fontFamily: 'DM Sans, sans-serif', fontSize: 11,
+                                                                color: C.body, backgroundColor: C.bg, outline: 'none',
+                                                            }}
+                                                            onFocus={e => { e.target.style.borderColor = C.primary }}
+                                                            onBlur={e => {
+                                                                e.target.style.borderColor = C.borderInput
+                                                                const t = tagInput.trim().toLowerCase()
+                                                                if (t && !tags.includes(t)) setTags(prev => [...prev, t])
+                                                                setTagInput('')
+                                                            }}
+                                                        />
+                                                        <button
+                                                            onClick={() => {
+                                                                const t = tagInput.trim().toLowerCase()
+                                                                if (t && !tags.includes(t)) setTags(prev => [...prev, t])
+                                                                setTagInput('')
+                                                            }}
+                                                            style={{
+                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                width: 28, height: 28, flexShrink: 0,
+                                                                border: `1px solid ${C.border}`, borderRadius: 7,
+                                                                backgroundColor: 'transparent', cursor: 'pointer',
+                                                                color: C.secondary,
+                                                            }}
+                                                            title="Add tag"
+                                                        >
+                                                            <Tag size={11} />
+                                                        </button>
+                                                    </div>
+                                                    <p style={{
+                                                        margin: '4px 0 0', fontFamily: 'DM Sans, sans-serif',
+                                                        fontSize: 9, color: C.muted,
+                                                    }}>
+                                                        Press Enter or comma to add
+                                                    </p>
+                                                </div>
+                                            )}
+                                            {/* Sort Order — admin only */}
+                                            {isAdmin && (
+                                                <div style={{ marginTop: 10 }}>
+                                                    <p style={{
+                                                        margin: '0 0 5px', fontFamily: 'DM Sans, sans-serif',
+                                                        fontSize: 10, fontWeight: 700, color: C.muted,
+                                                        textTransform: 'uppercase', letterSpacing: 0.8,
+                                                    }}>
+                                                        Gallery Position
+                                                    </p>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                        <input
+                                                            type="number"
+                                                            min={0}
+                                                            value={sortOrder}
+                                                            onChange={e => setSortOrder(Math.max(0, parseInt(e.target.value) || 0))}
+                                                            style={{
+                                                                width: 70, padding: '6px 9px', borderRadius: 7,
+                                                                border: `1px solid ${C.borderInput}`,
+                                                                fontFamily: 'DM Sans, sans-serif', fontSize: 12,
+                                                                color: C.body, backgroundColor: C.bg, outline: 'none',
+                                                                textAlign: 'center',
+                                                            }}
+                                                            onFocus={e => { e.target.style.borderColor = C.primary }}
+                                                            onBlur={e => { e.target.style.borderColor = C.borderInput }}
+                                                        />
+                                                        <p style={{
+                                                            margin: 0, fontFamily: 'DM Sans, sans-serif',
+                                                            fontSize: 10, color: C.muted, lineHeight: 1.4,
+                                                        }}>
+                                                            Lower = appears first<br />0 is top of gallery
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>
