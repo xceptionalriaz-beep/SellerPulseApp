@@ -25,7 +25,7 @@ import { createClient } from '@/lib/supabase'
 import { createClient as createRawClient } from '@supabase/supabase-js'
 import {
     ChevronLeft, Save, Check, Loader2,
-    Globe, LayoutTemplate, Code2, Download, History,
+    Globe, LayoutTemplate, Code2, Download, History, EyeOff,
 } from 'lucide-react'
 import VisualEditor from '@/components/ui/VisualEditor'
 import ProDropdown, { DropdownOption } from '@/components/ui/ProDropdown'
@@ -195,6 +195,9 @@ function VisualEditorInner() {
     /** Phase 1 AI bridge — slot role map for this template */
     const [slots, setSlots] = useState<TemplateSlot[]>([])
     const [showVersionHistory, setShowVersionHistory] = useState(false)
+    // Admin-only state
+    const [description, setDescription] = useState('')
+    const [isLive, setIsLive] = useState(false) // true when is_system = true in DB
 
     // ── Close action menu on outside click ───────────────────────────────────
     useEffect(() => {
@@ -223,7 +226,7 @@ function VisualEditorInner() {
                 try {
                     const { data } = await rawDb
                         .from('listing_templates')
-                        .select('id, name, category, description_html, slots')
+                        .select('id, name, category, description_html, slots, description, is_system')
                         .eq('id', templateId)
                         .single()
                     if (data) {
@@ -232,6 +235,10 @@ function VisualEditorInner() {
                         setHtml(data.description_html || BLANK_HTML)
                         setSavedId(data.id)
                         setSlots(Array.isArray(data.slots) ? data.slots : [])
+                        if (isAdmin) {
+                            setDescription(data.description || '')
+                            setIsLive(!!data.is_system)
+                        }
                     }
                 } catch (err) {
                     console.error('[visual-editor] load error:', err)
@@ -282,6 +289,7 @@ function VisualEditorInner() {
                         description_html: html,
                         is_ebay_compliant: isEbayCompliant,
                         slots,
+                        ...(isAdmin ? { description } : {}),
                         updated_at: new Date().toISOString(),
                     })
                     .eq('id', savedId)
@@ -296,7 +304,7 @@ function VisualEditorInner() {
                         description_html: html,
                         is_ebay_compliant: isEbayCompliant,
                         slots,
-                        description: 'Visual Builder template',
+                        description: isAdmin ? description : 'Visual Builder template',
                         is_system: false,
                         is_shared: false,
                         use_count: 0,
@@ -341,6 +349,7 @@ function VisualEditorInner() {
                         description_html: html,
                         is_ebay_compliant: isEbayCompliant,
                         slots,
+                        ...(isAdmin ? { description } : {}),
                         updated_at: new Date().toISOString(),
                     })
                     .eq('id', savedId)
@@ -356,7 +365,7 @@ function VisualEditorInner() {
                         description_html: html,
                         is_ebay_compliant: isEbayCompliant,
                         slots,
-                        description: 'Visual Builder template',
+                        description: isAdmin ? description : 'Visual Builder template',
                         is_system: false,
                         is_shared: false,
                         use_count: 0,
@@ -395,6 +404,7 @@ function VisualEditorInner() {
                 is_shared: true,
                 is_system: isAdmin,
                 thumbnail_url: null, // auto-generated or set later
+                ...(isAdmin ? { description } : {}),
             }
 
             if (savedId) {
@@ -406,6 +416,7 @@ function VisualEditorInner() {
                     })
                     .eq('id', savedId)
                 setPublishStatus('published')
+                if (isAdmin) setIsLive(true)
                 setTimeout(() => {
                     setPublishStatus('idle')
                     // Fix #4 — redirect to correct page after publish
@@ -438,6 +449,20 @@ function VisualEditorInner() {
             setPublishStatus('idle')
         }
     }, [savedId, name, category, html, slots, supabase, isAdmin])
+
+    // ── Unpublish (admin only) ────────────────────────────────────────────────
+    const handleUnpublish = useCallback(async () => {
+        if (!savedId) return
+        try {
+            await (supabase as any)
+                .from('listing_templates')
+                .update({ is_system: false, is_shared: false, updated_at: new Date().toISOString() })
+                .eq('id', savedId)
+            setIsLive(false)
+        } catch (err) {
+            console.error('[visual-editor] unpublish error:', err)
+        }
+    }, [savedId, supabase])
 
     // ── Name edit ─────────────────────────────────────────────────────────────
     const startEditingName = () => {
@@ -519,6 +544,25 @@ function VisualEditorInner() {
                     onBack={() => router.push(isAdmin ? '/dashboard/admin' : '/dashboard/design')}
                     toolbarSlot={
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            {/* Draft / Live status badge — admin only */}
+                            {isAdmin && (
+                                <div style={{
+                                    display: 'flex', alignItems: 'center', gap: 5,
+                                    padding: '4px 10px', borderRadius: 20,
+                                    backgroundColor: isLive ? '#dcfce7' : '#f3f4f6',
+                                    border: `1px solid ${isLive ? '#86efac' : '#e5e7eb'}`,
+                                    fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700,
+                                    color: isLive ? '#16a34a' : '#6b7280',
+                                    textTransform: 'uppercase', letterSpacing: '0.05em',
+                                    flexShrink: 0,
+                                }}>
+                                    <div style={{
+                                        width: 6, height: 6, borderRadius: '50%',
+                                        backgroundColor: isLive ? '#16a34a' : '#9ca3af',
+                                    }} />
+                                    {isLive ? 'Live' : 'Draft'}
+                                </div>
+                            )}
                             {/* History button — disabled until template has been saved at least once */}
                             <button
                                 onClick={() => savedId ? setShowVersionHistory(v => !v) : undefined}
@@ -592,6 +636,37 @@ function VisualEditorInner() {
                                             }}
                                             width={232}
                                         />
+                                        {/* Gallery description — admin only */}
+                                        {isAdmin && (
+                                            <div style={{ marginTop: 10 }}>
+                                                <p style={{
+                                                    margin: '0 0 5px', fontFamily: 'DM Sans, sans-serif',
+                                                    fontSize: 10, fontWeight: 700, color: C.muted,
+                                                    textTransform: 'uppercase', letterSpacing: 0.8,
+                                                }}>
+                                                    Gallery Description
+                                                </p>
+                                                <textarea
+                                                    value={description}
+                                                    onChange={e => {
+                                                        dirtyRef.current = true
+                                                        setDescription(e.target.value)
+                                                    }}
+                                                    placeholder="Short description shown in the template gallery..."
+                                                    rows={3}
+                                                    style={{
+                                                        width: '100%', boxSizing: 'border-box',
+                                                        padding: '7px 9px', resize: 'vertical',
+                                                        border: `1px solid ${C.borderInput}`, borderRadius: 8,
+                                                        fontFamily: 'DM Sans, sans-serif', fontSize: 12,
+                                                        color: C.body, backgroundColor: C.bg,
+                                                        outline: 'none', lineHeight: 1.5,
+                                                    }}
+                                                    onFocus={e => { e.target.style.borderColor = C.primary }}
+                                                    onBlur={e => { e.target.style.borderColor = C.borderInput }}
+                                                />
+                                            </div>
+                                        )}
                                     </div>
                                     {/* Action buttons */}
                                     <div style={{ padding: '8px 8px' }}>
@@ -655,6 +730,7 @@ function VisualEditorInner() {
                                                 <p style={{ margin: 0, fontSize: 10, color: C.muted }}>Fine-tune the raw HTML</p>
                                             </div>
                                         </button>
+                                        {!isAdmin && (
                                         <button
                                             onClick={() => { exportFnRef.current?.(); setActionMenuOpen(false) }}
                                             style={{
@@ -679,8 +755,9 @@ function VisualEditorInner() {
                                                 <p style={{ margin: 0, fontSize: 10, color: C.muted }}>Download ready-to-use eBay HTML</p>
                                             </div>
                                         </button>
+                                        )}
                                     </div>
-                                    {/* Publish */}
+                                    {/* Publish / Unpublish */}
                                     <div style={{ padding: '8px', borderTop: `1px solid ${C.border}` }}>
                                         <button
                                             onClick={() => { handlePublish(); setActionMenuOpen(false) }}
@@ -710,13 +787,48 @@ function VisualEditorInner() {
                                             </span>
                                             <div>
                                                 <p style={{ margin: 0, fontSize: 12 }}>
-                                                    {published ? 'Published!' : 'Publish Template'}
+                                                    {published
+                                                        ? 'Published!'
+                                                        : isAdmin ? 'Publish to Gallery' : 'Publish Template'}
                                                 </p>
                                                 <p style={{ margin: 0, fontSize: 10, color: C.muted }}>
-                                                    Make visible to all users
+                                                    {isAdmin
+                                                        ? 'Adds to system gallery for all users'
+                                                        : 'Make visible to all users'}
                                                 </p>
                                             </div>
                                         </button>
+                                        {/* Unpublish — admin only, shown when template is currently live */}
+                                        {isAdmin && isLive && !published && (
+                                            <button
+                                                onClick={() => { handleUnpublish(); setActionMenuOpen(false) }}
+                                                style={{
+                                                    marginTop: 4,
+                                                    width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                                                    padding: '9px 10px', border: 'none', borderRadius: 8,
+                                                    backgroundColor: 'transparent',
+                                                    color: C.danger,
+                                                    fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 600,
+                                                    cursor: 'pointer', textAlign: 'left', transition: 'background 0.12s',
+                                                }}
+                                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#fef2f2' }}
+                                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
+                                            >
+                                                <span style={{
+                                                    width: 28, height: 28, borderRadius: 7,
+                                                    backgroundColor: '#fee2e2', border: '1px solid #fecaca',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                                                }}>
+                                                    <EyeOff size={13} style={{ color: C.danger }} />
+                                                </span>
+                                                <div>
+                                                    <p style={{ margin: 0, fontSize: 12 }}>Unpublish</p>
+                                                    <p style={{ margin: 0, fontSize: 10, color: C.muted }}>
+                                                        Remove from gallery (keep as draft)
+                                                    </p>
+                                                </div>
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             )}
@@ -749,6 +861,7 @@ function VisualEditorInner() {
                     templateCategory={category}
                     slots={slots}
                     onSlotsChange={setSlots}
+                    isAdmin={isAdmin}
                 />
             </div>
 

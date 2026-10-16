@@ -158,6 +158,8 @@ interface VisualEditorProps {
     slots?: TemplateSlot[]
     /** Called whenever the seller assigns or clears a slot role in the properties panel */
     onSlotsChange?: (slots: TemplateSlot[]) => void
+    /** When true (admin mode), hides seller-specific UI like "Link to Listing" */
+    isAdmin?: boolean
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -176,6 +178,7 @@ export default function VisualEditor({
     onBack,
     slots = [],
     onSlotsChange,
+    isAdmin = false,
 }: VisualEditorProps) {
     // ── Core block state ──────────────────────────────────────────────────────
     const [blocks, setBlocks] = useState<Block[]>([])
@@ -1646,6 +1649,7 @@ export default function VisualEditor({
                 linkedListing={linkedListing}
                 onOpenListingPicker={() => setShowListingPicker(true)}
                 onUnlinkListing={handleUnlinkListing}
+                isAdmin={isAdmin}
             />
 
             {/* ── Listing Picker Modal ─────────────────────────────────────────────────── */}
@@ -2256,6 +2260,7 @@ interface EditorToolbarProps {
     linkedListing?: LinkedListing | null
     onOpenListingPicker?: () => void
     onUnlinkListing?: () => void
+    isAdmin?: boolean
 }
 
 function EditorToolbar({
@@ -2266,6 +2271,7 @@ function EditorToolbar({
     onZoomChange, onTemplateNameChange, onSave, saveStatus, onExport, onClearAll,
     onPublish, publishStatus = 'idle', toolbarSlot, onBack,
     linkedListing, onOpenListingPicker, onUnlinkListing,
+    isAdmin = false,
 }: EditorToolbarProps) {
     return (
         <div style={{
@@ -2481,10 +2487,10 @@ function EditorToolbar({
                     Clear all
                 </button>
 
-                <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
+                {!isAdmin && <div style={{ width: 1, height: 20, backgroundColor: C.border }} />}
 
-                {/* Link to Listing button / linked chip */}
-                {linkedListing ? (
+                {/* Link to Listing button / linked chip — hidden in admin mode */}
+                {!isAdmin && (linkedListing ? (
                     /* Linked state — chip with listing name + unlink ✕ */
                     <div style={{
                         display: 'flex', alignItems: 'center', gap: 0,
@@ -2575,7 +2581,7 @@ function EditorToolbar({
                         </svg>
                         Link to Listing
                     </button>
-                )}
+                ))}
 
                 <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
 
