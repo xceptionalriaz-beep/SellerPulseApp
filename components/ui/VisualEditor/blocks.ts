@@ -2023,8 +2023,8 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         description: 'Single image with optional caption and link',
         defaultProps: {
             ...DEFAULT_COMMON,
-            src: '{{MAIN_IMAGE_URL}}',
-            alt: '{{PRODUCT_TITLE}}',
+            src: '',
+            alt: '',
             width: 100,
             widthUnit: '%',
             align: 'center',
@@ -2044,7 +2044,9 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             // clients strip box-shadow so the email falls back to the rounded
             // corner + bgColor frame alone.
             const shadowStyle = p.shadow ? `box-shadow:${p.shadow};` : ''
-            const imgHtml = `<img src="${p.src}" alt="${p.alt}" border="0" style="${widthStyle}height:auto;display:block;border-radius:${p.borderRadius}px;${shadowStyle}" />`
+            const imgHtml = p.src
+                ? `<img src="${p.src}" alt="${p.alt || ''}" border="0" style="${widthStyle}height:auto;display:block;border-radius:${p.borderRadius}px;${shadowStyle}" />`
+                : `<div style="${widthStyle}padding-top:56.25%;background:#f3eeff;border-radius:${p.borderRadius}px;position:relative;"><span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#c4b5fd;font-size:13px;font-family:sans-serif;white-space:nowrap;">Add image URL</span></div>`
             const linked = p.linkUrl
                 ? `<a href="${p.linkUrl}" style="text-decoration:none;display:inline-block;">${imgHtml}</a>`
                 : imgHtml
@@ -4604,6 +4606,8 @@ export function assembleDocument(blocks: Block[], settings: CanvasSettings = DEF
     @media only screen and (max-width: 480px) {
       .block-text { font-size: ${settings.mobileFontScale ?? 90}% !important; }
       td[class="block-pad"] { padding-left: ${Math.round(16 * (settings.mobilePaddingScale ?? 80) / 100)}px !important; padding-right: ${Math.round(16 * (settings.mobilePaddingScale ?? 80) / 100)}px !important; }
+      .mobile-stack td { display: block !important; width: 100% !important; box-sizing: border-box !important; padding-left: 0 !important; padding-right: 0 !important; }
+      .mobile-stack td img { width: 100% !important; max-width: 100% !important; height: auto !important; }
     }
   </style>
 </head>
