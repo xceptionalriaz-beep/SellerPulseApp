@@ -1205,7 +1205,7 @@ export default function VisualEditor({
             if (!meta && !e.altKey && !['input', 'textarea', 'select'].includes(tag)) {
                 switch (e.key.toLowerCase()) {
                     case 'b': e.preventDefault(); setActiveTab('blocks'); setPanelOpen(true); break
-                    case 'c': e.preventDefault(); setActiveTab('content'); setPanelOpen(true); break
+                    case 'c': e.preventDefault(); setActiveTab('blocks'); setPanelOpen(true); break
                     case 't': e.preventDefault(); setActiveTab('templates'); setPanelOpen(true); break
                     case 'o': e.preventDefault(); setActiveTab('body'); setPanelOpen(true); break
                     case 'i': e.preventDefault(); setActiveTab('images'); setPanelOpen(true); break
@@ -1251,7 +1251,7 @@ export default function VisualEditor({
                 if (isImage) {
                     setActiveTab('images');
                 } else {
-                    setActiveTab('content');
+                    setActiveTab('blocks');
                 }
                 setPanelOpen(true);
             } else if (event.data?.type === 'RIAZIFY_EDIT_SLOT_CONTENT') {
@@ -1288,7 +1288,7 @@ export default function VisualEditor({
                     if (targetBlock && (IMAGE_BLOCK_TYPES.has(targetBlock.type) || propKey.toLowerCase().includes('image'))) {
                         setActiveTab('images');
                     } else {
-                        setActiveTab('content');
+                        setActiveTab('blocks');
                     }
                     setPanelOpen(true);
                 }
@@ -1343,7 +1343,7 @@ export default function VisualEditor({
                 if (blockId && typeof text === 'string') {
                     // Ensure block is selected and Content panel is open
                     setSelectedId(blockId);
-                    setActiveTab('content');
+                    setActiveTab('blocks');
                     setPanelOpen(true);
 
                     const idx = blocks.findIndex(b => b.id === blockId);
@@ -1791,7 +1791,7 @@ export default function VisualEditor({
                                         }
                                         // Bug #5 fix: clear stale slot edit so old props don't linger
                                         setActiveSlotEdit(null)
-                                        setActiveTab('content')
+                                        setActiveTab('blocks')
                                         setPanelOpen(true)
                                     }}
                                     persistent

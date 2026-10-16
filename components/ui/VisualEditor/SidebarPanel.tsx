@@ -22,7 +22,6 @@ import React from 'react'
 import { RailTabId } from './IconRail'
 import { Block, BlockType, CanvasSettings } from './blocks'
 import BlockLibrary from './BlockLibrary'
-import ContentLibrary from './ContentLibrary'
 import TemplatesTab from './TemplatesTab'
 import BodySettings from './BodySettings'
 import ImagesTab from './ImagesTab'
@@ -169,15 +168,6 @@ export default function SidebarPanel({
                         />
                     )}
 
-                    {activeTab === 'content' && (
-                        <ContentLibrary
-                            onAddBlock={onAddBlock}
-                            onDragStart={onDragStart}
-                            onDragEnd={onDragEnd}
-                            draggedType={draggedType}
-                        />
-                    )}
-
                     {activeTab === 'templates' && (
                         <TemplatesTab
                             onInsert={onInsertTemplate}
@@ -265,7 +255,6 @@ export default function SidebarPanel({
 // ─────────────────────────────────────────────────────────────────────────────
 const TAB_LABELS: Record<RailTabId, string> = {
     blocks: 'Blocks',
-    content: 'Contents',
     templates: 'Section Templates',
     body: 'Canvas Settings',
     images: 'Images',
