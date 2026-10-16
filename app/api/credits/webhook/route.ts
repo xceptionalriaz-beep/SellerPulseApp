@@ -28,9 +28,9 @@ const supabaseAdmin = createClient(
 
 // ── Fulfil credits for a completed checkout session ───────────────────────────
 async function fulfilCredits(session: Stripe.Checkout.Session) {
-    const userId       = session.metadata?.user_id
+    const userId = session.metadata?.user_id
     const totalCredits = parseInt(session.metadata?.total_credits ?? '0', 10)
-    const packageId    = session.metadata?.package_id
+    const packageId = session.metadata?.package_id
 
     if (!userId || !totalCredits) {
         console.error('[webhook] Missing metadata:', session.metadata)
@@ -69,14 +69,14 @@ async function fulfilCredits(session: Stripe.Checkout.Session) {
         return
     }
 
-    const newBalance  = wallet.balance + totalCredits
+    const newBalance = wallet.balance + totalCredits
     const newLifetime = wallet.lifetime_credits + totalCredits
 
     // Update wallet
     const { error: walletErr } = await supabaseAdmin
         .from('user_ai_wallets')
         .update({
-            balance:          newBalance,
+            balance: newBalance,
             lifetime_credits: newLifetime,
         })
         .eq('user_id', userId)
@@ -89,12 +89,12 @@ async function fulfilCredits(session: Stripe.Checkout.Session) {
     // Ledger entry
     const amountPaid = (session.amount_total ?? 0) / 100  // cents → dollars
     await supabaseAdmin.from('ai_credit_ledger').insert({
-        user_id:           userId,
-        type:              'purchase',
-        amount:            totalCredits,
-        balance_after:     newBalance,
+        user_id: userId,
+        type: 'purchase',
+        amount: totalCredits,
+        balance_after: newBalance,
         stripe_session_id: session.id,
-        note:              `Purchased ${totalCredits} credits ($${amountPaid.toFixed(2)})`,
+        note: `Purchased ${totalCredits} credits ($${amountPaid.toFixed(2)})`,
     })
 
     console.log(`[webhook] ✅ Credited ${totalCredits} credits to user ${userId}, new balance: ${newBalance}`)
@@ -102,9 +102,9 @@ async function fulfilCredits(session: Stripe.Checkout.Session) {
 
 // ── Main handler ──────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
-    const body      = await req.text()
+    const body = await req.text()
     const signature = req.headers.get('stripe-signature') ?? ''
-    const secret    = process.env.STRIPE_WEBHOOK_SECRET!
+    const secret = process.env.STRIPE_WEBHOOK_SECRET!
 
     let event: Stripe.Event
     try {
@@ -127,7 +127,7 @@ export async function POST(req: NextRequest) {
             // Future: handle refunds
             // case 'charge.refunded': { ... }
             default:
-                // Ignore unknown events
+            // Ignore unknown events
         }
     } catch (err) {
         console.error('[webhook] Handler error:', err)

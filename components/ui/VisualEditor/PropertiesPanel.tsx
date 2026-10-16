@@ -8148,13 +8148,13 @@ function AITab({
                             </p>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 12 }}>
                                 {([
-                                    { id: 'product',     label: 'Product Shot', Icon: Package  },
-                                    { id: 'white-bg',    label: 'White BG',     Icon: ScanLine },
-                                    { id: 'lifestyle',   label: 'Lifestyle',    Icon: Leaf     },
-                                    { id: 'infographic', label: 'Infographic',  Icon: BarChart2},
-                                    { id: 'detail',      label: 'Detail Shot',  Icon: ZoomIn   },
-                                    { id: 'dark-studio', label: 'Dark Studio',  Icon: Moon     },
-                                    { id: 'in-box',      label: 'In-Box',       Icon: Box      },
+                                    { id: 'product', label: 'Product Shot', Icon: Package },
+                                    { id: 'white-bg', label: 'White BG', Icon: ScanLine },
+                                    { id: 'lifestyle', label: 'Lifestyle', Icon: Leaf },
+                                    { id: 'infographic', label: 'Infographic', Icon: BarChart2 },
+                                    { id: 'detail', label: 'Detail Shot', Icon: ZoomIn },
+                                    { id: 'dark-studio', label: 'Dark Studio', Icon: Moon },
+                                    { id: 'in-box', label: 'In-Box', Icon: Box },
                                 ] as const).map(s => (
                                     <button
                                         key={s.id}

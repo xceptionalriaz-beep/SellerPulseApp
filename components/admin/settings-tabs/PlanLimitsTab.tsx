@@ -36,100 +36,100 @@ const C = {
 
 // ── Types ──────────────────────────────────────────────────────
 interface PlanLimit {
-  id:                      string
-  tier:                    string
-  plan_id:                 string | null
-  display_name:            string | null
-  daily_searches:          string | null
-  vero_checks:             string | null
-  support_level:           string | null
-  max_monthly_searches:    number | null
-  max_vero_checks:         number | null
-  max_tracked_items:       number | null
-  max_orders_protected:    number | null
-  max_ebay_stores:         number | null
-  max_team_seats:          number | null
-  max_message_templates:   number | null
-  max_ai_optimize:         number | null
-  max_keyword_searches:    number | null
-  max_competitor_extract:  number | null
-  max_title_generations:   number | null
-  max_profit_calcs:        number | null
-  has_advanced_analytics:  boolean
-  has_bulk_export:         boolean
-  has_title_builder:       boolean
+  id: string
+  tier: string
+  plan_id: string | null
+  display_name: string | null
+  daily_searches: string | null
+  vero_checks: string | null
+  support_level: string | null
+  max_monthly_searches: number | null
+  max_vero_checks: number | null
+  max_tracked_items: number | null
+  max_orders_protected: number | null
+  max_ebay_stores: number | null
+  max_team_seats: number | null
+  max_message_templates: number | null
+  max_ai_optimize: number | null
+  max_keyword_searches: number | null
+  max_competitor_extract: number | null
+  max_title_generations: number | null
+  max_profit_calcs: number | null
+  has_advanced_analytics: boolean
+  has_bulk_export: boolean
+  has_title_builder: boolean
   has_competitor_research: boolean
-  has_api_access:          boolean
-  has_priority_support:    boolean
-  has_evidence_vault:      boolean
-  has_csv_export:          boolean
-  has_pdf_export:          boolean
-  has_multi_currency:      boolean
-  has_message_templates:   boolean
-  has_pro_charts_hud:      boolean
-  has_30d_trend:           boolean
-  has_bulk_title_gen:      boolean
-  has_vero_bulk_check:     boolean
-  has_vero_alerts:         boolean
-  has_ai_suggestions:      boolean
-  has_evidence_pdf:        string | null
-  has_buyer_profiling:     string | null
-  has_auto_sync:           string | null
-  has_analytics:           string | null
-  trial_days:              number | null
-  grace_period_days:       number | null
-  price_monthly:           number
-  price_annual:            number
-  is_active:               boolean
-  updated_at:              string
+  has_api_access: boolean
+  has_priority_support: boolean
+  has_evidence_vault: boolean
+  has_csv_export: boolean
+  has_pdf_export: boolean
+  has_multi_currency: boolean
+  has_message_templates: boolean
+  has_pro_charts_hud: boolean
+  has_30d_trend: boolean
+  has_bulk_title_gen: boolean
+  has_vero_bulk_check: boolean
+  has_vero_alerts: boolean
+  has_ai_suggestions: boolean
+  has_evidence_pdf: string | null
+  has_buyer_profiling: string | null
+  has_auto_sync: string | null
+  has_analytics: string | null
+  trial_days: number | null
+  grace_period_days: number | null
+  price_monthly: number
+  price_annual: number
+  is_active: boolean
+  updated_at: string
 }
 
 interface HudStats {
-  freeUsers:     number
-  premiumSubs:   number
+  freeUsers: number
+  premiumSubs: number
   gatingTunnels: number
-  mrr:           number
-  starterCount:  number
-  growthCount:   number
-  customCount:   number
+  mrr: number
+  starterCount: number
+  growthCount: number
+  customCount: number
 }
 
 interface EditState {
-  max_monthly_searches:    string
-  max_vero_checks:         string
-  max_tracked_items:       string
-  max_orders_protected:    string
-  max_ebay_stores:         string
-  max_team_seats:          string
-  max_message_templates:   string
-  max_ai_optimize:         string
-  max_keyword_searches:    string
-  max_competitor_extract:  string
-  trial_days:              string
-  grace_period_days:       string
-  has_advanced_analytics:  boolean
-  has_bulk_export:         boolean
-  has_title_builder:       boolean
+  max_monthly_searches: string
+  max_vero_checks: string
+  max_tracked_items: string
+  max_orders_protected: string
+  max_ebay_stores: string
+  max_team_seats: string
+  max_message_templates: string
+  max_ai_optimize: string
+  max_keyword_searches: string
+  max_competitor_extract: string
+  trial_days: string
+  grace_period_days: string
+  has_advanced_analytics: boolean
+  has_bulk_export: boolean
+  has_title_builder: boolean
   has_competitor_research: boolean
-  has_api_access:          boolean
-  has_priority_support:    boolean
-  has_evidence_vault:      boolean
-  has_csv_export:          boolean
-  has_pdf_export:          boolean
-  has_multi_currency:      boolean
-  has_message_templates:   boolean
-  has_pro_charts_hud:      boolean
-  has_30d_trend:           boolean
-  has_bulk_title_gen:      boolean
-  has_vero_bulk_check:     boolean
-  has_vero_alerts:         boolean
-  has_ai_suggestions:      boolean
-  has_evidence_pdf:        string
-  has_buyer_profiling:     string
-  has_auto_sync:           string
-  has_analytics:           string
-  price_monthly:           string
-  price_annual:            string
+  has_api_access: boolean
+  has_priority_support: boolean
+  has_evidence_vault: boolean
+  has_csv_export: boolean
+  has_pdf_export: boolean
+  has_multi_currency: boolean
+  has_message_templates: boolean
+  has_pro_charts_hud: boolean
+  has_30d_trend: boolean
+  has_bulk_title_gen: boolean
+  has_vero_bulk_check: boolean
+  has_vero_alerts: boolean
+  has_ai_suggestions: boolean
+  has_evidence_pdf: string
+  has_buyer_profiling: string
+  has_auto_sync: string
+  has_analytics: string
+  price_monthly: string
+  price_annual: string
 }
 
 // ── Helpers ────────────────────────────────────────────────────
@@ -160,55 +160,55 @@ function countGatingTunnels(plans: PlanLimit[]): number {
 
 function planToEditState(plan: PlanLimit): EditState {
   return {
-    max_monthly_searches:    String(plan.max_monthly_searches    ?? ''),
-    max_vero_checks:         String(plan.max_vero_checks         ?? ''),
-    max_tracked_items:       String(plan.max_tracked_items       ?? ''),
-    max_orders_protected:    String(plan.max_orders_protected    ?? ''),
-    max_ebay_stores:         String(plan.max_ebay_stores         ?? ''),
-    max_team_seats:          String(plan.max_team_seats          ?? ''),
-    max_message_templates:   String(plan.max_message_templates   ?? ''),
-    max_ai_optimize:         String(plan.max_ai_optimize         ?? ''),
-    max_keyword_searches:    String(plan.max_keyword_searches    ?? ''),
-    max_competitor_extract:  String(plan.max_competitor_extract  ?? ''),
-    trial_days:              String(plan.trial_days              ?? ''),
-    grace_period_days:       String(plan.grace_period_days       ?? ''),
-    has_advanced_analytics:  plan.has_advanced_analytics,
-    has_bulk_export:         plan.has_bulk_export,
-    has_title_builder:       plan.has_title_builder,
+    max_monthly_searches: String(plan.max_monthly_searches ?? ''),
+    max_vero_checks: String(plan.max_vero_checks ?? ''),
+    max_tracked_items: String(plan.max_tracked_items ?? ''),
+    max_orders_protected: String(plan.max_orders_protected ?? ''),
+    max_ebay_stores: String(plan.max_ebay_stores ?? ''),
+    max_team_seats: String(plan.max_team_seats ?? ''),
+    max_message_templates: String(plan.max_message_templates ?? ''),
+    max_ai_optimize: String(plan.max_ai_optimize ?? ''),
+    max_keyword_searches: String(plan.max_keyword_searches ?? ''),
+    max_competitor_extract: String(plan.max_competitor_extract ?? ''),
+    trial_days: String(plan.trial_days ?? ''),
+    grace_period_days: String(plan.grace_period_days ?? ''),
+    has_advanced_analytics: plan.has_advanced_analytics,
+    has_bulk_export: plan.has_bulk_export,
+    has_title_builder: plan.has_title_builder,
     has_competitor_research: plan.has_competitor_research,
-    has_api_access:          plan.has_api_access,
-    has_priority_support:    plan.has_priority_support,
-    has_evidence_vault:      plan.has_evidence_vault    ?? false,
-    has_csv_export:          plan.has_csv_export        ?? false,
-    has_pdf_export:          plan.has_pdf_export        ?? false,
-    has_multi_currency:      plan.has_multi_currency    ?? false,
-    has_message_templates:   plan.has_message_templates ?? true,
-    has_pro_charts_hud:      plan.has_pro_charts_hud   ?? false,
-    has_30d_trend:           plan.has_30d_trend         ?? false,
-    has_bulk_title_gen:      plan.has_bulk_title_gen    ?? false,
-    has_vero_bulk_check:     plan.has_vero_bulk_check   ?? false,
-    has_vero_alerts:         plan.has_vero_alerts       ?? false,
-    has_ai_suggestions:      plan.has_ai_suggestions    ?? false,
-    has_evidence_pdf:        plan.has_evidence_pdf      ?? 'none',
-    has_buyer_profiling:     plan.has_buyer_profiling   ?? 'none',
-    has_auto_sync:           plan.has_auto_sync         ?? 'manual',
-    has_analytics:           plan.has_analytics         ?? 'none',
-    price_monthly:           String(plan.price_monthly  ?? ''),
-    price_annual:            String(plan.price_annual   ?? ''),
+    has_api_access: plan.has_api_access,
+    has_priority_support: plan.has_priority_support,
+    has_evidence_vault: plan.has_evidence_vault ?? false,
+    has_csv_export: plan.has_csv_export ?? false,
+    has_pdf_export: plan.has_pdf_export ?? false,
+    has_multi_currency: plan.has_multi_currency ?? false,
+    has_message_templates: plan.has_message_templates ?? true,
+    has_pro_charts_hud: plan.has_pro_charts_hud ?? false,
+    has_30d_trend: plan.has_30d_trend ?? false,
+    has_bulk_title_gen: plan.has_bulk_title_gen ?? false,
+    has_vero_bulk_check: plan.has_vero_bulk_check ?? false,
+    has_vero_alerts: plan.has_vero_alerts ?? false,
+    has_ai_suggestions: plan.has_ai_suggestions ?? false,
+    has_evidence_pdf: plan.has_evidence_pdf ?? 'none',
+    has_buyer_profiling: plan.has_buyer_profiling ?? 'none',
+    has_auto_sync: plan.has_auto_sync ?? 'manual',
+    has_analytics: plan.has_analytics ?? 'none',
+    price_monthly: String(plan.price_monthly ?? ''),
+    price_annual: String(plan.price_annual ?? ''),
   }
 }
 
 // ── Toast ──────────────────────────────────────────────────────
 function Toast({ msg, type }: { msg: string; type: 'success' | 'error' | 'info' }) {
   const map = {
-    success: { bg: C.dark,    border: C.lime,   color: C.lime },
-    error:   { bg: '#FEF2F2', border: '#FECACA', color: C.red  },
-    info:    { bg: C.bg,      border: C.border,  color: C.text },
+    success: { bg: C.dark, border: C.lime, color: C.lime },
+    error: { bg: '#FEF2F2', border: '#FECACA', color: C.red },
+    info: { bg: C.bg, border: C.border, color: C.text },
   }
   const t = map[type]
   return (
     <div className="fixed bottom-6 right-6 z-[99999] flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl"
-         style={{ backgroundColor: t.bg, border: `1px solid ${t.border}` }}>
+      style={{ backgroundColor: t.bg, border: `1px solid ${t.border}` }}>
       <Check size={15} style={{ color: t.color }} />
       <p className="text-[13px] font-bold" style={{ color: t.color }}>{msg}</p>
     </div>
@@ -221,34 +221,34 @@ function HudCards({ stats, loading }: { stats: HudStats; loading: boolean }) {
     {
       title: 'Free Users',
       value: stats.freeUsers.toString(),
-      sub:   'on Free plan',
-      icon:  Users,
+      sub: 'on Free plan',
+      icon: Users,
       color: C.muted,
-      bg:    C.bg,
+      bg: C.bg,
     },
     {
       title: 'Paid Subscribers',
       value: stats.premiumSubs.toString(),
-      sub:   `${stats.starterCount} Starter · ${stats.growthCount} Growth · ${stats.customCount} Custom`,
-      icon:  Star,
+      sub: `${stats.starterCount} Starter · ${stats.growthCount} Growth · ${stats.customCount} Custom`,
+      icon: Star,
       color: C.limeDeep,
-      bg:    C.limeTint,
+      bg: C.limeTint,
     },
     {
       title: 'MRR',
       value: `$${stats.mrr.toLocaleString()}`,
-      sub:   `$${(stats.mrr * 12).toLocaleString()} annual run rate`,
-      icon:  Zap,
+      sub: `$${(stats.mrr * 12).toLocaleString()} annual run rate`,
+      icon: Zap,
       color: stats.mrr > 0 ? C.green : C.muted,
-      bg:    stats.mrr > 0 ? 'rgba(22,163,74,0.08)' : C.bg,
+      bg: stats.mrr > 0 ? 'rgba(22,163,74,0.08)' : C.bg,
     },
     {
       title: 'Active Gating Tunnels',
       value: stats.gatingTunnels.toString(),
-      sub:   'capped feature limits',
-      icon:  Lock,
+      sub: 'capped feature limits',
+      icon: Lock,
       color: C.blue,
-      bg:    'rgba(29,78,216,0.08)',
+      bg: 'rgba(29,78,216,0.08)',
     },
   ]
 
@@ -258,13 +258,13 @@ function HudCards({ stats, loading }: { stats: HudStats; loading: boolean }) {
         const Icon = card.icon
         return (
           <div key={i} className="flex flex-col gap-3 p-4 rounded-2xl border"
-               style={{ backgroundColor: C.surface, borderColor: C.border }}>
+            style={{ backgroundColor: C.surface, borderColor: C.border }}>
             <div className="flex items-center justify-between">
               <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>
                 {card.title.toUpperCase()}
               </p>
               <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                   style={{ backgroundColor: card.bg }}>
+                style={{ backgroundColor: card.bg }}>
                 <Icon size={15} style={{ color: card.color }} />
               </div>
             </div>
@@ -287,10 +287,10 @@ function HudCards({ stats, loading }: { stats: HudStats; loading: boolean }) {
 function CustomDropdown({
   value, onChange, options, label,
 }: {
-  value:    string
+  value: string
   onChange: (v: string) => void
-  options:  { label: string; value: string }[]
-  label:    string
+  options: { label: string; value: string }[]
+  label: string
 }) {
   const [open, setOpen] = useState(false)
   const selected = options.find(o => o.value === value)
@@ -314,7 +314,7 @@ function CustomDropdown({
           <>
             <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
             <div className="absolute top-full left-0 right-0 mt-1 rounded-xl border shadow-xl overflow-hidden z-20"
-                 style={{ backgroundColor: C.surface, borderColor: C.border }}>
+              style={{ backgroundColor: C.surface, borderColor: C.border }}>
               {options.map(o => (
                 <button key={o.value} onClick={() => { onChange(o.value); setOpen(false) }}
                   className="w-full flex items-center justify-between px-3 py-2 text-[12px] font-semibold hover:bg-[#f3eeff] transition-colors"
@@ -333,10 +333,10 @@ function CustomDropdown({
 function BoolToggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
   return (
     <div onClick={() => onChange(!value)}
-         className="relative w-10 h-5 rounded-full cursor-pointer transition-colors shrink-0"
-         style={{ backgroundColor: value ? C.lime : C.border }}>
+      className="relative w-10 h-5 rounded-full cursor-pointer transition-colors shrink-0"
+      style={{ backgroundColor: value ? C.lime : C.border }}>
       <div className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all"
-           style={{ left: value ? '22px' : '2px', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+        style={{ left: value ? '22px' : '2px', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
     </div>
   )
 }
@@ -345,10 +345,10 @@ function BoolToggle({ value, onChange }: { value: boolean; onChange: (v: boolean
 function NumericInput({
   label, value, onChange, hint,
 }: {
-  label:    string
-  value:    string
+  label: string
+  value: string
   onChange: (v: string) => void
-  hint?:    string
+  hint?: string
 }) {
   const [focused, setFocused] = useState(false)
   return (
@@ -364,7 +364,7 @@ function NumericInput({
         placeholder="-1 for unlimited"
         className="w-full h-9 px-3 rounded-xl border text-[13px] font-bold outline-none"
         style={{
-          borderColor:     focused ? C.lime : C.border,
+          borderColor: focused ? C.lime : C.border,
           backgroundColor: C.bg,
           color:           value === '-1' ? C.limeDeep : C.text,
           boxShadow:       focused ? '0 0 0 3px rgba(117,48,251,0.12)' : 'none',
@@ -382,47 +382,47 @@ const PLAN_COLS = ['PLAN', 'MONTHLY', 'ANNUAL', 'SEARCHES', 'VERO', 'ORDERS', 'T
 
 // ── Plan Row ───────────────────────────────────────────────────
 function PlanRow({
-    plan,
-    isExpanded,
-    onToggle,
-    onToggleActive,
-    canActivate = true,
-  }: {
-    plan:           PlanLimit
-    isExpanded:     boolean
-    onToggle:       () => void
-    onToggleActive: (plan: PlanLimit) => void
-    canActivate?:   boolean
-  }) {
+  plan,
+  isExpanded,
+  onToggle,
+  onToggleActive,
+  canActivate = true,
+}: {
+  plan: PlanLimit
+  isExpanded: boolean
+  onToggle: () => void
+  onToggleActive: (plan: PlanLimit) => void
+  canActivate?: boolean
+}) {
   const planColors: Record<string, { color: string; bg: string }> = {
-    free:    { color: C.muted,    bg: C.bg                    },
-    starter: { color: C.blue,     bg: 'rgba(29,78,216,0.08)'  },
-    growth:  { color: C.limeDeep, bg: C.limeTint              },
-    custom:  { color: C.amber,    bg: 'rgba(217,119,6,0.08)'  },
+    free: { color: C.muted, bg: C.bg },
+    starter: { color: C.blue, bg: 'rgba(29,78,216,0.08)' },
+    growth: { color: C.limeDeep, bg: C.limeTint },
+    custom: { color: C.amber, bg: 'rgba(217,119,6,0.08)' },
   }
   const pc = planColors[plan.plan_id ?? ''] ?? { color: C.text, bg: C.bg }
 
   const numericCols = [
-    { value: plan.max_monthly_searches,  label: 'Searches'   },
-    { value: plan.max_vero_checks,       label: 'VeRO'       },
-    { value: plan.max_orders_protected,  label: 'Orders'     },
+    { value: plan.max_monthly_searches, label: 'Searches' },
+    { value: plan.max_vero_checks, label: 'VeRO' },
+    { value: plan.max_orders_protected, label: 'Orders' },
     { value: plan.max_title_generations, label: 'Titles/day' },
-    { value: plan.max_ai_optimize,       label: 'AI/day'     },
-    { value: plan.max_ebay_stores,       label: 'Stores'     },
-    { value: plan.max_team_seats,        label: 'Seats'      },
+    { value: plan.max_ai_optimize, label: 'AI/day' },
+    { value: plan.max_ebay_stores, label: 'Stores' },
+    { value: plan.max_team_seats, label: 'Seats' },
   ]
 
   const textCols = [
     { value: plan.has_evidence_pdf, label: 'Evidence' },
-    { value: plan.has_auto_sync,    label: 'Sync'     },
+    { value: plan.has_auto_sync, label: 'Sync' },
   ]
 
   const boolCols = [
     { value: plan.has_advanced_analytics, label: 'Analytics' },
-    { value: plan.has_bulk_export,        label: 'Export'    },
-    { value: plan.has_api_access,         label: 'API'       },
-    { value: plan.has_priority_support,   label: 'Support'   },
-    { value: plan.has_evidence_vault,     label: 'Vault'     },
+    { value: plan.has_bulk_export, label: 'Export' },
+    { value: plan.has_api_access, label: 'API' },
+    { value: plan.has_priority_support, label: 'Support' },
+    { value: plan.has_evidence_vault, label: 'Vault' },
   ]
 
   return (
@@ -430,17 +430,17 @@ function PlanRow({
       className="grid items-center px-4 py-3 border-b last:border-b-0 cursor-pointer hover:bg-[#f8f7ff] transition-colors"
       style={{
         gridTemplateColumns: PLAN_GRID,
-        gap:             10,
-        borderColor:     C.border,
+        gap: 10,
+        borderColor: C.border,
         backgroundColor: isExpanded ? C.limeTint : !plan.is_active ? 'rgba(100,116,139,0.04)' : undefined,
-        opacity:         plan.is_active ? 1 : 0.6,
+        opacity: plan.is_active ? 1 : 0.6,
       }}
       onClick={onToggle}>
 
       {/* 1 — Plan name */}
       <div className="flex items-center min-w-0">
         <div className="px-2 py-0.5 rounded-lg shrink-0"
-             style={{ backgroundColor: pc.bg }}>
+          style={{ backgroundColor: pc.bg }}>
           <p className="text-[11px] font-black" style={{ color: pc.color }}>
             {plan.display_name ?? plan.tier}
           </p>
@@ -463,7 +463,7 @@ function PlanRow({
             </p>
             {plan.price_monthly > 0 && (
               <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full"
-                    style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
+                style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
                 SAVE {Math.round((1 - plan.price_annual / (plan.price_monthly * 12)) * 100)}%
               </span>
             )}
@@ -493,12 +493,12 @@ function PlanRow({
         <div key={i} className="flex items-center justify-center">
           {!col.value || col.value === 'none' || col.value === 'manual' ? (
             <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
-                  style={{ backgroundColor: 'rgba(185,28,28,0.08)', color: C.red }}>
+              style={{ backgroundColor: 'rgba(185,28,28,0.08)', color: C.red }}>
               {col.value === 'manual' ? 'Manual' : 'None'}
             </span>
           ) : (
             <span className="text-[9px] font-bold px-1.5 py-0.5 rounded capitalize"
-                  style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
+              style={{ backgroundColor: C.limeTint, color: C.limeDeep }}>
               {col.value}
             </span>
           )}
@@ -512,12 +512,12 @@ function PlanRow({
             <span className="text-[12px]" style={{ color: C.muted }}>—</span>
           ) : col.value ? (
             <div className="w-5 h-5 rounded-full flex items-center justify-center"
-                 style={{ backgroundColor: C.limeTint }}>
+              style={{ backgroundColor: C.limeTint }}>
               <Check size={11} style={{ color: C.limeDeep }} />
             </div>
           ) : (
             <div className="w-5 h-5 rounded-full flex items-center justify-center"
-                 style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
+              style={{ backgroundColor: 'rgba(185,28,28,0.08)' }}>
               <X size={11} style={{ color: C.red }} />
             </div>
           )}
@@ -538,10 +538,10 @@ function PlanRow({
         </span>
       </div>
 
-     {/* 20 — Active toggle */}
-        <div className="flex items-center justify-center" onClick={e => { e.stopPropagation(); canActivate && onToggleActive(plan) }}>
-          <div className="relative w-9 h-5 rounded-full transition-colors"
-               style={{ backgroundColor: plan.is_active ? C.dark : 'rgba(100,116,139,0.35)', cursor: canActivate ? 'pointer' : 'not-allowed', opacity: canActivate ? 1 : 0.5 }}>
+      {/* 20 — Active toggle */}
+      <div className="flex items-center justify-center" onClick={e => { e.stopPropagation(); canActivate && onToggleActive(plan) }}>
+        <div className="relative w-9 h-5 rounded-full transition-colors"
+          style={{ backgroundColor: plan.is_active ? C.dark : 'rgba(100,116,139,0.35)', cursor: canActivate ? 'pointer' : 'not-allowed', opacity: canActivate ? 1 : 0.5 }}>
           <div style={{
             position: 'absolute', top: '2px', left: '2px',
             width: '16px', height: '16px', borderRadius: '50%',
@@ -555,10 +555,10 @@ function PlanRow({
       {/* 21 — Expand icon */}
       <div className="flex justify-end">
         <div className="w-7 h-7 flex items-center justify-center rounded-xl border"
-             style={{ borderColor: isExpanded ? C.lime : C.border, backgroundColor: isExpanded ? C.limeTint : C.surface }}>
+          style={{ borderColor: isExpanded ? C.lime : C.border, backgroundColor: isExpanded ? C.limeTint : C.surface }}>
           {isExpanded
-            ? <ChevronUp   size={13} style={{ color: C.limeDeep }} />
-            : <ChevronDown size={13} style={{ color: C.muted    }} />}
+            ? <ChevronUp size={13} style={{ color: C.limeDeep }} />
+            : <ChevronDown size={13} style={{ color: C.muted }} />}
         </div>
       </div>
     </div>
@@ -573,16 +573,16 @@ function EditPanel({
   showToast,
   canEdit = true,
 }: {
-  plan:      PlanLimit
-  onClose:   () => void
-  onSaved:   (updated: PlanLimit) => void
+  plan: PlanLimit
+  onClose: () => void
+  onSaved: (updated: PlanLimit) => void
   showToast: (msg: string, type: 'success' | 'error' | 'info') => void
-  canEdit?:  boolean
+  canEdit?: boolean
 }) {
-  const supabase          = createClient()
-  const [edit, setEdit]   = useState<EditState>(planToEditState(plan))
+  const supabase = createClient()
+  const [edit, setEdit] = useState<EditState>(planToEditState(plan))
   const [saving, setSaving] = useState(false)
-  const [error,  setError]  = useState('')
+  const [error, setError] = useState('')
 
   function updateEdit(key: keyof EditState, value: string | boolean) {
     setEdit(prev => ({ ...prev, [key]: value }))
@@ -599,10 +599,10 @@ function EditPanel({
     for (const field of numericFields) {
       const val = Number(edit[field])
       if (isNaN(val)) { setError(`${field.replace(/_/g, ' ')} must be a number`); return false }
-      if (val < -1)   { setError(`${field.replace(/_/g, ' ')} must be -1 (unlimited) or a positive number`); return false }
+      if (val < -1) { setError(`${field.replace(/_/g, ' ')} must be -1 (unlimited) or a positive number`); return false }
     }
     if (Number(edit.price_monthly) < 0) { setError('Monthly price cannot be negative'); return false }
-    if (Number(edit.price_annual)  < 0) { setError('Annual price cannot be negative');  return false }
+    if (Number(edit.price_annual) < 0) { setError('Annual price cannot be negative'); return false }
     return true
   }
 
@@ -612,45 +612,45 @@ function EditPanel({
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/admin/plan-limits/update', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body:    JSON.stringify({
-          id:                      plan.id,
-          max_monthly_searches:    Number(edit.max_monthly_searches),
-          max_vero_checks:         Number(edit.max_vero_checks),
-          max_tracked_items:       Number(edit.max_tracked_items),
-          max_orders_protected:    Number(edit.max_orders_protected),
-          max_ebay_stores:         Number(edit.max_ebay_stores),
-          max_team_seats:          Number(edit.max_team_seats),
-          has_advanced_analytics:  edit.has_advanced_analytics,
-          has_bulk_export:         edit.has_bulk_export,
-          has_title_builder:       edit.has_title_builder,
+        body: JSON.stringify({
+          id: plan.id,
+          max_monthly_searches: Number(edit.max_monthly_searches),
+          max_vero_checks: Number(edit.max_vero_checks),
+          max_tracked_items: Number(edit.max_tracked_items),
+          max_orders_protected: Number(edit.max_orders_protected),
+          max_ebay_stores: Number(edit.max_ebay_stores),
+          max_team_seats: Number(edit.max_team_seats),
+          has_advanced_analytics: edit.has_advanced_analytics,
+          has_bulk_export: edit.has_bulk_export,
+          has_title_builder: edit.has_title_builder,
           has_competitor_research: edit.has_competitor_research,
-          has_api_access:          edit.has_api_access,
-          has_priority_support:    edit.has_priority_support,
-          has_evidence_vault:      edit.has_evidence_vault,
-          has_csv_export:          edit.has_csv_export,
-          has_pdf_export:          edit.has_pdf_export,
-          has_multi_currency:      edit.has_multi_currency,
-          has_message_templates:   edit.has_message_templates,
-          has_pro_charts_hud:      edit.has_pro_charts_hud,
-          has_30d_trend:           edit.has_30d_trend,
-          has_bulk_title_gen:      edit.has_bulk_title_gen,
-          has_vero_bulk_check:     edit.has_vero_bulk_check,
-          has_vero_alerts:         edit.has_vero_alerts,
-          has_ai_suggestions:      edit.has_ai_suggestions,
-          has_evidence_pdf:        edit.has_evidence_pdf,
-          has_buyer_profiling:     edit.has_buyer_profiling,
-          has_auto_sync:           edit.has_auto_sync,
-          has_analytics:           edit.has_analytics,
-          max_message_templates:   Number(edit.max_message_templates),
-          max_ai_optimize:         Number(edit.max_ai_optimize),
-          max_keyword_searches:    Number(edit.max_keyword_searches),
-          max_competitor_extract:  Number(edit.max_competitor_extract),
-          trial_days:              Number(edit.trial_days),
-          grace_period_days:       Number(edit.grace_period_days),
-          price_monthly:           Number(edit.price_monthly),
-          price_annual:            Number(edit.price_annual),
+          has_api_access: edit.has_api_access,
+          has_priority_support: edit.has_priority_support,
+          has_evidence_vault: edit.has_evidence_vault,
+          has_csv_export: edit.has_csv_export,
+          has_pdf_export: edit.has_pdf_export,
+          has_multi_currency: edit.has_multi_currency,
+          has_message_templates: edit.has_message_templates,
+          has_pro_charts_hud: edit.has_pro_charts_hud,
+          has_30d_trend: edit.has_30d_trend,
+          has_bulk_title_gen: edit.has_bulk_title_gen,
+          has_vero_bulk_check: edit.has_vero_bulk_check,
+          has_vero_alerts: edit.has_vero_alerts,
+          has_ai_suggestions: edit.has_ai_suggestions,
+          has_evidence_pdf: edit.has_evidence_pdf,
+          has_buyer_profiling: edit.has_buyer_profiling,
+          has_auto_sync: edit.has_auto_sync,
+          has_analytics: edit.has_analytics,
+          max_message_templates: Number(edit.max_message_templates),
+          max_ai_optimize: Number(edit.max_ai_optimize),
+          max_keyword_searches: Number(edit.max_keyword_searches),
+          max_competitor_extract: Number(edit.max_competitor_extract),
+          trial_days: Number(edit.trial_days),
+          grace_period_days: Number(edit.grace_period_days),
+          price_monthly: Number(edit.price_monthly),
+          price_annual: Number(edit.price_annual),
         }),
       })
       const json = await res.json()
@@ -664,44 +664,44 @@ function EditPanel({
 
   const boolFeatures: { key: keyof EditState; label: string; icon: any; section: string }[] = [
     // General
-    { key: 'has_title_builder',       label: 'Title Builder',       icon: Edit3,     section: 'General'  },
-    { key: 'has_competitor_research', label: 'Competitor Research', icon: Globe,     section: 'General'  },
-    { key: 'has_api_access',          label: 'API Access',          icon: Zap,       section: 'General'  },
-    { key: 'has_priority_support',    label: 'Priority Support',    icon: Star,      section: 'General'  },
-    { key: 'has_advanced_analytics',  label: 'Advanced Analytics',  icon: BarChart2, section: 'General'  },
-    { key: 'has_bulk_export',         label: 'Bulk Export',         icon: Download,  section: 'General'  },
+    { key: 'has_title_builder', label: 'Title Builder', icon: Edit3, section: 'General' },
+    { key: 'has_competitor_research', label: 'Competitor Research', icon: Globe, section: 'General' },
+    { key: 'has_api_access', label: 'API Access', icon: Zap, section: 'General' },
+    { key: 'has_priority_support', label: 'Priority Support', icon: Star, section: 'General' },
+    { key: 'has_advanced_analytics', label: 'Advanced Analytics', icon: BarChart2, section: 'General' },
+    { key: 'has_bulk_export', label: 'Bulk Export', icon: Download, section: 'General' },
     // Title Builder
-    { key: 'has_pro_charts_hud',      label: 'PRO Charts HUD',      icon: BarChart2, section: 'Title'    },
-    { key: 'has_30d_trend',           label: '30D Trend Visualizer',icon: BarChart2, section: 'Title'    },
-    { key: 'has_bulk_title_gen',      label: 'Bulk Title Gen',      icon: Edit3,     section: 'Title'    },
-    { key: 'has_ai_suggestions',      label: 'AI Suggestions',      icon: Zap,       section: 'Title'    },
+    { key: 'has_pro_charts_hud', label: 'PRO Charts HUD', icon: BarChart2, section: 'Title' },
+    { key: 'has_30d_trend', label: '30D Trend Visualizer', icon: BarChart2, section: 'Title' },
+    { key: 'has_bulk_title_gen', label: 'Bulk Title Gen', icon: Edit3, section: 'Title' },
+    { key: 'has_ai_suggestions', label: 'AI Suggestions', icon: Zap, section: 'Title' },
     // VeRO
-    { key: 'has_vero_bulk_check',     label: 'VeRO Bulk Check',     icon: Shield,    section: 'VeRO'     },
-    { key: 'has_vero_alerts',         label: 'VeRO Alerts',         icon: Shield,    section: 'VeRO'     },
+    { key: 'has_vero_bulk_check', label: 'VeRO Bulk Check', icon: Shield, section: 'VeRO' },
+    { key: 'has_vero_alerts', label: 'VeRO Alerts', icon: Shield, section: 'VeRO' },
     // Orders
-    { key: 'has_evidence_vault',      label: 'Evidence Vault',      icon: Shield,    section: 'Orders'   },
-    { key: 'has_csv_export',          label: 'CSV Export',          icon: Download,  section: 'Orders'   },
-    { key: 'has_pdf_export',          label: 'PDF Export',          icon: Download,  section: 'Orders'   },
-    { key: 'has_multi_currency',      label: 'Multi-Currency',      icon: Globe,     section: 'Orders'   },
-    { key: 'has_message_templates',   label: 'Message Templates',   icon: Zap,       section: 'Orders'   },
+    { key: 'has_evidence_vault', label: 'Evidence Vault', icon: Shield, section: 'Orders' },
+    { key: 'has_csv_export', label: 'CSV Export', icon: Download, section: 'Orders' },
+    { key: 'has_pdf_export', label: 'PDF Export', icon: Download, section: 'Orders' },
+    { key: 'has_multi_currency', label: 'Multi-Currency', icon: Globe, section: 'Orders' },
+    { key: 'has_message_templates', label: 'Message Templates', icon: Zap, section: 'Orders' },
   ]
 
   const tierOptions = [
-    { label: 'None',      value: 'none'     },
-    { label: 'Basic',     value: 'basic'    },
-    { label: 'Full',      value: 'full'     },
+    { label: 'None', value: 'none' },
+    { label: 'Basic', value: 'basic' },
+    { label: 'Full', value: 'full' },
   ]
 
   const syncOptions = [
-    { label: 'Manual',    value: 'manual'   },
-    { label: '30 min',    value: '30min'    },
-    { label: '5 min',     value: '5min'     },
+    { label: 'Manual', value: 'manual' },
+    { label: '30 min', value: '30min' },
+    { label: '5 min', value: '5min' },
     { label: 'Real-time', value: 'realtime' },
   ]
 
   return (
     <div className="border-b overflow-hidden"
-         style={{ borderColor: C.border, backgroundColor: C.limeTint }}>
+      style={{ borderColor: C.border, backgroundColor: C.limeTint }}>
       <div className="px-5 py-5">
 
         {/* Header */}
@@ -712,7 +712,7 @@ function EditPanel({
               Editing: {plan.display_name ?? plan.tier}
             </p>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                  style={{ backgroundColor: C.limeTint, color: C.limeDeep, border: `1px solid ${C.lime}40` }}>
+              style={{ backgroundColor: C.limeTint, color: C.limeDeep, border: `1px solid ${C.lime}40` }}>
               -1 = Unlimited
             </span>
           </div>
@@ -725,7 +725,7 @@ function EditPanel({
 
         {error && (
           <div className="px-3 py-2 rounded-xl border mb-4"
-               style={{ backgroundColor: '#FEF2F2', borderColor: '#FECACA' }}>
+            style={{ backgroundColor: '#FEF2F2', borderColor: '#FECACA' }}>
             <p className="text-[12px] font-bold" style={{ color: C.red }}>{error}</p>
           </div>
         )}
@@ -734,23 +734,23 @@ function EditPanel({
 
           {/* Left — Numeric limits */}
           <div className="flex flex-col gap-3 p-4 rounded-2xl border bg-white"
-               style={{ borderColor: C.border }}>
+            style={{ borderColor: C.border }}>
             <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>
               NUMERIC LIMITS
             </p>
             <div className="grid grid-cols-2 gap-3">
-              <NumericInput label="Monthly Searches"    value={edit.max_monthly_searches}    onChange={v => updateEdit('max_monthly_searches',    v)} hint="Product searches/month"       />
-              <NumericInput label="VeRO Checks"         value={edit.max_vero_checks}         onChange={v => updateEdit('max_vero_checks',         v)} hint="VeRO scans/month"            />
-              <NumericInput label="Tracked Items"       value={edit.max_tracked_items}       onChange={v => updateEdit('max_tracked_items',       v)} hint="Items in watchlist"          />
-              <NumericInput label="Orders Protected"    value={edit.max_orders_protected}    onChange={v => updateEdit('max_orders_protected',    v)} hint="Orders cap/month"            />
-              <NumericInput label="eBay Stores"         value={edit.max_ebay_stores}         onChange={v => updateEdit('max_ebay_stores',         v)} hint="Connected stores"            />
-              <NumericInput label="Team Seats"          value={edit.max_team_seats}          onChange={v => updateEdit('max_team_seats',          v)} hint="-1 for unlimited"            />
-              <NumericInput label="Msg Templates"       value={edit.max_message_templates}   onChange={v => updateEdit('max_message_templates',   v)} hint="-1 for unlimited"            />
-              <NumericInput label="AI Optimize/day"     value={edit.max_ai_optimize}         onChange={v => updateEdit('max_ai_optimize',         v)} hint="Title AI uses per day"       />
-              <NumericInput label="Keyword Searches"    value={edit.max_keyword_searches}    onChange={v => updateEdit('max_keyword_searches',    v)} hint="Keyword searches/day"        />
-              <NumericInput label="Competitor Extract"  value={edit.max_competitor_extract}  onChange={v => updateEdit('max_competitor_extract',  v)} hint="Item ID extractions/day"     />
-              <NumericInput label="Trial Days"          value={edit.trial_days}              onChange={v => updateEdit('trial_days',              v)} hint="Free trial duration"         />
-              <NumericInput label="Grace Period Days"   value={edit.grace_period_days}       onChange={v => updateEdit('grace_period_days',       v)} hint="Days after expiry"           />
+              <NumericInput label="Monthly Searches" value={edit.max_monthly_searches} onChange={v => updateEdit('max_monthly_searches', v)} hint="Product searches/month" />
+              <NumericInput label="VeRO Checks" value={edit.max_vero_checks} onChange={v => updateEdit('max_vero_checks', v)} hint="VeRO scans/month" />
+              <NumericInput label="Tracked Items" value={edit.max_tracked_items} onChange={v => updateEdit('max_tracked_items', v)} hint="Items in watchlist" />
+              <NumericInput label="Orders Protected" value={edit.max_orders_protected} onChange={v => updateEdit('max_orders_protected', v)} hint="Orders cap/month" />
+              <NumericInput label="eBay Stores" value={edit.max_ebay_stores} onChange={v => updateEdit('max_ebay_stores', v)} hint="Connected stores" />
+              <NumericInput label="Team Seats" value={edit.max_team_seats} onChange={v => updateEdit('max_team_seats', v)} hint="-1 for unlimited" />
+              <NumericInput label="Msg Templates" value={edit.max_message_templates} onChange={v => updateEdit('max_message_templates', v)} hint="-1 for unlimited" />
+              <NumericInput label="AI Optimize/day" value={edit.max_ai_optimize} onChange={v => updateEdit('max_ai_optimize', v)} hint="Title AI uses per day" />
+              <NumericInput label="Keyword Searches" value={edit.max_keyword_searches} onChange={v => updateEdit('max_keyword_searches', v)} hint="Keyword searches/day" />
+              <NumericInput label="Competitor Extract" value={edit.max_competitor_extract} onChange={v => updateEdit('max_competitor_extract', v)} hint="Item ID extractions/day" />
+              <NumericInput label="Trial Days" value={edit.trial_days} onChange={v => updateEdit('trial_days', v)} hint="Free trial duration" />
+              <NumericInput label="Grace Period Days" value={edit.grace_period_days} onChange={v => updateEdit('grace_period_days', v)} hint="Days after expiry" />
             </div>
 
             {/* Orders Management tiered fields */}
@@ -758,10 +758,10 @@ function EditPanel({
               ORDERS MANAGEMENT TIERS
             </p>
             <div className="grid grid-cols-2 gap-3">
-              <CustomDropdown label="EVIDENCE PDF"    value={edit.has_evidence_pdf}    onChange={v => updateEdit('has_evidence_pdf',    v)} options={tierOptions} />
-              <CustomDropdown label="BUYER PROFILING" value={edit.has_buyer_profiling}  onChange={v => updateEdit('has_buyer_profiling',  v)} options={tierOptions} />
-              <CustomDropdown label="AUTO SYNC"       value={edit.has_auto_sync}        onChange={v => updateEdit('has_auto_sync',        v)} options={syncOptions} />
-              <CustomDropdown label="ANALYTICS"       value={edit.has_analytics}        onChange={v => updateEdit('has_analytics',        v)} options={tierOptions} />
+              <CustomDropdown label="EVIDENCE PDF" value={edit.has_evidence_pdf} onChange={v => updateEdit('has_evidence_pdf', v)} options={tierOptions} />
+              <CustomDropdown label="BUYER PROFILING" value={edit.has_buyer_profiling} onChange={v => updateEdit('has_buyer_profiling', v)} options={tierOptions} />
+              <CustomDropdown label="AUTO SYNC" value={edit.has_auto_sync} onChange={v => updateEdit('has_auto_sync', v)} options={syncOptions} />
+              <CustomDropdown label="ANALYTICS" value={edit.has_analytics} onChange={v => updateEdit('has_analytics', v)} options={tierOptions} />
             </div>
           </div>
 
@@ -770,7 +770,7 @@ function EditPanel({
 
             {/* Feature flags */}
             <div className="flex flex-col gap-2 p-4 rounded-2xl border bg-white"
-                 style={{ borderColor: C.border }}>
+              style={{ borderColor: C.border }}>
               <p className="text-[10px] font-black tracking-wider mb-1" style={{ color: C.muted }}>
                 FEATURE FLAGS
               </p>
@@ -784,7 +784,7 @@ function EditPanel({
                       <div className="flex items-center gap-2">
                         <Icon size={13} style={{ color: (edit[key] as boolean) ? C.limeDeep : C.muted }} />
                         <p className="text-[12px] font-semibold"
-                           style={{ color: (edit[key] as boolean) ? C.dark : C.muted }}>
+                          style={{ color: (edit[key] as boolean) ? C.dark : C.muted }}>
                           {label}
                         </p>
                       </div>
@@ -800,13 +800,13 @@ function EditPanel({
 
             {/* Pricing */}
             <div className="flex flex-col gap-3 p-4 rounded-2xl border bg-white"
-                 style={{ borderColor: C.border }}>
+              style={{ borderColor: C.border }}>
               <p className="text-[10px] font-black tracking-wider" style={{ color: C.muted }}>
                 PRICING
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <NumericInput label="Monthly ($)" value={edit.price_monthly} onChange={v => updateEdit('price_monthly', v)} />
-                <NumericInput label="Annual ($)"  value={edit.price_annual}  onChange={v => updateEdit('price_annual',  v)} />
+                <NumericInput label="Annual ($)" value={edit.price_annual} onChange={v => updateEdit('price_annual', v)} />
               </div>
             </div>
           </div>
@@ -834,22 +834,22 @@ function EditPanel({
 
 // ── Feature Gating Matrix ──────────────────────────────────────
 function GatingMatrix({
-    plans,
-    expandedId,
-    onToggleExpand,
-    onPlanUpdated,
-    showToast,
-    canEdit = true,
-    canActivate = true,
-  }: {
-    plans:          PlanLimit[]
-    expandedId:     string | null
-    onToggleExpand: (id: string) => void
-    onPlanUpdated:  (updated: PlanLimit) => void
-    showToast:      (msg: string, type: 'success' | 'error' | 'info') => void
-    canEdit?:       boolean
-    canActivate?:   boolean
-  }) {
+  plans,
+  expandedId,
+  onToggleExpand,
+  onPlanUpdated,
+  showToast,
+  canEdit = true,
+  canActivate = true,
+}: {
+  plans: PlanLimit[]
+  expandedId: string | null
+  onToggleExpand: (id: string) => void
+  onPlanUpdated: (updated: PlanLimit) => void
+  showToast: (msg: string, type: 'success' | 'error' | 'info') => void
+  canEdit?: boolean
+  canActivate?: boolean
+}) {
   const supabase = createClient()
   const [togglingActive, setTogglingActive] = useState<string | null>(null)
 
@@ -859,9 +859,9 @@ function GatingMatrix({
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/admin/plan-limits/update', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body:    JSON.stringify({ id: plan.id, is_active: !plan.is_active }),
+        body: JSON.stringify({ id: plan.id, is_active: !plan.is_active }),
       })
       const json = await res.json()
       if (res.ok) {
@@ -879,44 +879,44 @@ function GatingMatrix({
     <div className="rounded-2xl border overflow-hidden" style={{ borderColor: C.border, backgroundColor: C.surface }}>
       <div className="overflow-x-auto">
         <div style={{ minWidth: '1100px' }}>
-      {/* Header */}
-      <div className="grid px-4 py-2.5 border-b"
-           style={{
-             gridTemplateColumns: PLAN_GRID,
-             gap:         10,
-             borderColor: C.border,
-             backgroundColor: C.bg,
-           }}>
-        {PLAN_COLS.map((h, i) => (
-          <span key={i}
-            className={`text-[9px] font-black tracking-wider ${i === 0 ? 'text-left' : 'text-center'}`}
-            style={{ color: C.muted }}>
-            {h}
-          </span>
-        ))}
-      </div>
+          {/* Header */}
+          <div className="grid px-4 py-2.5 border-b"
+            style={{
+              gridTemplateColumns: PLAN_GRID,
+              gap: 10,
+              borderColor: C.border,
+              backgroundColor: C.bg,
+            }}>
+            {PLAN_COLS.map((h, i) => (
+              <span key={i}
+                className={`text-[9px] font-black tracking-wider ${i === 0 ? 'text-left' : 'text-center'}`}
+                style={{ color: C.muted }}>
+                {h}
+              </span>
+            ))}
+          </div>
 
-      {/* Plan rows */}
-      {plans.map(plan => (
-        <div key={plan.id}>
-          <PlanRow
-            plan={plan}
-              isExpanded={expandedId === plan.id}
-              onToggle={() => onToggleExpand(plan.id)}
-              onToggleActive={handleToggleActive}
-              canActivate={canActivate}
-            />
-          {expandedId === plan.id && (
-            <EditPanel
-              plan={plan}
-              onClose={() => onToggleExpand(plan.id)}
-              onSaved={onPlanUpdated}
-              showToast={showToast}
-              canEdit={canEdit}
-            />
-          )}
-        </div>
-      ))}
+          {/* Plan rows */}
+          {plans.map(plan => (
+            <div key={plan.id}>
+              <PlanRow
+                plan={plan}
+                isExpanded={expandedId === plan.id}
+                onToggle={() => onToggleExpand(plan.id)}
+                onToggleActive={handleToggleActive}
+                canActivate={canActivate}
+              />
+              {expandedId === plan.id && (
+                <EditPanel
+                  plan={plan}
+                  onClose={() => onToggleExpand(plan.id)}
+                  onSaved={onPlanUpdated}
+                  showToast={showToast}
+                  canEdit={canEdit}
+                />
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -930,12 +930,12 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
   const { can } = useTabPermissions('plan_limits')
   const supabase = createClient()
 
-  const [plans,      setPlans]      = useState<PlanLimit[]>([])
-  const [hudStats,   setHudStats]   = useState<HudStats>({ freeUsers: 0, premiumSubs: 0, gatingTunnels: 0, mrr: 0, starterCount: 0, growthCount: 0, customCount: 0 })
-  const [loading,    setLoading]    = useState(true)
+  const [plans, setPlans] = useState<PlanLimit[]>([])
+  const [hudStats, setHudStats] = useState<HudStats>({ freeUsers: 0, premiumSubs: 0, gatingTunnels: 0, mrr: 0, starterCount: 0, growthCount: 0, customCount: 0 })
+  const [loading, setLoading] = useState(true)
   const [showPricingEditor, setShowPricingEditor] = useState(false)
   const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [toast,      setToast]      = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null)
+  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null)
   const [refreshing, setRefreshing] = useState(false)
 
   function showToast(msg: string, type: 'success' | 'error' | 'info' = 'success') {
@@ -995,13 +995,13 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
       )
       setPlans(loadedPlans)
       setHudStats({
-        freeUsers:     freeCount    ?? 0,
-        premiumSubs:   (starterCount ?? 0) + (growthCount ?? 0) + (customCount ?? 0),
+        freeUsers: freeCount ?? 0,
+        premiumSubs: (starterCount ?? 0) + (growthCount ?? 0) + (customCount ?? 0),
         gatingTunnels: countGatingTunnels(loadedPlans),
         mrr,
-        starterCount:  starterCount ?? 0,
-        growthCount:   growthCount  ?? 0,
-        customCount:   customCount  ?? 0,
+        starterCount: starterCount ?? 0,
+        growthCount: growthCount ?? 0,
+        customCount: customCount ?? 0,
       })
     } catch (e) {
       console.error('[PlanLimitsTab] loadData error:', e)
@@ -1011,7 +1011,7 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
     setRefreshing(false)
   }, [supabase])
 
-  const [planHistory,    setPlanHistory]    = useState<any[]>([])
+  const [planHistory, setPlanHistory] = useState<any[]>([])
   const [historyLoading, setHistoryLoading] = useState(false)
   const [showAllHistory, setShowAllHistory] = useState(false)
 
@@ -1031,7 +1031,7 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
     setHistoryLoading(false)
   }, [supabase, showAllHistory])
 
-  useEffect(() => { loadData()    }, [loadData])
+  useEffect(() => { loadData() }, [loadData])
   useEffect(() => { loadHistory() }, [loadHistory])
 
   function handleToggleExpand(id: string) {
@@ -1091,12 +1091,12 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
       ])
     ]
 
-    const csv  = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n')
+    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n')
     const blob = new Blob([csv], { type: 'text/csv' })
-    const url  = URL.createObjectURL(blob)
-    const a    = document.createElement('a')
-    a.href     = url
-    a.download = `riazify-plans-${new Date().toISOString().slice(0,10)}.csv`
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `riazify-plans-${new Date().toISOString().slice(0, 10)}.csv`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -1157,42 +1157,42 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
       {/* ── Tool Plans content (hidden when AI Credits active) ────── */}
       {activeSubTab === 'tool_plans' && <>
 
-      {/* Page header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-[11px] font-black tracking-wider mb-0.5" style={{ color: C.muted }}>
-            FEATURE GATING MATRIX
-          </p>
-          <p className="text-[13px]" style={{ color: C.muted }}>
-            Click any plan row to edit its limits inline
-          </p>
+        {/* Page header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[11px] font-black tracking-wider mb-0.5" style={{ color: C.muted }}>
+              FEATURE GATING MATRIX
+            </p>
+            <p className="text-[13px]" style={{ color: C.muted }}>
+              Click any plan row to edit its limits inline
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            {can('edit_pricing') && <button onClick={() => setShowPricingEditor(true)}
+              className="flex items-center justify-center w-9 h-9 rounded-xl border hover:opacity-80"
+              style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}
+              title="Edit Landing Page Pricing">
+              <Layout size={13} />
+            </button>}
+            {can('export_plans') && <button onClick={exportPlansCSV}
+              className="flex items-center justify-center w-9 h-9 rounded-xl border hover:opacity-80"
+              style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}
+              title="Export plans as CSV">
+              <Download size={13} />
+            </button>}
+            <button onClick={handleRefresh} disabled={refreshing}
+              className="flex items-center gap-2 h-9 px-3 rounded-xl border text-[12px] font-bold hover:opacity-80 disabled:opacity-40"
+              style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
+              <RefreshCw size={13} style={{ animation: refreshing ? 'spin 0.8s linear infinite' : 'none' }} />
+              Refresh
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          {can('edit_pricing') && <button onClick={() => setShowPricingEditor(true)}
-            className="flex items-center justify-center w-9 h-9 rounded-xl border hover:opacity-80"
-            style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}
-            title="Edit Landing Page Pricing">
-            <Layout size={13} />
-          </button>}
-          {can('export_plans') && <button onClick={exportPlansCSV}
-            className="flex items-center justify-center w-9 h-9 rounded-xl border hover:opacity-80"
-            style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}
-            title="Export plans as CSV">
-            <Download size={13} />
-          </button>}
-          <button onClick={handleRefresh} disabled={refreshing}
-            className="flex items-center gap-2 h-9 px-3 rounded-xl border text-[12px] font-bold hover:opacity-80 disabled:opacity-40"
-            style={{ borderColor: C.border, backgroundColor: C.surface, color: C.muted }}>
-            <RefreshCw size={13} style={{ animation: refreshing ? 'spin 0.8s linear infinite' : 'none' }} />
-            Refresh
-          </button>
-        </div>
-      </div>
 
-      {/* HUD Cards */}
-      <HudCards stats={hudStats} loading={loading} />
+        {/* HUD Cards */}
+        <HudCards stats={hudStats} loading={loading} />
 
-      {/* Matrix */}
+        {/* Matrix */}
         {!can('view_limits') ? (
           <div className="flex flex-col items-center justify-center py-10 text-center rounded-2xl border" style={{ borderColor: C.border, backgroundColor: C.bg }}>
             <p className="text-[13px] font-bold" style={{ color: C.muted }}>You don't have access to view plan limits</p>
@@ -1205,7 +1205,7 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
           </div>
         ) : plans.length === 0 ? (
           <div className="flex flex-col items-center py-16 gap-3 rounded-2xl border"
-               style={{ borderColor: C.border, backgroundColor: C.surface }}>
+            style={{ borderColor: C.border, backgroundColor: C.surface }}>
             <AlertTriangle size={24} style={{ color: C.border }} />
             <p className="text-[14px] font-bold" style={{ color: C.text }}>No plan limits configured</p>
             <p className="text-[12px]" style={{ color: C.muted }}>Run the SQL migration to populate plan limits</p>
@@ -1223,139 +1223,139 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
         )}
 
         {can('view_history') && <>
-        {/* Plan Change History */}
-      <div className="rounded-2xl border overflow-hidden"
-           style={{ backgroundColor: C.surface, borderColor: C.border }}>
+          {/* Plan Change History */}
+          <div className="rounded-2xl border overflow-hidden"
+            style={{ backgroundColor: C.surface, borderColor: C.border }}>
 
-        {/* Header bar */}
-        <div className="flex items-center gap-2 px-4 py-2.5 border-b"
-             style={{ borderColor: C.border, backgroundColor: C.bg }}>
-          <RefreshCw size={13} style={{ color: C.muted }} />
-          <p className="text-[10px] font-black tracking-wider flex-1" style={{ color: C.muted }}>
-            PLAN CHANGE HISTORY
-          </p>
-          <button onClick={() => setShowAllHistory(p => !p)}
-            className="text-[10px] font-bold hover:opacity-70 px-2.5 py-1 rounded-lg border"
-            style={{ color: C.limeDeep, borderColor: `${C.limeDeep}33`, backgroundColor: C.limeTint }}>
-            {showAllHistory ? 'Show Less ↑' : 'View All →'}
-          </button>
-        </div>
+            {/* Header bar */}
+            <div className="flex items-center gap-2 px-4 py-2.5 border-b"
+              style={{ borderColor: C.border, backgroundColor: C.bg }}>
+              <RefreshCw size={13} style={{ color: C.muted }} />
+              <p className="text-[10px] font-black tracking-wider flex-1" style={{ color: C.muted }}>
+                PLAN CHANGE HISTORY
+              </p>
+              <button onClick={() => setShowAllHistory(p => !p)}
+                className="text-[10px] font-bold hover:opacity-70 px-2.5 py-1 rounded-lg border"
+                style={{ color: C.limeDeep, borderColor: `${C.limeDeep}33`, backgroundColor: C.limeTint }}>
+                {showAllHistory ? 'Show Less ↑' : 'View All →'}
+              </button>
+            </div>
 
-        {/* Table header */}
-        <div className="grid px-4 py-2 border-b"
-             style={{
-               gridTemplateColumns: '0.8fr 1.8fr 0.8fr 0.6fr 0.5fr',
-               gap: 12,
-               borderColor: C.border,
-               backgroundColor: C.bg,
-             }}>
-          {['PLAN', 'CHANGES', 'ADMIN', 'TIME', 'DATE'].map(h => (
-            <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
-          ))}
-        </div>
+            {/* Table header */}
+            <div className="grid px-4 py-2 border-b"
+              style={{
+                gridTemplateColumns: '0.8fr 1.8fr 0.8fr 0.6fr 0.5fr',
+                gap: 12,
+                borderColor: C.border,
+                backgroundColor: C.bg,
+              }}>
+              {['PLAN', 'CHANGES', 'ADMIN', 'TIME', 'DATE'].map(h => (
+                <span key={h} className="text-[9px] font-black tracking-wider" style={{ color: C.muted }}>{h}</span>
+              ))}
+            </div>
 
-        {/* Rows */}
-        {historyLoading ? (
-          <div className="flex flex-col gap-2 p-4">
-            {[0,1,2].map(i => (
-              <div key={i} className="h-10 rounded-xl animate-pulse" style={{ backgroundColor: C.bg }} />
-            ))}
-          </div>
-        ) : planHistory.length === 0 ? (
-          <div className="flex items-center justify-center py-10">
-            <p className="text-[12px]" style={{ color: C.muted }}>
-              No plan changes yet — edits will appear here
-            </p>
-          </div>
-        ) : (
-          planHistory.map((entry: any) => {
-            const changes   = entry.metadata?.changes ?? {}
-            const changeKeys = Object.keys(changes)
-            const planName  = entry.metadata?.plan_name ?? '—'
-            const adminName = entry.metadata?.admin_name ?? 'Admin'
-            const timeAgo = (() => {
-              const diff  = Date.now() - new Date(entry.created_at).getTime()
-              const mins  = Math.floor(diff / 60000)
-              const hours = Math.floor(diff / 3600000)
-              const days  = Math.floor(diff / 86400000)
-              if (mins  <  1) return 'Just now'
-              if (mins  < 60) return `${mins}m ago`
-              if (hours < 24) return `${hours}h ago`
-              return `${days}d ago`
-            })()
+            {/* Rows */}
+            {historyLoading ? (
+              <div className="flex flex-col gap-2 p-4">
+                {[0, 1, 2].map(i => (
+                  <div key={i} className="h-10 rounded-xl animate-pulse" style={{ backgroundColor: C.bg }} />
+                ))}
+              </div>
+            ) : planHistory.length === 0 ? (
+              <div className="flex items-center justify-center py-10">
+                <p className="text-[12px]" style={{ color: C.muted }}>
+                  No plan changes yet — edits will appear here
+                </p>
+              </div>
+            ) : (
+              planHistory.map((entry: any) => {
+                const changes = entry.metadata?.changes ?? {}
+                const changeKeys = Object.keys(changes)
+                const planName = entry.metadata?.plan_name ?? '—'
+                const adminName = entry.metadata?.admin_name ?? 'Admin'
+                const timeAgo = (() => {
+                  const diff = Date.now() - new Date(entry.created_at).getTime()
+                  const mins = Math.floor(diff / 60000)
+                  const hours = Math.floor(diff / 3600000)
+                  const days = Math.floor(diff / 86400000)
+                  if (mins < 1) return 'Just now'
+                  if (mins < 60) return `${mins}m ago`
+                  if (hours < 24) return `${hours}h ago`
+                  return `${days}d ago`
+                })()
 
-            const planColorMap: Record<string, { color: string; bg: string }> = {
-              Free:    { color: C.muted,    bg: C.bg                    },
-              Starter: { color: C.blue,     bg: 'rgba(29,78,216,0.08)' },
-              Growth:  { color: C.limeDeep, bg: C.limeTint              },
-              Custom:  { color: C.amber,    bg: 'rgba(217,119,6,0.08)' },
-            }
-            const planColor = planColorMap[planName] ?? { color: C.text, bg: C.bg }
+                const planColorMap: Record<string, { color: string; bg: string }> = {
+                  Free: { color: C.muted, bg: C.bg },
+                  Starter: { color: C.blue, bg: 'rgba(29,78,216,0.08)' },
+                  Growth: { color: C.limeDeep, bg: C.limeTint },
+                  Custom: { color: C.amber, bg: 'rgba(217,119,6,0.08)' },
+                }
+                const planColor = planColorMap[planName] ?? { color: C.text, bg: C.bg }
 
             return (
               <div key={entry.id}
                    className="grid items-start px-4 py-3 border-b last:border-b-0 hover:bg-[#f8f7ff] transition-colors"
                    style={{ gridTemplateColumns: '0.8fr 1.8fr 0.8fr 0.6fr 0.5fr', gap: 12, borderColor: C.border }}>
 
-                {/* PLAN */}
-                <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-black px-2 py-0.5 rounded-lg"
+                    {/* PLAN */}
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] font-black px-2 py-0.5 rounded-lg"
                         style={{ backgroundColor: planColor.bg, color: planColor.color }}>
-                    {planName}
-                  </span>
-                  {entry.action === 'update_pricing' && (
-                    <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full w-fit"
+                        {planName}
+                      </span>
+                      {entry.action === 'update_pricing' && (
+                        <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full w-fit"
                           style={{ backgroundColor: 'rgba(29,78,216,0.08)', color: C.blue }}>
-                      PRICING PAGE
-                    </span>
-                  )}
-                </div>
+                          PRICING PAGE
+                        </span>
+                      )}
+                    </div>
 
-                {/* CHANGES */}
-                <div className="flex flex-col gap-0.5">
-                  {changeKeys.length === 0 ? (
-                    <p className="text-[10px]" style={{ color: C.muted }}>—</p>
-                  ) : changeKeys.slice(0, 3).map(key => {
-                    const from  = changes[key].from
-                    const to    = changes[key].to
-                    const label = key.replace(/_/g, ' ').replace('max ', '').replace('has ', '')
-                    const fmt   = (v: any) => typeof v === 'boolean' ? (v ? 'ON' : 'OFF') : v === -1 ? '∞' : String(v ?? '—')
-                    return (
-                      <div key={key} className="flex items-center gap-1">
-                        <p className="text-[9px] font-black uppercase truncate" style={{ color: C.muted }}>{label}:</p>
-                        <span className="text-[9px] font-bold" style={{ color: C.red }}>{fmt(from)}</span>
-                        <span className="text-[9px]" style={{ color: C.muted }}>→</span>
-                        <span className="text-[9px] font-bold" style={{ color: C.limeDeep }}>{fmt(to)}</span>
-                      </div>
-                    )
-                  })}
-                  {changeKeys.length > 3 && (
-                    <p className="text-[9px]" style={{ color: C.muted }}>+{changeKeys.length - 3} more</p>
-                  )}
-                </div>
+                    {/* CHANGES */}
+                    <div className="flex flex-col gap-0.5">
+                      {changeKeys.length === 0 ? (
+                        <p className="text-[10px]" style={{ color: C.muted }}>—</p>
+                      ) : changeKeys.slice(0, 3).map(key => {
+                        const from = changes[key].from
+                        const to = changes[key].to
+                        const label = key.replace(/_/g, ' ').replace('max ', '').replace('has ', '')
+                        const fmt = (v: any) => typeof v === 'boolean' ? (v ? 'ON' : 'OFF') : v === -1 ? '∞' : String(v ?? '—')
+                        return (
+                          <div key={key} className="flex items-center gap-1">
+                            <p className="text-[9px] font-black uppercase truncate" style={{ color: C.muted }}>{label}:</p>
+                            <span className="text-[9px] font-bold" style={{ color: C.red }}>{fmt(from)}</span>
+                            <span className="text-[9px]" style={{ color: C.muted }}>→</span>
+                            <span className="text-[9px] font-bold" style={{ color: C.limeDeep }}>{fmt(to)}</span>
+                          </div>
+                        )
+                      })}
+                      {changeKeys.length > 3 && (
+                        <p className="text-[9px]" style={{ color: C.muted }}>+{changeKeys.length - 3} more</p>
+                      )}
+                    </div>
 
-                {/* ADMIN */}
-                <p className="text-[11px] font-semibold" style={{ color: C.text }}>{adminName}</p>
+                    {/* ADMIN */}
+                    <p className="text-[11px] font-semibold" style={{ color: C.text }}>{adminName}</p>
 
-                {/* TIME */}
-                <p className="text-[11px]" style={{ color: C.muted }}>{timeAgo}</p>
+                    {/* TIME */}
+                    <p className="text-[11px]" style={{ color: C.muted }}>{timeAgo}</p>
 
-                {/* DATE */}
-                  <p className="text-[10px]" style={{ color: C.muted }}>
-                    {new Date(entry.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
-                  </p>
+                    {/* DATE */}
+                    <p className="text-[10px]" style={{ color: C.muted }}>
+                      {new Date(entry.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                    </p>
 
-                </div>
-              )
-            })
-          )}
-        </div>
+                  </div>
+                )
+              })
+            )}
+          </div>
         </>}
 
         {/* Pricing Editor Modal */}
         {showPricingEditor && (
-        <PricingEditorModal onClose={() => setShowPricingEditor(false)} />
-      )}
+          <PricingEditorModal onClose={() => setShowPricingEditor(false)} />
+        )}
 
       </> /* end activeSubTab === 'tool_plans' */}
 
@@ -1398,20 +1398,20 @@ function AiCreditsPanel({
   supabase: ReturnType<typeof createClient>
   showToast: (msg: string, type?: 'success' | 'error' | 'info') => void
 }) {
-  const [packages,    setPackages]    = useState<AiPackage[]>([])
-  const [costs,       setCosts]       = useState<AiActionCost[]>([])
-  const [loading,     setLoading]     = useState(true)
-  const [editingPkg,  setEditingPkg]  = useState<string | null>(null)
+  const [packages, setPackages] = useState<AiPackage[]>([])
+  const [costs, setCosts] = useState<AiActionCost[]>([])
+  const [loading, setLoading] = useState(true)
+  const [editingPkg, setEditingPkg] = useState<string | null>(null)
   const [editingCost, setEditingCost] = useState<string | null>(null)
-  const [pkgEdits,    setPkgEdits]    = useState<Partial<AiPackage>>({})
-  const [costEdits,   setCostEdits]   = useState<Partial<AiActionCost>>({})
-  const [saving,      setSaving]      = useState(false)
+  const [pkgEdits, setPkgEdits] = useState<Partial<AiPackage>>({})
+  const [costEdits, setCostEdits] = useState<Partial<AiActionCost>>({})
+  const [saving, setSaving] = useState(false)
 
   // Gift credits
-  const [giftEmail,   setGiftEmail]   = useState('')
-  const [giftAmount,  setGiftAmount]  = useState('')
-  const [giftNote,    setGiftNote]    = useState('')
-  const [gifting,     setGifting]     = useState(false)
+  const [giftEmail, setGiftEmail] = useState('')
+  const [giftAmount, setGiftAmount] = useState('')
+  const [giftNote, setGiftNote] = useState('')
+  const [gifting, setGifting] = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -1558,46 +1558,46 @@ function AiCreditsPanel({
                     <td style={cell}>
                       {isEditing
                         ? <input style={input} value={pkgEdits.name ?? pkg.name}
-                            onChange={e => setPkgEdits(p => ({ ...p, name: e.target.value }))} />
+                          onChange={e => setPkgEdits(p => ({ ...p, name: e.target.value }))} />
                         : <strong>{pkg.name}</strong>}
                     </td>
                     <td style={cell}>
                       {isEditing
                         ? <input style={input} value={pkgEdits.description ?? pkg.description ?? ''}
-                            onChange={e => setPkgEdits(p => ({ ...p, description: e.target.value }))} />
+                          onChange={e => setPkgEdits(p => ({ ...p, description: e.target.value }))} />
                         : <span style={{ color: C.muted }}>{pkg.description ?? '—'}</span>}
                     </td>
                     <td style={cell}>
                       {isEditing
                         ? <input style={{ ...input, width: 80 }} type="number" step="0.01"
-                            value={pkgEdits.price_usd ?? pkg.price_usd}
-                            onChange={e => setPkgEdits(p => ({ ...p, price_usd: parseFloat(e.target.value) }))} />
+                          value={pkgEdits.price_usd ?? pkg.price_usd}
+                          onChange={e => setPkgEdits(p => ({ ...p, price_usd: parseFloat(e.target.value) }))} />
                         : `$${pkg.price_usd.toFixed(2)}`}
                     </td>
                     <td style={cell}>
                       {isEditing
                         ? <input style={{ ...input, width: 70 }} type="number"
-                            value={pkgEdits.credits ?? pkg.credits}
-                            onChange={e => setPkgEdits(p => ({ ...p, credits: parseInt(e.target.value, 10) }))} />
+                          value={pkgEdits.credits ?? pkg.credits}
+                          onChange={e => setPkgEdits(p => ({ ...p, credits: parseInt(e.target.value, 10) }))} />
                         : pkg.credits.toLocaleString()}
                     </td>
                     <td style={cell}>
                       {isEditing
                         ? <input style={{ ...input, width: 70 }} type="number"
-                            value={pkgEdits.bonus_credits ?? pkg.bonus_credits}
-                            onChange={e => setPkgEdits(p => ({ ...p, bonus_credits: parseInt(e.target.value, 10) }))} />
+                          value={pkgEdits.bonus_credits ?? pkg.bonus_credits}
+                          onChange={e => setPkgEdits(p => ({ ...p, bonus_credits: parseInt(e.target.value, 10) }))} />
                         : (pkg.bonus_credits > 0
-                            ? <span style={{ color: '#10b981', fontWeight: 600 }}>+{pkg.bonus_credits}</span>
-                            : <span style={{ color: C.muted }}>0</span>)}
+                          ? <span style={{ color: '#10b981', fontWeight: 600 }}>+{pkg.bonus_credits}</span>
+                          : <span style={{ color: C.muted }}>0</span>)}
                     </td>
                     <td style={cell}>
                       {isEditing
                         ? <input type="checkbox"
-                            checked={pkgEdits.is_active ?? pkg.is_active}
-                            onChange={e => setPkgEdits(p => ({ ...p, is_active: e.target.checked }))} />
+                          checked={pkgEdits.is_active ?? pkg.is_active}
+                          onChange={e => setPkgEdits(p => ({ ...p, is_active: e.target.checked }))} />
                         : (pkg.is_active
-                            ? <Check size={14} color="#10b981" />
-                            : <X size={14} color="#ef4444" />)}
+                          ? <Check size={14} color="#10b981" />
+                          : <X size={14} color="#ef4444" />)}
                     </td>
                     <td style={{ ...cell, whiteSpace: 'nowrap' as const }}>
                       {isEditing ? (
@@ -1655,7 +1655,7 @@ function AiCreditsPanel({
                     <td style={{ ...cell, fontWeight: 600 }}>
                       {isEditing
                         ? <input style={input} value={costEdits.name ?? cost.name}
-                            onChange={e => setCostEdits(p => ({ ...p, name: e.target.value }))} />
+                          onChange={e => setCostEdits(p => ({ ...p, name: e.target.value }))} />
                         : cost.name}
                     </td>
                     <td style={cell}>
@@ -1666,24 +1666,24 @@ function AiCreditsPanel({
                     <td style={cell}>
                       {isEditing
                         ? <input style={{ ...input, width: 70 }} type="number"
-                            value={costEdits.credits_cost ?? cost.credits_cost}
-                            onChange={e => setCostEdits(p => ({ ...p, credits_cost: parseInt(e.target.value, 10) }))} />
+                          value={costEdits.credits_cost ?? cost.credits_cost}
+                          onChange={e => setCostEdits(p => ({ ...p, credits_cost: parseInt(e.target.value, 10) }))} />
                         : <span style={{ fontWeight: 700, color: '#6366f1' }}>{cost.credits_cost}</span>}
                     </td>
                     <td style={cell}>
                       {isEditing
                         ? <input style={input} value={costEdits.description ?? cost.description ?? ''}
-                            onChange={e => setCostEdits(p => ({ ...p, description: e.target.value }))} />
+                          onChange={e => setCostEdits(p => ({ ...p, description: e.target.value }))} />
                         : <span style={{ color: C.muted, fontSize: 11 }}>{cost.description ?? '—'}</span>}
                     </td>
                     <td style={cell}>
                       {isEditing
                         ? <input type="checkbox"
-                            checked={costEdits.is_enabled ?? cost.is_enabled}
-                            onChange={e => setCostEdits(p => ({ ...p, is_enabled: e.target.checked }))} />
+                          checked={costEdits.is_enabled ?? cost.is_enabled}
+                          onChange={e => setCostEdits(p => ({ ...p, is_enabled: e.target.checked }))} />
                         : (cost.is_enabled
-                            ? <Check size={14} color="#10b981" />
-                            : <span style={{ fontSize: 11, color: '#ef4444', fontWeight: 600 }}>OFF</span>)}
+                          ? <Check size={14} color="#10b981" />
+                          : <span style={{ fontSize: 11, color: '#ef4444', fontWeight: 600 }}>OFF</span>)}
                     </td>
                     <td style={{ ...cell, whiteSpace: 'nowrap' as const }}>
                       {isEditing ? (

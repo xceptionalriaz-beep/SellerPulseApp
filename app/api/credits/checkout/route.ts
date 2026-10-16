@@ -109,17 +109,17 @@ export async function POST(req: NextRequest) {
             line_items: [lineItem],
             customer_email: user.email,
             success_url: `${origin}/credits/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url:  `${origin}/credits/cancelled`,
+            cancel_url: `${origin}/credits/cancelled`,
             metadata: {
-                user_id:       user.id,
-                package_id:    pkg.id,
-                credits:       String(pkg.credits),
+                user_id: user.id,
+                package_id: pkg.id,
+                credits: String(pkg.credits),
                 bonus_credits: String(pkg.bonus_credits),
                 total_credits: String(totalCredits),
             },
             payment_intent_data: {
                 metadata: {
-                    user_id:    user.id,
+                    user_id: user.id,
                     package_id: pkg.id,
                 },
             },

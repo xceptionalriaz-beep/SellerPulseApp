@@ -96,11 +96,11 @@ export async function deductCredits(
 
     // Atomic deduction via RPC
     const { data: result, error: rpcError } = await supabaseAdmin.rpc('deduct_ai_credits', {
-        p_user_id:     userId,
+        p_user_id: userId,
         p_feature_key: featureKey,
-        p_cost:        cost,
-        p_note:        action.name,
-        p_reference:   referenceId ?? null,
+        p_cost: cost,
+        p_note: action.name,
+        p_reference: referenceId ?? null,
     })
 
     if (rpcError) {

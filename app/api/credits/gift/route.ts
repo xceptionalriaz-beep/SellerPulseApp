@@ -106,11 +106,11 @@ export async function POST(req: NextRequest) {
     const { error: ledgerErr } = await supabaseAdmin
         .from('ai_credit_ledger')
         .insert({
-            user_id:       target_user_id,
-            type:          'bonus',
-            amount:        amount,
+            user_id: target_user_id,
+            type: 'bonus',
+            amount: amount,
             balance_after: newBalance,
-            note:          `${note} (gifted by admin ${caller.id})`,
+            note: `${note} (gifted by admin ${caller.id})`,
         })
 
     if (ledgerErr) {

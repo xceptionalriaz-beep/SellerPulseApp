@@ -115,11 +115,11 @@ export async function POST(req: NextRequest) {
     const { data: result, error: rpcError } = await supabaseAdmin.rpc(
         'deduct_ai_credits',
         {
-            p_user_id:     userId,
+            p_user_id: userId,
             p_feature_key: feature_key,
-            p_cost:        cost,
-            p_note:        action.name,
-            p_reference:   reference_id ?? null,
+            p_cost: cost,
+            p_note: action.name,
+            p_reference: reference_id ?? null,
         }
     )
 
