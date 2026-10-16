@@ -846,10 +846,9 @@ function BlockCard({
             )}
 
             {/* ── Block preview content ── */}
-            {/* Desktop: full-width inner wrapper so 700px iframe fills the stage */}
-            {/* Tablet/Mobile: centred constrained wrapper with device framing    */}
+            {/* All device modes: full-width, same spacing as desktop, scaled proportionally */}
             <div style={{
-                padding: deviceWidth === 'desktop' ? '0' : '16px 0',
+                padding: '0',
                 display: 'flex',
                 justifyContent: 'center',
                 pointerEvents: 'auto',
@@ -858,15 +857,12 @@ function BlockCard({
                 <div
                     ref={el => {
                         if (!el) return
-                        // Scale proportionally so content stretches 100% from left to right with 0px gap
+                        // Scale proportionally for all device widths so content always fills the stage
+                        const targetWidth = deviceWidth === 'tablet' ? 768 : deviceWidth === 'mobile' ? 375 : 1000
                         const recalcScale = () => {
-                            if (deviceWidth === 'desktop') {
-                                const w = el.getBoundingClientRect().width
-                                const scale = w > 0 ? (w / 1000) : 1
-                                el.style.setProperty('--canvas-scale', String(scale))
-                            } else {
-                                el.style.setProperty('--canvas-scale', '1')
-                            }
+                            const w = el.getBoundingClientRect().width
+                            const scale = w > 0 ? (w / targetWidth) : 1
+                            el.style.setProperty('--canvas-scale', String(scale))
                         }
                         recalcScale()
                         const ro = new ResizeObserver(recalcScale)
@@ -875,11 +871,11 @@ function BlockCard({
                             ; (el as any).__ro = ro
                     }}
                     style={{
-                        width: deviceWidth === 'desktop' ? '100%' : deviceWidth === 'tablet' ? '768px' : '375px',
+                        width: '100%',
                         overflow: 'hidden',
-                        borderRadius: deviceWidth === 'desktop' ? 0 : 8,
-                        boxShadow: deviceWidth === 'desktop' ? 'none' : '0 4px 24px rgba(0,0,0,0.18)',
-                        border: deviceWidth === 'desktop' ? 'none' : '1px solid rgba(0,0,0,0.10)',
+                        borderRadius: 0,
+                        boxShadow: 'none',
+                        border: 'none',
                     }}
                 >
                     <BlockPreview block={block} def={def} activeCategory={activeCategory} deviceWidth={deviceWidth} />
