@@ -79,6 +79,10 @@ interface ListingTemplate {
     use_count: number | null
     created_at: string | null
     updated_at: string | null
+    tags: string[] | null
+    sort_order: number | null
+    is_featured: boolean | null
+    is_new_badge: boolean | null
 }
 
 // ── Category definitions ─────────────────────────────────────────────────────
@@ -86,41 +90,41 @@ interface ListingTemplate {
 // direct. Filter logic also supports old Design-Studio slugs for backwards compat.
 import type { LucideIcon } from 'lucide-react'
 const CATEGORIES: { id: string; label: string; Icon: LucideIcon }[] = [
-    { id: 'all',                  label: 'All Templates',         Icon: LayoutGrid  },
-    { id: 'consumer_electronics', label: 'Consumer Electronics',  Icon: Smartphone  },
-    { id: 'computers',            label: 'Computers & Tablets',   Icon: Monitor     },
-    { id: 'clothing',             label: 'Clothing & Accessories',Icon: Shirt       },
-    { id: 'jewelry',              label: 'Jewellery & Watches',   Icon: Gem         },
-    { id: 'health_beauty',        label: 'Health & Beauty',       Icon: Heart       },
-    { id: 'home_garden',          label: 'Home & Garden',         Icon: Home        },
-    { id: 'furniture',            label: 'Furniture',             Icon: Sofa        },
-    { id: 'toys_hobbies',         label: 'Toys & Hobbies',        Icon: Gamepad2    },
-    { id: 'sporting_goods',       label: 'Sporting Goods',        Icon: Dumbbell    },
-    { id: 'collectibles',         label: 'Collectibles & Art',    Icon: Archive     },
-    { id: 'books_movies',         label: 'Books & Media',         Icon: BookOpen    },
-    { id: 'pet_supplies',         label: 'Pet Supplies',          Icon: PawPrint    },
-    { id: 'motors_parts',         label: 'Motors & Parts',        Icon: Car         },
-    { id: 'business',             label: 'Business & Industrial', Icon: Briefcase   },
-    { id: 'general',              label: 'General / Other',       Icon: Tag         },
+    { id: 'all', label: 'All Templates', Icon: LayoutGrid },
+    { id: 'consumer_electronics', label: 'Consumer Electronics', Icon: Smartphone },
+    { id: 'computers', label: 'Computers & Tablets', Icon: Monitor },
+    { id: 'clothing', label: 'Clothing & Accessories', Icon: Shirt },
+    { id: 'jewelry', label: 'Jewellery & Watches', Icon: Gem },
+    { id: 'health_beauty', label: 'Health & Beauty', Icon: Heart },
+    { id: 'home_garden', label: 'Home & Garden', Icon: Home },
+    { id: 'furniture', label: 'Furniture', Icon: Sofa },
+    { id: 'toys_hobbies', label: 'Toys & Hobbies', Icon: Gamepad2 },
+    { id: 'sporting_goods', label: 'Sporting Goods', Icon: Dumbbell },
+    { id: 'collectibles', label: 'Collectibles & Art', Icon: Archive },
+    { id: 'books_movies', label: 'Books & Media', Icon: BookOpen },
+    { id: 'pet_supplies', label: 'Pet Supplies', Icon: PawPrint },
+    { id: 'motors_parts', label: 'Motors & Parts', Icon: Car },
+    { id: 'business', label: 'Business & Industrial', Icon: Briefcase },
+    { id: 'general', label: 'General / Other', Icon: Tag },
 ]
 
 // Maps new listing-category IDs → old Design-Studio slugs (backwards compat)
 const LEGACY_SLUGS: Record<string, string[]> = {
     consumer_electronics: ['electronics'],
-    computers:            ['electronics', 'computers'],
-    clothing:             ['fashion', 'clothing'],
-    jewelry:              ['fashion', 'jewelry', 'jewellery'],
-    health_beauty:        ['fashion', 'health_beauty', 'health'],
-    home_garden:          ['home', 'home_garden'],
-    furniture:            ['home', 'furniture'],
-    toys_hobbies:         ['toys', 'toys_hobbies'],
-    sporting_goods:       ['sports', 'sporting_goods'],
-    pet_supplies:         ['pets', 'pet_supplies'],
-    motors_parts:         ['auto', 'motors_parts'],
-    books_movies:         ['general', 'books_movies'],
-    collectibles:         ['general', 'collectibles'],
-    business:             ['general', 'business'],
-    general:              ['general'],
+    computers: ['electronics', 'computers'],
+    clothing: ['fashion', 'clothing'],
+    jewelry: ['fashion', 'jewelry', 'jewellery'],
+    health_beauty: ['fashion', 'health_beauty', 'health'],
+    home_garden: ['home', 'home_garden'],
+    furniture: ['home', 'furniture'],
+    toys_hobbies: ['toys', 'toys_hobbies'],
+    sporting_goods: ['sports', 'sporting_goods'],
+    pet_supplies: ['pets', 'pet_supplies'],
+    motors_parts: ['auto', 'motors_parts'],
+    books_movies: ['general', 'books_movies'],
+    collectibles: ['general', 'collectibles'],
+    business: ['general', 'business'],
+    general: ['general'],
 }
 
 function matchesCategoryFilter(templateCat: string | null, filterId: string): boolean {
@@ -213,28 +217,28 @@ function CategoryBadge({ category }: { category: string | null }) {
     const map: Record<string, { bg: string; text: string }> = {
         // ── New category IDs ───────────────────────────────────────────
         consumer_electronics: { bg: '#dbeafe', text: '#1d4ed8' },
-        computers:            { bg: '#dbeafe', text: '#1d4ed8' },
-        clothing:             { bg: '#fce7f3', text: '#be185d' },
-        jewelry:              { bg: '#fce7f3', text: '#be185d' },
-        health_beauty:        { bg: '#fce7f3', text: '#be185d' },
-        home_garden:          { bg: '#dcfce7', text: '#15803d' },
-        furniture:            { bg: '#dcfce7', text: '#15803d' },
-        motors_parts:         { bg: '#fef3c7', text: '#b45309' },
-        pet_supplies:         { bg: '#f3e8ff', text: '#7e22ce' },
-        sporting_goods:       { bg: '#e0f2fe', text: '#0369a1' },
-        toys_hobbies:         { bg: '#fef9c3', text: '#a16207' },
-        collectibles:         { bg: '#f1f5f9', text: '#475569' },
-        books_movies:         { bg: '#f1f5f9', text: '#475569' },
-        business:             { bg: '#f1f5f9', text: '#475569' },
-        general:              { bg: '#f1f5f9', text: '#475569' },
+        computers: { bg: '#dbeafe', text: '#1d4ed8' },
+        clothing: { bg: '#fce7f3', text: '#be185d' },
+        jewelry: { bg: '#fce7f3', text: '#be185d' },
+        health_beauty: { bg: '#fce7f3', text: '#be185d' },
+        home_garden: { bg: '#dcfce7', text: '#15803d' },
+        furniture: { bg: '#dcfce7', text: '#15803d' },
+        motors_parts: { bg: '#fef3c7', text: '#b45309' },
+        pet_supplies: { bg: '#f3e8ff', text: '#7e22ce' },
+        sporting_goods: { bg: '#e0f2fe', text: '#0369a1' },
+        toys_hobbies: { bg: '#fef9c3', text: '#a16207' },
+        collectibles: { bg: '#f1f5f9', text: '#475569' },
+        books_movies: { bg: '#f1f5f9', text: '#475569' },
+        business: { bg: '#f1f5f9', text: '#475569' },
+        general: { bg: '#f1f5f9', text: '#475569' },
         // ── Legacy slugs (backwards compat) ───────────────────────────
-        electronics:          { bg: '#dbeafe', text: '#1d4ed8' },
-        fashion:              { bg: '#fce7f3', text: '#be185d' },
-        home:                 { bg: '#dcfce7', text: '#15803d' },
-        auto:                 { bg: '#fef3c7', text: '#b45309' },
-        pet:                  { bg: '#f3e8ff', text: '#7e22ce' },
-        sports:               { bg: '#e0f2fe', text: '#0369a1' },
-        toys:                 { bg: '#fef9c3', text: '#a16207' },
+        electronics: { bg: '#dbeafe', text: '#1d4ed8' },
+        fashion: { bg: '#fce7f3', text: '#be185d' },
+        home: { bg: '#dcfce7', text: '#15803d' },
+        auto: { bg: '#fef3c7', text: '#b45309' },
+        pet: { bg: '#f3e8ff', text: '#7e22ce' },
+        sports: { bg: '#e0f2fe', text: '#0369a1' },
+        toys: { bg: '#fef9c3', text: '#a16207' },
     }
     const cat = (category || 'general').toLowerCase()
     const style = map[cat] || map.general
@@ -297,9 +301,9 @@ function DesignStudioInner() {
             // System templates
             const { data: sys } = await rawDb
                 .from('listing_templates')
-                .select('id, user_id, name, description, category, description_html, is_system, is_shared, thumbnail_url, use_count, created_at, updated_at')
+                .select('id, user_id, name, description, category, description_html, is_system, is_shared, thumbnail_url, use_count, created_at, updated_at, tags, sort_order, is_featured, is_new_badge')
                 .eq('is_system', true)
-                .order('use_count', { ascending: false })
+                .order('sort_order', { ascending: true })
 
             // User's own templates — from visual_templates (where Visual Builder saves)
             // Must use the typed supabase client (not rawDb) — visual_templates RLS needs auth.uid()
@@ -328,6 +332,10 @@ function DesignStudioInner() {
                         use_count: 0,
                         created_at: vt.updated_at,
                         updated_at: vt.updated_at,
+                        tags: null,
+                        sort_order: null,
+                        is_featured: null,
+                        is_new_badge: null,
                     }
                 })
             }
@@ -352,15 +360,20 @@ function DesignStudioInner() {
     const filtered = allVisible.filter(t => {
         const matchCat = activeCategory === 'all' || matchesCategoryFilter(t.category, activeCategory)
         const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase()) ||
-            (t.description || '').toLowerCase().includes(search.toLowerCase())
+            (t.description || '').toLowerCase().includes(search.toLowerCase()) ||
+            (t.tags || []).some(tag => tag.toLowerCase().includes(search.toLowerCase()))
         return matchCat && matchSearch
     })
-    // System templates only — sorted
+    // System templates only — sorted: sort_order primary, then popular/newest secondary
     const sortedTemplates = templates.filter(t => {
         const matchCat = activeCategory === 'all' || matchesCategoryFilter(t.category, activeCategory)
-        const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase())
+        const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase()) ||
+            (t.tags || []).some(tag => tag.toLowerCase().includes(search.toLowerCase()))
         return matchCat && matchSearch
     }).sort((a, b) => {
+        const oa = a.sort_order ?? 9999
+        const ob = b.sort_order ?? 9999
+        if (oa !== ob) return oa - ob
         if (sort === 'popular') return (b.use_count || 0) - (a.use_count || 0)
         return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
     })
@@ -653,10 +666,10 @@ function DesignStudioInner() {
                                         {CATEGORIES.filter(cat =>
                                             !catSearch || cat.label.toLowerCase().includes(catSearch.toLowerCase())
                                         ).length === 0 && (
-                                            <p style={{ textAlign: 'center', fontSize: 12, color: C.muted, padding: '12px 0', fontFamily: 'DM Sans, sans-serif' }}>
-                                                No categories found
-                                            </p>
-                                        )}
+                                                <p style={{ textAlign: 'center', fontSize: 12, color: C.muted, padding: '12px 0', fontFamily: 'DM Sans, sans-serif' }}>
+                                                    No categories found
+                                                </p>
+                                            )}
                                     </div>
                                 </div>
                             </>
@@ -943,11 +956,16 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy
     const [hovered, setHovered] = useState(false)
     const copied = copiedId === template.id
     const deleting = deletingId === template.id
+    const isFeaturedCard = !!template.is_featured
 
     const badge = (() => {
         if (!template.is_system) return null
+        // Admin-controlled badges take priority over auto-computed ones
+        if (template.is_featured) return { label: 'FEATURED', bg: '#fef3c7', text: '#92400e' }
+        if (template.is_new_badge) return { label: 'NEW', bg: '#16a34a', text: '#fff' }
+        // Auto-computed badges
         if ((template.use_count || 0) > 10) return { label: 'POPULAR', bg: '#b8fa33', text: '#1e1535' }
-        // Only show NEW for templates created within 30 days
+        // Only show auto-NEW for templates created within 30 days
         const createdAt = template.created_at ? new Date(template.created_at).getTime() : 0
         const isNew = createdAt > 0 && (Date.now() - createdAt) < 30 * 24 * 60 * 60 * 1000
         if (isNew) return { label: 'NEW', bg: '#16a34a', text: '#fff' }
@@ -960,9 +978,13 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy
             onMouseLeave={() => setHovered(false)}
             className="rounded-2xl overflow-hidden flex flex-col"
             style={{
-                border: `2px solid ${hovered ? C.primary : C.border}`,
+                border: `2px solid ${hovered ? C.primary : isFeaturedCard ? '#f59e0b' : C.border}`,
                 backgroundColor: C.surface,
-                boxShadow: hovered ? '0 8px 32px rgba(117,48,251,0.18)' : '0 1px 4px rgba(117,48,251,0.05)',
+                boxShadow: hovered
+                    ? '0 8px 32px rgba(117,48,251,0.18)'
+                    : isFeaturedCard
+                        ? '0 2px 12px rgba(245,158,11,0.15)'
+                        : '0 1px 4px rgba(117,48,251,0.05)',
                 transition: 'all 0.2s ease',
             }}
         >
@@ -1022,8 +1044,22 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy
                     <p className="text-[12px] font-bold truncate" style={{ color: C.dark, fontFamily: 'DM Sans, sans-serif' }}>
                         {template.name}
                     </p>
-                    <div className="flex items-center gap-1.5 mt-0.5">
+                    <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                         <CategoryBadge category={template.category} />
+                        {template.tags && template.tags.length > 0 && template.tags.slice(0, 3).map(tag => (
+                            <span key={tag} style={{
+                                fontSize: 9, fontWeight: 600, padding: '1px 6px', borderRadius: 20,
+                                backgroundColor: C.primaryLight, color: C.primary,
+                                fontFamily: 'DM Sans, sans-serif',
+                            }}>
+                                {tag}
+                            </span>
+                        ))}
+                        {template.tags && template.tags.length > 3 && (
+                            <span style={{ fontSize: 9, color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                +{template.tags.length - 3}
+                            </span>
+                        )}
                     </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">

@@ -1949,6 +1949,7 @@ export default function VisualEditor({
                         <PropertiesPanel
                             block={activeSlotEdit.slotBlock}
                             placeholders={placeholders}
+                            templateCategory={templateCategory}
                             onChange={(updatedSlotBlock) => {
                                 // Apply prop changes back to slot HTML and keep
                                 // activeSlotEdit.slotBlock in sync so the panel
@@ -2008,6 +2009,7 @@ export default function VisualEditor({
                         <PropertiesPanel
                             block={selectedBlock}
                             placeholders={placeholders}
+                            templateCategory={templateCategory}
                             onChange={handleBlockChange}
                             onDeselect={() => setSelectedId(null)}
                             palette={canvasSettings.palette ?? []}
