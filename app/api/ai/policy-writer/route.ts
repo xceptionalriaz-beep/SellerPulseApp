@@ -173,7 +173,7 @@ export async function POST(req: NextRequest) {
     }
 
     return new Response(
-        JSON.stringify({ error: 'AI Policy Writer is temporarily unavailable. Check your API Vault keys.' }),
+        JSON.stringify({ error: 'AI Policy Writer is temporarily unavailable. Check your API Vault keys.', code: 'NO_AI_KEY' }),
         { status: 503, headers: { 'Content-Type': 'application/json' } }
     )
 }

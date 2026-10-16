@@ -7827,12 +7827,15 @@ function AITab({
             })
             const data = await res.json()
             if (!res.ok || data.error) {
-                setCopyError(data.error ?? 'Optimization failed. Try again.')
+                const userMsg = data.code === 'NO_AI_KEY'
+                    ? 'AI features are currently unavailable. Please try again later.'
+                    : 'Something went wrong. Please try again.'
+                setCopyError(userMsg)
             } else {
                 setCopyResult(data.result as Record<string, string>)
             }
         } catch {
-            setCopyError('Network error. Check your connection and try again.')
+            setCopyError('Something went wrong. Please try again.')
         } finally {
             setCopyLoading(false)
         }
@@ -7862,7 +7865,10 @@ function AITab({
             })
             if (!res.ok) {
                 const data = await res.json().catch(() => ({}))
-                setPolicyError(data.error ?? 'Policy generation failed. Try again.')
+                const userMsg = data.code === 'NO_AI_KEY'
+                    ? 'AI features are currently unavailable. Please try again later.'
+                    : 'Something went wrong. Please try again.'
+                setPolicyError(userMsg)
                 setPolicyLoading(false)
                 return
             }
@@ -7878,7 +7884,7 @@ function AITab({
                 setPolicyResult(accumulated)
             }
         } catch {
-            setPolicyError('Network error. Check your connection and try again.')
+            setPolicyError('Something went wrong. Please try again.')
         } finally {
             setPolicyLoading(false)
         }

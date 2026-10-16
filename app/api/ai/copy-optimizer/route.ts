@@ -168,7 +168,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-        { error: 'AI Copy Optimizer is temporarily unavailable. Check your API Vault keys.' },
+        { error: 'AI Copy Optimizer is temporarily unavailable. Check your API Vault keys.', code: 'NO_AI_KEY' },
         { status: 503 }
     )
 }
