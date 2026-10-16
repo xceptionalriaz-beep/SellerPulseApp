@@ -28,7 +28,7 @@ import {
     Tag, BadgeDollarSign, Image, FileText, Table2,
     Camera, Megaphone, LayoutGrid,
     ShieldCheck, Truck, RotateCcw, User, Bell, Info, Package, Grid, Play,
-    Sparkles, Wand2, Zap,
+    Sparkles, Wand2, Zap, Leaf, BarChart2, ScanLine,
     AlignLeft, AlignCenter, AlignRight,
     CheckCircle2, AlertTriangle,
     MousePointer2,
@@ -8148,10 +8148,10 @@ function AITab({
                             </p>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 12 }}>
                                 {([
-                                    { id: 'product',    label: '📦 Product Shot' },
-                                    { id: 'white-bg',   label: '⬜ White BG' },
-                                    { id: 'lifestyle',  label: '🌿 Lifestyle' },
-                                    { id: 'infographic',label: '📊 Infographic' },
+                                    { id: 'product',     label: 'Product Shot', Icon: Package },
+                                    { id: 'white-bg',    label: 'White BG',     Icon: ScanLine },
+                                    { id: 'lifestyle',   label: 'Lifestyle',    Icon: Leaf },
+                                    { id: 'infographic', label: 'Infographic',  Icon: BarChart2 },
                                 ] as const).map(s => (
                                     <button
                                         key={s.id}
@@ -8164,8 +8164,10 @@ function AITab({
                                             backgroundColor: photoStyle === s.id ? '#fef3c7' : C.bg,
                                             color: photoStyle === s.id ? '#d97706' : C.secondary,
                                             cursor: 'pointer', transition: 'all 0.15s',
+                                            display: 'flex', alignItems: 'center', gap: 4,
                                         }}
                                     >
+                                        <s.Icon size={10} />
                                         {s.label}
                                     </button>
                                 ))}
