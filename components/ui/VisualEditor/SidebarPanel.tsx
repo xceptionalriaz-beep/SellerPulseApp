@@ -168,6 +168,14 @@ export default function SidebarPanel({
                         />
                     )}
 
+                    {activeTab === 'content' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '32px 20px', gap: 12, textAlign: 'center' }}>
+                            <div style={{ width: 48, height: 48, borderRadius: 12, backgroundColor: '#f3eeff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>✦</div>
+                            <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 700, color: '#1e1535' }}>Content coming soon</p>
+                            <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: '#9ca3af', lineHeight: 1.5 }}>This tab is ready for new content blocks. All current blocks are in the Blocks tab.</p>
+                        </div>
+                    )}
+
                     {activeTab === 'templates' && (
                         <TemplatesTab
                             onInsert={onInsertTemplate}
@@ -255,6 +263,7 @@ export default function SidebarPanel({
 // ─────────────────────────────────────────────────────────────────────────────
 const TAB_LABELS: Record<RailTabId, string> = {
     blocks: 'Blocks',
+    content: 'Content',
     templates: 'Section Templates',
     body: 'Canvas Settings',
     images: 'Images',
