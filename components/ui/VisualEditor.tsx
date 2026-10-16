@@ -1007,7 +1007,35 @@ export default function VisualEditor({
                                 const imgHtml = `<img src="${url}" alt="${alt || ''}" style="width:100%;height:auto;display:block;border-radius:8px;object-fit:cover;" />`;
                                 return { ...b, props: { ...bp, [effectivePropKey]: imgHtml } } as Block
                             }
-                            // Content/text slot: insert text/HTML directly (no img wrapper)
+                            // Content slot: if the slot HTML already contains an <img> tag,
+                            // replace its src (and alt) in-place so the surrounding block
+                            // structure (product image, gallery, etc.) is preserved.
+                            // Only fall back to raw URL insertion when there is no img tag.
+                            const existingSlotHtml: string = bp[effectivePropKey] ?? ''
+                            if (existingSlotHtml && /<img\b/i.test(existingSlotHtml)) {
+                                let updatedSlotHtml = existingSlotHtml
+                                // Replace src="..." on the first <img> tag
+                                updatedSlotHtml = updatedSlotHtml.replace(
+                                    /(<img\b[^>]*\s)src="[^"]*"/i,
+                                    `$1src="${url}"`
+                                )
+                                // Also catch src as the very first attribute: <img src="..."
+                                if (updatedSlotHtml === existingSlotHtml) {
+                                    updatedSlotHtml = updatedSlotHtml.replace(
+                                        /(<img\b\s*)src="[^"]*"/i,
+                                        `$1src="${url}"`
+                                    )
+                                }
+                                // Update alt if present, otherwise leave unchanged
+                                if (/\balt="/i.test(updatedSlotHtml)) {
+                                    updatedSlotHtml = updatedSlotHtml.replace(
+                                        /\balt="[^"]*"/i,
+                                        `alt="${alt || ''}"`
+                                    )
+                                }
+                                return { ...b, props: { ...bp, [effectivePropKey]: updatedSlotHtml } } as Block
+                            }
+                            // Empty content slot — insert text/HTML directly (no img wrapper)
                             return { ...b, props: { ...bp, [effectivePropKey]: url } } as Block
                         }
                         return { ...b, props: { ...bp, [effectivePropKey]: url } } as Block
@@ -1246,9 +1274,14 @@ export default function VisualEditor({
                 setSelectedSubSlot(propKey);
                 setActiveDropSlot({ blockId, slot: propKey as any });
 
-                // Any image/thumbnail/logo slot click opens Images tab, otherwise Content tab
+                // Any image/thumbnail/logo slot click opens Images tab, otherwise Blocks tab.
+                // Also open Images tab when the slot's current HTML contains an <img> tag
+                // (e.g. a Product Image block dropped inside a two-column layout).
                 const propKeyLower = propKey.toLowerCase();
-                const isImage = propKeyLower.includes('image') || propKeyLower.includes('thumb') || propKeyLower.includes('src') || propKeyLower.includes('logo') || propKeyLower.includes('img');
+                const slotBlock2 = blockId ? blocks.find(b => b.id === blockId) : null;
+                const slotCurrentHtml: string = slotBlock2 ? ((slotBlock2.props as any)[propKey] ?? '') : '';
+                const isImage = propKeyLower.includes('image') || propKeyLower.includes('thumb') || propKeyLower.includes('src') || propKeyLower.includes('logo') || propKeyLower.includes('img')
+                    || /<img\b/i.test(slotCurrentHtml);
                 if (isImage) {
                     setActiveTab('images');
                 } else {
@@ -1286,7 +1319,9 @@ export default function VisualEditor({
                     const iframe = document.querySelector(`iframe[data-block-id="${blockId}"]`) as HTMLIFrameElement;
                     iframe?.contentWindow?.postMessage({ type: 'RIAZIFY_UPDATE_ACTIVE_SLOT', propKey }, '*');
                     const targetBlock = blocks.find(b => b.id === blockId);
-                    if (targetBlock && (IMAGE_BLOCK_TYPES.has(targetBlock.type) || propKey.toLowerCase().includes('image'))) {
+                    const slotHtmlForCheck: string = targetBlock ? ((targetBlock.props as any)[propKey] ?? '') : '';
+                    const slotHasImg = /<img\b/i.test(slotHtmlForCheck);
+                    if (targetBlock && (IMAGE_BLOCK_TYPES.has(targetBlock.type) || propKey.toLowerCase().includes('image') || slotHasImg)) {
                         setActiveTab('images');
                     } else {
                         setActiveTab('blocks');
