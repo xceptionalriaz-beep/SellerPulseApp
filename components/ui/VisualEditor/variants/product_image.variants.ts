@@ -59,7 +59,7 @@ function renderSplitImage(p: any, id: string, isLeft: boolean): string {
           <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}"
             data-slot="src"
             style="width:100%;height:auto;display:block;margin:0 auto;${imgStyle(p)}" />
-          <div data-canvas-overlay="src" style="position:absolute;top:12px;right:12px;background:rgba(30,21,53,0.85);color:#fff;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;letter-spacing:0.04em;opacity:0;transition:opacity 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.25);display:flex;align-items:center;gap:5px;white-space:nowrap;">
+          <div data-canvas-overlay="src" style="position:absolute;top:12px;left:12px;background:#7530fb;color:#fff;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;letter-spacing:0.04em;opacity:0;transition:opacity 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.25);display:flex;align-items:center;gap:5px;white-space:nowrap;">
             <span>✎</span> Change Image
           </div>
         </div>
@@ -125,7 +125,7 @@ export const productImageVariants: BlockVariant[] = [
           data-slot="src"
           width="${maxW}"
           style="width:100%;height:auto;display:block;margin:0 auto;object-fit:${p.objectFit ?? 'contain'};border-radius:${p.borderRadius ?? 12}px;${p.showBorder ? `border:${p.borderWidth ?? 1}px solid ${p.borderColor ?? '#ede9fe'};` : ''}${shadowVal ? `box-shadow:${shadowVal};` : ''}" />
-        <div data-canvas-overlay="src" style="position:absolute;top:12px;right:12px;background:rgba(30,21,53,0.85);color:#fff;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;letter-spacing:0.04em;opacity:0;transition:opacity 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.25);display:flex;align-items:center;gap:5px;white-space:nowrap;">
+        <div data-canvas-overlay="src" style="position:absolute;top:12px;left:12px;background:#7530fb;color:#fff;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;letter-spacing:0.04em;opacity:0;transition:opacity 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.25);display:flex;align-items:center;gap:5px;white-space:nowrap;">
           <span>✎</span> Change Image
         </div>
       </div>
@@ -236,7 +236,7 @@ ${captionRow}
                   <img src="${url}" alt="${p.alt ?? 'Product'} view ${i + 1}"
                     data-slot="${slotKey}"
                     style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;object-fit:cover;object-position:center;" />
-                  <div data-canvas-overlay="${slotKey}" style="position:absolute;top:8px;right:8px;background:rgba(30,21,53,0.85);color:#fff;font-family:Arial,sans-serif;font-size:9px;font-weight:700;padding:4px 8px;border-radius:16px;letter-spacing:0.03em;opacity:0;transition:opacity 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 2px 5px rgba(0,0,0,0.25);display:flex;align-items:center;gap:4px;white-space:nowrap;">
+                  <div data-canvas-overlay="${slotKey}" style="position:absolute;top:8px;left:8px;background:#7530fb;color:#fff;font-family:Arial,sans-serif;font-size:9px;font-weight:700;padding:4px 8px;border-radius:16px;letter-spacing:0.03em;opacity:0;transition:opacity 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 2px 5px rgba(0,0,0,0.25);display:flex;align-items:center;gap:4px;white-space:nowrap;">
                     <span>✎</span> Change
                   </div>
                 </div>
@@ -287,7 +287,7 @@ ${captionRow}
         <div align="center" style="position:relative;display:inline-block;width:100%;max-width:100%;margin:0 auto;text-align:center;" data-canvas-dropzone="src">
           <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}" data-slot="src"
             style="width:100%;display:block;margin:0 auto;min-height:${p.minHeight ?? 300}px;object-fit:cover;${shadowStyle(p)};padding:0;border:none;" />
-          <div data-canvas-overlay="src" style="position:absolute;top:12px;right:12px;background:rgba(30,21,53,0.85);color:#fff;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;letter-spacing:0.04em;opacity:0;transition:opacity 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.25);display:flex;align-items:center;gap:5px;white-space:nowrap;">
+          <div data-canvas-overlay="src" style="position:absolute;top:12px;left:12px;background:#7530fb;color:#fff;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;letter-spacing:0.04em;opacity:0;transition:opacity 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.25);display:flex;align-items:center;gap:5px;white-space:nowrap;">
             <span>✎</span> Change Image
           </div>
         </div>`
@@ -299,7 +299,7 @@ ${captionRow}
     <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:${p.overlayColor};">
       ${p.overlayText ? `<p style="position:absolute;bottom:20px;left:20px;margin:0;font-family:Arial,sans-serif;font-size:16px;font-weight:700;color:#ffffff;">${p.overlayText}</p>` : ''}
     </div>
-    <div data-canvas-overlay="src" style="position:absolute;top:12px;right:12px;background:rgba(30,21,53,0.85);color:#fff;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;letter-spacing:0.04em;opacity:0;transition:opacity 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.25);display:flex;align-items:center;gap:5px;white-space:nowrap;">
+    <div data-canvas-overlay="src" style="position:absolute;top:12px;left:12px;background:#7530fb;color:#fff;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;letter-spacing:0.04em;opacity:0;transition:opacity 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.25);display:flex;align-items:center;gap:5px;white-space:nowrap;">
       <span>✎</span> Change Image
     </div>
   </div>
@@ -432,7 +432,7 @@ ${captionRow}
         </div>
 
         <!-- Floating Edit Overlay for Canvas -->
-        <div data-canvas-overlay="src" style="position:absolute;top:12px;right:12px;background:rgba(30,21,53,0.85);color:#fff;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;letter-spacing:0.04em;opacity:0;transition:opacity 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.25);display:flex;align-items:center;gap:5px;white-space:nowrap;">
+        <div data-canvas-overlay="src" style="position:absolute;top:12px;left:12px;background:#7530fb;color:#fff;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;letter-spacing:0.04em;opacity:0;transition:opacity 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.25);display:flex;align-items:center;gap:5px;white-space:nowrap;">
           <span>✎</span> Change Image
         </div>
       </div>
@@ -554,7 +554,7 @@ ${mobileStyle}
         </div>
 
         <!-- Floating Edit Overlay for Canvas -->
-        <div data-canvas-overlay="src" style="position:absolute;top:12px;right:12px;background:rgba(30,21,53,0.85);color:#fff;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;letter-spacing:0.04em;opacity:0;transition:opacity 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.25);display:flex;align-items:center;gap:5px;white-space:nowrap;">
+        <div data-canvas-overlay="src" style="position:absolute;top:12px;left:12px;background:#7530fb;color:#fff;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;letter-spacing:0.04em;opacity:0;transition:opacity 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.25);display:flex;align-items:center;gap:5px;white-space:nowrap;">
           <span>✎</span> Change Image
         </div>
 
@@ -609,7 +609,7 @@ ${mobileStyle}
             <div align="center" style="display:block;width:100%;max-width:100%;margin:0 auto;text-align:center;position:relative;display:inline-block;" data-canvas-dropzone="src">
               <img src="${p.src ?? '{{MAIN_IMAGE_URL}}'}" alt="${p.alt ?? '{{PRODUCT_TITLE}}'}" data-slot="src"
                 style="width:100%;height:auto;display:block;margin:0 auto;border-radius:6px;object-fit:${p.objectFit ?? 'cover'};${shadowStyle(p)}" />
-              <div data-canvas-overlay="src" style="position:absolute;top:12px;right:12px;background:rgba(30,21,53,0.85);color:#fff;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;letter-spacing:0.04em;opacity:0;transition:opacity 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.25);display:flex;align-items:center;gap:5px;white-space:nowrap;">
+              <div data-canvas-overlay="src" style="position:absolute;top:12px;left:12px;background:#7530fb;color:#fff;font-family:Arial,sans-serif;font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;letter-spacing:0.04em;opacity:0;transition:opacity 0.15s ease;pointer-events:none;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.25);display:flex;align-items:center;gap:5px;white-space:nowrap;">
                 <span>✎</span> Change Image
               </div>
             </div>
