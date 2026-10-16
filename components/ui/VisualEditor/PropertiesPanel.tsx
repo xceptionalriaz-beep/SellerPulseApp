@@ -28,7 +28,7 @@ import {
     Tag, BadgeDollarSign, Image, FileText, Table2,
     Camera, Megaphone, LayoutGrid,
     ShieldCheck, Truck, RotateCcw, User, Bell, Info, Package, Grid, Play,
-    Sparkles, Wand2, Zap, Leaf, BarChart2, ScanLine,
+    Sparkles, Wand2, Zap, Leaf, BarChart2, ScanLine, ZoomIn, Moon, Box,
     AlignLeft, AlignCenter, AlignRight,
     CheckCircle2, AlertTriangle,
     MousePointer2,
@@ -7789,7 +7789,7 @@ function AITab({
     // ── Photo Studio state ────────────────────────────────────────────────────
     const [photoOpen, setPhotoOpen] = useState(false)
     const [photoPrompt, setPhotoPrompt] = useState('')
-    const [photoStyle, setPhotoStyle] = useState<'product' | 'white-bg' | 'lifestyle' | 'infographic'>('product')
+    const [photoStyle, setPhotoStyle] = useState<'product' | 'white-bg' | 'lifestyle' | 'infographic' | 'detail' | 'dark-studio' | 'in-box'>('product')
     const [photoLoading, setPhotoLoading] = useState(false)
     const [photoResult, setPhotoResult] = useState<{ url: string; revisedPrompt: string } | null>(null)
     const [photoError, setPhotoError] = useState<string | null>(null)
@@ -8148,10 +8148,13 @@ function AITab({
                             </p>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 12 }}>
                                 {([
-                                    { id: 'product',     label: 'Product Shot', Icon: Package },
+                                    { id: 'product',     label: 'Product Shot', Icon: Package  },
                                     { id: 'white-bg',    label: 'White BG',     Icon: ScanLine },
-                                    { id: 'lifestyle',   label: 'Lifestyle',    Icon: Leaf },
-                                    { id: 'infographic', label: 'Infographic',  Icon: BarChart2 },
+                                    { id: 'lifestyle',   label: 'Lifestyle',    Icon: Leaf     },
+                                    { id: 'infographic', label: 'Infographic',  Icon: BarChart2},
+                                    { id: 'detail',      label: 'Detail Shot',  Icon: ZoomIn   },
+                                    { id: 'dark-studio', label: 'Dark Studio',  Icon: Moon     },
+                                    { id: 'in-box',      label: 'In-Box',       Icon: Box      },
                                 ] as const).map(s => (
                                     <button
                                         key={s.id}

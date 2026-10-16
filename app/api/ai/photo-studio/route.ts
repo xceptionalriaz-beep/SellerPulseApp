@@ -50,10 +50,13 @@ async function trackUsage(platform: string) {
 
 // ── Style modifiers ───────────────────────────────────────────────────────────
 const STYLE_SUFFIX: Record<string, string> = {
-    'product':    'professional product photography, studio lighting, clean background, sharp focus, high resolution, commercial quality',
-    'white-bg':   'isolated on pure white background, professional product photography, no shadows, clean and minimal',
-    'lifestyle':  'lifestyle photography, natural light, in-use setting, warm and aspirational, editorial style',
-    'infographic':'clean flat-design infographic, bold icons, minimal color palette, professional layout, white background',
+    'product':     'professional product photography, studio lighting, clean background, sharp focus, high resolution, commercial quality',
+    'white-bg':    'isolated on pure white background, professional product photography, no shadows, clean and minimal',
+    'lifestyle':   'lifestyle photography, natural light, in-use setting, warm and aspirational, editorial style',
+    'infographic': 'clean flat-design infographic, bold icons, minimal color palette, professional layout, white background',
+    'detail':      'extreme close-up macro photography, razor-sharp focus on texture and material detail, soft studio lighting, shallow depth of field, high resolution',
+    'dark-studio': 'dramatic dark background, professional studio lighting with rim light and edge highlights, sleek and premium feel, high contrast, luxury product photography',
+    'in-box':      'product displayed inside its open retail packaging box, clean studio background, professional product photography, trust-building presentation, sharp focus',
 }
 
 // ── Build enhanced DALL-E prompt ──────────────────────────────────────────────
