@@ -16,6 +16,7 @@
 
 import { NextRequest } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { getAuthUserId, deductCredits } from '@/lib/ai/credits'
 
 const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -134,6 +135,17 @@ export async function POST(req: NextRequest) {
 
     const { category = 'general', context = '' } = body
     const prompt = buildPrompt(category, context)
+
+    // ── Credit check + deduction ──────────────────────────────────────────────
+    const userId = await getAuthUserId()
+    if (!userId) {
+        return new Response(
+            JSON.stringify({ error: 'Please sign in to use AI features.', code: 'UNAUTHORIZED' }),
+            { status: 401, headers: { 'Content-Type': 'application/json' } }
+        )
+    }
+    const credit = await deductCredits(userId, 'ai_policy_writer')
+    if (!credit.ok) return credit.response
 
     // ── Try Anthropic with streaming ──────────────────────────────────────────
     const anthropicKey = (await getAiKey('anthropic')) ?? process.env.ANTHROPIC_API_KEY ?? null

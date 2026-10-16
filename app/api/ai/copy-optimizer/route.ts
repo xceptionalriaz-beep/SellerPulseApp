@@ -16,6 +16,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { getAuthUserId, deductCredits } from '@/lib/ai/credits'
 
 const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -125,15 +126,23 @@ function parseJsonResult(raw: string): Record<string, string> {
 
 // ── Main handler ──────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
-    let body: { fields?: Record<string, string>; blockType?: string; category?: string }
+    let body: { fields?: Record<string, string>; blockType?: string; category?: string; blockId?: string }
     try { body = await req.json() } catch { return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 }) }
 
-    const { fields = {}, blockType = 'unknown', category = 'general' } = body
+    const { fields = {}, blockType = 'unknown', category = 'general', blockId } = body
 
     const fieldEntries = Object.entries(fields).filter(([, v]) => typeof v === 'string' && v.trim().length > 0)
     if (fieldEntries.length === 0) {
         return NextResponse.json({ error: 'No text fields provided' }, { status: 400 })
     }
+
+    // ── Credit check + deduction ──────────────────────────────────────────────
+    const userId = await getAuthUserId()
+    if (!userId) {
+        return NextResponse.json({ error: 'Please sign in to use AI features.' }, { status: 401 })
+    }
+    const credit = await deductCredits(userId, 'ai_copy_optimizer', blockId)
+    if (!credit.ok) return credit.response
 
     const prompt = buildPrompt(Object.fromEntries(fieldEntries), blockType, category)
 

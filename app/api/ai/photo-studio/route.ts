@@ -20,6 +20,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { getAuthUserId, deductCredits } from '@/lib/ai/credits'
 
 const BUCKET = 'ai-photos'
 
@@ -107,6 +108,14 @@ export async function POST(req: NextRequest) {
     if (!prompt.trim()) {
         return NextResponse.json({ error: 'A prompt is required.' }, { status: 400 })
     }
+
+    // ── Credit check + deduction ──────────────────────────────────────────────
+    const userId = await getAuthUserId()
+    if (!userId) {
+        return NextResponse.json({ error: 'Please sign in to use AI features.' }, { status: 401 })
+    }
+    const credit = await deductCredits(userId, 'ai_photo_studio', blockId)
+    if (!credit.ok) return credit.response
 
     // ── Get OpenAI key ────────────────────────────────────────────────────────
     const openaiKey = (await getAiKey('openai')) ?? process.env.OPENAI_API_KEY ?? null
