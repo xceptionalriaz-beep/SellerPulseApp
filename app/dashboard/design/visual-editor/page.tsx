@@ -500,7 +500,17 @@ function VisualEditorInner() {
                 iframe.onload = () => resolve()
                 setTimeout(resolve, 3000)
             })
-            const h2c = (await import('html2canvas')).default
+            // Load html2canvas from CDN on demand (avoids npm bundling issues)
+            type H2C = (el: HTMLElement, opts?: Record<string, unknown>) => Promise<HTMLCanvasElement>
+            const win = window as unknown as { html2canvas?: H2C }
+            const h2c = await new Promise<H2C>((resolve, reject) => {
+                if (win.html2canvas) { resolve(win.html2canvas); return }
+                const s = document.createElement('script')
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'
+                s.onload = () => win.html2canvas ? resolve(win.html2canvas) : reject(new Error('html2canvas failed to load'))
+                s.onerror = reject
+                document.head.appendChild(s)
+            })
             const canvas = await h2c(iframe.contentDocument!.body, {
                 width: 1000, height: 700, scale: 0.5,
                 useCORS: true, allowTaint: true,
