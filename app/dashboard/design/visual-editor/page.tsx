@@ -491,15 +491,25 @@ function VisualEditorInner() {
     const handleGenerateThumbnail = useCallback(async () => {
         if (!savedId) { alert('Save the template first before generating a thumbnail.'); return }
         setThumbnailStatus('generating')
+        // Render container — visible but off-screen so html2canvas can measure it
+        const container = document.createElement('div')
+        container.style.cssText = [
+            'position:fixed',
+            'top:0',
+            'left:-1100px',
+            'width:1000px',
+            'height:700px',
+            'overflow:hidden',
+            'pointer-events:none',
+            'z-index:-1',
+            'background:#fff',
+        ].join(';')
+        container.innerHTML = html
+        document.body.appendChild(container)
         try {
-            const iframe = document.createElement('iframe')
-            iframe.style.cssText = 'position:fixed;top:-99999px;left:-99999px;width:1000px;height:700px;border:none;pointer-events:none;visibility:hidden;'
-            iframe.srcdoc = html
-            document.body.appendChild(iframe)
-            await new Promise<void>((resolve) => {
-                iframe.onload = () => resolve()
-                setTimeout(resolve, 3000)
-            })
+            // Give browser a frame to lay out the injected HTML
+            await new Promise<void>(r => setTimeout(r, 500))
+
             // Load html2canvas from CDN on demand (avoids npm bundling issues)
             type H2C = (el: HTMLElement, opts?: Record<string, unknown>) => Promise<HTMLCanvasElement>
             const win = window as unknown as { html2canvas?: H2C }
@@ -508,15 +518,22 @@ function VisualEditorInner() {
                 const s = document.createElement('script')
                 s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'
                 s.onload = () => win.html2canvas ? resolve(win.html2canvas) : reject(new Error('html2canvas failed to load'))
-                s.onerror = reject
+                s.onerror = () => reject(new Error('Failed to load html2canvas from CDN'))
                 document.head.appendChild(s)
             })
-            const canvas = await h2c(iframe.contentDocument!.body, {
-                width: 1000, height: 700, scale: 0.5,
-                useCORS: true, allowTaint: true,
-                backgroundColor: '#ffffff', logging: false, imageTimeout: 4000,
+
+            const canvas = await h2c(container, {
+                width: 1000,
+                height: 700,
+                scale: 0.5,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff',
+                logging: false,
+                imageTimeout: 5000,
             })
-            document.body.removeChild(iframe)
+            document.body.removeChild(container)
+
             setThumbnailStatus('uploading')
             const blob = await new Promise<Blob>((resolve, reject) =>
                 canvas.toBlob((b: Blob | null) => b ? resolve(b) : reject(new Error('Canvas toBlob failed')), 'image/png')
@@ -526,6 +543,7 @@ function VisualEditorInner() {
             setTimeout(() => setThumbnailStatus('idle'), 2500)
         } catch (err) {
             console.error('[thumbnail] generate error:', err)
+            document.body.contains(container) && document.body.removeChild(container)
             setThumbnailStatus('error')
             setTimeout(() => setThumbnailStatus('idle'), 3000)
         }
