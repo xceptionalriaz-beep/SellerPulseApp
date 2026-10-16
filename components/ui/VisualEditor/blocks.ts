@@ -4622,6 +4622,59 @@ ${bodyHtml}
 </html>`
 }
 
+// ── Preview document: same as assembleDocument but with sample data substituted ──
+// Used by LivePreview when no real eBay item is connected, so the preview matches
+// the canvas view (both show dolphin/sample images instead of raw {{TOKEN}} placeholders).
+//
+// renderFn receives (rawHtml, blockType, category) and returns substituted HTML.
+// Keeping it as a callback avoids a circular import with sampleData.ts.
+export function assembleDocumentForPreview(
+    blocks: Block[],
+    settings: CanvasSettings = DEFAULT_CANVAS_SETTINGS,
+    category = 'general',
+    renderFn?: (html: string, type: string, cat?: string) => string,
+): string {
+    if (blocks.length === 0) return assembleDocument([], settings)
+
+    const applyTokens = renderFn ?? ((html: string) => html)
+
+    const bodyHtml = blocks.map(block => {
+        const def = getDefinition(block.type)
+        if (!def) return ''
+        const rawHtml = def.toHtml(block.props, block.id)
+        return applyTokens(rawHtml, block.type, category)
+    }).join('\n\n')
+
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { margin: 0; padding: 0; font-family: ${settings.fontStack}; background: ${settings.bgColor}; color: ${settings.textColor}; }
+    table { border-collapse: collapse; }
+    img { border: 0; display: block; }
+    a { color: ${settings.primaryColor ?? settings.linkColor}; text-decoration: none; }
+    h1, h2, h3 { color: ${settings.headingColor ?? settings.textColor}; font-family: ${settings.headingFont ?? settings.fontStack}; }
+    @media only screen and (max-width: 480px) {
+      .block-text { font-size: ${settings.mobileFontScale ?? 90}% !important; }
+      td[class="block-pad"] { padding-left: ${Math.round(16 * (settings.mobilePaddingScale ?? 80) / 100)}px !important; padding-right: ${Math.round(16 * (settings.mobilePaddingScale ?? 80) / 100)}px !important; }
+      .mobile-stack td { display: block !important; width: 100% !important; box-sizing: border-box !important; padding-left: 0 !important; padding-right: 0 !important; }
+      .mobile-stack td img { width: 100% !important; max-width: 100% !important; height: auto !important; }
+    }
+  </style>
+</head>
+<body>
+<table width="${settings.maxWidth}" cellpadding="0" cellspacing="0" border="0" align="${settings.align}"
+  style="width:100%;max-width:${settings.maxWidth}px;margin:0 ${settings.align === 'center' ? 'auto' : '0'};background:${settings.canvasBg};">
+
+${bodyHtml}
+
+</table>
+</body>
+</html>`
+}
+
 // eBay-safe export: no <html>/<head>/<body>/<!DOCTYPE> wrapper — body content only
 export function assembleBodyOnly(blocks: Block[], settings: CanvasSettings = DEFAULT_CANVAS_SETTINGS): string {
     if (blocks.length === 0) return ''

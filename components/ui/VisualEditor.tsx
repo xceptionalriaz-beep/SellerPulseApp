@@ -35,6 +35,7 @@ import {
     createBlock,
     assembleDocument,
     assembleBodyOnly,
+    assembleDocumentForPreview,
     getDefinition,
     CanvasSettings,
     DEFAULT_CANVAS_SETTINGS,
@@ -43,7 +44,7 @@ import {
 import { parseHtml, ParseResult } from './VisualEditor/htmlParser'
 import { RailTabId } from './VisualEditor/IconRail'
 import { auditHtml } from './VisualEditor/audit'
-import { categoryFromTemplateId, type CategoryId } from './VisualEditor/sampleData'
+import { categoryFromTemplateId, renderForCanvas, type CategoryId } from './VisualEditor/sampleData'
 import IconRail from './VisualEditor/IconRail'
 import SidebarPanel from './VisualEditor/SidebarPanel'
 import Canvas from './VisualEditor/Canvas'
@@ -1858,7 +1859,7 @@ export default function VisualEditor({
                     {/* ── Canvas or Live Preview ── */}
                     {livePreview ? (
                         <LivePreview
-                            html={currentHtml}
+                            html={assembleDocumentForPreview(blocks, canvasSettings, activeCategory, renderForCanvas as (html: string, type: string, cat?: string) => string)}
                             deviceWidth={deviceWidth}
                             onDeviceChange={setDeviceWidth}
                             onClose={() => setLivePreview(false)}
