@@ -4617,3 +4617,19 @@ ${bodyHtml}
 </body>
 </html>`
 }
+
+// eBay-safe export: no <html>/<head>/<body>/<!DOCTYPE> wrapper — body content only
+export function assembleBodyOnly(blocks: Block[], settings: CanvasSettings = DEFAULT_CANVAS_SETTINGS): string {
+    if (blocks.length === 0) return ''
+    const bodyHtml = blocks.map(block => {
+        const def = getDefinition(block.type)
+        if (!def) return ''
+        return def.toHtml(block.props, block.id)
+    }).join('\n\n')
+
+    return `<table width="${settings.maxWidth}" cellpadding="0" cellspacing="0" border="0" align="${settings.align}" style="width:100%;max-width:${settings.maxWidth}px;margin:0 ${settings.align === 'center' ? 'auto' : '0'};background:${settings.canvasBg};">
+
+${bodyHtml}
+
+</table>`
+}

@@ -34,6 +34,7 @@ import {
     BlockType,
     createBlock,
     assembleDocument,
+    assembleBodyOnly,
     getDefinition,
     CanvasSettings,
     DEFAULT_CANVAS_SETTINGS,
@@ -822,7 +823,7 @@ export default function VisualEditor({
             }
             // ── Push HTML to linked listing if one is set ──
             if (linkedListing) {
-                const assembledHtml = assembleDocument(blocks, canvasSettings)
+                const assembledHtml = assembleBodyOnly(blocks, canvasSettings)
                 await (supabase.from('listing_drafts') as any)
                     .update({
                         description_html: assembledHtml,
@@ -883,7 +884,7 @@ export default function VisualEditor({
 
     const handleExport = useCallback(() => {
         if (blocks.length === 0) return
-        const html = stripInternalAttributes(assembleDocument(blocks, canvasSettings))
+        const html = stripInternalAttributes(assembleBodyOnly(blocks, canvasSettings))
         const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
