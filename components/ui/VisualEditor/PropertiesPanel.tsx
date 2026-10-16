@@ -78,7 +78,6 @@ import {
     ConditionBadgeProps,
     ItemSpecificsProps,
     CompetitorComparisonProps,
-    QrCodeProps,
 } from './blocks'
 import ProDropdown, { type DropdownOption } from '@/components/ui/ProDropdown'
 import { auditHtml } from './audit'
@@ -3355,29 +3354,6 @@ function BlockStyleProps({ block, props, updateProps }: {
                 </>
             )
 
-        case 'qr_code': {
-            const qp = props as QrCodeProps
-            return (
-                <>
-                    <Section title="QR Colours">
-                        <ColorRow label="Module colour (dark)" value={qp.qrFgColor ?? '#1e1535'} onChange={v => updateProps({ qrFgColor: v } as any)} />
-                        <ColorRow label="Background colour" value={qp.qrBgColor ?? '#ffffff'} onChange={v => updateProps({ qrBgColor: v } as any)} />
-                    </Section>
-                    <Section title="Border">
-                        <ColorRow label="Border colour" value={qp.borderColor ?? '#ede9fe'} onChange={v => updateProps({ borderColor: v } as any)} />
-                        <SliderInput label="Border radius" value={qp.borderRadius ?? 8} min={0} max={24} suffix="px" onChange={v => updateProps({ borderRadius: v } as any)} />
-                    </Section>
-                    <Section title="Caption">
-                        <ColorRow label="Caption text colour" value={qp.labelColor ?? '#6b7280'} onChange={v => updateProps({ labelColor: v } as any)} />
-                        <SliderInput label="Caption font size" value={qp.labelFontSize ?? 13} min={10} max={20} suffix="px" onChange={v => updateProps({ labelFontSize: v } as any)} />
-                    </Section>
-                    <Section title="Size & Spacing">
-                        <SliderInput label="QR size" value={qp.qrSize ?? 180} min={100} max={300} suffix="px" onChange={v => updateProps({ qrSize: v } as any)} />
-                    </Section>
-                </>
-            )
-        }
-
         case 'numbered_list':
             return (
                 <>
@@ -6092,104 +6068,6 @@ function BlockAttributeProps({ block, props, updateProps, phButton, tokenButton,
                         >
                             + Add Row
                         </button>
-                    </Section>
-                </>
-            )
-        }
-
-        case 'qr_code': {
-            const qp = props as QrCodeProps
-            const url = qp.targetUrl ?? ''
-
-            // eBay domain validator
-            const EBAY_DOMAINS = [
-                'ebay.com', 'ebay.co.uk', 'ebay.de', 'ebay.fr', 'ebay.it',
-                'ebay.es', 'ebay.com.au', 'ebay.ca', 'ebay.at', 'ebay.be',
-                'ebay.ch', 'ebay.ie', 'ebay.com.sg', 'ebay.in', 'ebay.com.my',
-                'ebay.ph', 'ebay.pl', 'ebay.nl', 'ebay.com.hk', 'ebay.co.jp',
-                'ebay.com.tw', 'ebay.com.br', 'ebay.com.ar',
-            ]
-            function isEbayUrl(u: string): boolean {
-                try {
-                    const host = new URL(u).hostname.toLowerCase().replace(/^www\./, '')
-                    return EBAY_DOMAINS.some(d => host === d || host.endsWith('.' + d))
-                } catch { return false }
-            }
-            const isEmpty  = url.trim() === ''
-            const isEbay   = !isEmpty && isEbayUrl(url)
-            const isBad    = !isEmpty && !isEbay
-
-            return (
-                <>
-                    <Section title="Store URL">
-                        <TextInput
-                            label="Destination URL"
-                            value={url}
-                            onChange={v => updateProps({ targetUrl: v } as any)}
-                        />
-                        {/* URL validator badge */}
-                        {!isEmpty && (
-                            <div style={{
-                                marginTop: 6,
-                                padding: '7px 10px',
-                                borderRadius: 6,
-                                background: isEbay ? '#f0fdf4' : '#fff1f2',
-                                border: `1px solid ${isEbay ? '#bbf7d0' : '#fecdd3'}`,
-                                display: 'flex',
-                                alignItems: 'flex-start',
-                                gap: 8,
-                            }}>
-                                <span style={{
-                                    fontSize: 14,
-                                    lineHeight: '18px',
-                                    flexShrink: 0,
-                                    color: isEbay ? '#16a34a' : '#dc2626',
-                                }}>
-                                    {isEbay ? '✓' : '⚠'}
-                                </span>
-                                <span style={{
-                                    fontSize: 11,
-                                    lineHeight: '1.45',
-                                    color: isEbay ? '#15803d' : '#b91c1c',
-                                    fontWeight: 500,
-                                }}>
-                                    {isEbay
-                                        ? 'Valid eBay URL — safe to use in listings'
-                                        : 'Non-eBay URL detected. eBay prohibits links to external websites in listing HTML. Use an ebay.com, ebay.co.uk, ebay.de (or similar) URL instead.'}
-                                </span>
-                            </div>
-                        )}
-                        {isEmpty && (
-                            <div style={{
-                                marginTop: 6,
-                                padding: '7px 10px',
-                                borderRadius: 6,
-                                background: '#fafafa',
-                                border: '1px solid #e5e7eb',
-                                fontSize: 11,
-                                color: '#9ca3af',
-                                lineHeight: '1.45',
-                            }}>
-                                Enter an eBay store URL to generate the QR code.
-                            </div>
-                        )}
-                    </Section>
-                    <Section title="Display">
-                        <ToggleRow label="Show caption" value={qp.showLabel !== false} onChange={v => updateProps({ showLabel: v } as any)} />
-                        {qp.showLabel !== false && (
-                            <TextInput label="Caption text" value={qp.labelText ?? 'Scan to visit our eBay store'} onChange={v => updateProps({ labelText: v } as any)} />
-                        )}
-                        <ToggleRow label="Show border" value={qp.showBorder !== false} onChange={v => updateProps({ showBorder: v } as any)} />
-                        <SelectInput
-                            label="Alignment"
-                            value={qp.alignment ?? 'center'}
-                            options={[
-                                { v: 'left',   l: 'Left'   },
-                                { v: 'center', l: 'Center' },
-                                { v: 'right',  l: 'Right'  },
-                            ]}
-                            onChange={v => updateProps({ alignment: v } as any)}
-                        />
                     </Section>
                 </>
             )

@@ -3,13 +3,6 @@
 // Riazify — Visual Editor Block System
 //
 // Pure TypeScript — no React.
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const _qrcodeGenerator: (typeNumber: number, eccLevel: 'L'|'M'|'Q'|'H') => {
-    addData(data: string): void
-    make(): void
-    getModuleCount(): number
-    isDark(row: number, col: number): boolean
-} = require('qrcode-generator')
 // Every other VisualEditor file imports from here.
 //
 // Each block has:
@@ -146,7 +139,6 @@ export type BlockType =
     | 'urgency_timer_block'
     | 'trust_badge_block'
     | 'competitor_comparison'
-    | 'qr_code'
 
 // ── Base block instance ─────────────────────────────────────────────────────
 export interface Block {
@@ -215,7 +207,6 @@ export type BlockProps =
     | WhyBuyFromUsProps
     | InfoBoxProps
     | CompetitorComparisonProps
-    | QrCodeProps
 
 // ── Shared common props (present on every block) ────────────────────────────
 export interface CommonProps {
@@ -1231,40 +1222,10 @@ export interface CompetitorComparisonProps extends CommonProps {
     fontSize: number
 }
 
-// ── QR Code ───────────────────────────────────────────────────────────────────
-export interface QrCodeProps extends CommonProps {
-    targetUrl: string             // eBay URL to encode
-    qrSize: number                // rendered size in px (100–300)
-    qrFgColor: string             // dark module colour
-    qrBgColor: string             // light / background colour
-    showLabel: boolean            // show caption below QR
-    labelText: string             // caption text
-    labelColor: string            // caption text colour
-    labelFontSize: number         // caption font size
-    alignment: 'left' | 'center' | 'right'
-    showBorder: boolean
-    borderColor: string
-    borderRadius: number
-}
-
 // ── Raw HTML ──────────────────────────────────────────────────────────────────
 export interface RawHtmlProps extends CommonProps {
     code: string              // raw HTML — passed through sanitiseHtml on export
     label: string             // internal label shown on canvas card
-}
-
-// ── QR code generator — qrcode-generator (pure JS, browser + Node safe) ──────
-function _qrCreate(text: string): { modules: { size: number; data: Uint8Array } } {
-    // typeNumber 0 = auto-detect minimum version; errorCorrectionLevel M
-    const qr = _qrcodeGenerator(0, 'M')
-    qr.addData(text)
-    qr.make()
-    const n = qr.getModuleCount()
-    const data = new Uint8Array(n * n)
-    for (let r = 0; r < n; r++)
-        for (let c = 0; c < n; c++)
-            data[r * n + c] = qr.isDark(r, c) ? 1 : 0
-    return { modules: { size: n, data } }
 }
 
 // Variant system imports
@@ -4493,106 +4454,6 @@ ${thumbCells}
 </table>`
 
                 return wrapBlock('competitor_comparison' as BlockType, id, inner, p)
-            },
-        },
-        // ── QR Code ───────────────────────────────────────────────────────────
-        {
-            type: 'qr_code' as BlockType,
-            label: 'QR Code',
-            category: 'Conversion',
-            icon: 'qr-code',
-            description: 'Scannable QR code linking to your eBay store page',
-            defaultProps: {
-                ...DEFAULT_COMMON,
-                bgColor: '#ffffff',
-                paddingTop: 24,
-                paddingBottom: 24,
-                paddingLeft: 20,
-                paddingRight: 20,
-                targetUrl: 'https://www.ebay.co.uk/str/your-store-name',
-                qrSize: 180,
-                qrFgColor: '#1e1535',
-                qrBgColor: '#ffffff',
-                showLabel: true,
-                labelText: 'Scan to visit our eBay store',
-                labelColor: '#6b7280',
-                labelFontSize: 13,
-                alignment: 'center',
-                showBorder: true,
-                borderColor: '#ede9fe',
-                borderRadius: 8,
-            } as unknown as BlockProps,
-            toHtml(props, id) {
-                const p = props as CommonProps & { [key: string]: any }
-
-                const targetUrl    = (p.targetUrl    ?? 'https://www.ebay.co.uk').trim()
-                const size         = Number(p.qrSize  ?? 180)
-                const fg           = p.qrFgColor      ?? '#1e1535'
-                const bg           = p.qrBgColor      ?? '#ffffff'
-                const showLabel    = p.showLabel      !== false
-                const labelText    = p.labelText      ?? 'Scan to visit our eBay store'
-                const labelColor   = p.labelColor     ?? '#6b7280'
-                const labelFontSize = Number(p.labelFontSize ?? 13)
-                const alignment    = p.alignment      ?? 'center'
-                const showBorder   = p.showBorder     !== false
-                const borderColor  = p.borderColor    ?? '#ede9fe'
-                const borderRadius = Number(p.borderRadius ?? 8)
-
-                // ── Generate QR code as inline SVG ────────────────────────────
-                let qrSvg = ''
-                try {
-                    const qrData = _qrCreate(targetUrl)
-                    const n      = qrData.modules.size
-                    const data   = qrData.modules.data
-                    const quiet  = 4                       // quiet-zone modules
-                    const total  = n + quiet * 2
-                    const cs     = size / total            // cell size in px
-
-                    let rects = ''
-                    for (let y = 0; y < n; y++) {
-                        for (let x = 0; x < n; x++) {
-                            if (data[y * n + x]) {
-                                const rx = ((x + quiet) * cs).toFixed(2)
-                                const ry = ((y + quiet) * cs).toFixed(2)
-                                const rs = (cs + 0.3).toFixed(2)   // tiny overlap prevents sub-pixel gaps
-                                rects += `<rect x="${rx}" y="${ry}" width="${rs}" height="${rs}"/>`
-                            }
-                        }
-                    }
-                    qrSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><rect width="${size}" height="${size}" fill="${bg}"/><g fill="${fg}">${rects}</g></svg>`
-                } catch {
-                    // Fallback placeholder if QR generation fails
-                    qrSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><rect width="${size}" height="${size}" fill="${bg}" stroke="${fg}" stroke-width="3" rx="4"/><text x="50%" y="48%" font-family="Arial,sans-serif" font-size="13" fill="${fg}" text-anchor="middle" dominant-baseline="middle">QR Code</text><text x="50%" y="62%" font-family="Arial,sans-serif" font-size="9" fill="${fg}" text-anchor="middle" dominant-baseline="middle">${targetUrl}</text></svg>`
-                }
-
-                // URI-encode so it works inline as <img src="data:…"> in any HTML context
-                const imgSrc = 'data:image/svg+xml,' + encodeURIComponent(qrSvg)
-
-                const borderStyle = showBorder
-                    ? `border:2px solid ${borderColor};border-radius:${borderRadius}px;`
-                    : `border-radius:${borderRadius}px;`
-
-                const imgTag = `<img src="${imgSrc}" width="${size}" height="${size}" alt="QR Code - scan to visit our eBay store" style="display:block;width:${size}px;height:${size}px;${borderStyle}" />`
-
-                const labelRow = showLabel ? `
-  <tr>
-    <td style="padding:10px 0 0 0;text-align:${alignment};">
-      <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:${labelFontSize}px;color:${labelColor};line-height:1.5;">${labelText}</p>
-    </td>
-  </tr>` : ''
-
-                const inner = `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;background-color:${p.bgColor};${pad(p)}">
-  <tr>
-    <td style="text-align:${alignment};padding:0;">
-      <table cellpadding="0" cellspacing="0" border="0" style="display:inline-table;">
-        <tr><td style="padding:0;">${imgTag}</td></tr>
-        ${labelRow}
-      </table>
-    </td>
-  </tr>
-</table>`
-
-                return wrapBlock('qr_code' as BlockType, id, inner, p)
             },
         },
     )
