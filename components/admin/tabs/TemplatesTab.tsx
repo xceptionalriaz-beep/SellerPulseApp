@@ -273,7 +273,8 @@ export default function TemplatesTab() {
             const { data, error } = await supabase
                 .from('listing_templates')
                 .select('id, user_id, name, description, category, description_html, is_system, is_shared, thumbnail_url, use_count, created_at, updated_at')
-                // Ensure system templates (admin‑published) are included regardless of RLS user filtering
+                // Load all admin-owned templates: published (is_system=true) AND
+                // drafts (is_system=false, user_id=null) created from admin panel
                 .or('is_system.eq.true,user_id.is.null')
                 .order('created_at', { ascending: false })
             if (error) throw error

@@ -163,9 +163,10 @@ function VisualEditorInner() {
     const supabase = createClient()
     const router = useRouter()
     const searchParams = useSearchParams()
-    // isAdmin is always false — system templates are set server-side only.
-    // Never derive admin status from a URL param any user could append.
-    const isAdmin = false
+    // isAdmin = true when opened from the admin panel (?admin=true).
+    // UI-only flag — the real security gate is Supabase RLS on listing_templates.
+    // A regular user who appends ?admin=true would still fail the DB write.
+    const isAdmin = searchParams.get('admin') === 'true'
 
     // templateId from query — if present, load existing template
     const templateId = searchParams.get('id')
@@ -289,7 +290,7 @@ function VisualEditorInner() {
                 const { data, error } = await (supabase as any)
                     .from('listing_templates')
                     .insert({
-                        user_id: user.id,
+                        user_id: isAdmin ? null : user.id,
                         name,
                         category,
                         description_html: html,
@@ -304,8 +305,8 @@ function VisualEditorInner() {
                     .single()
                 if (!error && data) {
                     setSavedId(data.id)
-                    // Update URL without reload
-                    window.history.replaceState(null, '', `?id=${data.id}`)
+                    // Update URL without reload, keep ?admin=true so isAdmin stays correct
+                    window.history.replaceState(null, '', `?id=${data.id}${isAdmin ? '&admin=true' : ''}`)
                 }
             }
             setAutoSaveLabel('saved')
@@ -349,7 +350,7 @@ function VisualEditorInner() {
                 const { data, error } = await (supabase as any)
                     .from('listing_templates')
                     .insert({
-                        user_id: user.id,
+                        user_id: isAdmin ? null : user.id,
                         name,
                         category,
                         description_html: html,
@@ -364,7 +365,7 @@ function VisualEditorInner() {
                     .single()
                 if (!error && data) {
                     setSavedId(data.id)
-                    window.history.replaceState(null, '', `?id=${data.id}`)
+                    window.history.replaceState(null, '', `?id=${data.id}${isAdmin ? '&admin=true' : ''}`)
                     // Save initial version snapshot
                     saveTemplateVersion(data.id, user.id, html, name)
                 }
@@ -405,13 +406,16 @@ function VisualEditorInner() {
                     })
                     .eq('id', savedId)
                 setPublishStatus('published')
-                setTimeout(() => setPublishStatus('idle'), 3000)
-                router.refresh()
+                setTimeout(() => {
+                    setPublishStatus('idle')
+                    // Fix #4 — redirect to correct page after publish
+                    if (isAdmin) router.push('/dashboard/admin')
+                }, 1500)
             } else {
                 const { data, error } = await (supabase as any)
                     .from('listing_templates')
                     .insert({
-                        user_id: user.id,
+                        user_id: isAdmin ? null : user.id,
                         ...publishPayload,
                         description: 'Visual Builder template',
                         use_count: 0,
@@ -420,10 +424,13 @@ function VisualEditorInner() {
                     .single()
                 if (!error && data) {
                     setSavedId(data.id)
-                    window.history.replaceState(null, '', `?id=${data.id}`)
+                    window.history.replaceState(null, '', `?id=${data.id}${isAdmin ? '&admin=true' : ''}`)
                     setPublishStatus('published')
-                    setTimeout(() => setPublishStatus('idle'), 3000)
-                    router.push('/dashboard/design?tab=templates')
+                    setTimeout(() => {
+                        setPublishStatus('idle')
+                        // Fix #4 — redirect to correct page after publish
+                        router.push(isAdmin ? '/dashboard/admin' : '/dashboard/design?tab=templates')
+                    }, 1500)
                 }
             }
         } catch (err) {
@@ -509,7 +516,7 @@ function VisualEditorInner() {
                     onExportReady={(fn) => { exportFnRef.current = fn }}
                     onPublish={handlePublish}
                     publishStatus={publishStatus}
-                    onBack={() => router.push('/dashboard/design')}
+                    onBack={() => router.push(isAdmin ? '/dashboard/admin' : '/dashboard/design')}
                     toolbarSlot={
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             {/* History button — disabled until template has been saved at least once */}
