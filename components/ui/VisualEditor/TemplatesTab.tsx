@@ -19,8 +19,8 @@
 
 import React, { useState, useMemo } from 'react'
 import { Search, LayoutTemplate, Zap, Package, FileText, Store, ChevronDown } from 'lucide-react'
+// LayoutTemplate kept for empty-state icon
 import { Block, createBlock, assembleDocument, BlockType } from './blocks'
-import { FULL_TEMPLATES } from './templates'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -63,7 +63,6 @@ interface TemplateCategory {
 }
 
 const TEMPLATE_CATEGORIES: TemplateCategory[] = [
-    { id: 'full', label: 'Full Templates', Icon: LayoutTemplate, color: '#7530fb' },
     { id: 'conversion', label: 'Conversion', Icon: Zap, color: '#d97706' },
     { id: 'product', label: 'Product', Icon: Package, color: '#16a34a' },
     { id: 'policy', label: 'Policy', Icon: FileText, color: '#0ea5e9' },
@@ -71,9 +70,6 @@ const TEMPLATE_CATEGORIES: TemplateCategory[] = [
 ]
 
 const TEMPLATES: TemplateSection[] = [
-
-    // ── FULL TEMPLATES — imported from ./templates/ ──────────────────────────
-    ...FULL_TEMPLATES,
 
     // ── CONVERSION ────────────────────────────────────────────────────────────
     {
