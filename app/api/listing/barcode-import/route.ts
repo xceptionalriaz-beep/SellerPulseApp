@@ -22,6 +22,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { deductCredits } from '@/lib/ai/credits'
 import {
     detectBarcodeType,
     validateCheckDigit,
@@ -187,33 +188,33 @@ async function saveDraft(
         const { data, error } = await supabaseAdmin
             .from('listing_drafts')
             .insert({
-                user_id:           userId,
-                product_name:      product.title,
-                title:             product.title_ebay,
-                title_score:       product.cassini_score,
-                health_score:      product.cassini_score ?? 60,
-                description_html:  product.description_html,
-                category:          product.category_label ?? null,
-                condition:         product.condition,
-                ean:               product.ean ?? barcode,
-                item_specifics:    product.item_specifics,
-                sell_price:        product.price_suggested ?? null,
-                buy_price:         null,
-                supplier_price:    null,
+                user_id: userId,
+                product_name: product.title,
+                title: product.title_ebay,
+                title_score: product.cassini_score,
+                health_score: product.cassini_score ?? 60,
+                description_html: product.description_html,
+                category: product.category_label ?? null,
+                condition: product.condition,
+                ean: product.ean ?? barcode,
+                item_specifics: product.item_specifics,
+                sell_price: product.price_suggested ?? null,
+                buy_price: null,
+                supplier_price: null,
                 markup_percentage: null,
-                net_profit:        null,
-                margin:            null,
-                seller_type:       'own_stock',
-                source_platform:   'barcode_import',
-                supplier_url:      null,
-                supplier_images:   product.images,
-                photos:            [],
-                main_photo_url:    product.images[0] ?? null,
-                photo_count:       0,
-                vero_status:       product.vero_status,
+                net_profit: null,
+                margin: null,
+                seller_type: 'own_stock',
+                source_platform: 'barcode_import',
+                supplier_url: null,
+                supplier_images: product.images,
+                photos: [],
+                main_photo_url: product.images[0] ?? null,
+                photo_count: 0,
+                vero_status: product.vero_status,
                 vero_brands_found: product.vero_brand ? [product.vero_brand] : [],
-                status:            'draft',
-                current_step:      1,
+                status: 'draft',
+                current_step: 1,
             })
             .select('id')
             .single()
@@ -275,14 +276,14 @@ async function lookupGoogleBooks(barcode: string): Promise<RawProduct | null> {
             ?? null
 
         return {
-            title:       v.title ?? 'Unknown Book',
-            brand:       v.authors?.[0] ?? undefined,  // treat first author as "brand" for VeRO
-            author:      v.authors?.join(', ') ?? undefined,
-            publisher:   v.publisher ?? undefined,
-            page_count:  v.pageCount ?? undefined,
+            title: v.title ?? 'Unknown Book',
+            brand: v.authors?.[0] ?? undefined,  // treat first author as "brand" for VeRO
+            author: v.authors?.join(', ') ?? undefined,
+            publisher: v.publisher ?? undefined,
+            page_count: v.pageCount ?? undefined,
             description: v.description ?? undefined,
-            images:      image ? [image] : [],
-            category:    v.categories?.[0] ?? 'Books',
+            images: image ? [image] : [],
+            category: v.categories?.[0] ?? 'Books',
         }
     } catch { return null }
 }
@@ -315,10 +316,10 @@ async function lookupOpenFoodFacts(barcode: string): Promise<RawProduct | null> 
         if (!p.product_name || p.product_name.trim().length < 2) return null
 
         return {
-            title:       p.product_name.trim(),
-            brand:       p.brands?.split(',')[0]?.trim() ?? undefined,
-            images:      p.image_url ? [p.image_url] : [],
-            category:    p.categories?.split(',')[0]?.trim() ?? 'Food & Grocery',
+            title: p.product_name.trim(),
+            brand: p.brands?.split(',')[0]?.trim() ?? undefined,
+            images: p.image_url ? [p.image_url] : [],
+            category: p.categories?.split(',')[0]?.trim() ?? 'Food & Grocery',
             ingredients: p.ingredients_text ?? undefined,
         }
     } catch { return null }
@@ -380,11 +381,11 @@ async function lookupUpcItemDb(barcode: string, userKey?: string | null): Promis
         await trackUsage('upcitemdb')
 
         return {
-            title:        item.title.trim(),
-            brand:        item.brand?.trim() ?? undefined,
-            description:  item.description?.trim() ?? undefined,
-            images:       (item.images ?? []).filter(Boolean).slice(0, 4),
-            category:     item.category?.trim() ?? undefined,
+            title: item.title.trim(),
+            brand: item.brand?.trim() ?? undefined,
+            description: item.description?.trim() ?? undefined,
+            images: (item.images ?? []).filter(Boolean).slice(0, 4),
+            category: item.category?.trim() ?? undefined,
             price_market: priceMarket,
         }
     } catch { return null }
@@ -431,11 +432,11 @@ async function lookupBarcodeLookup(barcode: string, apiKey: string): Promise<Raw
         await trackUsage('barcodelookup')
 
         return {
-            title:        item.title.trim(),
-            brand:        item.brand?.trim() ?? undefined,
-            description:  item.description?.trim() ?? undefined,
-            images:       (item.images ?? []).filter(Boolean).slice(0, 4),
-            category:     item.category?.trim() ?? undefined,
+            title: item.title.trim(),
+            brand: item.brand?.trim() ?? undefined,
+            description: item.description?.trim() ?? undefined,
+            images: (item.images ?? []).filter(Boolean).slice(0, 4),
+            category: item.category?.trim() ?? undefined,
             price_market: priceMarket,
         }
     } catch { return null }
@@ -476,11 +477,11 @@ async function lookupGoUpc(barcode: string, apiKey: string): Promise<RawProduct 
         await trackUsage('go_upc')
 
         return {
-            title:       p.name.trim(),
-            brand:       p.brand?.trim() ?? undefined,
+            title: p.name.trim(),
+            brand: p.brand?.trim() ?? undefined,
             description: p.description?.trim() ?? undefined,
-            images:      p.imageUrl ? [p.imageUrl] : [],
-            category:    p.category?.trim() ?? undefined,
+            images: p.imageUrl ? [p.imageUrl] : [],
+            category: p.category?.trim() ?? undefined,
         }
     } catch { return null }
 }
@@ -674,6 +675,13 @@ Reply ONLY with valid JSON:
 // ── Main POST handler ─────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
     const userId = await getAuthUserId()
+    if (!userId) {
+        return NextResponse.json({ success: false, errorCode: 'auth_required', message: 'Please sign in to use Barcode AI.' }, { status: 401 })
+    }
+
+    // ── Credit deduction ──────────────────────────────────────────────────────
+    const credit = await deductCredits(userId, 'ai_barcode_import')
+    if (!credit.ok) return credit.response
 
     // Parse body
     const body = await req.json().catch(() => ({})) as {
@@ -682,9 +690,9 @@ export async function POST(req: NextRequest) {
         useAiTitle?: boolean
         useAiPrice?: boolean
     }
-    const rawBarcode   = (body.barcode ?? '').trim()
-    const useAiTitle   = body.useAiTitle   !== false  // default true
-    const useAiPrice   = body.useAiPrice   !== false  // default true
+    const rawBarcode = (body.barcode ?? '').trim()
+    const useAiTitle = body.useAiTitle !== false  // default true
+    const useAiPrice = body.useAiPrice !== false  // default true
 
     if (!rawBarcode) {
         return NextResponse.json(
@@ -777,16 +785,16 @@ export async function POST(req: NextRequest) {
     // Only call AI when the user wants AI-enhanced output AND a key exists
     if (useAiTitle && (geminiKey || anthropicKey)) {
         const [aiGemini, aiAnthropic] = await Promise.all([
-            geminiKey    ? aiTransformWithGemini(raw, barcodeType, digits, geminiKey)       : Promise.resolve(null),
+            geminiKey ? aiTransformWithGemini(raw, barcodeType, digits, geminiKey) : Promise.resolve(null),
             anthropicKey ? aiTransformWithAnthropic(raw, barcodeType, digits, anthropicKey) : Promise.resolve(null),
         ])
         ai = aiGemini ?? aiAnthropic
     }
 
     // Fallbacks when AI disabled or unavailable
-    const titleEbay   = useAiTitle ? (ai?.title_ebay    ?? raw.title.slice(0, 80)) : raw.title.slice(0, 80)
-    const cassini     = ai?.cassini_score ?? 60
-    const descHtml    = useAiTitle
+    const titleEbay = useAiTitle ? (ai?.title_ebay ?? raw.title.slice(0, 80)) : raw.title.slice(0, 80)
+    const cassini = ai?.cassini_score ?? 60
+    const descHtml = useAiTitle
         ? (ai?.description_html
             ?? `<p>${raw.title}${raw.brand ? ` by ${raw.brand}` : ''}. Please see product details below.</p>${raw.description ? `<p>${raw.description}</p>` : ''}`)
         : `<p>${raw.title}${raw.brand ? ` by ${raw.brand}` : ''}. Please see product details below.</p>${raw.description ? `<p>${raw.description}</p>` : ''}`
@@ -797,7 +805,7 @@ export async function POST(req: NextRequest) {
         ...(ai?.item_specifics ?? {}),
     }
     if (isIsbn && raw.author) itemSpecifics['Author'] = raw.author
-    if (raw.publisher)        itemSpecifics['Publisher'] = raw.publisher
+    if (raw.publisher) itemSpecifics['Publisher'] = raw.publisher
 
     // Price: AI suggestion → market anchor × 0.85 → null
     // Skipped entirely when useAiPrice = false (price_suggested will be undefined)
@@ -815,31 +823,31 @@ export async function POST(req: NextRequest) {
 
     // ── Step 6: Build product data ───────────────────────────────────────────────
     const product: BarcodeProductData = {
-        title:          raw.title,
-        title_ebay:     titleEbay,
-        brand:          raw.brand ?? undefined,
-        description_html:       descHtml,
+        title: raw.title,
+        title_ebay: titleEbay,
+        brand: raw.brand ?? undefined,
+        description_html: descHtml,
         description_is_fallback: !useAiTitle || !ai?.description_html,
-        images:         raw.images,
+        images: raw.images,
         category_label: categoryLabel,
-        condition:      'New',       // barcode lookups default to new; seller adjusts in wizard
-        ean:            !isIsbn ? digits : undefined,
-        isbn:           isIsbn  ? digits : undefined,
-        author:         raw.author   ?? undefined,
-        publisher:      raw.publisher ?? undefined,
-        page_count:     raw.page_count ?? undefined,
+        condition: 'New',       // barcode lookups default to new; seller adjusts in wizard
+        ean: !isIsbn ? digits : undefined,
+        isbn: isIsbn ? digits : undefined,
+        author: raw.author ?? undefined,
+        publisher: raw.publisher ?? undefined,
+        page_count: raw.page_count ?? undefined,
         item_specifics: itemSpecifics,
         // Price intelligence
-        price_suggested:       priceSuggested ?? undefined,
-        price_avg_sold:        undefined,  // v2: eBay Finding API
-        price_range_low:       undefined,
-        price_range_high:      undefined,
-        sold_last_30_days:     undefined,
+        price_suggested: priceSuggested ?? undefined,
+        price_avg_sold: undefined,  // v2: eBay Finding API
+        price_range_low: undefined,
+        price_range_high: undefined,
+        sold_last_30_days: undefined,
         active_listings_count: undefined,
         // VeRO
         vero_status: vero.status,
         vero_reason: vero.reason,
-        vero_brand:  vero.vero_brand,
+        vero_brand: vero.vero_brand,
         // Cassini
         cassini_score: cassini,
     }
@@ -852,7 +860,7 @@ export async function POST(req: NextRequest) {
 
     // ── Step 8: Return result ────────────────────────────────────────────────────
     const result: BarcodeImportResult = {
-        barcode:     digits,
+        barcode: digits,
         barcodeType,
         source,
         product,

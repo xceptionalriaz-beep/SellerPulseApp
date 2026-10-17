@@ -10,47 +10,48 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
-import { Palette, Check, X, ExternalLink, RefreshCw, ChevronDown, ChevronUp, Sparkles, Loader2, CheckCircle2 } from 'lucide-react'
+import { Palette, Check, X, ExternalLink, RefreshCw, ChevronDown, ChevronUp, Sparkles, Loader2, CheckCircle2, ShoppingCart } from 'lucide-react'
+import { BuyCreditsModal } from '@/components/ui/BuyCreditsModal'
 
 const C = {
-    bg:           '#f8f7ff',
-    surface:      '#ffffff',
-    border:       '#ede9fe',
-    borderInput:  '#e5e0f5',
-    primary:      '#7530fb',
+    bg: '#f8f7ff',
+    surface: '#ffffff',
+    border: '#ede9fe',
+    borderInput: '#e5e0f5',
+    primary: '#7530fb',
     primaryLight: '#f3eeff',
-    dark:         '#1e1535',
-    body:         '#1f1d2e',
-    secondary:    '#6b7280',
-    muted:        '#9ca3af',
-    success:      '#16a34a',
-    successBg:    '#dcfce7',
+    dark: '#1e1535',
+    body: '#1f1d2e',
+    secondary: '#6b7280',
+    muted: '#9ca3af',
+    success: '#16a34a',
+    successBg: '#dcfce7',
 }
 
 interface VisualTemplate {
-    id:                   string
-    name:                 string
-    category:             string
-    thumbnail_url:        string | null
-    use_count:            number
-    updated_at:           string
-    blocks_json:          any
+    id: string
+    name: string
+    category: string
+    thumbnail_url: string | null
+    use_count: number
+    updated_at: string
+    blocks_json: any
     canvas_settings_json: any
 }
 
 interface TemplateSlot {
-    role:    string
+    role: string
     blockId: string
-    label:   string
+    label: string
 }
 
 interface Props {
-    templateId:    string | null
-    onChange:      (id: string | null) => void
+    templateId: string | null
+    onChange: (id: string | null) => void
     /** ID of the current listing draft — enables the AI Fill button */
-    draftId?:      string
+    draftId?: string
     /** Called with the AI-filled description_html on success */
-    onFilled?:     (html: string) => void
+    onFilled?: (html: string) => void
     /** Draft's category key (e.g. "consumer_electronics") — enables category match badge */
     draftCategory?: string
 }
@@ -60,20 +61,20 @@ interface Props {
 // legacy Design-Studio slugs (electronics, fashion, etc.)
 const LEGACY_SLUGS: Record<string, string[]> = {
     consumer_electronics: ['electronics'],
-    computers:            ['electronics', 'computers'],
-    clothing:             ['fashion', 'clothing'],
-    jewelry:              ['fashion', 'jewelry', 'jewellery'],
-    health_beauty:        ['fashion', 'health_beauty', 'health'],
-    home_garden:          ['home', 'home_garden'],
-    furniture:            ['home', 'furniture'],
-    toys_hobbies:         ['toys', 'toys_hobbies'],
-    sporting_goods:       ['sports', 'sporting_goods'],
-    pet_supplies:         ['pets', 'pet_supplies'],
-    motors_parts:         ['auto', 'motors_parts'],
-    books_movies:         ['general', 'books_movies'],
-    collectibles:         ['general', 'collectibles'],
-    business:             ['general', 'business'],
-    default:              ['general'],
+    computers: ['electronics', 'computers'],
+    clothing: ['fashion', 'clothing'],
+    jewelry: ['fashion', 'jewelry', 'jewellery'],
+    health_beauty: ['fashion', 'health_beauty', 'health'],
+    home_garden: ['home', 'home_garden'],
+    furniture: ['home', 'furniture'],
+    toys_hobbies: ['toys', 'toys_hobbies'],
+    sporting_goods: ['sports', 'sporting_goods'],
+    pet_supplies: ['pets', 'pet_supplies'],
+    motors_parts: ['auto', 'motors_parts'],
+    books_movies: ['general', 'books_movies'],
+    collectibles: ['general', 'collectibles'],
+    business: ['general', 'business'],
+    default: ['general'],
 }
 
 function categoryMatch(templateCat: string, draftCat?: string): boolean {
@@ -87,17 +88,19 @@ function categoryMatch(templateCat: string, draftCat?: string): boolean {
 export default function TemplatePickerCard({ templateId, onChange, draftId, onFilled, draftCategory }: Props) {
     const supabase = createClient()
 
-    const [templates, setTemplates]       = useState<VisualTemplate[]>([])
-    const [loading, setLoading]           = useState(true)
-    const [expanded, setExpanded]         = useState(false)
-    const [selected, setSelected]         = useState<VisualTemplate | null>(null)
-    const [hoverId, setHoverId]           = useState<string | null>(null)
+    const [templates, setTemplates] = useState<VisualTemplate[]>([])
+    const [loading, setLoading] = useState(true)
+    const [expanded, setExpanded] = useState(false)
+    const [selected, setSelected] = useState<VisualTemplate | null>(null)
+    const [hoverId, setHoverId] = useState<string | null>(null)
 
     // AI Fill state
-    const [slots, setSlots]               = useState<TemplateSlot[]>([])
-    const [aiLoading, setAiLoading]       = useState(false)
-    const [aiFilled, setAiFilled]         = useState(false)
-    const [aiError, setAiError]           = useState<string | null>(null)
+    const [slots, setSlots] = useState<TemplateSlot[]>([])
+    const [aiLoading, setAiLoading] = useState(false)
+    const [aiFilled, setAiFilled] = useState(false)
+    const [aiError, setAiError] = useState<string | null>(null)
+    const [creditError, setCreditError] = useState<{ balance: number; cost: number } | null>(null)
+    const [showBuyCredits, setShowBuyCredits] = useState(false)
 
     useEffect(() => { loadTemplates() }, [])
 
@@ -161,12 +164,22 @@ export default function TemplatePickerCard({ templateId, onChange, draftId, onFi
         setAiLoading(true)
         setAiError(null)
         setAiFilled(false)
+        setCreditError(null)
         try {
             const res = await fetch('/api/listing-generator/ai-fill', {
-                method:  'POST',
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({ draftId }),
+                body: JSON.stringify({ draftId }),
             })
+            if (res.status === 401) {
+                setAiError('Please sign in to use AI Fill')
+                return
+            }
+            if (res.status === 402) {
+                const errData = await res.json().catch(() => ({}))
+                setCreditError({ balance: errData.balance ?? 0, cost: errData.cost ?? 3 })
+                return
+            }
             const data = await res.json()
             if (!res.ok || !data.ok) {
                 setAiError(data.error ?? 'AI fill failed')
@@ -206,8 +219,8 @@ export default function TemplatePickerCard({ templateId, onChange, draftId, onFi
                 {blocks.slice(0, 3).map((b: any, i: number) => (
                     <div key={i} style={{
                         position: 'absolute',
-                        top:    `${15 + i * 22}%`,
-                        left:   '10%', right: '10%',
+                        top: `${15 + i * 22}%`,
+                        left: '10%', right: '10%',
                         height: '14%',
                         background: b.style?.backgroundColor ?? b.style?.color ?? C.primary,
                         opacity: 0.35 - i * 0.08,
@@ -374,9 +387,9 @@ export default function TemplatePickerCard({ templateId, onChange, draftId, onFi
                     overflowY: 'auto',
                 }}>
                     {sortedTemplates.map(t => {
-                        const isActive  = templateId === t.id
+                        const isActive = templateId === t.id
                         const isHovered = hoverId === t.id
-                        const tMatch    = categoryMatch(t.category, draftCategory)
+                        const tMatch = categoryMatch(t.category, draftCategory)
                         return (
                             <div
                                 key={t.id}
@@ -544,6 +557,33 @@ export default function TemplatePickerCard({ templateId, onChange, draftId, onFi
                             {aiError}
                         </p>
                     )}
+
+                    {/* Credit error banner */}
+                    {creditError && (
+                        <div style={{ padding: '10px 12px', backgroundColor: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: 8 }}>
+                            <p style={{ margin: '0 0 4px', fontSize: 11, fontWeight: 700, color: C.primary, display: 'flex', alignItems: 'center', gap: 5 }}>
+                                <ShoppingCart size={11} /> Not enough credits
+                            </p>
+                            <p style={{ margin: '0 0 6px', fontSize: 10, color: C.secondary }}>
+                                AI Fill costs {creditError.cost} credits. You have {creditError.balance}.
+                            </p>
+                            <div style={{ display: 'flex', gap: 5 }}>
+                                <button
+                                    onClick={() => setShowBuyCredits(true)}
+                                    style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, backgroundColor: C.primary, color: '#fff', border: 'none', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
+                                >
+                                    <ShoppingCart size={10} /> Buy Credits
+                                </button>
+                                <button
+                                    onClick={() => setCreditError(null)}
+                                    style={{ padding: '4px 10px', borderRadius: 6, backgroundColor: '#f3f4f6', color: C.muted, border: 'none', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}
+                                >
+                                    Dismiss
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                    {showBuyCredits && <BuyCreditsModal onClose={() => setShowBuyCredits(false)} />}
 
                     {/* Helper tip */}
                     {!aiFilled && !aiError && (

@@ -75,13 +75,13 @@ export interface ImageImportResult {
 // ── Image-specific task definitions ──────────────────────────────────────────
 function getImageTasks(): ProcessingTask[] {
   return [
-    { id: 'upload',   label: 'Preparing and uploading photos',          status: 'pending' },
-    { id: 'analyse',  label: 'AI analysing product images',             status: 'pending' },
+    { id: 'upload', label: 'Preparing and uploading photos', status: 'pending' },
+    { id: 'analyse', label: 'AI analysing product images', status: 'pending' },
     { id: 'identify', label: 'Identifying item and extracting details', status: 'pending' },
-    { id: 'title',    label: 'Writing eBay-optimised title',            status: 'pending' },
-    { id: 'describe', label: 'Generating listing description',          status: 'pending' },
-    { id: 'pricing',  label: 'Suggesting price range',                  status: 'pending' },
-    { id: 'vero',     label: 'VeRO brand check',                        status: 'pending' },
+    { id: 'title', label: 'Writing eBay-optimised title', status: 'pending' },
+    { id: 'describe', label: 'Generating listing description', status: 'pending' },
+    { id: 'pricing', label: 'Suggesting price range', status: 'pending' },
+    { id: 'vero', label: 'VeRO brand check', status: 'pending' },
   ]
 }
 
@@ -100,11 +100,11 @@ const SUB_CONDITION_LABELS: Record<string, string> = {
 
 // ── TaskRow sub-component ─────────────────────────────────────────────────────
 function TaskRow({ task }: { task: ProcessingTask }) {
-  const isRunning  = task.status === 'running'
-  const isDone     = task.status === 'done'
-  const isFailed   = task.status === 'failed'
-  const isSkipped  = task.status === 'skipped'
-  const isPending  = task.status === 'pending'
+  const isRunning = task.status === 'running'
+  const isDone = task.status === 'done'
+  const isFailed = task.status === 'failed'
+  const isSkipped = task.status === 'skipped'
+  const isPending = task.status === 'pending'
 
   return (
     <div
@@ -117,10 +117,10 @@ function TaskRow({ task }: { task: ProcessingTask }) {
         backgroundColor: isRunning
           ? C.primaryLight
           : isDone
-          ? C.successBg
-          : isFailed
-          ? C.dangerBg
-          : 'transparent',
+            ? C.successBg
+            : isFailed
+              ? C.dangerBg
+              : 'transparent',
         opacity: isPending ? 0.4 : 1,
         transform: isPending ? 'translateX(-4px)' : 'translateX(0)',
         transition: 'all 0.3s ease',
@@ -129,8 +129,8 @@ function TaskRow({ task }: { task: ProcessingTask }) {
       {/* Status icon */}
       <div style={{ width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
         {isRunning && <Loader2 size={20} className="animate-spin" style={{ color: C.primary }} />}
-        {isDone    && <CheckCircle2 size={20} style={{ color: C.success }} />}
-        {isFailed  && <XCircle size={20} style={{ color: C.danger }} />}
+        {isDone && <CheckCircle2 size={20} style={{ color: C.success }} />}
+        {isFailed && <XCircle size={20} style={{ color: C.danger }} />}
         {isSkipped && <SkipForward size={18} style={{ color: C.muted }} />}
         {isPending && (
           <div style={{ width: 9, height: 9, borderRadius: '50%', backgroundColor: C.muted }} />
@@ -147,12 +147,12 @@ function TaskRow({ task }: { task: ProcessingTask }) {
           color: isRunning
             ? C.primary
             : isDone
-            ? C.success
-            : isFailed
-            ? C.danger
-            : isSkipped
-            ? C.muted
-            : C.body,
+              ? C.success
+              : isFailed
+                ? C.danger
+                : isSkipped
+                  ? C.muted
+                  : C.body,
         }}
       >
         {task.label}
@@ -176,8 +176,8 @@ function TaskRow({ task }: { task: ProcessingTask }) {
             backgroundColor: isDone
               ? 'rgba(22,163,74,0.12)'
               : isFailed
-              ? C.dangerBg
-              : C.bg,
+                ? C.dangerBg
+                : C.bg,
             color: isDone ? C.success : isFailed ? C.danger : C.secondary,
           }}
         >
@@ -198,10 +198,10 @@ interface Props {
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function ImageImportProcessing({ data, onComplete, onFailed, onCancel }: Props) {
-  const [tasks, setTasks]     = useState<ProcessingTask[]>(getImageTasks())
+  const [tasks, setTasks] = useState<ProcessingTask[]>(getImageTasks())
   const [elapsed, setElapsed] = useState(0)
-  const startRef              = useRef(Date.now())
-  const cancelledRef          = useRef(false)
+  const startRef = useRef(Date.now())
+  const cancelledRef = useRef(false)
 
   // ── Elapsed timer ─────────────────────────────────────────────────────────
   useEffect(() => {
@@ -237,13 +237,13 @@ export default function ImageImportProcessing({ data, onComplete, onFailed, onCa
         const { naturalWidth: w, naturalHeight: h } = img
         const scale = Math.min(1, MAX_PX / Math.max(w, h))
         const canvas = document.createElement('canvas')
-        canvas.width  = Math.round(w * scale)
+        canvas.width = Math.round(w * scale)
         canvas.height = Math.round(h * scale)
         const ctx = canvas.getContext('2d')
         if (!ctx) { reject(new Error('Canvas unavailable')); return }
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
         // Keep PNG for PNGs (may have transparency), JPEG for everything else
-        const mime    = file.type === 'image/png' ? 'image/png' : 'image/jpeg'
+        const mime = file.type === 'image/png' ? 'image/png' : 'image/jpeg'
         const quality = mime === 'image/jpeg' ? 0.85 : undefined
         resolve(canvas.toDataURL(mime, quality).split(',')[1])
       }
@@ -304,6 +304,18 @@ export default function ImageImportProcessing({ data, onComplete, onFailed, onCa
 
       const res = await Promise.race([fetchPromise, timeoutPromise])
 
+      if (res && res.status === 401) {
+        if (!cancelledRef.current) onFailed('auth_required', 'Please sign in to continue')
+        return
+      }
+
+      if (res && res.status === 402) {
+        const errData = await res.json().catch(() => ({}))
+        if (!cancelledRef.current)
+          onFailed('insufficient_credits', `Not enough credits for Image Import (have ${errData.balance ?? 0}, need ${errData.cost ?? 5})`)
+        return
+      }
+
       if (res && res.ok) {
         const result: ImageImportResult = await res.json()
 
@@ -338,12 +350,12 @@ export default function ImageImportProcessing({ data, onComplete, onFailed, onCa
     await sleep(200)
 
     const steps: Array<[string, number, string]> = [
-      ['analyse',  3200, 'Vision AI complete'],
+      ['analyse', 3200, 'Vision AI complete'],
       ['identify', 2400, 'Item recognised'],
-      ['title',    2000, 'Cassini score: 91'],
+      ['title', 2000, 'Cassini score: 91'],
       ['describe', 2600, 'HTML ready'],
-      ['pricing',  1400, '£18–£26 range'],
-      ['vero',     1600, 'No issues found'],
+      ['pricing', 1400, '£18–£26 range'],
+      ['vero', 1600, 'No issues found'],
     ]
 
     for (const [id, duration, detail] of steps) {
@@ -366,7 +378,7 @@ export default function ImageImportProcessing({ data, onComplete, onFailed, onCa
     }))
 
     const condLabel = CONDITION_LABELS[data.condition] ?? data.condition
-    const subLabel  = data.subCondition ? ` — ${SUB_CONDITION_LABELS[data.subCondition]}` : ''
+    const subLabel = data.subCondition ? ` — ${SUB_CONDITION_LABELS[data.subCondition]}` : ''
 
     const mockResult: ImageImportResult = {
       success: true,
@@ -419,7 +431,7 @@ export default function ImageImportProcessing({ data, onComplete, onFailed, onCa
 
   const conditionSummary = (() => {
     const base = CONDITION_LABELS[data.condition] ?? data.condition
-    const sub  = data.subCondition ? ` (${SUB_CONDITION_LABELS[data.subCondition]})` : ''
+    const sub = data.subCondition ? ` (${SUB_CONDITION_LABELS[data.subCondition]})` : ''
     return `${base}${sub}`
   })()
 

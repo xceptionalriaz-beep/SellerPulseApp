@@ -9,6 +9,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { getAuthUserId, deductCredits } from '@/lib/ai/credits'
 
 const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -122,6 +123,14 @@ export async function POST(req: NextRequest) {
     if (!prompt || prompt.trim().length < 5) {
         return NextResponse.json({ error: 'prompt is required' }, { status: 400 })
     }
+
+    // ── Auth + credit deduction ──────────────────────────────────────────────
+    const userId = await getAuthUserId()
+    if (!userId) {
+        return NextResponse.json({ error: 'Please sign in to use AI Template Generator.' }, { status: 401 })
+    }
+    const credit = await deductCredits(userId, 'ai_design_template')
+    if (!credit.ok) return credit.response
 
     const fullPrompt = buildPrompt(prompt.trim())
 

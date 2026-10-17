@@ -17,9 +17,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2026-09-30.endive',
-})
+// Lazy singleton — only instantiated at request time, not at build time
+function getStripe() {
+    const key = process.env.STRIPE_SECRET_KEY
+    if (!key) throw new Error('STRIPE_SECRET_KEY is not set')
+    return new Stripe(key, { apiVersion: '2026-09-30.endive' })
+}
 
 const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -108,7 +111,7 @@ export async function POST(req: NextRequest) {
 
     let event: Stripe.Event
     try {
-        event = stripe.webhooks.constructEvent(body, signature, secret)
+        event = getStripe().webhooks.constructEvent(body, signature, secret)
     } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'Unknown error'
         console.error('[webhook] Signature verification failed:', msg)

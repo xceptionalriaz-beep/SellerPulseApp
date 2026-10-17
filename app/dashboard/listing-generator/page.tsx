@@ -335,7 +335,7 @@ export default function ListingGeneratorPage() {
     const [planLimits, setPlanLimits] = useState<any>(null)
     const [userId, setUserId] = useState<string | null>(null)
     const [currentTier, setCurrentTier] = useState<string>('free')
-    const [teaserOpen,  setTeaserOpen]  = useState(false)
+    const [teaserOpen, setTeaserOpen] = useState(false)
     const [upgradeOpen, setUpgradeOpen] = useState(false)
 
     // ── Bulk upload state ──────────────────────────────────────
@@ -424,7 +424,7 @@ export default function ListingGeneratorPage() {
         // Initialise queue rows (all pending)
         const queue: QueueRow[] = parsedRows.map(r => ({
             ...r,
-            _status:  'pending',
+            _status: 'pending',
             _message: '',
         }))
         setBulkRows([...queue])
@@ -447,22 +447,31 @@ export default function ListingGeneratorPage() {
             try {
                 const row = queue[idx]
                 const res = await fetch('/api/listing-generator/bulk-generate', {
-                    method:  'POST',
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body:    JSON.stringify({
-                        title:       row.title,
-                        barcode:     row.barcode,
-                        buy_price:   row.buy_price,
-                        sell_price:  row.sell_price,
-                        sku:         row.sku,
-                        condition:   row.condition,
-                        quantity:    row.quantity,
+                    body: JSON.stringify({
+                        title: row.title,
+                        barcode: row.barcode,
+                        buy_price: row.buy_price,
+                        sell_price: row.sell_price,
+                        sku: row.sku,
+                        condition: row.condition,
+                        quantity: row.quantity,
                         category_id: row.category_id,
-                        images:      row.images,
+                        images: row.images,
                         template_id: templateId ?? undefined,
-                        _rowIndex:   row._rowIndex,
+                        _rowIndex: row._rowIndex,
                     }),
                 })
+
+                if (res.status === 401) {
+                    throw new Error('Not signed in — please refresh and try again')
+                }
+
+                if (res.status === 402) {
+                    const errData = await res.json().catch(() => ({}))
+                    throw new Error(`Not enough credits for Bulk Generate (have ${errData.balance ?? 0}, need ${errData.cost ?? 5})`)
+                }
 
                 const json = await res.json()
 
@@ -474,10 +483,10 @@ export default function ListingGeneratorPage() {
                     const next = [...prev]
                     next[idx] = {
                         ...next[idx],
-                        _status:      'done',
-                        _message:     json.message    || 'Listing created',
-                        _draftId:     json.draftId    ?? undefined,
-                        _veroStatus:  json.veroStatus ?? 'ok',
+                        _status: 'done',
+                        _message: json.message || 'Listing created',
+                        _draftId: json.draftId ?? undefined,
+                        _veroStatus: json.veroStatus ?? 'ok',
                     }
                     return next
                 })
@@ -529,7 +538,7 @@ export default function ListingGeneratorPage() {
         const reparsed: ParsedRow[] = failedRows.map(r => ({
             ...r,
             _errors: [],
-            _valid:  true,
+            _valid: true,
         }))
         handleBulkConfirm(reparsed, null)
     }

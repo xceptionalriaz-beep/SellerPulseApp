@@ -19,9 +19,12 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2026-09-30.endive',
-})
+// Lazy singleton — only instantiated at request time, not at build time
+function getStripe() {
+    const key = process.env.STRIPE_SECRET_KEY
+    if (!key) throw new Error('STRIPE_SECRET_KEY is not set')
+    return new Stripe(key, { apiVersion: '2026-09-30.endive' })
+}
 
 const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -104,7 +107,7 @@ export async function POST(req: NextRequest) {
                 quantity: 1,
             }
 
-        session = await stripe.checkout.sessions.create({
+        session = await getStripe().checkout.sessions.create({
             mode: 'payment',
             line_items: [lineItem],
             customer_email: user.email,

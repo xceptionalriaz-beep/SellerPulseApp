@@ -9,10 +9,12 @@ import {
     FileCode2, Layers,
     Cpu, Shirt, Trophy, Home, Wrench,
     Dumbbell, BookOpen, PawPrint, Gamepad2, Package,
+    ShoppingCart,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { AIButton } from '@/components/ui/Buttons'
+import { BuyCreditsModal } from '@/components/ui/BuyCreditsModal'
 
 const C = {
     bg: '#f8f7ff',
@@ -117,6 +119,8 @@ export default function AiTemplateGenerator({ open, onClose, onImport, isAdmin =
     const [templateName, setTemplateName] = useState('')
     const [saving, setSaving] = useState(false)
     const [saved, setSaved] = useState(false)
+    const [showBuyCredits, setShowBuyCredits] = useState(false)
+    const [creditError, setCreditError] = useState<{ balance: number; cost: number } | null>(null)
 
     const abortRef = useRef<AbortController | null>(null)
 
@@ -163,6 +167,7 @@ STRICT RULES — follow every single one:
         setStep('generating')
         setHtml('')
         setError('')
+        setCreditError(null)
         setProgress(10)
 
         const cat = CATEGORIES.find(c => c.id === category)?.label ?? category
@@ -185,6 +190,19 @@ STRICT RULES — follow every single one:
             })
 
             clearInterval(progressInterval)
+
+            if (res.status === 401) {
+                setStep('input')
+                setError('Please sign in to use AI Template Generator.')
+                return
+            }
+
+            if (res.status === 402) {
+                const data = await res.json().catch(() => ({}))
+                setStep('input')
+                setCreditError({ balance: data.balance ?? 0, cost: data.cost ?? 5 })
+                return
+            }
 
             if (!res.ok) {
                 throw new Error('Template generation is temporarily unavailable. Please try again in a moment.')
@@ -241,6 +259,7 @@ STRICT RULES — follow every single one:
         setStep('input')
         setHtml('')
         setError('')
+        setCreditError(null)
         setProgress(0)
         setSaved(false)
     }
@@ -397,6 +416,35 @@ STRICT RULES — follow every single one:
                                 onBlur={e => e.currentTarget.style.borderColor = C.borderInput}
                             />
                         </div>
+
+                        {/* Credit error */}
+                        {creditError && (
+                            <div className="flex flex-col gap-3 p-4 rounded-xl"
+                                style={{ backgroundColor: '#fdf4ff', border: '1.5px solid #e9d5ff' }}>
+                                <div className="flex items-start gap-3">
+                                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                                        style={{ backgroundColor: 'rgba(117,48,251,0.1)' }}>
+                                        <Zap size={15} style={{ color: C.primary }} />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-[13px] font-bold mb-0.5"
+                                            style={{ color: C.dark, fontFamily: 'DM Sans, sans-serif' }}>
+                                            Not enough credits
+                                        </p>
+                                        <p className="text-[12px]" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
+                                            This action costs <strong style={{ color: C.primary }}>{creditError.cost} credits</strong>.
+                                            You have <strong style={{ color: '#dc2626' }}>{creditError.balance}</strong> remaining.
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setShowBuyCredits(true)}
+                                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[12px] font-bold transition-all hover:opacity-90"
+                                    style={{ backgroundColor: C.primary, color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                                    <ShoppingCart size={13} /> Buy Credits
+                                </button>
+                            </div>
+                        )}
 
                         {/* Error */}
                         {error && (
@@ -631,6 +679,11 @@ STRICT RULES — follow every single one:
                 @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
                 @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
             `}</style>
+
+            {/* Buy Credits modal */}
+            {showBuyCredits && (
+                <BuyCreditsModal onClose={() => setShowBuyCredits(false)} />
+            )}
         </div>
     )
 }

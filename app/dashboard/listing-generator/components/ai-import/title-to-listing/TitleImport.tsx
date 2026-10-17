@@ -11,8 +11,9 @@ import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import {
     Type, PlusCircle, CheckSquare, Square, Trash2,
     ArrowRight, RefreshCcw, AlertTriangle, History, X,
-    Sparkles, CheckCircle2,
+    Sparkles, CheckCircle2, ShoppingCart,
 } from 'lucide-react'
+import { BuyCreditsModal } from '@/components/ui/BuyCreditsModal'
 import {
     BarcodeImportResult,
     BarcodeImportResponse,
@@ -26,33 +27,33 @@ import TitleQueueRow from './TitleQueueRow'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
-    primary:      '#7530fb',
+    primary: '#7530fb',
     primaryLight: '#f3eeff',
-    accent:       '#b8fa33',
-    accentDark:   '#8abf1f',
-    bg:           '#f8f7ff',
-    surface:      '#ffffff',
-    border:       '#ede9fe',
-    text:         '#1a1523',
-    muted:        '#6b7280',
-    error:        '#ef4444',
-    errorLight:   '#fef2f2',
-    warning:      '#f59e0b',
+    accent: '#b8fa33',
+    accentDark: '#8abf1f',
+    bg: '#f8f7ff',
+    surface: '#ffffff',
+    border: '#ede9fe',
+    text: '#1a1523',
+    muted: '#6b7280',
+    error: '#ef4444',
+    errorLight: '#fef2f2',
+    warning: '#f59e0b',
     warningLight: '#fffbeb',
-    success:      '#22c55e',
+    success: '#22c55e',
     successLight: '#f0fdf4',
 } as const
 
 // ── Queue item type ───────────────────────────────────────────────────────────
 export interface TitleQueueItem {
-    id:           string
-    searchTitle:  string               // what the user typed
-    condition:    string               // condition at the time of adding
-    status:       QueueItemStatus
-    result?:      BarcodeImportResult  // same shape as barcode import
-    errorCode?:   BarcodeImportErrorCode
-    selected:     boolean
-    addedAt:      number               // Date.now()
+    id: string
+    searchTitle: string               // what the user typed
+    condition: string               // condition at the time of adding
+    status: QueueItemStatus
+    result?: BarcodeImportResult  // same shape as barcode import
+    errorCode?: BarcodeImportErrorCode
+    selected: boolean
+    addedAt: number               // Date.now()
 }
 
 // ── Props ─────────────────────────────────────────────────────────────────────
@@ -61,27 +62,27 @@ interface TitleImportProps {
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const MAX_CONCURRENT   = 3
-const MAX_QUEUE        = 100
+const MAX_CONCURRENT = 3
+const MAX_QUEUE = 100
 const FETCH_TIMEOUT_MS = 30_000
-const SESSION_KEY      = 'riazify_title_session'
-const RECENT_KEY       = 'riazify_title_recent'
-const MAX_RECENT       = 10
+const SESSION_KEY = 'riazify_title_session'
+const RECENT_KEY = 'riazify_title_recent'
+const MAX_RECENT = 10
 
 // ── Condition options ─────────────────────────────────────────────────────────
 const CONDITIONS = [
-    { value: 'New',              label: 'New',              short: 'New' },
-    { value: 'Used – Good',      label: 'Used – Good',      short: 'Good' },
+    { value: 'New', label: 'New', short: 'New' },
+    { value: 'Used – Good', label: 'Used – Good', short: 'Good' },
     { value: 'Used – Acceptable', label: 'Used – Acceptable', short: 'Acceptable' },
-    { value: 'For Parts',        label: 'For Parts',        short: 'Parts' },
+    { value: 'For Parts', label: 'For Parts', short: 'Parts' },
 ] as const
 
 // ── Condition colour map ──────────────────────────────────────────────────────
 function conditionStyle(condition: string): { bg: string; border: string; fg: string } {
-    if (condition === 'New')               return { bg: '#dbeafe', border: '#3b82f6', fg: '#1d4ed8' }
-    if (condition === 'Used – Good')       return { bg: C.successLight, border: C.success, fg: '#16a34a' }
+    if (condition === 'New') return { bg: '#dbeafe', border: '#3b82f6', fg: '#1d4ed8' }
+    if (condition === 'Used – Good') return { bg: C.successLight, border: C.success, fg: '#16a34a' }
     if (condition === 'Used – Acceptable') return { bg: C.warningLight, border: C.warning, fg: '#b45309' }
-    if (condition === 'For Parts')         return { bg: C.errorLight, border: C.error, fg: C.error }
+    if (condition === 'For Parts') return { bg: C.errorLight, border: C.error, fg: C.error }
     return { bg: '#f3f4f6', border: C.border, fg: C.muted }
 }
 
@@ -108,60 +109,62 @@ function detectVeROBrand(title: string): string | null {
 
 // ── Session types ─────────────────────────────────────────────────────────────
 interface StoredSession {
-    items:   TitleQueueItem[]
+    items: TitleQueueItem[]
     savedAt: number
 }
 
 // ── Adapt TitleQueueItem → BarcodeQueueItem for shared preview panels ─────────
 function adaptForPreview(item: TitleQueueItem): BarcodeQueueItem {
     return {
-        id:          item.id,
-        barcode:     item.searchTitle,
+        id: item.id,
+        barcode: item.searchTitle,
         barcodeType: item.result?.barcodeType ?? 'TITLE',
-        status:      item.status,
-        result:      item.result,
-        errorCode:   item.errorCode,
-        selected:    item.selected,
-        scannedAt:   item.addedAt,
+        status: item.status,
+        result: item.result,
+        errorCode: item.errorCode,
+        selected: item.selected,
+        scannedAt: item.addedAt,
     }
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function TitleImport({ onBack }: TitleImportProps) {
-    const [queue, setQueue]                   = useState<TitleQueueItem[]>([])
-    const [condition, setCondition]           = useState<string>('New')
-    const [titleInput, setTitleInput]         = useState('')
-    const [inputError, setInputError]         = useState<string | null>(null)
-    const [previewItem, setPreviewItem]       = useState<TitleQueueItem | null>(null)
-    const [failedItem, setFailedItem]         = useState<TitleQueueItem | null>(null)
-    const [bulkDone, setBulkDone]             = useState(false)
+    const [queue, setQueue] = useState<TitleQueueItem[]>([])
+    const [condition, setCondition] = useState<string>('New')
+    const [titleInput, setTitleInput] = useState('')
+    const [inputError, setInputError] = useState<string | null>(null)
+    const [previewItem, setPreviewItem] = useState<TitleQueueItem | null>(null)
+    const [failedItem, setFailedItem] = useState<TitleQueueItem | null>(null)
+    const [bulkDone, setBulkDone] = useState(false)
     const [bulkSavedCount, setBulkSavedCount] = useState(0)
     const [restoreSession, setRestoreSession] = useState<StoredSession | null>(null)
     const [recentSearches, setRecentSearches] = useState<string[]>([])
-    const [showRecent, setShowRecent]         = useState(false)
-    const [aiTitle, setAiTitle]               = useState(true)
-    const [aiPrice, setAiPrice]               = useState(true)
+    const [showRecent, setShowRecent] = useState(false)
+    const [aiTitle, setAiTitle] = useState(true)
+    const [aiPrice, setAiPrice] = useState(true)
+    const [creditError, setCreditError] = useState<{ balance: number; cost: number } | null>(null)
+    const [showBuyCredits, setShowBuyCredits] = useState(false)
 
     const inFlightRef = useRef<Set<string>>(new Set())
-    const queueRef    = useRef<TitleQueueItem[]>([])
-    const inputRef    = useRef<HTMLInputElement>(null)
-    const wrapperRef  = useRef<HTMLDivElement>(null)
+    const queueRef = useRef<TitleQueueItem[]>([])
+    const inputRef = useRef<HTMLInputElement>(null)
+    const wrapperRef = useRef<HTMLDivElement>(null)
 
     // ── Keep refs in sync ─────────────────────────────────────────────────────
     useEffect(() => { queueRef.current = queue }, [queue])
 
     // ── Derived state ─────────────────────────────────────────────────────────
-    const found      = queue.filter(i => i.status === 'found' || i.status === 'vero_risk')
-    const selected   = found.filter(i => i.selected)
-    const pending    = queue.filter(i => i.status === 'pending' || i.status === 'loading')
+    const found = queue.filter(i => i.status === 'found' || i.status === 'vero_risk')
+    const selected = found.filter(i => i.selected)
+    const pending = queue.filter(i => i.status === 'pending' || i.status === 'loading')
     const allSelected = found.length > 0 && selected.length === found.length
 
     const stats = {
-        total:   queue.length,
-        found:   found.length,
+        total: queue.length,
+        found: found.length,
         loading: queue.filter(i => i.status === 'loading').length,
         pending: queue.filter(i => i.status === 'pending').length,
-        failed:  queue.filter(i => i.status === 'not_found' || i.status === 'error').length,
+        failed: queue.filter(i => i.status === 'not_found' || i.status === 'error').length,
     }
 
     const isEmpty = queue.length === 0
@@ -182,7 +185,7 @@ export default function TitleImport({ onBack }: TitleImportProps) {
                 const age = Date.now() - session.savedAt
                 const hasTerminal = session.items.some(
                     i => i.status === 'found' || i.status === 'vero_risk' ||
-                         i.status === 'not_found' || i.status === 'error'
+                        i.status === 'not_found' || i.status === 'error'
                 )
                 if (age < 86_400_000 && hasTerminal) {
                     setRestoreSession(session)
@@ -202,7 +205,7 @@ export default function TitleImport({ onBack }: TitleImportProps) {
         if (queue.length === 0) return
         const terminalItems = queue.filter(
             i => i.status === 'found' || i.status === 'vero_risk' ||
-                 i.status === 'not_found' || i.status === 'error'
+                i.status === 'not_found' || i.status === 'error'
         )
         if (terminalItems.length === 0) return
         try {
@@ -240,20 +243,34 @@ export default function TitleImport({ onBack }: TitleImportProps) {
         inFlightRef.current.add(id)
 
         const controller = new AbortController()
-        const timeoutId  = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+        const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
 
         try {
             const res = await fetch('/api/listing/title-import', {
-                method:  'POST',
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({
-                    title:      searchTitle,
-                    condition:  itemCondition,
+                body: JSON.stringify({
+                    title: searchTitle,
+                    condition: itemCondition,
                     useAiTitle: aiTitle,
                     useAiPrice: aiPrice,
                 }),
                 signal: controller.signal,
             })
+            if (res.status === 401) {
+                setQueue(q => q.map(i =>
+                    i.id === id ? { ...i, status: 'error', errorCode: 'network_error' } : i
+                ))
+                return
+            }
+            if (res.status === 402) {
+                const errData = await res.json().catch(() => ({}))
+                setCreditError({ balance: errData.balance ?? 0, cost: errData.cost ?? 3 })
+                setQueue(q => q.map(i =>
+                    i.id === id ? { ...i, status: 'error', errorCode: 'network_error' } : i
+                ))
+                return
+            }
             const data: BarcodeImportResponse = await res.json()
             if (data.success && data.result) {
                 const status = data.result.product.vero_status === 'flagged' ? 'vero_risk' : 'found'
@@ -305,12 +322,12 @@ export default function TitleImport({ onBack }: TitleImportProps) {
 
         setInputError(null)
         const newItem: TitleQueueItem = {
-            id:          crypto.randomUUID().slice(0, 8),
+            id: crypto.randomUUID().slice(0, 8),
             searchTitle: title,
             condition,
-            status:      'pending',
-            selected:    false,
-            addedAt:     Date.now(),
+            status: 'pending',
+            selected: false,
+            addedAt: Date.now(),
         }
 
         setQueue(prev => {
@@ -507,9 +524,9 @@ export default function TitleImport({ onBack }: TitleImportProps) {
                                     className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
                                     style={{
                                         backgroundColor: active ? cs.bg : C.bg,
-                                        color:           active ? cs.fg : C.muted,
-                                        border:          `1.5px solid ${active ? cs.border : C.border}`,
-                                        fontFamily:      'DM Sans, sans-serif',
+                                        color: active ? cs.fg : C.muted,
+                                        border: `1.5px solid ${active ? cs.border : C.border}`,
+                                        fontFamily: 'DM Sans, sans-serif',
                                     }}
                                 >
                                     {opt.label}
@@ -540,11 +557,11 @@ export default function TitleImport({ onBack }: TitleImportProps) {
                                     placeholder="e.g. Sony WH-1000XM5 Wireless Headphones"
                                     className="w-full rounded-xl px-4 py-3 pr-10 text-sm outline-none"
                                     style={{
-                                        border:          `1.5px solid ${inputError ? C.error : C.border}`,
+                                        border: `1.5px solid ${inputError ? C.error : C.border}`,
                                         backgroundColor: C.surface,
-                                        color:           C.text,
-                                        fontFamily:      'DM Sans, sans-serif',
-                                        transition:      'border-color 150ms',
+                                        color: C.text,
+                                        fontFamily: 'DM Sans, sans-serif',
+                                        transition: 'border-color 150ms',
                                     }}
                                     onFocus={e => {
                                         e.currentTarget.style.borderColor = inputError ? C.error : C.primary
@@ -577,8 +594,8 @@ export default function TitleImport({ onBack }: TitleImportProps) {
                                 className="flex items-center gap-1.5 px-5 py-3 rounded-xl font-semibold text-sm transition-opacity disabled:opacity-40 flex-shrink-0"
                                 style={{
                                     backgroundColor: C.primary,
-                                    color:           '#fff',
-                                    fontFamily:      'DM Sans, sans-serif',
+                                    color: '#fff',
+                                    fontFamily: 'DM Sans, sans-serif',
                                 }}
                             >
                                 <PlusCircle size={15} />
@@ -708,6 +725,33 @@ export default function TitleImport({ onBack }: TitleImportProps) {
                     </div>
                 )}
 
+                {/* ── Credit error banner ───────────────────────────────────── */}
+                {creditError && (
+                    <div style={{ padding: '12px 14px', backgroundColor: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: 10 }}>
+                        <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: C.primary, display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <ShoppingCart size={13} /> Not enough credits
+                        </p>
+                        <p style={{ margin: '0 0 8px', fontSize: 12, color: C.muted }}>
+                            Title AI Import costs {creditError.cost} credits. You have {creditError.balance}.
+                        </p>
+                        <div style={{ display: 'flex', gap: 6 }}>
+                            <button
+                                onClick={() => setShowBuyCredits(true)}
+                                style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 7, backgroundColor: C.primary, color: '#fff', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+                            >
+                                <ShoppingCart size={11} /> Buy Credits
+                            </button>
+                            <button
+                                onClick={() => setCreditError(null)}
+                                style={{ padding: '5px 12px', borderRadius: 7, backgroundColor: '#f3f4f6', color: C.muted, border: 'none', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                            >
+                                Dismiss
+                            </button>
+                        </div>
+                    </div>
+                )}
+                {showBuyCredits && <BuyCreditsModal onClose={() => setShowBuyCredits(false)} />}
+
                 {/* ── Queue ─────────────────────────────────────────────────── */}
                 {!isEmpty && (
                     <div
@@ -815,10 +859,10 @@ export default function TitleImport({ onBack }: TitleImportProps) {
                                     }}
                                     className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors hover:border-purple-400"
                                     style={{
-                                        borderColor:     C.border,
+                                        borderColor: C.border,
                                         backgroundColor: C.bg,
-                                        color:           C.muted,
-                                        fontFamily:      'DM Mono, monospace',
+                                        color: C.muted,
+                                        fontFamily: 'DM Mono, monospace',
                                     }}
                                 >
                                     {ex}
@@ -915,9 +959,9 @@ export default function TitleImport({ onBack }: TitleImportProps) {
                                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-base transition-opacity hover:opacity-90 active:scale-[0.99]"
                                 style={{
                                     backgroundColor: C.primary,
-                                    color:           '#fff',
-                                    fontFamily:      'Syne, sans-serif',
-                                    boxShadow:       '0 4px 16px rgba(117,48,251,0.25)',
+                                    color: '#fff',
+                                    fontFamily: 'Syne, sans-serif',
+                                    boxShadow: '0 4px 16px rgba(117,48,251,0.25)',
                                 }}
                             >
                                 <CheckCircle2 size={17} />
@@ -928,8 +972,8 @@ export default function TitleImport({ onBack }: TitleImportProps) {
                                     {!aiTitle && !aiPrice
                                         ? 'AI title, description and price skipped — raw data only'
                                         : !aiTitle
-                                        ? 'AI title & description skipped — raw product name will be used'
-                                        : 'AI price skipped — price will not be set automatically'}
+                                            ? 'AI title & description skipped — raw product name will be used'
+                                            : 'AI price skipped — price will not be set automatically'}
                                 </p>
                             )}
                         </div>

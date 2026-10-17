@@ -21,6 +21,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { ProcessingTask, ProcessingTaskStatus } from '@/app/dashboard/listing-generator/types/url-import.types'
+import { deductCredits } from '@/lib/ai/credits'
 
 export const maxDuration = 60
 
@@ -63,15 +64,15 @@ function buildConditionLabel(
   condition: string,
   subCondition: string | null
 ): string {
-  if (condition === 'new')       return 'New'
+  if (condition === 'new') return 'New'
   if (condition === 'for_parts') return 'For parts or not working'
   // used
   switch (subCondition) {
     case 'excellent': return 'Used – Like New'
-    case 'good':      return 'Used – Good'
-    case 'fair':      return 'Used – Acceptable'
-    case 'poor':      return 'Used – Acceptable'
-    default:          return 'Used'
+    case 'good': return 'Used – Good'
+    case 'fair': return 'Used – Acceptable'
+    case 'poor': return 'Used – Acceptable'
+    default: return 'Used'
   }
 }
 
@@ -193,7 +194,7 @@ async function checkVeRO(
         if (res && res.ok) {
           const d = await res.json() as { content?: Array<{ text?: string }> }
           const text = d.content?.[0]?.text?.trim() ?? ''
-          const parsed = (() => { try { return JSON.parse(text.replace(/^```json?\n?/i,'').replace(/\n?```$/i,'').trim()) } catch { return null } })()
+          const parsed = (() => { try { return JSON.parse(text.replace(/^```json?\n?/i, '').replace(/\n?```$/i, '').trim()) } catch { return null } })()
           if (parsed && parsed.risk && parsed.risk !== 'low') {
             return {
               status: parsed.risk === 'high' ? 'flagged' : 'warning',
@@ -231,33 +232,33 @@ async function saveDraft(
     const { data, error } = await supabaseAdmin
       .from('listing_drafts')
       .insert({
-        user_id:          userId,
-        product_name:     listing.title_raw,
-        title:            listing.title_ebay,
-        title_score:      listing.cassini_score,
-        health_score:     listing.cassini_score ?? 60,
+        user_id: userId,
+        product_name: listing.title_raw,
+        title: listing.title_ebay,
+        title_score: listing.cassini_score,
+        health_score: listing.cassini_score ?? 60,
         description_html: listing.description_html,
-        category:         listing.category_label ?? null,
-        condition:        listing.condition,
-        ean:              listing.ean ?? '',
-        item_specifics:   listing.item_specifics,
-        sell_price:       listing.price_suggested,
-        buy_price:        null,
-        supplier_price:   null,
+        category: listing.category_label ?? null,
+        condition: listing.condition,
+        ean: listing.ean ?? '',
+        item_specifics: listing.item_specifics,
+        sell_price: listing.price_suggested,
+        buy_price: null,
+        supplier_price: null,
         markup_percentage: null,
-        net_profit:       null,
-        margin:           null,
-        seller_type:      'own_stock',
-        source_platform:  'image_import',
-        supplier_url:     null,
-        supplier_images:  [],
-        photos:           [],
-        main_photo_url:   null,
-        photo_count:      0,
-        vero_status:      listing.vero_status,
+        net_profit: null,
+        margin: null,
+        seller_type: 'own_stock',
+        source_platform: 'image_import',
+        supplier_url: null,
+        supplier_images: [],
+        photos: [],
+        main_photo_url: null,
+        photo_count: 0,
+        vero_status: listing.vero_status,
         vero_brands_found: listing.vero_brand ? [listing.vero_brand] : [],
-        status:           'draft',
-        current_step:     1,
+        status: 'draft',
+        current_step: 1,
       })
       .select('id')
       .single()
@@ -490,6 +491,13 @@ async function extractLabelData(
 // ── Main POST handler ─────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   const userId = await getAuthUserId()
+  if (!userId) {
+    return NextResponse.json({ success: false, error_code: 'auth_required', error_message: 'Please sign in to use Photo AI.' }, { status: 401 })
+  }
+
+  // ── Credit deduction ──────────────────────────────────────────────────────
+  const credit = await deductCredits(userId, 'ai_image_import')
+  if (!credit.ok) return credit.response
 
   // ── Parse body ──────────────────────────────────────────────────────────────
   const body = await req.json().catch(() => ({})) as {
@@ -511,7 +519,7 @@ export async function POST(req: NextRequest) {
 
   // ── Separate product photos from label photo ────────────────────────────────
   const productImages = images.filter(img => !img.isLabel)
-  const labelImage    = images.find(img => img.isLabel) ?? null
+  const labelImage = images.find(img => img.isLabel) ?? null
 
   if (productImages.length === 0) {
     return NextResponse.json(
@@ -524,13 +532,13 @@ export async function POST(req: NextRequest) {
 
   // ── Task list ───────────────────────────────────────────────────────────────
   const tasks: ProcessingTask[] = [
-    { id: 'upload',   label: 'Preparing and uploading photos',          status: 'pending' },
-    { id: 'analyse',  label: 'AI analysing product images',             status: 'pending' },
+    { id: 'upload', label: 'Preparing and uploading photos', status: 'pending' },
+    { id: 'analyse', label: 'AI analysing product images', status: 'pending' },
     { id: 'identify', label: 'Identifying item and extracting details', status: 'pending' },
-    { id: 'title',    label: 'Writing eBay-optimised title',            status: 'pending' },
-    { id: 'describe', label: 'Generating listing description',          status: 'pending' },
-    { id: 'pricing',  label: 'Suggesting price range',                  status: 'pending' },
-    { id: 'vero',     label: 'VeRO brand check',                        status: 'pending' },
+    { id: 'title', label: 'Writing eBay-optimised title', status: 'pending' },
+    { id: 'describe', label: 'Generating listing description', status: 'pending' },
+    { id: 'pricing', label: 'Suggesting price range', status: 'pending' },
+    { id: 'vero', label: 'VeRO brand check', status: 'pending' },
   ]
   function set(id: string, status: ProcessingTaskStatus, detail?: string) {
     const t = tasks.find(t => t.id === id)
@@ -552,14 +560,14 @@ export async function POST(req: NextRequest) {
 
   // Run product vision + label extraction concurrently
   const [geminiResult, anthropicResult, labelData] = await Promise.all([
-    geminiKey    ? analyseWithGemini(productImages, productPrompt, geminiKey)       : Promise.resolve(null),
+    geminiKey ? analyseWithGemini(productImages, productPrompt, geminiKey) : Promise.resolve(null),
     anthropicKey ? analyseWithAnthropic(productImages, productPrompt, anthropicKey) : Promise.resolve(null),
-    labelImage   ? extractLabelData(labelImage, geminiKey, anthropicKey)            : Promise.resolve<LabelResult>({ ean: null, brand: null, model_number: null }),
+    labelImage ? extractLabelData(labelImage, geminiKey, anthropicKey) : Promise.resolve<LabelResult>({ ean: null, brand: null, model_number: null }),
   ])
 
   // Take whichever vision model responded; prefer Gemini
   const vision = geminiResult ?? anthropicResult
-  const hasAi  = !!vision
+  const hasAi = !!vision
 
   set('analyse', 'done', hasAi ? 'Vision AI complete' : 'AI unavailable — using defaults')
 
@@ -569,11 +577,11 @@ export async function POST(req: NextRequest) {
   // Merge label brand into vision result if vision didn't find one
   const brandFromLabel = labelData.brand
   const finalBrand = vision?.brand ?? brandFromLabel ?? null
-  const finalEan   = labelData.ean ?? null
+  const finalEan = labelData.ean ?? null
 
   // Merge model number into item_specifics if found
   const baseSpecifics: Record<string, string> = {
-    Brand:     finalBrand ?? 'Unbranded',
+    Brand: finalBrand ?? 'Unbranded',
     Condition: conditionLabel,
     ...(vision?.item_specifics ?? {}),
   }
@@ -588,9 +596,9 @@ export async function POST(req: NextRequest) {
 
   // ── Step 4: Title ───────────────────────────────────────────────────────────
   set('title', 'running')
-  const titleRaw  = vision?.title_raw  ?? (hint ?? 'Unknown product')
+  const titleRaw = vision?.title_raw ?? (hint ?? 'Unknown product')
   const titleEbay = vision?.title_ebay ?? (hint ? hint.slice(0, 80) : 'Product listing')
-  const cassini   = vision?.cassini_score ?? 60
+  const cassini = vision?.cassini_score ?? 60
   set('title', 'done', hasAi ? `Cassini score: ${cassini}` : 'Default title used')
 
   // ── Step 5: Description ─────────────────────────────────────────────────────
@@ -622,23 +630,23 @@ export async function POST(req: NextRequest) {
 
   // ── Build listing object ─────────────────────────────────────────────────────
   const listing = {
-    title_raw:        titleRaw,
-    title_ebay:       titleEbay,
-    cassini_score:    cassini,
-    images:           [] as string[],  // no hosted URLs yet — seller uploads in wizard
-    price_suggested:  priceSuggested,
-    price_currency:   'GBP',
+    title_raw: titleRaw,
+    title_ebay: titleEbay,
+    cassini_score: cassini,
+    images: [] as string[],  // no hosted URLs yet — seller uploads in wizard
+    price_suggested: priceSuggested,
+    price_currency: 'GBP',
     description_html: descHtml,
-    brand:            finalBrand,
-    ean:              finalEan,
-    condition:        conditionLabel,
-    category_label:   vision?.category_label ?? 'General',
+    brand: finalBrand,
+    ean: finalEan,
+    condition: conditionLabel,
+    category_label: vision?.category_label ?? 'General',
     category_ebay_id: null as string | null,
-    item_specifics:   baseSpecifics,
-    vero_status:      vero.status,
-    vero_reason:      vero.reason,
-    vero_brand:       vero.vero_brand,
-    imported_at:      new Date().toISOString(),
+    item_specifics: baseSpecifics,
+    vero_status: vero.status,
+    vero_reason: vero.reason,
+    vero_brand: vero.vero_brand,
+    imported_at: new Date().toISOString(),
   }
 
   // ── Save draft ──────────────────────────────────────────────────────────────
@@ -648,7 +656,7 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({
-    success:  true,
+    success: true,
     draft_id: draftId,
     tasks,
     listing,

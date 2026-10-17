@@ -19,19 +19,19 @@ import PricingEditorModal from '@/components/admin/PricingEditorModal'
 
 // ── Design tokens ──────────────────────────────────────────────
 const C = {
-  dark: '#0a0d08',
-  lime: '#8fff00',
-  limeDeep: '#4a8f00',
-  limeTint: '#f4ffe6',
-  border: '#e8ede2',
-  bg: '#f7f9f5',
-  text: '#1a2410',
-  muted: '#8a9e78',
-  surface: '#ffffff',
-  red: '#b91c1c',
+  dark: '#0a0614',          // near-black for headings
+  lime: '#b8fa33',          // accent yellow-green
+  limeDeep: '#7530fb',          // primary violet
+  limeTint: '#f5f1ff',          // very light violet tint — only for selected/active states
+  border: '#e8e3f4',          // subtle border, not too purple
+  bg: '#f5f4f8',          // off-white page bg — fresh, neutral
+  text: '#111118',          // near-black body text — max readability
+  muted: '#6b7280',          // medium gray — readable but subordinate
+  surface: '#ffffff',          // pure white card/surface
+  red: '#dc2626',
   amber: '#d97706',
   green: '#16a34a',
-  blue: '#1d4ed8',
+  blue: '#7530fb',
 }
 
 // ── Types ──────────────────────────────────────────────────────
@@ -305,7 +305,7 @@ function CustomDropdown({
             backgroundColor: C.bg,
             borderColor: open ? C.lime : C.border,
             color: C.text,
-            boxShadow: open ? '0 0 0 3px rgba(143,255,0,0.12)' : 'none',
+            boxShadow: open ? '0 0 0 3px rgba(117,48,251,0.12)' : 'none',
           }}>
           <span>{selected?.label ?? value}</span>
           <ChevronDown size={13} style={{ color: C.muted, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
@@ -317,7 +317,7 @@ function CustomDropdown({
               style={{ backgroundColor: C.surface, borderColor: C.border }}>
               {options.map(o => (
                 <button key={o.value} onClick={() => { onChange(o.value); setOpen(false) }}
-                  className="w-full flex items-center justify-between px-3 py-2 text-[12px] font-semibold hover:bg-[#f4ffe6] transition-colors"
+                  className="w-full flex items-center justify-between px-3 py-2 text-[12px] font-semibold hover:bg-[#f5f1ff] transition-colors"
                   style={{ color: o.value === value ? C.limeDeep : C.text }}>
                   {o.label}
                   {o.value === value && <Check size={12} style={{ color: C.limeDeep }} />}
@@ -367,7 +367,7 @@ function NumericInput({
           borderColor: focused ? C.lime : C.border,
           backgroundColor: C.bg,
           color: value === '-1' ? C.limeDeep : C.text,
-          boxShadow: focused ? '0 0 0 3px rgba(143,255,0,0.12)' : 'none',
+          boxShadow: focused ? '0 0 0 3px rgba(117,48,251,0.12)' : 'none',
           transition: 'border-color 0.2s, box-shadow 0.2s',
         }}
       />
@@ -427,7 +427,7 @@ function PlanRow({
 
   return (
     <div
-      className="grid items-center px-4 py-3 border-b last:border-b-0 cursor-pointer hover:bg-[#fafcf8] transition-colors"
+      className="grid items-center px-4 py-3 border-b last:border-b-0 cursor-pointer hover:bg-[#f5f4f8] transition-colors"
       style={{
         gridTemplateColumns: PLAN_GRID,
         gap: 10,
@@ -821,7 +821,7 @@ function EditPanel({
           </button>
           {canEdit && <button onClick={handleSave} disabled={saving}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold disabled:opacity-40"
-            style={{ backgroundColor: '#8fff00', color: '#1a2410' }}>
+            style={{ backgroundColor: '#7530fb', color: '#ffffff' }}>
             {saving
               ? <div className="w-4 h-4 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: C.lime }} />
               : <><Save size={14} /> Save Limits</>}
@@ -1120,33 +1120,43 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
         border: `1px solid ${C.border}`,
         alignSelf: 'flex-start',
       }}>
-        {(['tool_plans', 'ai_credits'] as const).map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveSubTab(tab)}
-            style={{
-              padding: '6px 16px',
-              borderRadius: 9,
-              border: 'none',
-              fontSize: 12,
-              fontWeight: 700,
-              cursor: 'pointer',
-              transition: 'all 0.15s',
-              background: activeSubTab === tab ? C.surface : 'transparent',
-              color: activeSubTab === tab ? C.text : C.muted,
-              boxShadow: activeSubTab === tab ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-            }}
-          >
-            {tab === 'tool_plans' ? (
-              <><Shield size={12} /> Tool Plans</>
-            ) : (
-              <><Zap size={12} fill="currentColor" /> AI Credits</>
-            )}
-          </button>
-        ))}
+        {(['tool_plans', 'ai_credits'] as const).map(tab => {
+          const isActive = activeSubTab === tab
+          const isLime = tab === 'ai_credits'
+          const activeBg = isLime ? '#b8fa33' : '#7530fb'
+          const activeColor = isLime ? '#0a0614' : '#ffffff'
+          return (
+            <button
+              key={tab}
+              onClick={() => setActiveSubTab(tab)}
+              style={{
+                padding: '6px 16px',
+                borderRadius: 9,
+                border: 'none',
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+                background: isActive ? activeBg : 'transparent',
+                color: isActive ? activeColor : C.muted,
+                boxShadow: isActive
+                  ? isLime
+                    ? '0 2px 8px rgba(184,250,51,0.35)'
+                    : '0 2px 8px rgba(117,48,251,0.30)'
+                  : 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+              }}
+            >
+              {tab === 'tool_plans' ? (
+                <><Shield size={12} /> Tool Plans</>
+              ) : (
+                <><Zap size={12} fill="currentColor" /> AI Credits</>
+              )}
+            </button>
+          )
+        })}
       </div>
 
       {/* ── AI Credits Panel ─────────────────────────────────────── */}
@@ -1294,7 +1304,7 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
 
                 return (
                   <div key={entry.id}
-                    className="grid items-start px-4 py-3 border-b last:border-b-0 hover:bg-[#fafcf8] transition-colors"
+                    className="grid items-start px-4 py-3 border-b last:border-b-0 hover:bg-[#f5f4f8] transition-colors"
                     style={{ gridTemplateColumns: '0.8fr 1.8fr 0.8fr 0.6fr 0.5fr', gap: 12, borderColor: C.border }}>
 
                     {/* PLAN */}
@@ -1554,7 +1564,7 @@ function AiCreditsPanel({
               {packages.map(pkg => {
                 const isEditing = editingPkg === pkg.id
                 return (
-                  <tr key={pkg.id} style={{ background: isEditing ? 'rgba(99,102,241,0.03)' : 'transparent' }}>
+                  <tr key={pkg.id} style={{ background: isEditing ? 'rgba(117,48,251,0.03)' : 'transparent' }}>
                     <td style={cell}>
                       {isEditing
                         ? <input style={input} value={pkgEdits.name ?? pkg.name}
@@ -1587,7 +1597,7 @@ function AiCreditsPanel({
                           value={pkgEdits.bonus_credits ?? pkg.bonus_credits}
                           onChange={e => setPkgEdits(p => ({ ...p, bonus_credits: parseInt(e.target.value, 10) }))} />
                         : (pkg.bonus_credits > 0
-                          ? <span style={{ color: '#10b981', fontWeight: 600 }}>+{pkg.bonus_credits}</span>
+                          ? <span style={{ color: '#7530fb', fontWeight: 700 }}>+{pkg.bonus_credits}</span>
                           : <span style={{ color: C.muted }}>0</span>)}
                     </td>
                     <td style={cell}>
@@ -1596,7 +1606,7 @@ function AiCreditsPanel({
                           checked={pkgEdits.is_active ?? pkg.is_active}
                           onChange={e => setPkgEdits(p => ({ ...p, is_active: e.target.checked }))} />
                         : (pkg.is_active
-                          ? <Check size={14} color="#10b981" />
+                          ? <Check size={14} color="#7530fb" />
                           : <X size={14} color="#ef4444" />)}
                     </td>
                     <td style={{ ...cell, whiteSpace: 'nowrap' as const }}>
@@ -1668,7 +1678,7 @@ function AiCreditsPanel({
                         ? <input style={{ ...input, width: 70 }} type="number"
                           value={costEdits.credits_cost ?? cost.credits_cost}
                           onChange={e => setCostEdits(p => ({ ...p, credits_cost: parseInt(e.target.value, 10) }))} />
-                        : <span style={{ fontWeight: 700, color: '#6366f1' }}>{cost.credits_cost}</span>}
+                        : <span style={{ fontWeight: 700, color: '#7530fb' }}>{cost.credits_cost}</span>}
                     </td>
                     <td style={cell}>
                       {isEditing
@@ -1682,7 +1692,7 @@ function AiCreditsPanel({
                           checked={costEdits.is_enabled ?? cost.is_enabled}
                           onChange={e => setCostEdits(p => ({ ...p, is_enabled: e.target.checked }))} />
                         : (cost.is_enabled
-                          ? <Check size={14} color="#10b981" />
+                          ? <Check size={14} color="#7530fb" />
                           : <span style={{ fontSize: 11, color: '#ef4444', fontWeight: 600 }}>OFF</span>)}
                     </td>
                     <td style={{ ...cell, whiteSpace: 'nowrap' as const }}>
