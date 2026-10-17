@@ -1679,17 +1679,30 @@ function AiCreditsPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [creditTab, statsDays])
 
-  // ── Save package ──────────────────────────────────────────────
+  // ── Save package (via server-side admin API — bypasses RLS) ──
   async function savePkg(id: string) {
     setSaving(true)
-    const { error } = await (supabase.from('ai_credit_packages') as any)
-      .update({ ...pkgEdits, updated_at: new Date().toISOString() })
-      .eq('id', id)
-    if (error) { showToast('Save failed: ' + error.message, 'error') }
-    else {
-      setPackages(prev => prev.map(p => p.id === id ? { ...p, ...pkgEdits } : p))
-      showToast('Package updated', 'success')
-      setEditingPkg(null)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/admin/packages', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ id, ...pkgEdits }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        showToast('Save failed: ' + (json.error ?? res.statusText), 'error')
+      } else {
+        setPackages(prev => prev.map(p => p.id === id ? { ...p, ...pkgEdits } : p))
+        showToast('Package updated', 'success')
+        setEditingPkg(null)
+        setPkgEdits({})
+      }
+    } catch (e: unknown) {
+      showToast('Save failed: network error', 'error')
     }
     setSaving(false)
   }
