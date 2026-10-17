@@ -154,11 +154,13 @@ export type UrlImportErrorCode =
     | 'invalid_url'           // Not a valid URL
     | 'unsupported_platform'  // Platform not in supported list
     | 'login_required'        // Page needs authentication
+    | 'auth_required'         // User is not signed in
     | 'product_not_found'     // URL is not a product page
     | 'scrape_blocked'        // Anti-bot blocked the request
     | 'scrape_timeout'        // Request timed out
     | 'ai_failed'             // AI transformation failed
     | 'rate_limited'          // User hit their plan limit
+    | 'insufficient_credits'  // Not enough AI credits to run the import
     | 'unknown_error'
 
 // ── Platform Meta (for UI display) ───────────────────────────
