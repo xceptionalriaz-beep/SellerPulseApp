@@ -83,50 +83,84 @@ export async function POST(req: NextRequest) {
     const totalCredits = pkg.credits + pkg.bonus_credits
 
     // ── Create Stripe Checkout Session ────────────────────────────────────────
+    const isMonthly = pkg.billing_type === 'monthly'
+
+    // Monthly packages MUST have a pre-created Stripe recurring Price ID.
+    if (isMonthly && !pkg.stripe_price_id) {
+        return NextResponse.json(
+            { error: 'This subscription package is not yet configured. Please contact support.' },
+            { status: 422 }
+        )
+    }
+
     let session: Stripe.Checkout.Session
 
     try {
-        // If the package already has a Stripe price ID (pre-created in Stripe dashboard)
-        // use it directly; otherwise use price_data for dynamic pricing.
-        const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = pkg.stripe_price_id
-            ? { price: pkg.stripe_price_id, quantity: 1 }
-            : {
-                price_data: {
-                    currency: 'usd',
-                    unit_amount: Math.round(pkg.price_usd * 100), // cents
-                    product_data: {
-                        name: `${pkg.name} — ${totalCredits} AI Credits`,
-                        description: pkg.description ?? `${totalCredits} AI credits for SellerPulse`,
-                        metadata: {
-                            package_id: pkg.id,
-                            credits: pkg.credits,
-                            bonus_credits: pkg.bonus_credits,
-                        },
+        const sharedMetadata = {
+            user_id: user.id,
+            package_id: pkg.id,
+            credits: String(pkg.credits),
+            bonus_credits: String(pkg.bonus_credits),
+            total_credits: String(totalCredits),
+            billing_type: pkg.billing_type,
+        }
+
+        if (isMonthly) {
+            // ── Subscription checkout ──────────────────────────────────────────
+            // Requires a Stripe recurring Price (monthly interval) stored in stripe_price_id.
+            session = await getStripe().checkout.sessions.create({
+                mode: 'subscription',
+                line_items: [{ price: pkg.stripe_price_id!, quantity: 1 }],
+                customer_email: user.email,
+                success_url: `${origin}/credits/success?session_id={CHECKOUT_SESSION_ID}`,
+                cancel_url: `${origin}/credits/cancelled`,
+                metadata: sharedMetadata,
+                subscription_data: {
+                    metadata: {
+                        user_id: user.id,
+                        package_id: pkg.id,
+                        rollover_cap: pkg.rollover_cap != null ? String(pkg.rollover_cap) : 'unlimited',
                     },
                 },
-                quantity: 1,
-            }
+            })
+        } else {
+            // ── One-time payment checkout ──────────────────────────────────────
+            // If the package has a Stripe price ID (pre-created), use it directly;
+            // otherwise fall back to dynamic price_data.
+            const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = pkg.stripe_price_id
+                ? { price: pkg.stripe_price_id, quantity: 1 }
+                : {
+                    price_data: {
+                        currency: 'usd',
+                        unit_amount: Math.round(pkg.price_usd * 100), // cents
+                        product_data: {
+                            name: `${pkg.name} — ${totalCredits} AI Credits`,
+                            description: pkg.description ?? `${totalCredits} AI credits for SellerPulse`,
+                            metadata: {
+                                package_id: pkg.id,
+                                credits: String(pkg.credits),
+                                bonus_credits: String(pkg.bonus_credits),
+                            },
+                        },
+                    },
+                    quantity: 1,
+                }
 
-        session = await getStripe().checkout.sessions.create({
-            mode: 'payment',
-            line_items: [lineItem],
-            customer_email: user.email,
-            success_url: `${origin}/credits/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${origin}/credits/cancelled`,
-            metadata: {
-                user_id: user.id,
-                package_id: pkg.id,
-                credits: String(pkg.credits),
-                bonus_credits: String(pkg.bonus_credits),
-                total_credits: String(totalCredits),
-            },
-            payment_intent_data: {
-                metadata: {
-                    user_id: user.id,
-                    package_id: pkg.id,
+            session = await getStripe().checkout.sessions.create({
+                mode: 'payment',
+                line_items: [lineItem],
+                customer_email: user.email,
+                success_url: `${origin}/credits/success?session_id={CHECKOUT_SESSION_ID}`,
+                cancel_url: `${origin}/credits/cancelled`,
+                metadata: sharedMetadata,
+                payment_intent_data: {
+                    metadata: {
+                        user_id: user.id,
+                        package_id: pkg.id,
+                    },
                 },
-            },
-        })
+            })
+        }
     } catch (e: unknown) {
         console.error('[credits/checkout] Stripe error:', e)
         return NextResponse.json(

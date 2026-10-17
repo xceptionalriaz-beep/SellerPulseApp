@@ -1393,6 +1393,9 @@ interface AiPackage {
   bonus_credits: number
   display_order: number
   is_active: boolean
+  billing_type: 'one_time' | 'monthly'
+  rollover_cap: number | null
+  stripe_price_id: string | null
 }
 
 interface AiActionCost {
@@ -1676,17 +1679,30 @@ function AiCreditsPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [creditTab, statsDays])
 
-  // ── Save package ──────────────────────────────────────────────
+  // ── Save package (via server-side admin API — bypasses RLS) ──
   async function savePkg(id: string) {
     setSaving(true)
-    const { error } = await (supabase.from('ai_credit_packages') as any)
-      .update({ ...pkgEdits, updated_at: new Date().toISOString() })
-      .eq('id', id)
-    if (error) { showToast('Save failed: ' + error.message, 'error') }
-    else {
-      setPackages(prev => prev.map(p => p.id === id ? { ...p, ...pkgEdits } : p))
-      showToast('Package updated', 'success')
-      setEditingPkg(null)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/admin/packages', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ id, ...pkgEdits }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        showToast('Save failed: ' + (json.error ?? res.statusText), 'error')
+      } else {
+        setPackages(prev => prev.map(p => p.id === id ? { ...p, ...pkgEdits } : p))
+        showToast('Package updated', 'success')
+        setEditingPkg(null)
+        setPkgEdits({})
+      }
+    } catch (e: unknown) {
+      showToast('Save failed: network error', 'error')
     }
     setSaving(false)
   }
@@ -1821,11 +1837,12 @@ function AiCreditsPanel({
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr>{['Name', 'Description', 'Price (USD)', 'Credits', 'Bonus', 'Active', ''].map(h => <th key={h} style={th}>{h}</th>)}</tr>
+                <tr>{['Name', 'Description', 'Price (USD)', 'Credits', 'Bonus', 'Billing', 'Rollover Cap', 'Stripe Price ID', 'Active', ''].map(h => <th key={h} style={th}>{h}</th>)}</tr>
               </thead>
               <tbody>
                 {packages.map(pkg => {
                   const isEditing = editingPkg === pkg.id
+                  const billingType = (pkgEdits.billing_type ?? pkg.billing_type) as 'one_time' | 'monthly'
                   return (
                     <tr key={pkg.id} style={{ background: isEditing ? 'rgba(117,48,251,0.03)' : 'transparent' }}>
                       <td style={cell}>{isEditing ? <input style={input} value={pkgEdits.name ?? pkg.name} onChange={e => setPkgEdits(p => ({ ...p, name: e.target.value }))} /> : <strong>{pkg.name}</strong>}</td>
@@ -1833,6 +1850,39 @@ function AiCreditsPanel({
                       <td style={cell}>{isEditing ? <input style={{ ...input, width: 80 }} type="number" step="0.01" value={pkgEdits.price_usd ?? pkg.price_usd} onChange={e => setPkgEdits(p => ({ ...p, price_usd: parseFloat(e.target.value) }))} /> : `$${pkg.price_usd.toFixed(2)}`}</td>
                       <td style={cell}>{isEditing ? <input style={{ ...input, width: 70 }} type="number" value={pkgEdits.credits ?? pkg.credits} onChange={e => setPkgEdits(p => ({ ...p, credits: parseInt(e.target.value, 10) }))} /> : pkg.credits.toLocaleString()}</td>
                       <td style={cell}>{isEditing ? <input style={{ ...input, width: 70 }} type="number" value={pkgEdits.bonus_credits ?? pkg.bonus_credits} onChange={e => setPkgEdits(p => ({ ...p, bonus_credits: parseInt(e.target.value, 10) }))} /> : (pkg.bonus_credits > 0 ? <span style={{ color: '#7530fb', fontWeight: 700 }}>+{pkg.bonus_credits}</span> : <span style={{ color: C.muted }}>0</span>)}</td>
+                      {/* Billing type toggle */}
+                      <td style={cell}>
+                        {isEditing ? (
+                          <div style={{ display: 'flex', gap: 0, borderRadius: 6, overflow: 'hidden', border: `1px solid ${C.border}`, width: 'fit-content' }}>
+                            {(['one_time', 'monthly'] as const).map(bt => (
+                              <button key={bt} onClick={() => setPkgEdits(p => ({ ...p, billing_type: bt }))}
+                                style={{ padding: '3px 8px', fontSize: 10, fontWeight: 700, border: 'none', cursor: 'pointer', background: billingType === bt ? C.lime : C.bg, color: billingType === bt ? C.dark : C.muted, transition: 'background .15s' }}>
+                                {bt === 'one_time' ? 'One-time' : 'Monthly'}
+                              </button>
+                            ))}
+                          </div>
+                        ) : (
+                          <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 99, background: pkg.billing_type === 'monthly' ? 'rgba(117,48,251,0.1)' : 'rgba(16,185,129,0.1)', color: pkg.billing_type === 'monthly' ? C.lime : '#10b981' }}>
+                            {pkg.billing_type === 'monthly' ? '↺ Monthly' : '✓ One-time'}
+                          </span>
+                        )}
+                      </td>
+                      {/* Rollover cap — only relevant for monthly */}
+                      <td style={cell}>
+                        {isEditing && billingType === 'monthly' ? (
+                          <input style={{ ...input, width: 70 }} type="number" placeholder="∞" value={pkgEdits.rollover_cap ?? pkg.rollover_cap ?? ''} onChange={e => setPkgEdits(p => ({ ...p, rollover_cap: e.target.value === '' ? null : parseInt(e.target.value, 10) }))} />
+                        ) : pkg.billing_type === 'monthly' ? (
+                          <span style={{ color: C.muted, fontSize: 12 }}>{pkg.rollover_cap != null ? `${pkg.rollover_cap} cr` : '∞ unlimited'}</span>
+                        ) : <span style={{ color: C.muted }}>—</span>}
+                      </td>
+                      {/* Stripe Price ID — only relevant for monthly */}
+                      <td style={cell}>
+                        {isEditing && billingType === 'monthly' ? (
+                          <input style={{ ...input, width: 140, fontFamily: 'monospace', fontSize: 11 }} placeholder="price_xxx" value={pkgEdits.stripe_price_id ?? pkg.stripe_price_id ?? ''} onChange={e => setPkgEdits(p => ({ ...p, stripe_price_id: e.target.value || null }))} />
+                        ) : pkg.billing_type === 'monthly' && pkg.stripe_price_id ? (
+                          <code style={{ fontSize: 10, color: C.muted, background: C.bg, padding: '2px 5px', borderRadius: 4 }}>{pkg.stripe_price_id}</code>
+                        ) : <span style={{ color: C.muted }}>—</span>}
+                      </td>
                       <td style={cell}>{isEditing ? <input type="checkbox" checked={pkgEdits.is_active ?? pkg.is_active} onChange={e => setPkgEdits(p => ({ ...p, is_active: e.target.checked }))} /> : (pkg.is_active ? <Check size={14} color="#7530fb" /> : <X size={14} color="#ef4444" />)}</td>
                       <td style={{ ...cell, whiteSpace: 'nowrap' as const }}>
                         {isEditing ? (
