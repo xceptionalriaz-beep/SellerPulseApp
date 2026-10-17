@@ -49,6 +49,9 @@ interface CreditPackage {
     price_usd: number
     credits: number
     bonus_credits: number
+    billing_type: 'one_time' | 'monthly'
+    rollover_cap: number | null
+    stripe_price_id: string | null
 }
 
 function CreditsCheckoutContent() {
@@ -68,7 +71,7 @@ function CreditsCheckoutContent() {
         ; (async () => {
             const { data } = await supabase
                 .from('ai_credit_packages')
-                .select('id, name, description, price_usd, credits, bonus_credits')
+                .select('id, name, description, price_usd, credits, bonus_credits, billing_type, rollover_cap, stripe_price_id')
                 .eq('id', packageId)
                 .eq('is_active', true)
                 .single()
@@ -110,6 +113,7 @@ function CreditsCheckoutContent() {
     )
 
     const totalCredits = (pkg?.credits ?? 0) + (pkg?.bonus_credits ?? 0)
+    const isMonthly    = pkg?.billing_type === 'monthly'
 
     return (
         <div style={{ minHeight: '100vh', background: T.bgApp, fontFamily: '"DM Sans", Inter, sans-serif' }}>
@@ -147,19 +151,29 @@ function CreditsCheckoutContent() {
                                 <Zap size={20} fill={T.primary} color={T.primary} />
                             </div>
                             <div>
-                                <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.primary, margin: '0 0 3px' }}>AI Credits</p>
+                                <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.primary, margin: '0 0 3px' }}>
+                                    AI Credits · {isMonthly ? 'Monthly Subscription' : 'One-time Top-up'}
+                                </p>
                                 <p style={{ fontSize: 18, fontWeight: 800, color: T.textPri, margin: 0 }}>{pkg?.name}</p>
                             </div>
                         </div>
+
+                        {/* Monthly rollover notice */}
+                        {isMonthly && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: T.primaryLt, borderRadius: 10, padding: '10px 14px', marginBottom: 16, fontSize: 12, color: T.primary, fontWeight: 600 }}>
+                                <RefreshCw size={13} />
+                                Credits refresh every month. Unused credits roll over{pkg?.rollover_cap != null ? ` (up to ${pkg.rollover_cap.toLocaleString()})` : ' (unlimited)'}.
+                            </div>
+                        )}
 
                         <div style={{ height: 1, background: T.border, marginBottom: 20 }} />
 
                         {/* Credits breakdown */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                             {[
-                                { label: 'Base credits', value: `${pkg?.credits.toLocaleString()} credits` },
+                                { label: isMonthly ? 'Credits per month' : 'Base credits', value: `${pkg?.credits.toLocaleString()} credits` },
                                 ...(pkg && pkg.bonus_credits > 0 ? [{ label: 'Bonus credits', value: `+${pkg.bonus_credits.toLocaleString()} credits` }] : []),
-                                { label: 'Total credits', value: `${totalCredits.toLocaleString()} credits`, bold: true },
+                                { label: isMonthly ? 'Total per month' : 'Total credits', value: `${totalCredits.toLocaleString()} credits`, bold: true },
                             ].map(row => (
                                 <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <span style={{ fontSize: 13, color: T.textSec }}>{row.label}</span>
@@ -175,14 +189,15 @@ function CreditsCheckoutContent() {
 
                     {/* What you can do */}
                     <div style={{ background: T.white, borderRadius: 16, border: `1px solid ${T.border}`, padding: '20px 24px' }}>
-                        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: T.textMuted, marginBottom: 14 }}>What you can do</p>
+                        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: T.textMuted, marginBottom: 14 }}>What you can do{isMonthly ? ' each month' : ''}</p>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                             {[
                                 `~${Math.floor(totalCredits / 10)} Photo Studio AI generations`,
                                 `~${Math.floor(totalCredits / 2)} Copy Optimizer rewrites`,
                                 `~${Math.floor(totalCredits / 5)} AI listing imports`,
                                 'Mix and match across all AI features',
-                                'Credits never expire',
+                                isMonthly ? 'Unused credits roll over each month' : 'Credits never expire',
+                                ...(isMonthly ? ['Cancel anytime from your account'] : []),
                             ].map(txt => (
                                 <div key={txt} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                                     <div style={{ width: 18, height: 18, borderRadius: '50%', background: T.primaryLt, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -208,11 +223,13 @@ function CreditsCheckoutContent() {
                             <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: T.textMuted, marginBottom: 14 }}>Order Summary</p>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
                                 <span style={{ fontSize: 14, fontWeight: 600, color: T.textPri }}>{pkg?.name}</span>
-                                <span style={{ fontSize: 18, fontWeight: 800, color: T.textPri }}>${pkg?.price_usd.toFixed(0)}</span>
+                                <span style={{ fontSize: 18, fontWeight: 800, color: T.textPri }}>
+                                    ${pkg?.price_usd.toFixed(0)}{isMonthly && <span style={{ fontSize: 12, fontWeight: 500, color: T.textMuted }}>/mo</span>}
+                                </span>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <span style={{ fontSize: 12, color: T.textMuted }}>{totalCredits.toLocaleString()} AI credits</span>
-                                <span style={{ fontSize: 11, color: T.textMuted }}>one-time</span>
+                                <span style={{ fontSize: 12, color: T.textMuted }}>{totalCredits.toLocaleString()} AI credits{isMonthly ? '/month' : ''}</span>
+                                <span style={{ fontSize: 11, color: T.textMuted }}>{isMonthly ? 'subscription' : 'one-time'}</span>
                             </div>
                         </div>
 
@@ -244,12 +261,15 @@ function CreditsCheckoutContent() {
                         }}>
                         {paying
                             ? <><RefreshCw size={14} style={{ animation: 'sp .7s linear infinite' }} /> Opening Stripe…</>
-                            : <><Lock size={13} /> Continue to Payment — ${pkg?.price_usd.toFixed(0)}</>
+                            : <><Lock size={13} /> {isMonthly ? 'Subscribe' : 'Continue to Payment'} — ${pkg?.price_usd.toFixed(0)}{isMonthly ? '/mo' : ''}</>
                         }
                     </button>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
-                        {['One-time purchase, no subscription', 'Credits never expire', 'Secure payment · 256-bit SSL'].map(txt => (
+                        {(isMonthly
+                            ? ['Renews monthly · cancel anytime', 'Credits roll over each month', 'Secure payment · 256-bit SSL']
+                            : ['One-time purchase, no subscription', 'Credits never expire', 'Secure payment · 256-bit SSL']
+                        ).map(txt => (
                             <div key={txt} style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, color: T.textMuted }}>
                                 <Check size={12} color={T.success} /> {txt}
                             </div>
