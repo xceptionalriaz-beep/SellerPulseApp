@@ -6,6 +6,7 @@
 // Inline editing with secure save confirmation
 // ══════════════════════════════════════════════════════════════
 
+import React from 'react'
 import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
@@ -14,6 +15,7 @@ import {
   ChevronDown, ChevronUp, Save, RefreshCw,
   Zap, BarChart2, Download, Globe, Star,
   AlertTriangle, Shield, Layout,
+  CreditCard, Tag, Gift, Receipt, Wallet, TrendingUp,
 } from 'lucide-react'
 import PricingEditorModal from '@/components/admin/PricingEditorModal'
 
@@ -1772,15 +1774,15 @@ function AiCreditsPanel({
   }
 
   // ── tab definitions ────────────────────────────────────────────
-  const CREDIT_TABS: { key: CreditTab; label: string }[] = [
-    { key: 'packages',     label: '💳 Packages'     },
-    { key: 'costs',        label: '⚡ Action Costs'  },
-    { key: 'settings',     label: '⚙️ Settings'      },
-    { key: 'transactions', label: '📋 Transactions'  },
-    { key: 'balances',     label: '👥 Balances'      },
-    { key: 'stats',        label: '📊 Usage Stats'   },
-    { key: 'bulk_gift',    label: '🎁 Bulk Gift'     },
-    { key: 'promo',        label: '🏷️ Promo Codes'  },
+  const CREDIT_TABS: { key: CreditTab; label: string; icon: React.ReactNode }[] = [
+    { key: 'packages',     label: 'Packages',     icon: <CreditCard size={11} /> },
+    { key: 'costs',        label: 'Action Costs', icon: <Zap size={11} />        },
+    { key: 'settings',     label: 'Settings',     icon: <Shield size={11} />     },
+    { key: 'transactions', label: 'Transactions', icon: <Receipt size={11} />    },
+    { key: 'balances',     label: 'Balances',     icon: <Wallet size={11} />     },
+    { key: 'stats',        label: 'Usage Stats',  icon: <TrendingUp size={11} /> },
+    { key: 'bulk_gift',    label: 'Bulk Gift',    icon: <Gift size={11} />       },
+    { key: 'promo',        label: 'Promo Codes',  icon: <Tag size={11} />        },
   ]
 
   return (
@@ -1798,8 +1800,9 @@ function AiCreditsPanel({
             fontSize: 11, fontWeight: 700, transition: 'all 0.15s',
             background: creditTab === t.key ? C.limeDeep : 'transparent',
             color: creditTab === t.key ? '#fff' : C.muted,
+            display: 'flex', alignItems: 'center', gap: 5,
           }}>
-            {t.label}
+            {t.icon}{t.label}
           </button>
         ))}
       </div>
