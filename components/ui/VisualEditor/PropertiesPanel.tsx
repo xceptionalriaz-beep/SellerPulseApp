@@ -38,7 +38,7 @@ import {
     Clock, Share2, ChevronRight, Type, Quote,
     Check, CreditCard, HelpCircle, LayoutTemplate,
     type LucideIcon,
-    Layers,
+    Layers, ShoppingCart,
 } from 'lucide-react'
 import {
     Block,
@@ -271,6 +271,7 @@ interface PropertiesPanelProps {
 // ─── Inline Icon Picker (used inside key_features_grid feature cards) ──────────
 
 import { ICON_LIBRARY, ICON_CATEGORIES, CATEGORY_LABELS, getIconSvg } from './IconLibrary'
+import { BuyCreditsModal } from '@/components/ui/BuyCreditsModal'
 
 function InlineIconPicker({ value, onChange }: { value: string; onChange: (id: string) => void }) {
     return (
@@ -7786,6 +7787,10 @@ function AITab({
     const [copyError, setCopyError] = useState<string | null>(null)
     const [policyError, setPolicyError] = useState<string | null>(null)
 
+    // ── Credit state (shared across all 3 AI tools) ───────────────────────────
+    const [creditError, setCreditError] = useState<{ balance: number; cost: number; tool: string } | null>(null)
+    const [showBuyCredits, setShowBuyCredits] = useState(false)
+
     // ── Photo Studio state ────────────────────────────────────────────────────
     const [photoOpen, setPhotoOpen] = useState(false)
     const [photoPrompt, setPhotoPrompt] = useState('')
@@ -7835,6 +7840,15 @@ function AITab({
                     category: templateCategory,
                 }),
             })
+            if (res.status === 401) {
+                setCopyError('Please sign in to use AI Copy Optimizer.')
+                return
+            }
+            if (res.status === 402) {
+                const data = await res.json().catch(() => ({}))
+                setCreditError({ balance: data.balance ?? 0, cost: data.cost ?? 5, tool: 'AI Copy Optimizer' })
+                return
+            }
             const data = await res.json()
             if (!res.ok || data.error) {
                 const userMsg = data.code === 'NO_AI_KEY'
@@ -7873,6 +7887,17 @@ function AITab({
                     category: templateCategory,
                 }),
             })
+            if (res.status === 401) {
+                setPolicyError('Please sign in to use AI Policy Writer.')
+                setPolicyLoading(false)
+                return
+            }
+            if (res.status === 402) {
+                const data = await res.json().catch(() => ({}))
+                setCreditError({ balance: data.balance ?? 0, cost: data.cost ?? 5, tool: 'AI Policy Writer' })
+                setPolicyLoading(false)
+                return
+            }
             if (!res.ok) {
                 const data = await res.json().catch(() => ({}))
                 const userMsg = data.code === 'NO_AI_KEY'
@@ -7923,6 +7948,15 @@ function AITab({
                     category: templateCategory,
                 }),
             })
+            if (res.status === 401) {
+                setPhotoError('Please sign in to use AI Photo Studio.')
+                return
+            }
+            if (res.status === 402) {
+                const data = await res.json().catch(() => ({}))
+                setCreditError({ balance: data.balance ?? 0, cost: data.cost ?? 5, tool: 'AI Photo Studio' })
+                return
+            }
             const data = await res.json()
             if (!res.ok || data.error) {
                 const userMsg = data.code === 'NO_AI_KEY'
@@ -8341,6 +8375,50 @@ function AITab({
                     )}
                 </div>
             </Section>
+
+            {/* ── Credit error card — shown when any AI tool returns 402 ── */}
+            {creditError && (
+                <div style={{
+                    margin: '0 0 12px',
+                    padding: '12px 14px',
+                    backgroundColor: '#faf5ff',
+                    border: '1px solid #e9d5ff',
+                    borderRadius: 10,
+                }}>
+                    <p style={{ margin: '0 0 2px', fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700, color: '#7530fb', display: 'flex', alignItems: 'center', gap: 5 }}>
+                        <ShoppingCart size={13} /> Not enough credits
+                    </p>
+                    <p style={{ margin: '0 0 10px', fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#6b7280', lineHeight: 1.4 }}>
+                        <strong>{creditError.tool}</strong> costs {creditError.cost} credits. You have {creditError.balance}.
+                    </p>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                        <button
+                            onClick={() => setShowBuyCredits(true)}
+                            style={{
+                                flex: 2, padding: '7px 0',
+                                fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700,
+                                color: '#fff', backgroundColor: '#7530fb',
+                                border: 'none', borderRadius: 7, cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                            }}
+                        >
+                            <ShoppingCart size={11} /> Buy Credits
+                        </button>
+                        <button
+                            onClick={() => setCreditError(null)}
+                            style={{
+                                flex: 1, padding: '7px 0',
+                                fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 600,
+                                color: '#6b7280', backgroundColor: 'transparent',
+                                border: '1px solid #e9d5ff', borderRadius: 7, cursor: 'pointer',
+                            }}
+                        >
+                            Dismiss
+                        </button>
+                    </div>
+                </div>
+            )}
+            {showBuyCredits && <BuyCreditsModal onClose={() => setShowBuyCredits(false)} />}
 
             <Section title="eBay Compliance">
                 <div style={{
