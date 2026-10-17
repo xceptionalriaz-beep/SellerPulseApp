@@ -9,8 +9,9 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import {
     ScanBarcode, PlusCircle, CheckSquare, Square, Trash2,
-    ArrowRight, RefreshCcw, CheckCircle2,
+    ArrowRight, RefreshCcw, CheckCircle2, ShoppingCart,
 } from 'lucide-react'
+import { BuyCreditsModal } from '@/components/ui/BuyCreditsModal'
 import {
     BarcodeQueueItem,
     BarcodeImportResponse,
@@ -86,6 +87,8 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
     const [aiPrice, setAiPrice] = useState(true)   // AI suggested price
     // Camera scan feedback: 'added' (green flash) | 'duplicate' (amber) | 'invalid' (red)
     const [cameraScanFeedback, setCameraScanFeedback] = useState<'added' | 'duplicate' | 'invalid' | null>(null)
+    const [creditError, setCreditError]               = useState<{ balance: number; cost: number } | null>(null)
+    const [showBuyCredits, setShowBuyCredits]         = useState(false)
     const inFlightRef                           = useRef<Set<string>>(new Set())
     // Mirror of queue for synchronous reads (avoids stale closure in camera handler)
     const queueRef                              = useRef<BarcodeQueueItem[]>([])
@@ -125,6 +128,20 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
                 }),
                 signal:  controller.signal,
             })
+            if (res.status === 401) {
+                setQueue(q => q.map(item =>
+                    item.id === id ? { ...item, status: 'error', errorCode: 'network_error' } : item
+                ))
+                return
+            }
+            if (res.status === 402) {
+                const errData = await res.json().catch(() => ({}))
+                setCreditError({ balance: errData.balance ?? 0, cost: errData.cost ?? 3 })
+                setQueue(q => q.map(item =>
+                    item.id === id ? { ...item, status: 'error', errorCode: 'network_error' } : item
+                ))
+                return
+            }
             const data: BarcodeImportResponse = await res.json()
             if (data.success && data.result) {
                 const status = data.result.product.vero_status === 'flagged' ? 'vero_risk' : 'found'
@@ -627,6 +644,33 @@ export default function BarcodeImport({ onBack }: BarcodeImportProps) {
                         </div>
                     </div>
                 )}
+
+                {/* ── Credit error banner ──────────────────────────────────── */}
+                {creditError && (
+                    <div style={{ padding: '12px 14px', backgroundColor: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: 10 }}>
+                        <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: C.primary, display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <ShoppingCart size={13} /> Not enough credits
+                        </p>
+                        <p style={{ margin: '0 0 8px', fontSize: 12, color: C.muted }}>
+                            Barcode AI Import costs {creditError.cost} credits. You have {creditError.balance}.
+                        </p>
+                        <div style={{ display: 'flex', gap: 6 }}>
+                            <button
+                                onClick={() => setShowBuyCredits(true)}
+                                style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 7, backgroundColor: C.primary, color: '#fff', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+                            >
+                                <ShoppingCart size={11} /> Buy Credits
+                            </button>
+                            <button
+                                onClick={() => setCreditError(null)}
+                                style={{ padding: '5px 12px', borderRadius: 7, backgroundColor: '#f3f4f6', color: C.muted, border: 'none', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                            >
+                                Dismiss
+                            </button>
+                        </div>
+                    </div>
+                )}
+                {showBuyCredits && <BuyCreditsModal onClose={() => setShowBuyCredits(false)} />}
 
                 {/* ── Queue ────────────────────────────────────────────────── */}
                 {!isEmpty && (

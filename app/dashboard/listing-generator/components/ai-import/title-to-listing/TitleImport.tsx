@@ -11,8 +11,9 @@ import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import {
     Type, PlusCircle, CheckSquare, Square, Trash2,
     ArrowRight, RefreshCcw, AlertTriangle, History, X,
-    Sparkles, CheckCircle2,
+    Sparkles, CheckCircle2, ShoppingCart,
 } from 'lucide-react'
+import { BuyCreditsModal } from '@/components/ui/BuyCreditsModal'
 import {
     BarcodeImportResult,
     BarcodeImportResponse,
@@ -141,6 +142,8 @@ export default function TitleImport({ onBack }: TitleImportProps) {
     const [showRecent, setShowRecent]         = useState(false)
     const [aiTitle, setAiTitle]               = useState(true)
     const [aiPrice, setAiPrice]               = useState(true)
+    const [creditError, setCreditError]       = useState<{ balance: number; cost: number } | null>(null)
+    const [showBuyCredits, setShowBuyCredits] = useState(false)
 
     const inFlightRef = useRef<Set<string>>(new Set())
     const queueRef    = useRef<TitleQueueItem[]>([])
@@ -254,6 +257,20 @@ export default function TitleImport({ onBack }: TitleImportProps) {
                 }),
                 signal: controller.signal,
             })
+            if (res.status === 401) {
+                setQueue(q => q.map(i =>
+                    i.id === id ? { ...i, status: 'error', errorCode: 'network_error' } : i
+                ))
+                return
+            }
+            if (res.status === 402) {
+                const errData = await res.json().catch(() => ({}))
+                setCreditError({ balance: errData.balance ?? 0, cost: errData.cost ?? 3 })
+                setQueue(q => q.map(i =>
+                    i.id === id ? { ...i, status: 'error', errorCode: 'network_error' } : i
+                ))
+                return
+            }
             const data: BarcodeImportResponse = await res.json()
             if (data.success && data.result) {
                 const status = data.result.product.vero_status === 'flagged' ? 'vero_risk' : 'found'
@@ -707,6 +724,33 @@ export default function TitleImport({ onBack }: TitleImportProps) {
                         </div>
                     </div>
                 )}
+
+                {/* ── Credit error banner ───────────────────────────────────── */}
+                {creditError && (
+                    <div style={{ padding: '12px 14px', backgroundColor: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: 10 }}>
+                        <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: C.primary, display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <ShoppingCart size={13} /> Not enough credits
+                        </p>
+                        <p style={{ margin: '0 0 8px', fontSize: 12, color: C.muted }}>
+                            Title AI Import costs {creditError.cost} credits. You have {creditError.balance}.
+                        </p>
+                        <div style={{ display: 'flex', gap: 6 }}>
+                            <button
+                                onClick={() => setShowBuyCredits(true)}
+                                style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 7, backgroundColor: C.primary, color: '#fff', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+                            >
+                                <ShoppingCart size={11} /> Buy Credits
+                            </button>
+                            <button
+                                onClick={() => setCreditError(null)}
+                                style={{ padding: '5px 12px', borderRadius: 7, backgroundColor: '#f3f4f6', color: C.muted, border: 'none', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                            >
+                                Dismiss
+                            </button>
+                        </div>
+                    </div>
+                )}
+                {showBuyCredits && <BuyCreditsModal onClose={() => setShowBuyCredits(false)} />}
 
                 {/* ── Queue ─────────────────────────────────────────────────── */}
                 {!isEmpty && (

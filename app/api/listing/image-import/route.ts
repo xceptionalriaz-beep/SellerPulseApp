@@ -21,6 +21,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { ProcessingTask, ProcessingTaskStatus } from '@/app/dashboard/listing-generator/types/url-import.types'
+import { deductCredits } from '@/lib/ai/credits'
 
 export const maxDuration = 60
 
@@ -490,6 +491,13 @@ async function extractLabelData(
 // ── Main POST handler ─────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   const userId = await getAuthUserId()
+  if (!userId) {
+    return NextResponse.json({ success: false, error_code: 'auth_required', error_message: 'Please sign in to use Photo AI.' }, { status: 401 })
+  }
+
+  // ── Credit deduction ──────────────────────────────────────────────────────
+  const credit = await deductCredits(userId, 'ai_image_import')
+  if (!credit.ok) return credit.response
 
   // ── Parse body ──────────────────────────────────────────────────────────────
   const body = await req.json().catch(() => ({})) as {

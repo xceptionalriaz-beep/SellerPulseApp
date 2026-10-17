@@ -22,6 +22,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { deductCredits } from '@/lib/ai/credits'
 import {
     detectBarcodeType,
     validateCheckDigit,
@@ -674,6 +675,13 @@ Reply ONLY with valid JSON:
 // ── Main POST handler ─────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
     const userId = await getAuthUserId()
+    if (!userId) {
+        return NextResponse.json({ success: false, errorCode: 'auth_required', message: 'Please sign in to use Barcode AI.' }, { status: 401 })
+    }
+
+    // ── Credit deduction ──────────────────────────────────────────────────────
+    const credit = await deductCredits(userId, 'ai_barcode_import')
+    if (!credit.ok) return credit.response
 
     // Parse body
     const body = await req.json().catch(() => ({})) as {

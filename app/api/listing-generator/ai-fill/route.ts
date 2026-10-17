@@ -19,6 +19,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient }              from '@supabase/supabase-js'
 import { createServerClient }        from '@supabase/ssr'
 import { cookies }                   from 'next/headers'
+import { deductCredits }             from '@/lib/ai/credits'
 
 export const maxDuration = 60
 
@@ -284,6 +285,10 @@ export async function POST(req: NextRequest) {
     } catch {
         return NextResponse.json({ ok: false, error: 'Auth failed' }, { status: 401 })
     }
+
+    // ── 1b. Credit deduction ─────────────────────────────────────────────────
+    const credit = await deductCredits(userId, 'ai_fill')
+    if (!credit.ok) return credit.response
 
     // ── 2. Parse body ────────────────────────────────────────────────────────
     let draftId: string

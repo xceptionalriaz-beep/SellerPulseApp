@@ -19,6 +19,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient }              from '@supabase/supabase-js'
 import { createServerClient }        from '@supabase/ssr'
 import { cookies }                   from 'next/headers'
+import { deductCredits }             from '@/lib/ai/credits'
 
 export const maxDuration = 60   // bulk rows need more time than single imports
 
@@ -321,6 +322,10 @@ export async function POST(req: NextRequest) {
     } catch {
         return NextResponse.json({ ok: false, error: 'Auth check failed' }, { status: 401 })
     }
+
+    // ── 1b. Credit deduction ─────────────────────────────────────────────────
+    const credit = await deductCredits(userId, 'ai_bulk_generate')
+    if (!credit.ok) return credit.response
 
     // ── 2. Parse request body ────────────────────────────────────────────────
     let body: {

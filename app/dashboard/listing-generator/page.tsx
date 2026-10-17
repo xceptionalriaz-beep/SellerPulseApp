@@ -464,6 +464,15 @@ export default function ListingGeneratorPage() {
                     }),
                 })
 
+                if (res.status === 401) {
+                    throw new Error('Not signed in — please refresh and try again')
+                }
+
+                if (res.status === 402) {
+                    const errData = await res.json().catch(() => ({}))
+                    throw new Error(`Not enough credits for Bulk Generate (have ${errData.balance ?? 0}, need ${errData.cost ?? 5})`)
+                }
+
                 const json = await res.json()
 
                 if (!res.ok || !json.ok) {

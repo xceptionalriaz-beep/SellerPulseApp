@@ -10,7 +10,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
-import { Palette, Check, X, ExternalLink, RefreshCw, ChevronDown, ChevronUp, Sparkles, Loader2, CheckCircle2 } from 'lucide-react'
+import { Palette, Check, X, ExternalLink, RefreshCw, ChevronDown, ChevronUp, Sparkles, Loader2, CheckCircle2, ShoppingCart } from 'lucide-react'
+import { BuyCreditsModal } from '@/components/ui/BuyCreditsModal'
 
 const C = {
     bg:           '#f8f7ff',
@@ -98,6 +99,8 @@ export default function TemplatePickerCard({ templateId, onChange, draftId, onFi
     const [aiLoading, setAiLoading]       = useState(false)
     const [aiFilled, setAiFilled]         = useState(false)
     const [aiError, setAiError]           = useState<string | null>(null)
+    const [creditError, setCreditError]   = useState<{ balance: number; cost: number } | null>(null)
+    const [showBuyCredits, setShowBuyCredits] = useState(false)
 
     useEffect(() => { loadTemplates() }, [])
 
@@ -161,12 +164,22 @@ export default function TemplatePickerCard({ templateId, onChange, draftId, onFi
         setAiLoading(true)
         setAiError(null)
         setAiFilled(false)
+        setCreditError(null)
         try {
             const res = await fetch('/api/listing-generator/ai-fill', {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body:    JSON.stringify({ draftId }),
             })
+            if (res.status === 401) {
+                setAiError('Please sign in to use AI Fill')
+                return
+            }
+            if (res.status === 402) {
+                const errData = await res.json().catch(() => ({}))
+                setCreditError({ balance: errData.balance ?? 0, cost: errData.cost ?? 3 })
+                return
+            }
             const data = await res.json()
             if (!res.ok || !data.ok) {
                 setAiError(data.error ?? 'AI fill failed')
@@ -544,6 +557,33 @@ export default function TemplatePickerCard({ templateId, onChange, draftId, onFi
                             {aiError}
                         </p>
                     )}
+
+                    {/* Credit error banner */}
+                    {creditError && (
+                        <div style={{ padding: '10px 12px', backgroundColor: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: 8 }}>
+                            <p style={{ margin: '0 0 4px', fontSize: 11, fontWeight: 700, color: C.primary, display: 'flex', alignItems: 'center', gap: 5 }}>
+                                <ShoppingCart size={11} /> Not enough credits
+                            </p>
+                            <p style={{ margin: '0 0 6px', fontSize: 10, color: C.secondary }}>
+                                AI Fill costs {creditError.cost} credits. You have {creditError.balance}.
+                            </p>
+                            <div style={{ display: 'flex', gap: 5 }}>
+                                <button
+                                    onClick={() => setShowBuyCredits(true)}
+                                    style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, backgroundColor: C.primary, color: '#fff', border: 'none', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
+                                >
+                                    <ShoppingCart size={10} /> Buy Credits
+                                </button>
+                                <button
+                                    onClick={() => setCreditError(null)}
+                                    style={{ padding: '4px 10px', borderRadius: 6, backgroundColor: '#f3f4f6', color: C.muted, border: 'none', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}
+                                >
+                                    Dismiss
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                    {showBuyCredits && <BuyCreditsModal onClose={() => setShowBuyCredits(false)} />}
 
                     {/* Helper tip */}
                     {!aiFilled && !aiError && (

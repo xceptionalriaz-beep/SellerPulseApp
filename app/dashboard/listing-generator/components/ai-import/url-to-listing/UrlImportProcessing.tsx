@@ -217,6 +217,18 @@ export default function UrlImportProcessing({
 
             const res = await Promise.race([fetchPromise, timeoutPromise])
 
+            if (res && res.status === 401) {
+                if (!cancelledRef.current) onFailed('auth_required', 'Please sign in to continue')
+                return
+            }
+
+            if (res && res.status === 402) {
+                const errData = await res.json().catch(() => ({}))
+                if (!cancelledRef.current)
+                    onFailed('insufficient_credits', `Not enough credits for URL Import (have ${errData.balance ?? 0}, need ${errData.cost ?? 3})`)
+                return
+            }
+
             if (res && res.ok) {
                 const result: UrlImportResult = await res.json()
 

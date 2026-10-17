@@ -304,6 +304,18 @@ export default function ImageImportProcessing({ data, onComplete, onFailed, onCa
 
       const res = await Promise.race([fetchPromise, timeoutPromise])
 
+      if (res && res.status === 401) {
+        if (!cancelledRef.current) onFailed('auth_required', 'Please sign in to continue')
+        return
+      }
+
+      if (res && res.status === 402) {
+        const errData = await res.json().catch(() => ({}))
+        if (!cancelledRef.current)
+          onFailed('insufficient_credits', `Not enough credits for Image Import (have ${errData.balance ?? 0}, need ${errData.cost ?? 5})`)
+        return
+      }
+
       if (res && res.ok) {
         const result: ImageImportResult = await res.json()
 

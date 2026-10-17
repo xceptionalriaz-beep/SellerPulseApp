@@ -20,6 +20,7 @@ import { NextRequest, NextResponse } from 'next/server'
 export const maxDuration = 60
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
+import { deductCredits } from '@/lib/ai/credits'
 import { cookies } from 'next/headers'
 import type {
     ImportPlatform,
@@ -845,6 +846,13 @@ function buildSimulatedRaw(platform: ImportPlatform): RawProductData {
 export async function POST(req: NextRequest) {
     // ── Get logged-in user ─────────────────────────────────────────────────────
     const userId = await getAuthUserId()
+    if (!userId) {
+        return NextResponse.json({ success: false, error_code: 'auth_required', error_message: 'Please sign in to use URL AI.' }, { status: 401 })
+    }
+
+    // ── Credit deduction ───────────────────────────────────────────────────────
+    const credit = await deductCredits(userId, 'ai_url_import')
+    if (!credit.ok) return credit.response
 
     // ── Parse & validate ───────────────────────────────────────────────────────
     const body = await req.json().catch(() => ({})) as { url?: string; platform?: string }
