@@ -680,9 +680,11 @@ STRICT RULES — follow every single one:
                 @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
             `}</style>
 
-            {/* Buy Credits modal */}
+            {/* Buy Credits modal — stop propagation so outer overlay doesn't fire onClose */}
             {showBuyCredits && (
-                <BuyCreditsModal onClose={() => setShowBuyCredits(false)} />
+                <div onClick={e => e.stopPropagation()}>
+                    <BuyCreditsModal onClose={() => setShowBuyCredits(false)} />
+                </div>
             )}
         </div>
     )
