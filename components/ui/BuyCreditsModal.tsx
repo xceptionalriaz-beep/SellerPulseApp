@@ -8,6 +8,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { X, Zap, Check, Loader2, Star } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -30,6 +31,7 @@ interface BuyCreditsModalProps {
 }
 
 export function BuyCreditsModal({ onClose }: BuyCreditsModalProps) {
+    const router = useRouter()
     const [packages, setPackages] = useState<CreditPackage[]>([])
     const [loading, setLoading] = useState(true)
     const [selected, setSelected] = useState<string | null>(null)
@@ -56,24 +58,11 @@ export function BuyCreditsModal({ onClose }: BuyCreditsModalProps) {
         return () => { document.body.style.overflow = '' }
     }, [])
 
-    const handlePurchase = async () => {
+    const handlePurchase = () => {
         if (!selected) return
         setPurchasing(true)
-        setError(null)
-        try {
-            const res = await fetch('/api/credits/checkout', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ package_id: selected }),
-            })
-            const data = await res.json()
-            if (!res.ok) throw new Error(data.error ?? 'Checkout failed')
-            // Redirect to Stripe
-            if (data.url) window.location.href = data.url
-        } catch (e: unknown) {
-            setError(e instanceof Error ? e.message : 'Something went wrong. Please try again.')
-            setPurchasing(false)
-        }
+        // Navigate to the checkout page with the selected package
+        router.push(`/checkout?type=credits&package_id=${selected}`)
     }
 
     const selectedPkg = packages.find(p => p.id === selected)
