@@ -1,6 +1,7 @@
 'use client'
 // app/checkout/page.tsx
-// Route: /checkout?plan=growth&billing=annual
+// Route: /checkout?plan=growth&billing=annual          — subscription
+// Route: /checkout?type=credits&package_id=<uuid>     — one-time credit purchase
 
 import { Suspense, useEffect, useState, useCallback } from 'react'
 import { useSearchParams, useRouter }                  from 'next/navigation'
@@ -37,6 +38,238 @@ interface DBPlan {
     features:           { text: string; included: boolean }[]
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// CREDITS CHECKOUT
+// Route: /checkout?type=credits&package_id=<uuid>
+// ─────────────────────────────────────────────────────────────────────────────
+interface CreditPackage {
+    id: string
+    name: string
+    description: string | null
+    price_usd: number
+    credits: number
+    bonus_credits: number
+}
+
+function CreditsCheckoutContent() {
+    const searchParams = useSearchParams()
+    const router       = useRouter()
+    const supabase     = createClient()
+
+    const packageId = searchParams.get('package_id') ?? ''
+
+    const [pkg,        setPkg]        = useState<CreditPackage | null>(null)
+    const [pkgLoading, setPkgLoading] = useState(true)
+    const [paying,     setPaying]     = useState(false)
+    const [error,      setError]      = useState<string | null>(null)
+
+    useEffect(() => {
+        if (!packageId) { router.replace('/credits'); return }
+        ;(async () => {
+            const { data } = await supabase
+                .from('ai_credit_packages')
+                .select('id, name, description, price_usd, credits, bonus_credits')
+                .eq('id', packageId)
+                .eq('is_active', true)
+                .single()
+            if (!data) { router.replace('/credits'); return }
+            setPkg(data as CreditPackage)
+            setPkgLoading(false)
+        })()
+    }, [packageId])
+
+    const handlePay = async () => {
+        if (!pkg) return
+        setPaying(true)
+        setError(null)
+        try {
+            const { data: { session } } = await supabase.auth.getSession()
+            if (!session) {
+                router.push(`/login?redirect=/checkout?type=credits&package_id=${pkg.id}`)
+                return
+            }
+            const res  = await fetch('/api/credits/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ package_id: pkg.id }),
+            })
+            const json = await res.json()
+            if (!res.ok) throw new Error(json.error ?? 'Checkout failed')
+            if (json.url) window.location.href = json.url
+        } catch (e: unknown) {
+            setError(e instanceof Error ? e.message : 'Something went wrong. Please try again.')
+            setPaying(false)
+        }
+    }
+
+    if (pkgLoading) return (
+        <div style={{ minHeight: '100vh', background: T.bgApp, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <style>{`@keyframes sp{to{transform:rotate(360deg)}}`}</style>
+            <div style={{ width: 32, height: 32, borderRadius: '50%', border: `2px solid ${T.border}`, borderTopColor: T.primary, animation: 'sp .7s linear infinite' }} />
+        </div>
+    )
+
+    const totalCredits = (pkg?.credits ?? 0) + (pkg?.bonus_credits ?? 0)
+
+    return (
+        <div style={{ minHeight: '100vh', background: T.bgApp, fontFamily: '"DM Sans", Inter, sans-serif' }}>
+            <style>{`
+                @keyframes sp { to { transform: rotate(360deg) } }
+                @keyframes up { from { opacity:0; transform:translateY(10px) } to { opacity:1; transform:translateY(0) } }
+                .fade { animation: up .3s ease both }
+                button:disabled { opacity: .55; cursor: not-allowed }
+            `}</style>
+
+            {/* Navbar */}
+            <nav style={{ background: T.dark, height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', position: 'sticky', top: 0, zIndex: 20 }}>
+                <button onClick={() => router.back()} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: '#a89cc8', fontSize: 13, fontWeight: 500 }}>
+                    <ArrowLeft size={14} /> Back
+                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ width: 28, height: 28, borderRadius: 8, background: T.primary, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Zap size={14} fill={T.accent} color={T.accent} />
+                    </div>
+                    <span style={{ fontSize: 15, fontWeight: 700, color: '#fff', letterSpacing: '-0.01em' }}>SellerPulse</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#a89cc8' }}>
+                    <Lock size={11} /> Secure checkout
+                </div>
+            </nav>
+
+            {/* Page content */}
+            <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 20px 64px', display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+
+                {/* LEFT: Package details */}
+                <div className="fade" style={{ flex: '1 1 360px', minWidth: 0 }}>
+                    <div style={{ background: T.white, borderRadius: 16, border: `1px solid ${T.border}`, padding: 28, marginBottom: 16 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+                            <div style={{ width: 44, height: 44, borderRadius: 12, background: T.primaryLt, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                <Zap size={20} fill={T.primary} color={T.primary} />
+                            </div>
+                            <div>
+                                <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.primary, margin: '0 0 3px' }}>AI Credits</p>
+                                <p style={{ fontSize: 18, fontWeight: 800, color: T.textPri, margin: 0 }}>{pkg?.name}</p>
+                            </div>
+                        </div>
+
+                        <div style={{ height: 1, background: T.border, marginBottom: 20 }} />
+
+                        {/* Credits breakdown */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                            {[
+                                { label: 'Base credits', value: `${pkg?.credits.toLocaleString()} credits` },
+                                ...(pkg && pkg.bonus_credits > 0 ? [{ label: 'Bonus credits', value: `+${pkg.bonus_credits.toLocaleString()} credits` }] : []),
+                                { label: 'Total credits', value: `${totalCredits.toLocaleString()} credits`, bold: true },
+                            ].map(row => (
+                                <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span style={{ fontSize: 13, color: T.textSec }}>{row.label}</span>
+                                    <span style={{ fontSize: 13, fontWeight: row.bold ? 800 : 600, color: row.bold ? T.primary : T.textPri }}>{row.value}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        {pkg?.description && (
+                            <p style={{ fontSize: 12, color: T.textMuted, marginTop: 16, lineHeight: 1.6, margin: '16px 0 0' }}>{pkg.description}</p>
+                        )}
+                    </div>
+
+                    {/* What you can do */}
+                    <div style={{ background: T.white, borderRadius: 16, border: `1px solid ${T.border}`, padding: '20px 24px' }}>
+                        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: T.textMuted, marginBottom: 14 }}>What you can do</p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                            {[
+                                `~${Math.floor(totalCredits / 10)} Photo Studio AI generations`,
+                                `~${Math.floor(totalCredits / 2)} Copy Optimizer rewrites`,
+                                `~${Math.floor(totalCredits / 5)} AI listing imports`,
+                                'Mix and match across all AI features',
+                                'Credits never expire',
+                            ].map(txt => (
+                                <div key={txt} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                    <div style={{ width: 18, height: 18, borderRadius: '50%', background: T.primaryLt, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <Check size={9} strokeWidth={3} color={T.primary} />
+                                    </div>
+                                    <span style={{ fontSize: 13, color: T.textPri }}>{txt}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* RIGHT: Order summary + pay */}
+                <div className="fade" style={{ flex: '0 0 264px', minWidth: 240, animationDelay: '60ms' }}>
+                    {error && (
+                        <div style={{ background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 10, padding: '11px 14px', fontSize: 12, color: '#991b1b', marginBottom: 14 }}>
+                            {error}
+                        </div>
+                    )}
+
+                    <div style={{ background: T.white, borderRadius: 16, border: `1px solid ${T.border}`, overflow: 'hidden', marginBottom: 14 }}>
+                        <div style={{ padding: '20px', borderBottom: `1px solid ${T.border}` }}>
+                            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: T.textMuted, marginBottom: 14 }}>Order Summary</p>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
+                                <span style={{ fontSize: 14, fontWeight: 600, color: T.textPri }}>{pkg?.name}</span>
+                                <span style={{ fontSize: 18, fontWeight: 800, color: T.textPri }}>${pkg?.price_usd.toFixed(0)}</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span style={{ fontSize: 12, color: T.textMuted }}>{totalCredits.toLocaleString()} AI credits</span>
+                                <span style={{ fontSize: 11, color: T.textMuted }}>one-time</span>
+                            </div>
+                        </div>
+
+                        <div style={{ padding: '12px 20px', background: T.successBg, borderBottom: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <ShieldCheck size={13} color={T.success} />
+                            <span style={{ fontSize: 12, fontWeight: 600, color: T.success }}>Credits added instantly after payment</span>
+                        </div>
+
+                        <div style={{ padding: '12px 20px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span style={{ fontSize: 12, color: T.textMuted }}>Tax</span>
+                                <span style={{ fontSize: 12, color: T.textMuted }}>At checkout</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={handlePay}
+                        disabled={paying}
+                        style={{
+                            width: '100%', padding: '14px 20px',
+                            borderRadius: 10, border: 'none',
+                            background: T.primary, color: '#fff',
+                            fontSize: 14, fontWeight: 700, cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                            marginBottom: 14,
+                            boxShadow: '0 4px 16px rgba(117,48,251,0.3)',
+                            transition: 'background .15s',
+                        }}>
+                        {paying
+                            ? <><RefreshCw size={14} style={{ animation: 'sp .7s linear infinite' }} /> Opening Stripe…</>
+                            : <><Lock size={13} /> Continue to Payment — ${pkg?.price_usd.toFixed(0)}</>
+                        }
+                    </button>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+                        {['One-time purchase, no subscription', 'Credits never expire', 'Secure payment · 256-bit SSL'].map(txt => (
+                            <div key={txt} style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, color: T.textMuted }}>
+                                <Check size={12} color={T.success} /> {txt}
+                            </div>
+                        ))}
+                    </div>
+
+                    <p style={{ textAlign: 'center', fontSize: 11, color: T.textMuted, lineHeight: 1.6 }}>
+                        Payment processed securely by Stripe.<br />
+                        Your card details never touch our servers.
+                    </p>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SUBSCRIPTION CHECKOUT (original)
+// Route: /checkout?plan=growth&billing=annual
+// ─────────────────────────────────────────────────────────────────────────────
 function CheckoutContent() {
     const searchParams = useSearchParams()
     const router       = useRouter()
@@ -336,6 +569,12 @@ function CheckoutContent() {
     )
 }
 
+function CheckoutRouter() {
+    const searchParams = useSearchParams()
+    const type = searchParams.get('type')
+    return type === 'credits' ? <CreditsCheckoutContent /> : <CheckoutContent />
+}
+
 export default function CheckoutPage() {
     return (
         <Suspense fallback={
@@ -344,7 +583,7 @@ export default function CheckoutPage() {
                 <div style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid #ede9fe', borderTopColor: '#7530fb', animation: 'sp .7s linear infinite' }} />
             </div>
         }>
-            <CheckoutContent />
+            <CheckoutRouter />
         </Suspense>
     )
 }
