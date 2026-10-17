@@ -18,6 +18,7 @@ import {
   CreditCard, Tag, Gift, Receipt, Wallet, TrendingUp,
 } from 'lucide-react'
 import PricingEditorModal from '@/components/admin/PricingEditorModal'
+import ProDropdown from '@/components/ui/ProDropdown'
 
 // ── Design tokens ──────────────────────────────────────────────
 const C = {
@@ -1928,30 +1929,34 @@ function AiCreditsPanel({
               <div style={{ padding: 16, borderRadius: 12, border: `1px solid ${C.border}`, background: C.bg }}>
                 <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, textTransform: 'uppercase' as const, letterSpacing: '0.5px', marginBottom: 8 }}>Overage Policy</p>
                 <p style={{ fontSize: 11, color: C.muted, marginBottom: 12 }}>What happens when a user has 0 credits and tries to use an AI feature.</p>
-                <select
-                  value={creditSettings.overage_policy}
-                  onChange={e => setCreditSettings(s => ({ ...s, overage_policy: e.target.value }))}
-                  style={{ ...input, width: '100%', fontWeight: 700, color: C.text }}
-                >
-                  <option value="block">🚫 Hard Block — reject request with 402</option>
-                  <option value="warn">⚠️ Warn — allow but show warning banner</option>
-                  <option value="allow_one">✅ Allow 1 More — permit one extra use then block</option>
-                </select>
+                <ProDropdown
+                  prefix=""
+                  currentValue={creditSettings.overage_policy}
+                  onChanged={v => setCreditSettings(s => ({ ...s, overage_policy: v }))}
+                  width="full"
+                  options={[
+                    { val: 'block',     label: 'Hard Block — reject with 402', enabled: true },
+                    { val: 'warn',      label: 'Warn — allow + show banner',   enabled: true },
+                    { val: 'allow_one', label: 'Allow 1 More — then block',    enabled: true },
+                  ]}
+                />
               </div>
 
               {/* Credit Expiry / Reset Policy */}
               <div style={{ padding: 16, borderRadius: 12, border: `1px solid ${C.border}`, background: C.bg }}>
                 <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, textTransform: 'uppercase' as const, letterSpacing: '0.5px', marginBottom: 8 }}>Credit Expiry / Reset Policy</p>
                 <p style={{ fontSize: 11, color: C.muted, marginBottom: 12 }}>How unused credits are handled each billing cycle.</p>
-                <select
-                  value={creditSettings.credit_expiry_policy}
-                  onChange={e => setCreditSettings(s => ({ ...s, credit_expiry_policy: e.target.value }))}
-                  style={{ ...input, width: '100%', fontWeight: 700, color: C.text }}
-                >
-                  <option value="rollover">♾️ Roll Over — credits accumulate forever</option>
-                  <option value="monthly_reset">🔄 Monthly Reset — balance resets on renewal</option>
-                  <option value="expire_90d">⏳ Expire After 90 Days — credits expire unused</option>
-                </select>
+                <ProDropdown
+                  prefix=""
+                  currentValue={creditSettings.credit_expiry_policy}
+                  onChanged={v => setCreditSettings(s => ({ ...s, credit_expiry_policy: v }))}
+                  width="full"
+                  options={[
+                    { val: 'rollover',      label: 'Roll Over — accumulate forever',    enabled: true },
+                    { val: 'monthly_reset', label: 'Monthly Reset — resets on renewal', enabled: true },
+                    { val: 'expire_90d',    label: 'Expire After 90 Days',              enabled: true },
+                  ]}
+                />
               </div>
             </div>
           )}
@@ -1978,14 +1983,20 @@ function AiCreditsPanel({
             <span style={{ fontWeight: 700, fontSize: 14, color: C.text, flex: 1 }}>Credit Transaction Log</span>
             <input placeholder="Filter by User ID" value={txFilter.user_id} onChange={e => setTxFilter(f => ({ ...f, user_id: e.target.value }))}
               style={{ ...input, width: 160 }} />
-            <select value={txFilter.type} onChange={e => setTxFilter(f => ({ ...f, type: e.target.value }))} style={{ ...input, width: 130 }}>
-              <option value="">All Types</option>
-              <option value="deduction">Deduction</option>
-              <option value="purchase">Purchase</option>
-              <option value="gift">Gift</option>
-              <option value="promo">Promo</option>
-              <option value="signup">Signup</option>
-            </select>
+            <ProDropdown
+              prefix=""
+              currentValue={txFilter.type || 'all'}
+              onChanged={v => setTxFilter(f => ({ ...f, type: v === 'all' ? '' : v }))}
+              width={150}
+              options={[
+                { val: 'all',       label: 'All Types', enabled: true },
+                { val: 'deduction', label: 'Deduction', enabled: true },
+                { val: 'purchase',  label: 'Purchase',  enabled: true },
+                { val: 'gift',      label: 'Gift',      enabled: true },
+                { val: 'promo',     label: 'Promo',     enabled: true },
+                { val: 'signup',    label: 'Signup',    enabled: true },
+              ]}
+            />
             <button onClick={() => loadTransactions(0)} style={{ ...actionBtn, background: C.limeDeep, color: '#fff', padding: '6px 14px' }}>
               Search
             </button>
@@ -2261,13 +2272,19 @@ function AiCreditsPanel({
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' as const, alignItems: 'flex-end' }}>
               <div style={{ flex: '1 1 140px' }}>
                 <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: C.muted, marginBottom: 4 }}>Target Plan</label>
-                <select value={bulkPlan} onChange={e => setBulkPlan(e.target.value)} style={{ ...input, width: '100%', fontWeight: 700 }}>
-                  <option value="all">All Users</option>
-                  <option value="Free">Free Plan</option>
-                  <option value="Starter">Starter Plan</option>
-                  <option value="Growth">Growth Plan</option>
-                  <option value="Custom">Custom Plan</option>
-                </select>
+                <ProDropdown
+                  prefix=""
+                  currentValue={bulkPlan}
+                  onChanged={v => setBulkPlan(v)}
+                  width="full"
+                  options={[
+                    { val: 'all',     label: 'All Users',   enabled: true },
+                    { val: 'Free',    label: 'Free Plan',   enabled: true },
+                    { val: 'Starter', label: 'Starter Plan',enabled: true },
+                    { val: 'Growth',  label: 'Growth Plan', enabled: true },
+                    { val: 'Custom',  label: 'Custom Plan', enabled: true },
+                  ]}
+                />
               </div>
               <div style={{ flex: '0 1 100px' }}>
                 <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: C.muted, marginBottom: 4 }}>Credits Each</label>
