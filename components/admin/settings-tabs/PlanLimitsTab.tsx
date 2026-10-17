@@ -6,6 +6,7 @@
 // Inline editing with secure save confirmation
 // ══════════════════════════════════════════════════════════════
 
+import React from 'react'
 import { useTabPermissions } from '@/hooks/useTabPermissions'
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
@@ -14,8 +15,10 @@ import {
   ChevronDown, ChevronUp, Save, RefreshCw,
   Zap, BarChart2, Download, Globe, Star,
   AlertTriangle, Shield, Layout,
+  CreditCard, Tag, Gift, Receipt, Wallet, TrendingUp,
 } from 'lucide-react'
 import PricingEditorModal from '@/components/admin/PricingEditorModal'
+import ProDropdown from '@/components/ui/ProDropdown'
 
 // ── Design tokens ──────────────────────────────────────────────
 const C = {
@@ -1377,8 +1380,8 @@ export default function PlanLimitsTab({ isInvestorMode = false }: { isInvestorMo
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// AI Credits Panel — Steps 15-17
-// Inline-editable tables for packages, action costs, and user credit gifting
+// AI Credits Panel — full admin suite
+// Tabs: Packages · Action Costs · Settings · Transactions · Balances · Stats · Bulk Gift · Promo Codes
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface AiPackage {
@@ -1401,6 +1404,58 @@ interface AiActionCost {
   description: string | null
 }
 
+// ── Credit sub-tab types ──────────────────────────────────────────
+type CreditTab = 'packages' | 'costs' | 'settings' | 'transactions' | 'balances' | 'stats' | 'bulk_gift' | 'promo'
+
+interface CreditSettings {
+  signup_credits: string
+  overage_policy: string
+  credit_expiry_policy: string
+}
+
+interface TxRow {
+  id: string
+  user_id: string
+  type: string
+  amount: number
+  balance_after: number
+  feature_key: string | null
+  note: string | null
+  created_at: string
+  profiles?: { email: string | null; full_name: string | null } | null
+}
+
+interface BalanceRow {
+  user_id: string
+  balance: number
+  lifetime_credits: number
+  lifetime_spent: number
+  updated_at: string
+  email: string | null
+  full_name: string | null
+  plan_name: string | null
+}
+
+interface StatsData {
+  daily: { date: string; credits: number }[]
+  byFeature: { feature_key: string; credits: number }[]
+  topUsers: { user_id: string; lifetime_spent: number; email: string | null; full_name: string | null }[]
+  totals: { totalBalance: number; totalIssued: number; totalSpent: number; activeWallets: number }
+  days: number
+}
+
+interface PromoCode {
+  id: string
+  code: string
+  description: string | null
+  credits: number
+  max_uses: number | null
+  uses_count: number
+  is_active: boolean
+  expires_at: string | null
+  created_at: string
+}
+
 function AiCreditsPanel({
   supabase,
   showToast,
@@ -1408,6 +1463,7 @@ function AiCreditsPanel({
   supabase: ReturnType<typeof createClient>
   showToast: (msg: string, type?: 'success' | 'error' | 'info') => void
 }) {
+  const [creditTab, setCreditTab] = useState<CreditTab>('packages')
   const [packages, setPackages] = useState<AiPackage[]>([])
   const [costs, setCosts] = useState<AiActionCost[]>([])
   const [loading, setLoading] = useState(true)
@@ -1417,11 +1473,49 @@ function AiCreditsPanel({
   const [costEdits, setCostEdits] = useState<Partial<AiActionCost>>({})
   const [saving, setSaving] = useState(false)
 
-  // Gift credits
+  // Gift credits (single user)
   const [giftEmail, setGiftEmail] = useState('')
   const [giftAmount, setGiftAmount] = useState('')
   const [giftNote, setGiftNote] = useState('')
   const [gifting, setGifting] = useState(false)
+
+  // Credit Settings
+  const [creditSettings, setCreditSettings] = useState<CreditSettings>({
+    signup_credits: '25', overage_policy: 'block', credit_expiry_policy: 'rollover',
+  })
+  const [settingsLoading, setSettingsLoading] = useState(false)
+  const [savingSettings, setSavingSettings] = useState(false)
+
+  // Transactions
+  const [txRows, setTxRows] = useState<TxRow[]>([])
+  const [txTotal, setTxTotal] = useState(0)
+  const [txPage, setTxPage] = useState(0)
+  const [txLoading, setTxLoading] = useState(false)
+  const [txFilter, setTxFilter] = useState({ user_id: '', type: '', feature_key: '' })
+
+  // Balances
+  const [balRows, setBalRows] = useState<BalanceRow[]>([])
+  const [balTotal, setBalTotal] = useState(0)
+  const [balPage, setBalPage] = useState(0)
+  const [balLoading, setBalLoading] = useState(false)
+  const [balSearch, setBalSearch] = useState('')
+
+  // Stats
+  const [stats, setStats] = useState<StatsData | null>(null)
+  const [statsLoading, setStatsLoading] = useState(false)
+  const [statsDays, setStatsDays] = useState(30)
+
+  // Bulk Gift
+  const [bulkPlan, setBulkPlan] = useState('all')
+  const [bulkAmount, setBulkAmount] = useState('')
+  const [bulkNote, setBulkNote] = useState('')
+  const [bulking, setBulking] = useState(false)
+
+  // Promo Codes
+  const [promoCodes, setPromoCodes] = useState<PromoCode[]>([])
+  const [promoLoading, setPromoLoading] = useState(false)
+  const [newPromo, setNewPromo] = useState({ code: '', description: '', credits: '', max_uses: '', expires_at: '' })
+  const [creatingPromo, setCreatingPromo] = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -1437,6 +1531,150 @@ function AiCreditsPanel({
       setLoading(false)
     })
   }, [supabase])
+
+  // ── Load credit settings ──────────────────────────────────────
+  async function loadSettings() {
+    setSettingsLoading(true)
+    try {
+      const res = await fetch('/api/admin/credits/settings')
+      if (res.ok) setCreditSettings(await res.json())
+    } catch { /* non-critical */ }
+    setSettingsLoading(false)
+  }
+
+  async function saveSettings() {
+    setSavingSettings(true)
+    try {
+      const res = await fetch('/api/admin/credits/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(creditSettings),
+      })
+      if (res.ok) showToast('Credit settings saved', 'success')
+      else showToast('Failed to save settings', 'error')
+    } catch { showToast('Network error', 'error') }
+    setSavingSettings(false)
+  }
+
+  // ── Load transactions ─────────────────────────────────────────
+  async function loadTransactions(page = 0) {
+    setTxLoading(true)
+    try {
+      const params = new URLSearchParams({
+        page: String(page), limit: '50',
+        ...(txFilter.user_id && { user_id: txFilter.user_id }),
+        ...(txFilter.type && { type: txFilter.type }),
+        ...(txFilter.feature_key && { feature_key: txFilter.feature_key }),
+      })
+      const res = await fetch(`/api/admin/credits/transactions?${params}`)
+      const json = await res.json()
+      setTxRows(json.rows ?? [])
+      setTxTotal(json.total ?? 0)
+      setTxPage(page)
+    } catch { /* non-critical */ }
+    setTxLoading(false)
+  }
+
+  // ── Load balances ─────────────────────────────────────────────
+  async function loadBalances(page = 0) {
+    setBalLoading(true)
+    try {
+      const params = new URLSearchParams({ page: String(page), limit: '50', ...(balSearch && { search: balSearch }) })
+      const res = await fetch(`/api/admin/credits/balances?${params}`)
+      const json = await res.json()
+      setBalRows(json.rows ?? [])
+      setBalTotal(json.total ?? 0)
+      setBalPage(page)
+    } catch { /* non-critical */ }
+    setBalLoading(false)
+  }
+
+  // ── Load stats ────────────────────────────────────────────────
+  async function loadStats() {
+    setStatsLoading(true)
+    try {
+      const res = await fetch(`/api/admin/credits/stats?days=${statsDays}`)
+      if (res.ok) setStats(await res.json())
+    } catch { /* non-critical */ }
+    setStatsLoading(false)
+  }
+
+  // ── Load promo codes ──────────────────────────────────────────
+  async function loadPromoCodes() {
+    setPromoLoading(true)
+    try {
+      const res = await fetch('/api/admin/credits/promo-codes')
+      if (res.ok) { const j = await res.json(); setPromoCodes(j.codes ?? []) }
+    } catch { /* non-critical */ }
+    setPromoLoading(false)
+  }
+
+  async function createPromoCode() {
+    if (!newPromo.code || !newPromo.credits) return
+    setCreatingPromo(true)
+    try {
+      const res = await fetch('/api/admin/credits/promo-codes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: newPromo.code,
+          description: newPromo.description || null,
+          credits: parseInt(newPromo.credits, 10),
+          max_uses: newPromo.max_uses ? parseInt(newPromo.max_uses, 10) : null,
+          expires_at: newPromo.expires_at || null,
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok) { showToast(json.error ?? 'Failed', 'error') }
+      else {
+        showToast(`Promo code "${newPromo.code.toUpperCase()}" created`, 'success')
+        setNewPromo({ code: '', description: '', credits: '', max_uses: '', expires_at: '' })
+        await loadPromoCodes()
+      }
+    } catch { showToast('Network error', 'error') }
+    setCreatingPromo(false)
+  }
+
+  async function togglePromoCode(id: string, is_active: boolean) {
+    await fetch('/api/admin/credits/promo-codes', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, is_active }),
+    })
+    setPromoCodes(prev => prev.map(c => c.id === id ? { ...c, is_active } : c))
+    showToast(is_active ? 'Code activated' : 'Code deactivated', 'info')
+  }
+
+  // ── Bulk Gift ─────────────────────────────────────────────────
+  async function handleBulkGift() {
+    if (!bulkAmount) return
+    setBulking(true)
+    try {
+      const res = await fetch('/api/admin/credits/bulk-gift', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan_name: bulkPlan,
+          amount: parseInt(bulkAmount, 10),
+          note: bulkNote || `Bulk gift to ${bulkPlan} plan`,
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok) showToast(json.error ?? 'Failed', 'error')
+      else showToast(`✅ Gifted ${bulkAmount} credits to ${json.successCount} users`, 'success')
+    } catch { showToast('Network error', 'error') }
+    setBulking(false)
+  }
+
+  // Load data when switching to a tab for the first time
+  useEffect(() => {
+    if (creditTab === 'settings') loadSettings()
+    if (creditTab === 'transactions') loadTransactions(0)
+    if (creditTab === 'balances') loadBalances(0)
+    if (creditTab === 'stats') loadStats()
+    if (creditTab === 'promo') loadPromoCodes()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [creditTab, statsDays])
 
   // ── Save package ──────────────────────────────────────────────
   async function savePkg(id: string) {
@@ -1536,256 +1774,648 @@ function AiCreditsPanel({
     )
   }
 
+  // ── tab definitions ────────────────────────────────────────────
+  const CREDIT_TABS: { key: CreditTab; label: string; icon: React.ReactNode }[] = [
+    { key: 'packages', label: 'Packages', icon: <CreditCard size={11} /> },
+    { key: 'costs', label: 'Action Costs', icon: <Zap size={11} /> },
+    { key: 'settings', label: 'Settings', icon: <Shield size={11} /> },
+    { key: 'transactions', label: 'Transactions', icon: <Receipt size={11} /> },
+    { key: 'balances', label: 'Balances', icon: <Wallet size={11} /> },
+    { key: 'stats', label: 'Usage Stats', icon: <TrendingUp size={11} /> },
+    { key: 'bulk_gift', label: 'Bulk Gift', icon: <Gift size={11} /> },
+    { key: 'promo', label: 'Promo Codes', icon: <Tag size={11} /> },
+  ]
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-      {/* ── Credit Packages ───────────────────────────────────── */}
+      {/* ── Credit sub-tab bar ────────────────────────────────── */}
       <div style={{
-        background: C.surface,
-        borderRadius: 16,
-        border: `1px solid ${C.border}`,
-        overflow: 'hidden',
+        display: 'flex', gap: 4, flexWrap: 'wrap' as const,
+        padding: 4, background: C.bg,
+        borderRadius: 12, border: `1px solid ${C.border}`,
       }}>
-        <div style={{ padding: '16px 18px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Zap size={15} color={C.lime} fill={C.lime} />
-          <span style={{ fontWeight: 700, fontSize: 14, color: C.text }}>Credit Packages</span>
-          <span style={{ fontSize: 11, color: C.muted, marginLeft: 4 }}>Inline editable — changes take effect immediately</span>
-        </div>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                {['Name', 'Description', 'Price (USD)', 'Credits', 'Bonus', 'Active', ''].map(h => (
-                  <th key={h} style={th}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {packages.map(pkg => {
-                const isEditing = editingPkg === pkg.id
-                return (
-                  <tr key={pkg.id} style={{ background: isEditing ? 'rgba(117,48,251,0.03)' : 'transparent' }}>
-                    <td style={cell}>
-                      {isEditing
-                        ? <input style={input} value={pkgEdits.name ?? pkg.name}
-                          onChange={e => setPkgEdits(p => ({ ...p, name: e.target.value }))} />
-                        : <strong>{pkg.name}</strong>}
-                    </td>
-                    <td style={cell}>
-                      {isEditing
-                        ? <input style={input} value={pkgEdits.description ?? pkg.description ?? ''}
-                          onChange={e => setPkgEdits(p => ({ ...p, description: e.target.value }))} />
-                        : <span style={{ color: C.muted }}>{pkg.description ?? '—'}</span>}
-                    </td>
-                    <td style={cell}>
-                      {isEditing
-                        ? <input style={{ ...input, width: 80 }} type="number" step="0.01"
-                          value={pkgEdits.price_usd ?? pkg.price_usd}
-                          onChange={e => setPkgEdits(p => ({ ...p, price_usd: parseFloat(e.target.value) }))} />
-                        : `$${pkg.price_usd.toFixed(2)}`}
-                    </td>
-                    <td style={cell}>
-                      {isEditing
-                        ? <input style={{ ...input, width: 70 }} type="number"
-                          value={pkgEdits.credits ?? pkg.credits}
-                          onChange={e => setPkgEdits(p => ({ ...p, credits: parseInt(e.target.value, 10) }))} />
-                        : pkg.credits.toLocaleString()}
-                    </td>
-                    <td style={cell}>
-                      {isEditing
-                        ? <input style={{ ...input, width: 70 }} type="number"
-                          value={pkgEdits.bonus_credits ?? pkg.bonus_credits}
-                          onChange={e => setPkgEdits(p => ({ ...p, bonus_credits: parseInt(e.target.value, 10) }))} />
-                        : (pkg.bonus_credits > 0
-                          ? <span style={{ color: '#7530fb', fontWeight: 700 }}>+{pkg.bonus_credits}</span>
-                          : <span style={{ color: C.muted }}>0</span>)}
-                    </td>
-                    <td style={cell}>
-                      {isEditing
-                        ? <input type="checkbox"
-                          checked={pkgEdits.is_active ?? pkg.is_active}
-                          onChange={e => setPkgEdits(p => ({ ...p, is_active: e.target.checked }))} />
-                        : (pkg.is_active
-                          ? <Check size={14} color="#7530fb" />
-                          : <X size={14} color="#ef4444" />)}
-                    </td>
-                    <td style={{ ...cell, whiteSpace: 'nowrap' as const }}>
-                      {isEditing ? (
-                        <div style={{ display: 'flex', gap: 4 }}>
-                          <button onClick={() => savePkg(pkg.id)} disabled={saving}
-                            style={{ ...actionBtn, background: C.lime, color: C.dark }}>
-                            <Save size={11} />
-                          </button>
-                          <button onClick={() => { setEditingPkg(null); setPkgEdits({}) }}
-                            style={{ ...actionBtn, background: C.bg, color: C.muted }}>
-                            <X size={11} />
-                          </button>
-                        </div>
-                      ) : (
-                        <button onClick={() => { setEditingPkg(pkg.id); setPkgEdits({}) }}
-                          style={{ ...actionBtn, background: C.bg, color: C.muted }}>
-                          <Edit3 size={11} />
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* ── Action Costs ─────────────────────────────────────── */}
-      <div style={{
-        background: C.surface,
-        borderRadius: 16,
-        border: `1px solid ${C.border}`,
-        overflow: 'hidden',
-      }}>
-        <div style={{ padding: '16px 18px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <BarChart2 size={15} color={C.blue} />
-          <span style={{ fontWeight: 700, fontSize: 14, color: C.text }}>Action Costs</span>
-          <span style={{ fontSize: 11, color: C.muted, marginLeft: 4 }}>Credits charged per AI action — edit to reprice without code deploy</span>
-        </div>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                {['Feature', 'Key', 'Credits / Use', 'Description', 'Enabled', ''].map(h => (
-                  <th key={h} style={th}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {costs.map(cost => {
-                const isEditing = editingCost === cost.id
-                return (
-                  <tr key={cost.id} style={{ background: isEditing ? 'rgba(29,78,216,0.03)' : 'transparent' }}>
-                    <td style={{ ...cell, fontWeight: 600 }}>
-                      {isEditing
-                        ? <input style={input} value={costEdits.name ?? cost.name}
-                          onChange={e => setCostEdits(p => ({ ...p, name: e.target.value }))} />
-                        : cost.name}
-                    </td>
-                    <td style={cell}>
-                      <code style={{ fontSize: 11, color: C.muted, background: C.bg, padding: '2px 6px', borderRadius: 4 }}>
-                        {cost.feature_key}
-                      </code>
-                    </td>
-                    <td style={cell}>
-                      {isEditing
-                        ? <input style={{ ...input, width: 70 }} type="number"
-                          value={costEdits.credits_cost ?? cost.credits_cost}
-                          onChange={e => setCostEdits(p => ({ ...p, credits_cost: parseInt(e.target.value, 10) }))} />
-                        : <span style={{ fontWeight: 700, color: '#7530fb' }}>{cost.credits_cost}</span>}
-                    </td>
-                    <td style={cell}>
-                      {isEditing
-                        ? <input style={input} value={costEdits.description ?? cost.description ?? ''}
-                          onChange={e => setCostEdits(p => ({ ...p, description: e.target.value }))} />
-                        : <span style={{ color: C.muted, fontSize: 11 }}>{cost.description ?? '—'}</span>}
-                    </td>
-                    <td style={cell}>
-                      {isEditing
-                        ? <input type="checkbox"
-                          checked={costEdits.is_enabled ?? cost.is_enabled}
-                          onChange={e => setCostEdits(p => ({ ...p, is_enabled: e.target.checked }))} />
-                        : (cost.is_enabled
-                          ? <Check size={14} color="#7530fb" />
-                          : <span style={{ fontSize: 11, color: '#ef4444', fontWeight: 600 }}>OFF</span>)}
-                    </td>
-                    <td style={{ ...cell, whiteSpace: 'nowrap' as const }}>
-                      {isEditing ? (
-                        <div style={{ display: 'flex', gap: 4 }}>
-                          <button onClick={() => saveCost(cost.id)} disabled={saving}
-                            style={{ ...actionBtn, background: C.lime, color: C.dark }}>
-                            <Save size={11} />
-                          </button>
-                          <button onClick={() => { setEditingCost(null); setCostEdits({}) }}
-                            style={{ ...actionBtn, background: C.bg, color: C.muted }}>
-                            <X size={11} />
-                          </button>
-                        </div>
-                      ) : (
-                        <button onClick={() => { setEditingCost(cost.id); setCostEdits({}) }}
-                          style={{ ...actionBtn, background: C.bg, color: C.muted }}>
-                          <Edit3 size={11} />
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* ── Gift Credits ─────────────────────────────────────── */}
-      <div style={{
-        background: C.surface,
-        borderRadius: 16,
-        border: `1px solid ${C.border}`,
-        padding: 20,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-          <Star size={15} color={C.amber} fill={C.amber} />
-          <span style={{ fontWeight: 700, fontSize: 14, color: C.text }}>Gift Credits to User</span>
-        </div>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' as const, alignItems: 'flex-end' }}>
-          <div style={{ flex: '2 1 200px' }}>
-            <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: C.muted, marginBottom: 4 }}>
-              User ID or Email
-            </label>
-            <input
-              style={{ ...input, width: '100%' }}
-              placeholder="user UUID from Supabase Auth"
-              value={giftEmail}
-              onChange={e => setGiftEmail(e.target.value)}
-            />
-          </div>
-          <div style={{ flex: '0 1 100px' }}>
-            <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: C.muted, marginBottom: 4 }}>
-              Credits
-            </label>
-            <input
-              style={{ ...input, width: '100%' }}
-              type="number" min="1" placeholder="e.g. 50"
-              value={giftAmount}
-              onChange={e => setGiftAmount(e.target.value)}
-            />
-          </div>
-          <div style={{ flex: '1 1 140px' }}>
-            <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: C.muted, marginBottom: 4 }}>
-              Note (optional)
-            </label>
-            <input
-              style={{ ...input, width: '100%' }}
-              placeholder="e.g. Refund for bug"
-              value={giftNote}
-              onChange={e => setGiftNote(e.target.value)}
-            />
-          </div>
-          <button
-            onClick={handleGift}
-            disabled={gifting || !giftEmail.trim() || !giftAmount}
-            style={{
-              ...actionBtn,
-              padding: '8px 18px',
-              background: giftEmail && giftAmount ? C.lime : C.bg,
-              color: giftEmail && giftAmount ? C.dark : C.muted,
-              fontWeight: 700,
-              fontSize: 12,
-              display: 'flex', alignItems: 'center', gap: 6,
-              flexShrink: 0,
-            }}
-          >
-            {gifting ? <RefreshCw size={12} style={{ animation: 'spin 0.8s linear infinite' }} /> : <Zap size={12} fill="currentColor" />}
-            Gift Credits
+        {CREDIT_TABS.map(t => (
+          <button key={t.key} onClick={() => setCreditTab(t.key)} style={{
+            padding: '5px 12px', borderRadius: 8, border: 'none', cursor: 'pointer',
+            fontSize: 11, fontWeight: 700, transition: 'all 0.15s',
+            background: creditTab === t.key ? C.limeDeep : 'transparent',
+            color: creditTab === t.key ? '#fff' : C.muted,
+            display: 'flex', alignItems: 'center', gap: 5,
+          }}>
+            {t.icon}{t.label}
           </button>
-        </div>
+        ))}
       </div>
+
+      {/* ══════════════════════════════════════════════════════
+          TAB: PACKAGES
+      ══════════════════════════════════════════════════════ */}
+      {creditTab === 'packages' && (
+        <div style={{ background: C.surface, borderRadius: 16, border: `1px solid ${C.border}`, overflow: 'hidden' }}>
+          <div style={{ padding: '16px 18px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Zap size={15} color={C.lime} fill={C.lime} />
+            <span style={{ fontWeight: 700, fontSize: 14, color: C.text }}>Credit Packages</span>
+            <span style={{ fontSize: 11, color: C.muted, marginLeft: 4 }}>Inline editable — changes take effect immediately</span>
+          </div>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>{['Name', 'Description', 'Price (USD)', 'Credits', 'Bonus', 'Active', ''].map(h => <th key={h} style={th}>{h}</th>)}</tr>
+              </thead>
+              <tbody>
+                {packages.map(pkg => {
+                  const isEditing = editingPkg === pkg.id
+                  return (
+                    <tr key={pkg.id} style={{ background: isEditing ? 'rgba(117,48,251,0.03)' : 'transparent' }}>
+                      <td style={cell}>{isEditing ? <input style={input} value={pkgEdits.name ?? pkg.name} onChange={e => setPkgEdits(p => ({ ...p, name: e.target.value }))} /> : <strong>{pkg.name}</strong>}</td>
+                      <td style={cell}>{isEditing ? <input style={input} value={pkgEdits.description ?? pkg.description ?? ''} onChange={e => setPkgEdits(p => ({ ...p, description: e.target.value }))} /> : <span style={{ color: C.muted }}>{pkg.description ?? '—'}</span>}</td>
+                      <td style={cell}>{isEditing ? <input style={{ ...input, width: 80 }} type="number" step="0.01" value={pkgEdits.price_usd ?? pkg.price_usd} onChange={e => setPkgEdits(p => ({ ...p, price_usd: parseFloat(e.target.value) }))} /> : `$${pkg.price_usd.toFixed(2)}`}</td>
+                      <td style={cell}>{isEditing ? <input style={{ ...input, width: 70 }} type="number" value={pkgEdits.credits ?? pkg.credits} onChange={e => setPkgEdits(p => ({ ...p, credits: parseInt(e.target.value, 10) }))} /> : pkg.credits.toLocaleString()}</td>
+                      <td style={cell}>{isEditing ? <input style={{ ...input, width: 70 }} type="number" value={pkgEdits.bonus_credits ?? pkg.bonus_credits} onChange={e => setPkgEdits(p => ({ ...p, bonus_credits: parseInt(e.target.value, 10) }))} /> : (pkg.bonus_credits > 0 ? <span style={{ color: '#7530fb', fontWeight: 700 }}>+{pkg.bonus_credits}</span> : <span style={{ color: C.muted }}>0</span>)}</td>
+                      <td style={cell}>{isEditing ? <input type="checkbox" checked={pkgEdits.is_active ?? pkg.is_active} onChange={e => setPkgEdits(p => ({ ...p, is_active: e.target.checked }))} /> : (pkg.is_active ? <Check size={14} color="#7530fb" /> : <X size={14} color="#ef4444" />)}</td>
+                      <td style={{ ...cell, whiteSpace: 'nowrap' as const }}>
+                        {isEditing ? (
+                          <div style={{ display: 'flex', gap: 4 }}>
+                            <button onClick={() => savePkg(pkg.id)} disabled={saving} style={{ ...actionBtn, background: C.lime, color: C.dark }}><Save size={11} /></button>
+                            <button onClick={() => { setEditingPkg(null); setPkgEdits({}) }} style={{ ...actionBtn, background: C.bg, color: C.muted }}><X size={11} /></button>
+                          </div>
+                        ) : (
+                          <button onClick={() => { setEditingPkg(pkg.id); setPkgEdits({}) }} style={{ ...actionBtn, background: C.bg, color: C.muted }}><Edit3 size={11} /></button>
+                        )}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════════
+          TAB: ACTION COSTS
+      ══════════════════════════════════════════════════════ */}
+      {creditTab === 'costs' && (
+        <div style={{ background: C.surface, borderRadius: 16, border: `1px solid ${C.border}`, overflow: 'hidden' }}>
+          <div style={{ padding: '16px 18px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <BarChart2 size={15} color={C.blue} />
+            <span style={{ fontWeight: 700, fontSize: 14, color: C.text }}>Action Costs</span>
+            <span style={{ fontSize: 11, color: C.muted, marginLeft: 4 }}>Credits charged per AI action — edit to reprice without code deploy</span>
+          </div>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>{['Feature', 'Key', 'Credits / Use', 'Description', 'Enabled', ''].map(h => <th key={h} style={th}>{h}</th>)}</tr>
+              </thead>
+              <tbody>
+                {costs.map(cost => {
+                  const isEditing = editingCost === cost.id
+                  return (
+                    <tr key={cost.id} style={{ background: isEditing ? 'rgba(29,78,216,0.03)' : 'transparent' }}>
+                      <td style={{ ...cell, fontWeight: 600 }}>{isEditing ? <input style={input} value={costEdits.name ?? cost.name} onChange={e => setCostEdits(p => ({ ...p, name: e.target.value }))} /> : cost.name}</td>
+                      <td style={cell}><code style={{ fontSize: 11, color: C.muted, background: C.bg, padding: '2px 6px', borderRadius: 4 }}>{cost.feature_key}</code></td>
+                      <td style={cell}>{isEditing ? <input style={{ ...input, width: 70 }} type="number" value={costEdits.credits_cost ?? cost.credits_cost} onChange={e => setCostEdits(p => ({ ...p, credits_cost: parseInt(e.target.value, 10) }))} /> : <span style={{ fontWeight: 700, color: '#7530fb' }}>{cost.credits_cost}</span>}</td>
+                      <td style={cell}>{isEditing ? <input style={input} value={costEdits.description ?? cost.description ?? ''} onChange={e => setCostEdits(p => ({ ...p, description: e.target.value }))} /> : <span style={{ color: C.muted, fontSize: 11 }}>{cost.description ?? '—'}</span>}</td>
+                      <td style={cell}>{isEditing ? <input type="checkbox" checked={costEdits.is_enabled ?? cost.is_enabled} onChange={e => setCostEdits(p => ({ ...p, is_enabled: e.target.checked }))} /> : (cost.is_enabled ? <Check size={14} color="#7530fb" /> : <span style={{ fontSize: 11, color: '#ef4444', fontWeight: 600 }}>OFF</span>)}</td>
+                      <td style={{ ...cell, whiteSpace: 'nowrap' as const }}>
+                        {isEditing ? (
+                          <div style={{ display: 'flex', gap: 4 }}>
+                            <button onClick={() => saveCost(cost.id)} disabled={saving} style={{ ...actionBtn, background: C.lime, color: C.dark }}><Save size={11} /></button>
+                            <button onClick={() => { setEditingCost(null); setCostEdits({}) }} style={{ ...actionBtn, background: C.bg, color: C.muted }}><X size={11} /></button>
+                          </div>
+                        ) : (
+                          <button onClick={() => { setEditingCost(cost.id); setCostEdits({}) }} style={{ ...actionBtn, background: C.bg, color: C.muted }}><Edit3 size={11} /></button>
+                        )}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════════
+          TAB: SETTINGS (Free on Signup, Overage, Expiry)
+      ══════════════════════════════════════════════════════ */}
+      {creditTab === 'settings' && (
+        <div style={{ background: C.surface, borderRadius: 16, border: `1px solid ${C.border}`, padding: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+            <Shield size={15} color={C.limeDeep} />
+            <span style={{ fontWeight: 700, fontSize: 14, color: C.text }}>Credit Policy Settings</span>
+          </div>
+          {settingsLoading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: 24 }}>
+              <RefreshCw size={18} style={{ animation: 'spin 0.8s linear infinite', color: C.muted }} />
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 }}>
+
+              {/* Free Credits on Signup */}
+              <div style={{ padding: 16, borderRadius: 12, border: `1px solid ${C.border}`, background: C.bg }}>
+                <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, textTransform: 'uppercase' as const, letterSpacing: '0.5px', marginBottom: 8 }}>Free Credits on Signup</p>
+                <p style={{ fontSize: 11, color: C.muted, marginBottom: 12 }}>Credits auto-gifted when a new user creates an account. Set to 0 to disable.</p>
+                <input
+                  type="number" min="0"
+                  value={creditSettings.signup_credits}
+                  onChange={e => setCreditSettings(s => ({ ...s, signup_credits: e.target.value }))}
+                  style={{ ...input, width: '100%', fontSize: 18, fontWeight: 700, color: C.limeDeep, textAlign: 'center' as const }}
+                />
+              </div>
+
+              {/* Overage Policy */}
+              <div style={{ padding: 16, borderRadius: 12, border: `1px solid ${C.border}`, background: C.bg }}>
+                <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, textTransform: 'uppercase' as const, letterSpacing: '0.5px', marginBottom: 8 }}>Overage Policy</p>
+                <p style={{ fontSize: 11, color: C.muted, marginBottom: 12 }}>What happens when a user has 0 credits and tries to use an AI feature.</p>
+                <ProDropdown
+                  prefix=""
+                  currentValue={creditSettings.overage_policy}
+                  onChanged={v => setCreditSettings(s => ({ ...s, overage_policy: v }))}
+                  width="full"
+                  options={[
+                    { val: 'block', label: 'Hard Block — reject with 402', enabled: true },
+                    { val: 'warn', label: 'Warn — allow + show banner', enabled: true },
+                    { val: 'allow_one', label: 'Allow 1 More — then block', enabled: true },
+                  ]}
+                />
+              </div>
+
+              {/* Credit Expiry / Reset Policy */}
+              <div style={{ padding: 16, borderRadius: 12, border: `1px solid ${C.border}`, background: C.bg }}>
+                <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, textTransform: 'uppercase' as const, letterSpacing: '0.5px', marginBottom: 8 }}>Credit Expiry / Reset Policy</p>
+                <p style={{ fontSize: 11, color: C.muted, marginBottom: 12 }}>How unused credits are handled each billing cycle.</p>
+                <ProDropdown
+                  prefix=""
+                  currentValue={creditSettings.credit_expiry_policy}
+                  onChanged={v => setCreditSettings(s => ({ ...s, credit_expiry_policy: v }))}
+                  width="full"
+                  options={[
+                    { val: 'rollover', label: 'Roll Over — accumulate forever', enabled: true },
+                    { val: 'monthly_reset', label: 'Monthly Reset — resets on renewal', enabled: true },
+                    { val: 'expire_90d', label: 'Expire After 90 Days', enabled: true },
+                  ]}
+                />
+              </div>
+            </div>
+          )}
+          <div style={{ marginTop: 20, display: 'flex', justifyContent: 'flex-end' }}>
+            <button
+              onClick={saveSettings}
+              disabled={savingSettings}
+              style={{ ...actionBtn, padding: '10px 24px', background: C.limeDeep, color: '#fff', fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}
+            >
+              {savingSettings ? <RefreshCw size={13} style={{ animation: 'spin 0.8s linear infinite' }} /> : <Save size={13} />}
+              Save Settings
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════════
+          TAB: TRANSACTIONS
+      ══════════════════════════════════════════════════════ */}
+      {creditTab === 'transactions' && (
+        <div style={{ background: C.surface, borderRadius: 16, border: `1px solid ${C.border}`, overflow: 'hidden' }}>
+          <div style={{ padding: '14px 18px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' as const }}>
+            <BarChart2 size={15} color={C.blue} />
+            <span style={{ fontWeight: 700, fontSize: 14, color: C.text, flex: 1 }}>Credit Transaction Log</span>
+            <input placeholder="Filter by User ID" value={txFilter.user_id} onChange={e => setTxFilter(f => ({ ...f, user_id: e.target.value }))}
+              style={{ ...input, width: 160 }} />
+            <ProDropdown
+              prefix=""
+              currentValue={txFilter.type || 'all'}
+              onChanged={v => setTxFilter(f => ({ ...f, type: v === 'all' ? '' : v }))}
+              width={150}
+              options={[
+                { val: 'all', label: 'All Types', enabled: true },
+                { val: 'deduction', label: 'Deduction', enabled: true },
+                { val: 'purchase', label: 'Purchase', enabled: true },
+                { val: 'gift', label: 'Gift', enabled: true },
+                { val: 'promo', label: 'Promo', enabled: true },
+                { val: 'signup', label: 'Signup', enabled: true },
+              ]}
+            />
+            <button onClick={() => loadTransactions(0)} style={{ ...actionBtn, background: C.limeDeep, color: '#fff', padding: '6px 14px' }}>
+              Search
+            </button>
+          </div>
+          {txLoading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: 32 }}>
+              <RefreshCw size={18} style={{ animation: 'spin 0.8s linear infinite', color: C.muted }} />
+            </div>
+          ) : (
+            <>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr>{['User', 'Type', 'Amount', 'Balance After', 'Feature', 'Note', 'Date'].map(h => <th key={h} style={th}>{h}</th>)}</tr>
+                  </thead>
+                  <tbody>
+                    {txRows.length === 0 ? (
+                      <tr><td colSpan={7} style={{ ...cell, textAlign: 'center' as const, color: C.muted }}>No transactions found</td></tr>
+                    ) : txRows.map((tx: TxRow) => (
+                      <tr key={tx.id}>
+                        <td style={cell}>
+                          <span style={{ fontSize: 11, color: C.muted }}>{(tx as any).profiles?.email ?? tx.user_id.slice(0, 8) + '…'}</span>
+                        </td>
+                        <td style={cell}>
+                          <span style={{
+                            fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 4,
+                            background: tx.type === 'deduction' ? 'rgba(220,38,38,0.08)' : tx.type === 'purchase' ? 'rgba(22,163,74,0.08)' : 'rgba(117,48,251,0.08)',
+                            color: tx.type === 'deduction' ? C.red : tx.type === 'purchase' ? C.green : C.limeDeep,
+                          }}>
+                            {tx.type}
+                          </span>
+                        </td>
+                        <td style={cell}>
+                          <span style={{ fontWeight: 700, color: tx.amount < 0 ? C.red : C.green }}>
+                            {tx.amount > 0 ? '+' : ''}{tx.amount}
+                          </span>
+                        </td>
+                        <td style={{ ...cell, color: C.muted }}>{tx.balance_after}</td>
+                        <td style={cell}>
+                          {tx.feature_key ? (
+                            <code style={{ fontSize: 10, color: C.muted, background: C.bg, padding: '1px 4px', borderRadius: 3 }}>{tx.feature_key}</code>
+                          ) : '—'}
+                        </td>
+                        <td style={{ ...cell, color: C.muted, fontSize: 11 }}>{tx.note ?? '—'}</td>
+                        <td style={{ ...cell, color: C.muted, fontSize: 11, whiteSpace: 'nowrap' as const }}>
+                          {new Date(tx.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' })}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {/* Pagination */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', borderTop: `1px solid ${C.border}` }}>
+                <span style={{ fontSize: 11, color: C.muted }}>{txTotal} total</span>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button disabled={txPage === 0} onClick={() => loadTransactions(txPage - 1)} style={{ ...actionBtn, background: C.bg, color: C.muted }}>← Prev</button>
+                  <span style={{ fontSize: 11, color: C.muted, padding: '4px 8px' }}>Page {txPage + 1}</span>
+                  <button disabled={(txPage + 1) * 50 >= txTotal} onClick={() => loadTransactions(txPage + 1)} style={{ ...actionBtn, background: C.bg, color: C.muted }}>Next →</button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════════
+          TAB: BALANCES
+      ══════════════════════════════════════════════════════ */}
+      {creditTab === 'balances' && (
+        <div style={{ background: C.surface, borderRadius: 16, border: `1px solid ${C.border}`, overflow: 'hidden' }}>
+          <div style={{ padding: '14px 18px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Users size={15} color={C.limeDeep} />
+            <span style={{ fontWeight: 700, fontSize: 14, color: C.text, flex: 1 }}>User Credit Balances</span>
+            <input placeholder="Search email or name…" value={balSearch} onChange={e => setBalSearch(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && loadBalances(0)}
+              style={{ ...input, width: 200 }} />
+            <button onClick={() => loadBalances(0)} style={{ ...actionBtn, background: C.limeDeep, color: '#fff', padding: '6px 14px' }}>Search</button>
+          </div>
+          {balLoading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: 32 }}>
+              <RefreshCw size={18} style={{ animation: 'spin 0.8s linear infinite', color: C.muted }} />
+            </div>
+          ) : (
+            <>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr>{['User', 'Plan', 'Balance', 'Lifetime Issued', 'Lifetime Spent', 'Last Active'].map(h => <th key={h} style={th}>{h}</th>)}</tr>
+                </thead>
+                <tbody>
+                  {balRows.length === 0 ? (
+                    <tr><td colSpan={6} style={{ ...cell, textAlign: 'center' as const, color: C.muted }}>No wallets found</td></tr>
+                  ) : balRows.map((row: BalanceRow) => (
+                    <tr key={row.user_id}>
+                      <td style={cell}>
+                        <div>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: C.text, margin: 0 }}>{row.email ?? 'Unknown'}</p>
+                          <p style={{ fontSize: 10, color: C.muted, margin: 0 }}>{row.full_name ?? row.user_id.slice(0, 12) + '…'}</p>
+                        </div>
+                      </td>
+                      <td style={cell}>
+                        <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: C.limeTint, color: C.limeDeep }}>
+                          {row.plan_name ?? 'Free'}
+                        </span>
+                      </td>
+                      <td style={cell}>
+                        <span style={{ fontWeight: 800, fontSize: 14, color: row.balance > 0 ? C.limeDeep : C.muted }}>{row.balance}</span>
+                      </td>
+                      <td style={{ ...cell, color: C.muted }}>{row.lifetime_credits}</td>
+                      <td style={{ ...cell, color: row.lifetime_spent > 0 ? C.red : C.muted }}>{row.lifetime_spent}</td>
+                      <td style={{ ...cell, color: C.muted, fontSize: 11 }}>
+                        {row.updated_at ? new Date(row.updated_at).toLocaleDateString('en-GB') : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', borderTop: `1px solid ${C.border}` }}>
+                <span style={{ fontSize: 11, color: C.muted }}>{balTotal} wallets total</span>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button disabled={balPage === 0} onClick={() => loadBalances(balPage - 1)} style={{ ...actionBtn, background: C.bg, color: C.muted }}>← Prev</button>
+                  <span style={{ fontSize: 11, color: C.muted, padding: '4px 8px' }}>Page {balPage + 1}</span>
+                  <button disabled={(balPage + 1) * 50 >= balTotal} onClick={() => loadBalances(balPage + 1)} style={{ ...actionBtn, background: C.bg, color: C.muted }}>Next →</button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════════
+          TAB: USAGE STATS
+      ══════════════════════════════════════════════════════ */}
+      {creditTab === 'stats' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Day range selector */}
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {[7, 14, 30, 90].map(d => (
+              <button key={d} onClick={() => { setStatsDays(d) }} style={{
+                ...actionBtn, padding: '6px 14px',
+                background: statsDays === d ? C.limeDeep : C.bg,
+                color: statsDays === d ? '#fff' : C.muted,
+              }}>
+                Last {d}d
+              </button>
+            ))}
+            <button onClick={loadStats} style={{ ...actionBtn, background: C.bg, color: C.muted, marginLeft: 8 }}>
+              <RefreshCw size={12} />
+            </button>
+          </div>
+
+          {statsLoading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}>
+              <RefreshCw size={20} style={{ animation: 'spin 0.8s linear infinite', color: C.muted }} />
+            </div>
+          ) : stats ? (
+            <>
+              {/* Totals HUD */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+                {[
+                  { label: 'Total Balance', value: stats.totals.totalBalance.toLocaleString(), color: C.limeDeep },
+                  { label: 'Total Issued', value: stats.totals.totalIssued.toLocaleString(), color: C.green },
+                  { label: 'Total Spent', value: stats.totals.totalSpent.toLocaleString(), color: C.red },
+                  { label: 'Active Users', value: stats.totals.activeWallets.toLocaleString(), color: C.blue },
+                ].map(card => (
+                  <div key={card.label} style={{ padding: 16, borderRadius: 12, border: `1px solid ${C.border}`, background: C.surface }}>
+                    <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, textTransform: 'uppercase' as const, letterSpacing: '0.5px', margin: '0 0 8px' }}>{card.label}</p>
+                    <p style={{ fontSize: 24, fontWeight: 800, color: card.color, margin: 0 }}>{card.value}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* By Feature */}
+              <div style={{ background: C.surface, borderRadius: 16, border: `1px solid ${C.border}`, overflow: 'hidden' }}>
+                <div style={{ padding: '14px 18px', borderBottom: `1px solid ${C.border}` }}>
+                  <span style={{ fontWeight: 700, fontSize: 13, color: C.text }}>Credits Spent by Feature — Last {statsDays} days</span>
+                </div>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead><tr>{['Feature Key', 'Credits Spent', 'Share'].map(h => <th key={h} style={th}>{h}</th>)}</tr></thead>
+                  <tbody>
+                    {stats.byFeature.map(row => {
+                      const pct = stats.totals.totalSpent > 0 ? Math.round(row.credits / stats.totals.totalSpent * 100) : 0
+                      return (
+                        <tr key={row.feature_key}>
+                          <td style={cell}><code style={{ fontSize: 11, color: C.muted, background: C.bg, padding: '2px 6px', borderRadius: 3 }}>{row.feature_key}</code></td>
+                          <td style={cell}><span style={{ fontWeight: 700, color: C.limeDeep }}>{row.credits.toLocaleString()}</span></td>
+                          <td style={cell}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <div style={{ flex: 1, height: 6, background: C.bg, borderRadius: 3, overflow: 'hidden' }}>
+                                <div style={{ width: `${pct}%`, height: '100%', background: C.limeDeep, borderRadius: 3 }} />
+                              </div>
+                              <span style={{ fontSize: 11, color: C.muted, minWidth: 32 }}>{pct}%</span>
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Top Users */}
+              <div style={{ background: C.surface, borderRadius: 16, border: `1px solid ${C.border}`, overflow: 'hidden' }}>
+                <div style={{ padding: '14px 18px', borderBottom: `1px solid ${C.border}` }}>
+                  <span style={{ fontWeight: 700, fontSize: 13, color: C.text }}>Top 10 Credit Consumers (All Time)</span>
+                </div>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead><tr>{['#', 'User', 'Lifetime Spent'].map(h => <th key={h} style={th}>{h}</th>)}</tr></thead>
+                  <tbody>
+                    {stats.topUsers.map((u, i) => (
+                      <tr key={u.user_id}>
+                        <td style={{ ...cell, color: C.muted, fontWeight: 700 }}>#{i + 1}</td>
+                        <td style={cell}>
+                          <p style={{ margin: 0, fontSize: 12, fontWeight: 600 }}>{u.email ?? 'Unknown'}</p>
+                          <p style={{ margin: 0, fontSize: 10, color: C.muted }}>{u.full_name ?? u.user_id.slice(0, 12)}</p>
+                        </td>
+                        <td style={cell}><span style={{ fontWeight: 700, color: C.red }}>{u.lifetime_spent.toLocaleString()}</span></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          ) : (
+            <div style={{ textAlign: 'center' as const, padding: 40, color: C.muted }}>Click a date range to load stats</div>
+          )}
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════════
+          TAB: BULK GIFT
+      ══════════════════════════════════════════════════════ */}
+      {creditTab === 'bulk_gift' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Single user gift */}
+          <div style={{ background: C.surface, borderRadius: 16, border: `1px solid ${C.border}`, padding: 22 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+              <Star size={15} color={C.amber} fill={C.amber} />
+              <span style={{ fontWeight: 700, fontSize: 14, color: C.text }}>Gift Credits to Single User</span>
+            </div>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' as const, alignItems: 'flex-end' }}>
+              <div style={{ flex: '2 1 200px' }}>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: C.muted, marginBottom: 4 }}>User ID or Email</label>
+                <input style={{ ...input, width: '100%' }} placeholder="user UUID from Supabase Auth" value={giftEmail} onChange={e => setGiftEmail(e.target.value)} />
+              </div>
+              <div style={{ flex: '0 1 100px' }}>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: C.muted, marginBottom: 4 }}>Credits</label>
+                <input style={{ ...input, width: '100%' }} type="number" min="1" placeholder="e.g. 50" value={giftAmount} onChange={e => setGiftAmount(e.target.value)} />
+              </div>
+              <div style={{ flex: '1 1 140px' }}>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: C.muted, marginBottom: 4 }}>Note (optional)</label>
+                <input style={{ ...input, width: '100%' }} placeholder="e.g. Refund for bug" value={giftNote} onChange={e => setGiftNote(e.target.value)} />
+              </div>
+              <button onClick={handleGift} disabled={gifting || !giftEmail.trim() || !giftAmount} style={{
+                ...actionBtn, padding: '8px 18px',
+                background: giftEmail && giftAmount ? C.lime : C.bg,
+                color: giftEmail && giftAmount ? C.dark : C.muted,
+                fontWeight: 700, fontSize: 12, display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0,
+              }}>
+                {gifting ? <RefreshCw size={12} style={{ animation: 'spin 0.8s linear infinite' }} /> : <Zap size={12} fill="currentColor" />}
+                Gift Credits
+              </button>
+            </div>
+          </div>
+
+          {/* Bulk gift to plan */}
+          <div style={{ background: C.surface, borderRadius: 16, border: `1px solid ${C.border}`, padding: 22 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <Users size={15} color={C.limeDeep} />
+              <span style={{ fontWeight: 700, fontSize: 14, color: C.text }}>Bulk Gift to Plan</span>
+            </div>
+            <p style={{ fontSize: 12, color: C.muted, marginBottom: 16 }}>Gift credits to every user on a specific plan (or all users). Max 10,000 credits per user per action.</p>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' as const, alignItems: 'flex-end' }}>
+              <div style={{ flex: '1 1 140px' }}>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: C.muted, marginBottom: 4 }}>Target Plan</label>
+                <ProDropdown
+                  prefix=""
+                  currentValue={bulkPlan}
+                  onChanged={v => setBulkPlan(v)}
+                  width="full"
+                  options={[
+                    { val: 'all', label: 'All Users', enabled: true },
+                    { val: 'Free', label: 'Free Plan', enabled: true },
+                    { val: 'Starter', label: 'Starter Plan', enabled: true },
+                    { val: 'Growth', label: 'Growth Plan', enabled: true },
+                    { val: 'Custom', label: 'Custom Plan', enabled: true },
+                  ]}
+                />
+              </div>
+              <div style={{ flex: '0 1 100px' }}>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: C.muted, marginBottom: 4 }}>Credits Each</label>
+                <input style={{ ...input, width: '100%' }} type="number" min="1" max="10000" placeholder="e.g. 25" value={bulkAmount} onChange={e => setBulkAmount(e.target.value)} />
+              </div>
+              <div style={{ flex: '1 1 200px' }}>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: C.muted, marginBottom: 4 }}>Note</label>
+                <input style={{ ...input, width: '100%' }} placeholder="e.g. Promo bonus for all Growth users" value={bulkNote} onChange={e => setBulkNote(e.target.value)} />
+              </div>
+              <button onClick={handleBulkGift} disabled={bulking || !bulkAmount} style={{
+                ...actionBtn, padding: '8px 20px',
+                background: bulkAmount ? '#7530fb' : C.bg,
+                color: bulkAmount ? '#fff' : C.muted,
+                fontWeight: 700, fontSize: 12, display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0,
+              }}>
+                {bulking ? <RefreshCw size={12} style={{ animation: 'spin 0.8s linear infinite' }} /> : <Zap size={12} fill="currentColor" />}
+                Bulk Gift
+              </button>
+            </div>
+            <p style={{ fontSize: 10, color: C.amber, marginTop: 12 }}>⚠️ This cannot be undone. Double-check the target plan and amount before gifting.</p>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════════
+          TAB: PROMO CODES
+      ══════════════════════════════════════════════════════ */}
+      {creditTab === 'promo' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Create new code */}
+          <div style={{ background: C.surface, borderRadius: 16, border: `1px solid ${C.border}`, padding: 22 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+              <Zap size={14} color={C.limeDeep} fill={C.limeDeep} />
+              <span style={{ fontWeight: 700, fontSize: 14, color: C.text }}>Create New Promo Code</span>
+            </div>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' as const, alignItems: 'flex-end' }}>
+              <div style={{ flex: '0 1 130px' }}>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: C.muted, marginBottom: 4 }}>Code</label>
+                <input style={{ ...input, width: '100%', fontWeight: 700, textTransform: 'uppercase' as const }} placeholder="SAVE25" value={newPromo.code} onChange={e => setNewPromo(p => ({ ...p, code: e.target.value.toUpperCase() }))} />
+              </div>
+              <div style={{ flex: '1 1 180px' }}>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: C.muted, marginBottom: 4 }}>Description</label>
+                <input style={{ ...input, width: '100%' }} placeholder="Spring 2026 bonus" value={newPromo.description} onChange={e => setNewPromo(p => ({ ...p, description: e.target.value }))} />
+              </div>
+              <div style={{ flex: '0 1 90px' }}>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: C.muted, marginBottom: 4 }}>Credits</label>
+                <input style={{ ...input, width: '100%' }} type="number" min="1" placeholder="50" value={newPromo.credits} onChange={e => setNewPromo(p => ({ ...p, credits: e.target.value }))} />
+              </div>
+              <div style={{ flex: '0 1 90px' }}>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: C.muted, marginBottom: 4 }}>Max Uses</label>
+                <input style={{ ...input, width: '100%' }} type="number" min="1" placeholder="∞" value={newPromo.max_uses} onChange={e => setNewPromo(p => ({ ...p, max_uses: e.target.value }))} />
+              </div>
+              <div style={{ flex: '0 1 140px' }}>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: C.muted, marginBottom: 4 }}>Expires At</label>
+                <input style={{ ...input, width: '100%' }} type="date" value={newPromo.expires_at} onChange={e => setNewPromo(p => ({ ...p, expires_at: e.target.value }))} />
+              </div>
+              <button onClick={createPromoCode} disabled={creatingPromo || !newPromo.code || !newPromo.credits} style={{
+                ...actionBtn, padding: '8px 18px',
+                background: newPromo.code && newPromo.credits ? C.lime : C.bg,
+                color: newPromo.code && newPromo.credits ? C.dark : C.muted,
+                fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0,
+              }}>
+                {creatingPromo ? <RefreshCw size={12} style={{ animation: 'spin 0.8s linear infinite' }} /> : <Check size={12} />}
+                Create Code
+              </button>
+            </div>
+          </div>
+
+          {/* Codes list */}
+          <div style={{ background: C.surface, borderRadius: 16, border: `1px solid ${C.border}`, overflow: 'hidden' }}>
+            <div style={{ padding: '14px 18px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontWeight: 700, fontSize: 14, color: C.text, flex: 1 }}>Promo Codes</span>
+              <button onClick={loadPromoCodes} style={{ ...actionBtn, background: C.bg, color: C.muted }}>
+                <RefreshCw size={12} />
+              </button>
+            </div>
+            {promoLoading ? (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: 32 }}>
+                <RefreshCw size={18} style={{ animation: 'spin 0.8s linear infinite', color: C.muted }} />
+              </div>
+            ) : (
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr>{['Code', 'Description', 'Credits', 'Uses', 'Expires', 'Status', ''].map(h => <th key={h} style={th}>{h}</th>)}</tr>
+                </thead>
+                <tbody>
+                  {promoCodes.length === 0 ? (
+                    <tr><td colSpan={7} style={{ ...cell, textAlign: 'center' as const, color: C.muted }}>No promo codes yet</td></tr>
+                  ) : promoCodes.map(code => (
+                    <tr key={code.id} style={{ opacity: code.is_active ? 1 : 0.5 }}>
+                      <td style={cell}>
+                        <code style={{ fontWeight: 800, fontSize: 13, color: C.limeDeep, background: C.limeTint, padding: '2px 8px', borderRadius: 4 }}>
+                          {code.code}
+                        </code>
+                      </td>
+                      <td style={{ ...cell, color: C.muted, fontSize: 11 }}>{code.description ?? '—'}</td>
+                      <td style={cell}><span style={{ fontWeight: 700, color: C.limeDeep }}>+{code.credits}</span></td>
+                      <td style={cell}>
+                        <span style={{ fontSize: 11, color: C.muted }}>
+                          {code.uses_count}{code.max_uses != null ? ` / ${code.max_uses}` : ' / ∞'}
+                        </span>
+                      </td>
+                      <td style={{ ...cell, fontSize: 11, color: C.muted }}>
+                        {code.expires_at ? new Date(code.expires_at).toLocaleDateString('en-GB') : 'Never'}
+                      </td>
+                      <td style={cell}>
+                        <span style={{
+                          fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 4,
+                          background: code.is_active ? 'rgba(22,163,74,0.08)' : 'rgba(220,38,38,0.08)',
+                          color: code.is_active ? C.green : C.red,
+                        }}>
+                          {code.is_active ? 'ACTIVE' : 'OFF'}
+                        </span>
+                      </td>
+                      <td style={cell}>
+                        <button onClick={() => togglePromoCode(code.id, !code.is_active)} style={{
+                          ...actionBtn,
+                          background: code.is_active ? 'rgba(220,38,38,0.08)' : 'rgba(22,163,74,0.08)',
+                          color: code.is_active ? C.red : C.green,
+                        }}>
+                          {code.is_active ? 'Deactivate' : 'Activate'}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      )}
 
     </div>
   )
