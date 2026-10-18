@@ -29,6 +29,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import { SLOT_SELECTION_CSS } from './slotSelection'
 import React, { useState, useRef, useCallback } from 'react'
+import { DIVIDER_FREE_VARIANTS } from './PropertiesPanel'
 import ImageEditorModal from '@/components/ui/ImageEditor/ImageEditorModal'
 import type { ImageEditorState } from '@/components/ui/ImageEditor/types'
 import {
@@ -150,6 +151,8 @@ interface CanvasProps {
     hasActiveSlot?: boolean
     onDeselect?: () => void
     onLoadTemplate?: (blocks: Block[], templateId: string) => void
+    /** Design Studio plan — used to show Pro watermark on blocks using Pro styles */
+    designStudioPlan?: 'free' | 'pro'
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -183,6 +186,7 @@ export default function Canvas({
     hasActiveSlot = false,
     onDeselect,
     onLoadTemplate,
+    designStudioPlan = 'free',
 }: CanvasProps) {
     // Drop zone state — is library block being dragged over the canvas?
     const [isDropTarget, setIsDropTarget] = useState(false)
@@ -393,6 +397,7 @@ export default function Canvas({
                                     hasActiveSlot={hasActiveSlot}
                                     activeCategory={activeCategory}
                                     deviceWidth={deviceWidth}
+                                    designStudioPlan={designStudioPlan}
                                 />
 
                                 {/* Reorder drop indicator — line below this block */}
@@ -679,6 +684,7 @@ interface BlockCardProps {
     hasActiveSlot?: boolean
     activeCategory?: CategoryId
     deviceWidth?: 'desktop' | 'tablet' | 'mobile'
+    designStudioPlan?: 'free' | 'pro'
 }
 
 function BlockCard({
@@ -709,6 +715,7 @@ function BlockCard({
     hasActiveSlot,
     activeCategory,
     deviceWidth = 'desktop',
+    designStudioPlan = 'free',
 }: BlockCardProps) {
     const [hovered, setHovered] = useState(false)
     const [deleteConfirm, setDeleteConfirm] = useState(false)
@@ -885,6 +892,45 @@ function BlockCard({
                     <BlockPreview block={block} def={def} activeCategory={activeCategory} deviceWidth={deviceWidth} />
                 </div>
             </div>
+
+            {/* ── Pro style watermark — editor-only, never exported ── */}
+            {(() => {
+                if (designStudioPlan === 'pro') return null
+                const isDivider = block.type === 'divider' || (block.type as string) === 'separator'
+                if (!isDivider) return null
+                const variantId = (block.props as any).variant ?? 'minimal_diamond'
+                if (DIVIDER_FREE_VARIANTS.has(variantId)) return null
+                return (
+                    <div
+                        title="Pro style — upgrade to publish"
+                        style={{
+                            position: 'absolute',
+                            bottom: 6,
+                            left: 8,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 4,
+                            background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                            color: '#fff',
+                            fontSize: 9,
+                            fontWeight: 700,
+                            letterSpacing: '0.04em',
+                            padding: '2px 7px 2px 5px',
+                            borderRadius: 10,
+                            lineHeight: 1,
+                            boxShadow: '0 1px 4px rgba(217,119,6,0.45)',
+                            pointerEvents: 'none',
+                            zIndex: 5,
+                            userSelect: 'none',
+                        }}
+                    >
+                        <svg width={8} height={7} viewBox="0 0 16 14" fill="none" style={{ display: 'block', flexShrink: 0 }}>
+                            <path d="M1 13h14M2 13L0.5 5.5L5 9L8 1L11 9L15.5 5.5L14 13H2Z" fill="#fff" stroke="#fff" strokeWidth="0.5" strokeLinejoin="round" strokeLinecap="round" />
+                        </svg>
+                        Pro
+                    </div>
+                )
+            })()}
 
             {/* ── Action toolbar — horizontal, top of block ── */}
             {(hovered || isSelected) && (

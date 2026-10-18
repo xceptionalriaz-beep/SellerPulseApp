@@ -27,8 +27,16 @@ async function verifyAdmin(req: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser(token)
     if (!user) return null
 
-    // Check role in user_metadata (set by app) or app_metadata (set by service role)
+    // Check role in profiles table (primary source of truth for app roles),
+    // then fall back to JWT metadata (user_metadata / app_metadata).
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
     const role =
+        (profile?.role as string | undefined) ??
         (user.user_metadata?.role as string | undefined) ??
         (user.app_metadata?.role as string | undefined)
 
