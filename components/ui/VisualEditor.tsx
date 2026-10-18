@@ -1739,6 +1739,8 @@ export default function VisualEditor({
                     canvasSettings={canvasSettings}
                     onUpdateSettings={handleUpdateSettings}
                     onApplyGlobalToAll={handleApplyGlobalToAll}
+                    designStudioPlan={designStudioPlan}
+                    onUpgradeClick={onUpgradeClick}
                     // ImagesTab — direct asset focus (no slot cards)
                     onInsertImage={handleInsertImage}
                     selectedId={selectedId}
