@@ -34,7 +34,7 @@ import ProDropdown, { DropdownOption } from '@/components/ui/ProDropdown'
 import { auditHtml } from '@/components/ui/VisualEditor/audit'
 import type { TemplateSlot } from '@/app/dashboard/listing-generator/types/listing.types'
 import VersionHistoryPanel, { saveTemplateVersion } from '@/components/ui/VersionHistoryPanel'
-import { DIVIDER_FREE_VARIANTS } from '@/components/ui/VisualEditor/PropertiesPanel'
+import { getFreeVariantIds } from '@/components/ui/VisualEditor/PropertiesPanel'
 import type { Block } from '@/components/ui/VisualEditor/blocks'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
@@ -421,13 +421,15 @@ function VisualEditorInner() {
     }, [savedId, name, category, html, slots, tags, sortOrder, isFeatured, isNewBadge, supabase])
 
     // ── Publish ───────────────────────────────────────────────────────────────
-    // Check if any block uses a Pro-only Divider style
+    // Check if any block uses a Pro-only style (first 2 variants are free for
+    // blocks with ≥10 styles; divider has its own 5-free set).
     const hasProStyles = useCallback((blocks: Block[]) => {
         return blocks.some(b => {
-            const isDivider = b.type === 'divider' || (b.type as string) === 'separator'
-            if (!isDivider) return false
-            const variantId = (b.props as any).variant ?? 'minimal_diamond'
-            return !DIVIDER_FREE_VARIANTS.has(variantId)
+            const freeIds = getFreeVariantIds(b.type)
+            if (!freeIds) return false       // block has <10 variants → all free
+            const variantId = (b.props as any).variant ?? (b.props as any).layoutStyle
+            if (!variantId) return false
+            return !freeIds.has(variantId)
         })
     }, [])
 
