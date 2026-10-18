@@ -36,7 +36,7 @@ import type { TemplateSlot } from '@/app/dashboard/listing-generator/types/listi
 import VersionHistoryPanel, { saveTemplateVersion } from '@/components/ui/VersionHistoryPanel'
 import { getFreeVariantIds } from '@/components/ui/VisualEditor/PropertiesPanel'
 import { getVariants } from '@/components/ui/VisualEditor/variants/index'
-import { VariantThumbnail } from '@/components/ui/VisualEditor/variantThumbnails'
+import { ProExportGate } from '@/components/ui/VisualEditor/ProExportGate'
 import type { Block } from '@/components/ui/VisualEditor/blocks'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
@@ -230,7 +230,6 @@ function VisualEditorInner() {
     const [proGateBlocks, setProGateBlocks] = useState<Array<{
         blockId: string; blockType: string; variantId: string; variantLabel: string
     }>>([])
-    const [proGateShowAll, setProGateShowAll] = useState(false)
     const proGateRef = useRef<HTMLDivElement>(null)
 
     // ── Close action menu on outside click ───────────────────────────────────
@@ -483,7 +482,6 @@ function VisualEditorInner() {
         const proBlocks = collectProBlocks(blocksRef.current)
         if (proBlocks.length === 0) { action(); return }
         setProGateBlocks(proBlocks)
-        setProGateShowAll(false)
         setShowProExportGate(true)
     }, [designStudioPlan, collectProBlocks])
 
@@ -1440,163 +1438,14 @@ function VisualEditorInner() {
                     copiedId={previewCopied ? (savedId || 'preview') : null}
                 />
             )}
-            {/* ── Pro Export Gate Popup (Canva-style) ── */}
+            {/* ── Pro Export Gate Popup ── */}
             {showProExportGate && (
-                <div
-                    ref={proGateRef}
-                    style={{
-                        position: 'fixed', top: 56, right: 16,
-                        width: 272,
-                        backgroundColor: C.surface,
-                        border: `1px solid ${C.border}`,
-                        borderRadius: 14,
-                        boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
-                        zIndex: 3000,
-                        overflow: 'hidden',
-                        fontFamily: 'DM Sans, sans-serif',
-                    }}
-                >
-                    {/* Gold crown header */}
-                    <div style={{
-                        background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                        padding: '10px 14px',
-                        display: 'flex', alignItems: 'center', gap: 8,
-                    }}>
-                        <svg width={16} height={13} viewBox="0 0 16 14" fill="none" style={{ flexShrink: 0 }}>
-                            <path d="M1 13h14M2 13L0.5 5.5L5 9L8 1L11 9L15.5 5.5L14 13H2Z"
-                                fill="#fff" stroke="#fff" strokeWidth="0.5" strokeLinejoin="round" strokeLinecap="round" />
-                            <circle cx="8" cy="1.5" r="1.2" fill="#fff" opacity="0.9" />
-                            <circle cx="0.5" cy="5.5" r="1" fill="#fff" opacity="0.9" />
-                            <circle cx="15.5" cy="5.5" r="1" fill="#fff" opacity="0.9" />
-                        </svg>
-                        <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: '#fff', lineHeight: 1.3 }}>
-                            Template uses Pro styles
-                        </p>
-                        <button
-                            onClick={() => setShowProExportGate(false)}
-                            style={{
-                                marginLeft: 'auto', background: 'none', border: 'none',
-                                cursor: 'pointer', color: 'rgba(255,255,255,0.8)',
-                                display: 'flex', alignItems: 'center', padding: 0, flexShrink: 0,
-                            }}
-                        >
-                            <X size={14} />
-                        </button>
-                    </div>
-
-                    {/* Body */}
-                    <div style={{ padding: '12px 14px 14px' }}>
-                        <p style={{ margin: '0 0 10px', fontSize: 11, color: C.secondary, lineHeight: 1.5 }}>
-                            Upgrade to export or open in Code Editor without&nbsp;restrictions.
-                        </p>
-
-                        {/* Pro block list */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginBottom: 12 }}>
-                            {(proGateShowAll ? proGateBlocks : proGateBlocks.slice(0, 2)).map(b => (
-                                <div key={b.blockId} style={{
-                                    display: 'flex', alignItems: 'center', gap: 8,
-                                    padding: '5px 7px', backgroundColor: C.bg,
-                                    borderRadius: 8, border: `1px solid ${C.border}`,
-                                }}>
-                                    {/* Mini SVG thumbnail */}
-                                    <div style={{
-                                        width: 60, height: 30, flexShrink: 0,
-                                        borderRadius: 4, overflow: 'hidden',
-                                        border: `1px solid ${C.border}`, backgroundColor: C.surface,
-                                    }}>
-                                        <VariantThumbnail variantId={b.variantId} isSelected={false} />
-                                    </div>
-                                    <div style={{ minWidth: 0, flex: 1 }}>
-                                        <p style={{
-                                            margin: 0, fontSize: 11, fontWeight: 600,
-                                            color: C.body, whiteSpace: 'nowrap',
-                                            overflow: 'hidden', textOverflow: 'ellipsis',
-                                        }}>
-                                            {b.variantLabel}
-                                        </p>
-                                        <p style={{ margin: 0, fontSize: 9.5, color: C.muted }}>
-                                            {b.blockType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                                        </p>
-                                    </div>
-                                    {/* Mini Pro badge */}
-                                    <span style={{
-                                        flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 2,
-                                        background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                                        color: '#fff', fontSize: 8, fontWeight: 700,
-                                        padding: '2px 5px', borderRadius: 4, lineHeight: 1,
-                                        letterSpacing: '0.04em',
-                                    }}>
-                                        <svg width={7} height={6} viewBox="0 0 16 14" fill="none">
-                                            <path d="M1 13h14M2 13L0.5 5.5L5 9L8 1L11 9L15.5 5.5L14 13H2Z"
-                                                fill="#fff" stroke="#fff" strokeWidth="0.5" strokeLinejoin="round" strokeLinecap="round" />
-                                        </svg>
-                                        Pro
-                                    </span>
-                                </div>
-                            ))}
-
-                            {/* "See N more" link */}
-                            {!proGateShowAll && proGateBlocks.length > 2 && (
-                                <button
-                                    onClick={() => setProGateShowAll(true)}
-                                    style={{
-                                        background: 'none', border: 'none', cursor: 'pointer',
-                                        fontSize: 11, fontWeight: 600, color: C.primary,
-                                        padding: '3px 2px', textAlign: 'left',
-                                        display: 'flex', alignItems: 'center', gap: 4,
-                                        fontFamily: 'DM Sans, sans-serif',
-                                    }}
-                                >
-                                    + {proGateBlocks.length - 2} more&nbsp;→
-                                </button>
-                            )}
-                        </div>
-
-                        {/* Upgrade CTA — gold crown badge style */}
-                        <button
-                            onClick={() => { setShowProExportGate(false); setShowUpgradeModal(true) }}
-                            style={{
-                                width: '100%', display: 'flex', alignItems: 'center',
-                                justifyContent: 'center', gap: 7,
-                                padding: '10px 0',
-                                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                                border: 'none', borderRadius: 8,
-                                cursor: 'pointer',
-                                color: '#fff', fontFamily: 'DM Sans, sans-serif',
-                                fontSize: 13, fontWeight: 700, letterSpacing: '0.02em',
-                                boxShadow: '0 2px 10px rgba(217,119,6,0.4)',
-                                transition: 'opacity 0.15s',
-                            }}
-                            onMouseEnter={e => { e.currentTarget.style.opacity = '0.9' }}
-                            onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
-                        >
-                            <svg width={13} height={11} viewBox="0 0 16 14" fill="none" style={{ flexShrink: 0 }}>
-                                <path d="M1 13h14M2 13L0.5 5.5L5 9L8 1L11 9L15.5 5.5L14 13H2Z"
-                                    fill="#fff" stroke="#fff" strokeWidth="0.5" strokeLinejoin="round" strokeLinecap="round" />
-                                <circle cx="8" cy="1.5" r="1.2" fill="#fff" opacity="0.9" />
-                                <circle cx="0.5" cy="5.5" r="1" fill="#fff" opacity="0.9" />
-                                <circle cx="15.5" cy="5.5" r="1" fill="#fff" opacity="0.9" />
-                            </svg>
-                            Upgrade to Pro — $9/mo
-                        </button>
-
-                        {/* Maybe later */}
-                        <button
-                            onClick={() => setShowProExportGate(false)}
-                            style={{
-                                width: '100%', marginTop: 7,
-                                background: 'none', border: 'none',
-                                fontSize: 11, color: C.muted, cursor: 'pointer',
-                                fontFamily: 'DM Sans, sans-serif', padding: '3px 0',
-                                transition: 'color 0.12s',
-                            }}
-                            onMouseEnter={e => { e.currentTarget.style.color = C.secondary }}
-                            onMouseLeave={e => { e.currentTarget.style.color = C.muted }}
-                        >
-                            Maybe later
-                        </button>
-                    </div>
-                </div>
+                <ProExportGate
+                    blocks={proGateBlocks}
+                    containerRef={proGateRef}
+                    onDismiss={() => setShowProExportGate(false)}
+                    onUpgrade={() => { setShowProExportGate(false); setShowUpgradeModal(true) }}
+                />
             )}
 
             {/* ── Pro Upgrade Modal ── */}
