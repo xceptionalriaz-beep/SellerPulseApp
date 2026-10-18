@@ -15,118 +15,97 @@ export interface FontDefinition {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 100+ CURATED FONT REGISTRY
+// CURATED FONT REGISTRY — eBay Listing & E-Commerce Optimised
+//
+// Every font here has a distinct visual purpose for product listings.
+// Fonts are grouped by the kind of eBay listing they suit best.
+//
+// Removed: near-duplicate generics, dev-only coding fonts, fonts that
+//          don't exist on Google Fonts (Cabinet Grotesk, Clash Display),
+//          a typo entry (Cinel Decorative), and anything that clashes
+//          with a professional listing context.
 // ─────────────────────────────────────────────────────────────────────────────
 export const FONT_REGISTRY: FontDefinition[] = [
-    // ── Classic Web-Safe System Fonts (No download required) ──
-    { name: 'Arial', category: 'system', fallback: 'Helvetica, sans-serif' },
-    { name: 'Georgia', category: 'system', fallback: 'serif' },
-    { name: 'Verdana', category: 'system', fallback: 'Geneva, sans-serif' },
-    { name: 'Trebuchet MS', category: 'system', fallback: 'Helvetica, sans-serif' },
+
+    // ── System fonts — zero download, always work in eBay HTML ──────────────
+    { name: 'Arial',           category: 'system', fallback: 'Helvetica, sans-serif' },
+    { name: 'Georgia',         category: 'system', fallback: 'serif' },
+    { name: 'Verdana',         category: 'system', fallback: 'Geneva, sans-serif' },
+    { name: 'Trebuchet MS',    category: 'system', fallback: 'Helvetica, sans-serif' },
     { name: 'Times New Roman', category: 'system', fallback: 'Times, serif' },
-    { name: 'Courier New', category: 'system', fallback: 'monospace' },
-    { name: 'Tahoma', category: 'system', fallback: 'sans-serif' },
-    { name: 'Impact', category: 'system', fallback: 'Charcoal, sans-serif' },
+    { name: 'Tahoma',          category: 'system', fallback: 'sans-serif' },
+    { name: 'Impact',          category: 'system', fallback: 'Charcoal, sans-serif' },
 
-    // ── Modern Clean Sans-Serif ──
-    { name: 'Inter', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Roboto', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Poppins', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Montserrat', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Open Sans', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Lato', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'DM Sans', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Plus Jakarta Sans', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Nunito', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Raleway', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Work Sans', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Ubuntu', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Rubik', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Manrope', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Syne', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Outfit', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Public Sans', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Barlow', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Quicksand', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Kanit', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Cabin', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Jost', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Heebo', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Karla', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Mukta', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'PT Sans', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Fira Sans', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Noto Sans', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Hanken Grotesk', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Red Hat Display', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Figtree', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Albert Sans', category: 'sans', fallback: 'sans-serif', google: true },
-    { name: 'Lexend', category: 'sans', fallback: 'sans-serif', google: true },
+    // ── Clean modern sans — body copy, bullet lists, spec tables ────────────
+    // Best for: all categories. Readable at small sizes on mobile.
+    { name: 'Inter',             category: 'sans', fallback: 'sans-serif', google: true },  // free
+    { name: 'Roboto',            category: 'sans', fallback: 'sans-serif', google: true },  // free
+    { name: 'Open Sans',         category: 'sans', fallback: 'sans-serif', google: true },  // most-used web font, excellent descriptions
+    { name: 'Lato',              category: 'sans', fallback: 'sans-serif', google: true },  // professional, warm — apparel, home goods
+    { name: 'Poppins',           category: 'sans', fallback: 'sans-serif', google: true },  // rounded, modern — fashion, beauty, toys
+    { name: 'Montserrat',        category: 'sans', fallback: 'sans-serif', google: true },  // strong geometric — all premium products
+    { name: 'Raleway',           category: 'sans', fallback: 'sans-serif', google: true },  // elegant thin caps — fashion, jewellery headers
+    { name: 'DM Sans',           category: 'sans', fallback: 'sans-serif', google: true },  // crisp modern — electronics, software
+    { name: 'Plus Jakarta Sans', category: 'sans', fallback: 'sans-serif', google: true },  // contemporary — lifestyle, home decor
+    { name: 'Nunito',            category: 'sans', fallback: 'sans-serif', google: true },  // rounded friendly — kids, toys, gifts
+    { name: 'Manrope',           category: 'sans', fallback: 'sans-serif', google: true },  // geometric modern — tech accessories
+    { name: 'Work Sans',         category: 'sans', fallback: 'sans-serif', google: true },  // editorial clean — tools, automotive parts
+    { name: 'Josefin Sans',      category: 'sans', fallback: 'sans-serif', google: true },  // geometric elegant — fashion, vintage
+    { name: 'Barlow',            category: 'sans', fallback: 'sans-serif', google: true },  // condensed-friendly — industrial, outdoor
+    { name: 'Rubik',             category: 'sans', fallback: 'sans-serif', google: true },  // slightly rounded — consumer electronics
+    { name: 'Quicksand',         category: 'sans', fallback: 'sans-serif', google: true },  // soft round — handmade, beauty, wellness
+    { name: 'Space Grotesk',     category: 'sans', fallback: 'sans-serif', google: true },  // techy-modern — gadgets, gaming
+    { name: 'IBM Plex Sans',     category: 'sans', fallback: 'sans-serif', google: true },  // crisp & technical — tools, parts, specs
+    { name: 'Outfit',            category: 'sans', fallback: 'sans-serif', google: true },  // friendly modern — everyday products
+    { name: 'Figtree',           category: 'sans', fallback: 'sans-serif', google: true },  // clean proportions — home & garden
+    { name: 'Urbanist',          category: 'sans', fallback: 'sans-serif', google: true },  // minimal luxury — premium/brand listings
+    { name: 'Mulish',            category: 'sans', fallback: 'sans-serif', google: true },  // lightweight clean — beauty, wellness
+    { name: 'Lexend',            category: 'sans', fallback: 'sans-serif', google: true },  // readability-optimised — long descriptions
 
-    // ── Luxury & Editorial Serif ──
-    { name: 'Playfair Display', category: 'serif', fallback: 'serif', google: true },
-    { name: 'Merriweather', category: 'serif', fallback: 'serif', google: true },
-    { name: 'Lora', category: 'serif', fallback: 'serif', google: true },
-    { name: 'Cormorant Garamond', category: 'serif', fallback: 'serif', google: true },
-    { name: 'Cinzel', category: 'serif', fallback: 'serif', google: true },
-    { name: 'Bodoni Moda', category: 'serif', fallback: 'serif', google: true },
-    { name: 'Libre Baskerville', category: 'serif', fallback: 'serif', google: true },
-    { name: 'EB Garamond', category: 'serif', fallback: 'serif', google: true },
-    { name: 'Prata', category: 'serif', fallback: 'serif', google: true },
-    { name: 'Marcellus', category: 'serif', fallback: 'serif', google: true },
-    { name: 'Castoro', category: 'serif', fallback: 'serif', google: true },
-    { name: 'Fraunces', category: 'serif', fallback: 'serif', google: true },
-    { name: 'DM Serif Display', category: 'serif', fallback: 'serif', google: true },
-    { name: 'Cinel Decorative', category: 'serif', fallback: 'serif', google: true },
-    { name: 'Cardo', category: 'serif', fallback: 'serif', google: true },
-    { name: 'Vollkorn', category: 'serif', fallback: 'serif', google: true },
-    { name: 'Newsreader', category: 'serif', fallback: 'serif', google: true },
-    { name: 'Spectral', category: 'serif', fallback: 'serif', google: true },
-    { name: 'Bitter', category: 'serif', fallback: 'serif', google: true },
-    { name: 'Old Standard TT', category: 'serif', fallback: 'serif', google: true },
-    { name: 'Faustina', category: 'serif', fallback: 'serif', google: true },
-    { name: 'Frank Ruhl Libre', category: 'serif', fallback: 'serif', google: true },
+    // ── Elegant serifs — premium, luxury & editorial listings ────────────────
+    // Best for: jewellery, watches, antiques, fashion, collectibles.
+    { name: 'Playfair Display',   category: 'serif', fallback: 'serif', google: true },  // luxury editorial — jewellery, watches
+    { name: 'Cormorant Garamond', category: 'serif', fallback: 'serif', google: true },  // ultra-luxury — fine art, couture, antiques
+    { name: 'Cinzel',             category: 'serif', fallback: 'serif', google: true },  // Roman elegance — premium, collectibles
+    { name: 'Bodoni Moda',        category: 'serif', fallback: 'serif', google: true },  // high-fashion editorial — clothing, bags
+    { name: 'Lora',               category: 'serif', fallback: 'serif', google: true },  // warm readable — home goods, books, decor
+    { name: 'Merriweather',       category: 'serif', fallback: 'serif', google: true },  // trustworthy — books, business items
+    { name: 'Libre Baskerville',  category: 'serif', fallback: 'serif', google: true },  // classic professional — all categories
+    { name: 'DM Serif Display',   category: 'serif', fallback: 'serif', google: true },  // bold editorial — sale headers, banners
+    { name: 'Fraunces',           category: 'serif', fallback: 'serif', google: true },  // quirky premium — craft, artisan, vintage
+    { name: 'Spectral',           category: 'serif', fallback: 'serif', google: true },  // refined narrow — compact listing layouts
+    { name: 'Bitter',             category: 'serif', fallback: 'serif', google: true },  // slab-serif readable — tools, books
+    { name: 'Italiana',           category: 'serif', fallback: 'serif', google: true },  // Italian fashion-forward — luxury apparel
+    { name: 'Marcellus',          category: 'serif', fallback: 'serif', google: true },  // elegant small caps — jewellery, perfume
 
-    // ── High-Impact Retail & Headline Display ──
-    { name: 'Oswald', category: 'display', fallback: 'sans-serif', google: true },
-    { name: 'Bebas Neue', category: 'display', fallback: 'sans-serif', google: true },
-    { name: 'Anton', category: 'display', fallback: 'sans-serif', google: true },
-    { name: 'Archivo Black', category: 'display', fallback: 'sans-serif', google: true },
-    { name: 'Teko', category: 'display', fallback: 'sans-serif', google: true },
-    { name: 'Righteous', category: 'display', fallback: 'sans-serif', google: true },
-    { name: 'Russo One', category: 'display', fallback: 'sans-serif', google: true },
-    { name: 'Alfa Slab One', category: 'display', fallback: 'serif', google: true },
-    { name: 'Changa One', category: 'display', fallback: 'sans-serif', google: true },
-    { name: 'Staatliches', category: 'display', fallback: 'sans-serif', google: true },
-    { name: 'Bungee', category: 'display', fallback: 'sans-serif', google: true },
-    { name: 'Abril Fatface', category: 'display', fallback: 'serif', google: true },
-    { name: 'Cinzel Decorative', category: 'display', fallback: 'serif', google: true },
-    { name: 'Unbounded', category: 'display', fallback: 'sans-serif', google: true },
-    { name: 'Audiowide', category: 'display', fallback: 'sans-serif', google: true },
-    { name: 'Orbitron', category: 'display', fallback: 'sans-serif', google: true },
-    { name: 'Cabinet Grotesk', category: 'display', fallback: 'sans-serif', google: true },
-    { name: 'Clash Display', category: 'display', fallback: 'sans-serif', google: true },
-    { name: 'Sora', category: 'display', fallback: 'sans-serif', google: true },
-    { name: 'Kalam', category: 'display', fallback: 'cursive', google: true },
-    { name: 'Caveat', category: 'display', fallback: 'cursive', google: true },
-    { name: 'Permanent Marker', category: 'display', fallback: 'cursive', google: true },
-    { name: 'Lobster', category: 'display', fallback: 'cursive', google: true },
-    { name: 'Pacifico', category: 'display', fallback: 'cursive', google: true },
-    { name: 'Satisfy', category: 'display', fallback: 'cursive', google: true },
-    { name: 'Great Vibes', category: 'display', fallback: 'cursive', google: true },
+    // ── High-impact display — product headlines, sale banners, promo text ────
+    // Best for: sale banners, product titles, section headers, promo blocks.
+    { name: 'Oswald',            category: 'display', fallback: 'sans-serif', google: true },  // condensed strong — SALE, DEAL headers
+    { name: 'Bebas Neue',        category: 'display', fallback: 'sans-serif', google: true },  // all-caps punch — discount banners
+    { name: 'Anton',             category: 'display', fallback: 'sans-serif', google: true },  // bold impact — clearance, sports
+    { name: 'Archivo Black',     category: 'display', fallback: 'sans-serif', google: true },  // heavy modern — electronics, gaming
+    { name: 'Russo One',         category: 'display', fallback: 'sans-serif', google: true },  // solid bold — automotive, tools
+    { name: 'Barlow Condensed',  category: 'display', fallback: 'sans-serif', google: true },  // compact retail — tight price-tag layouts
+    { name: 'Big Shoulders Display', category: 'display', fallback: 'sans-serif', google: true }, // industrial bold — tools, machinery
+    { name: 'Rajdhani',          category: 'display', fallback: 'sans-serif', google: true },  // tech-forward — electronics, gaming PC
+    { name: 'Exo 2',             category: 'display', fallback: 'sans-serif', google: true },  // sci-fi modern — drones, gadgets
+    { name: 'Orbitron',          category: 'display', fallback: 'sans-serif', google: true },  // futuristic — gaming, tech, automotive
+    { name: 'Unbounded',         category: 'display', fallback: 'sans-serif', google: true },  // chunky geometric — streetwear, sneakers
+    { name: 'Sora',              category: 'display', fallback: 'sans-serif', google: true },  // modern rounded display — lifestyle
+    { name: 'Abril Fatface',     category: 'display', fallback: 'serif', google: true },       // editorial bold serif — magazines, luxury
+    { name: 'Cinzel Decorative', category: 'display', fallback: 'serif', google: true },       // ornate Roman — awards, premium gifts
+    { name: 'Righteous',         category: 'display', fallback: 'sans-serif', google: true },  // retro-modern — vintage, lifestyle
+    { name: 'Racing Sans One',   category: 'display', fallback: 'sans-serif', google: true },  // speed/racing — automotive, sports gear
+    { name: 'Pacifico',          category: 'display', fallback: 'cursive', google: true },     // casual script — handmade, food, surf
+    { name: 'Satisfy',           category: 'display', fallback: 'cursive', google: true },     // elegant script — gifts, cards, wedding
+    { name: 'Great Vibes',       category: 'display', fallback: 'cursive', google: true },     // luxury script — jewellery, flowers, spa
 
-    // ── Tech, Tools & Automotive Monospace ──
-    { name: 'JetBrains Mono', category: 'mono', fallback: 'monospace', google: true },
-    { name: 'Fira Code', category: 'mono', fallback: 'monospace', google: true },
-    { name: 'Roboto Mono', category: 'mono', fallback: 'monospace', google: true },
-    { name: 'Space Mono', category: 'mono', fallback: 'monospace', google: true },
-    { name: 'Inconsolata', category: 'mono', fallback: 'monospace', google: true },
-    { name: 'Source Code Pro', category: 'mono', fallback: 'monospace', google: true },
-    { name: 'IBM Plex Mono', category: 'mono', fallback: 'monospace', google: true },
-    { name: 'Ubuntu Mono', category: 'mono', fallback: 'monospace', google: true },
-    { name: 'Courier Prime', category: 'mono', fallback: 'monospace', google: true },
-    { name: 'Share Tech Mono', category: 'mono', fallback: 'monospace', google: true },
-    { name: 'VT323', category: 'mono', fallback: 'monospace', google: true },
+    // ── Monospace — specs, measurements, part numbers, code/model IDs ────────
+    // Best for: electronics, auto parts, tools — anywhere you list SKUs or specs.
+    { name: 'IBM Plex Mono',  category: 'mono', fallback: 'monospace', google: true },  // cleanest mono for spec tables
+    { name: 'Roboto Mono',    category: 'mono', fallback: 'monospace', google: true },  // familiar, legible part numbers
+    { name: 'Inconsolata',    category: 'mono', fallback: 'monospace', google: true },  // compact, great for dense specs
+    { name: 'Courier Prime',  category: 'mono', fallback: 'monospace', google: true },  // typewriter warmth — vintage listings
 ]
 
 // ─────────────────────────────────────────────────────────────────────────────
