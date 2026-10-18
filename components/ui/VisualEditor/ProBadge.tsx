@@ -4,23 +4,45 @@
 // Reusable Pro gating components for the Visual Editor.
 //
 // Exports:
-//   <ProBadge />          — small inline "PRO" chip (for block library cards,
-//                           style preset tiles, toolbar buttons)
-//   <ProLockOverlay />    — semi-transparent overlay for locked block cards
-//   <ProFeatureGuard />   — wraps any button/element; intercepts click and
-//                           fires onUpgradeClick instead when user is free
+//   <ProBadge />          — gold crown "Pro" chip (Canva-style)
+//   <ProLockOverlay />    — semi-transparent overlay for locked tiles
+//   <ProFeatureGuard />   — wraps any element; intercepts click for free users
+//   useProGate()          — hook: isPro + requirePro()
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React from 'react'
-import { Lock, Sparkles } from 'lucide-react'
+import { Lock } from 'lucide-react'
 
-// ── Design tokens (matches VisualEditor palette) ──────────────────────────────
-const PRO_COLOR   = '#7530fb'   // primary violet
-const PRO_ACCENT  = '#b8fa33'   // lime accent
-const PRO_DARK    = '#1e1535'   // near-black
+// ── Crown SVG (inline — no icon library needed) ───────────────────────────────
+function CrownIcon({ size = 10, color = '#ffffff' }: { size?: number; color?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size * 0.85}
+      viewBox="0 0 16 14"
+      fill="none"
+      style={{ display: 'block', flexShrink: 0 }}
+    >
+      {/* Crown shape: flat base + 3 points */}
+      <path
+        d="M1 13h14M2 13L0.5 5.5L5 9L8 1L11 9L15.5 5.5L14 13H2Z"
+        fill={color}
+        stroke={color}
+        strokeWidth="0.5"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+      {/* Three crown jewels */}
+      <circle cx="8"   cy="1.5" r="1.2" fill={color} opacity="0.9" />
+      <circle cx="0.5" cy="5.5" r="1"   fill={color} opacity="0.9" />
+      <circle cx="15.5" cy="5.5" r="1"  fill={color} opacity="0.9" />
+    </svg>
+  )
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 1.  ProBadge — tiny chip, three sizes
+// 1.  ProBadge — gold crown chip, three sizes
+//     Looks like Canva / Notion / professional tool badges
 // ─────────────────────────────────────────────────────────────────────────────
 export type ProBadgeSize = 'xs' | 'sm' | 'md'
 
@@ -31,45 +53,44 @@ interface ProBadgeProps {
 
 export function ProBadge({ size = 'sm', style }: ProBadgeProps) {
   const cfg = {
-    xs: { fontSize: 8,  px: 4,  py: 1,  radius: 3,  iconSize: 7  },
-    sm: { fontSize: 9,  px: 5,  py: 2,  radius: 4,  iconSize: 8  },
-    md: { fontSize: 11, px: 7,  py: 3,  radius: 5,  iconSize: 10 },
+    xs: { fontSize: 8,  px: 5,  py: 2,  radius: 4,  iconSize: 8,  gap: 3 },
+    sm: { fontSize: 9,  px: 6,  py: 2,  radius: 5,  iconSize: 9,  gap: 3 },
+    md: { fontSize: 11, px: 8,  py: 3,  radius: 6,  iconSize: 11, gap: 4 },
   }[size]
 
   return (
     <span
       style={{
-        display:        'inline-flex',
-        alignItems:     'center',
-        gap:            3,
-        background:     PRO_COLOR,
-        color:          PRO_ACCENT,
-        fontSize:       cfg.fontSize,
-        fontWeight:     700,
-        letterSpacing:  '0.06em',
-        padding:        `${cfg.py}px ${cfg.px}px`,
-        borderRadius:   cfg.radius,
-        lineHeight:     1,
-        whiteSpace:     'nowrap',
-        userSelect:     'none',
-        flexShrink:     0,
+        display:       'inline-flex',
+        alignItems:    'center',
+        gap:           cfg.gap,
+        background:    'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+        color:         '#ffffff',
+        fontSize:      cfg.fontSize,
+        fontWeight:    700,
+        letterSpacing: '0.04em',
+        padding:       `${cfg.py}px ${cfg.px}px`,
+        borderRadius:  cfg.radius,
+        lineHeight:    1,
+        whiteSpace:    'nowrap',
+        userSelect:    'none',
+        flexShrink:    0,
+        boxShadow:     '0 1px 3px rgba(217,119,6,0.35)',
         ...style,
       }}
     >
-      <Sparkles size={cfg.iconSize} strokeWidth={2.5} />
-      PRO
+      <CrownIcon size={cfg.iconSize} color="#ffffff" />
+      Pro
     </span>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 2.  ProLockOverlay — covers a block card / style tile
+// 2.  ProLockOverlay — frost overlay for locked tiles
 //     Position the parent as `position: relative` and drop this inside.
 // ─────────────────────────────────────────────────────────────────────────────
 interface ProLockOverlayProps {
-  /** Called when the user clicks the locked area */
   onUpgrade?: () => void
-  /** Show a dimmed overlay (default true). Pass false for a border-only hint. */
   dim?: boolean
 }
 
@@ -82,8 +103,8 @@ export function ProLockOverlay({ onUpgrade, dim = true }: ProLockOverlayProps) {
         position:       'absolute',
         inset:          0,
         borderRadius:   'inherit',
-        background:     dim ? 'rgba(30,21,53,0.45)' : 'transparent',
-        backdropFilter: dim ? 'blur(1px)' : 'none',
+        background:     dim ? 'rgba(255,255,255,0.55)' : 'transparent',
+        backdropFilter: dim ? 'blur(2px)'              : 'none',
         display:        'flex',
         alignItems:     'center',
         justifyContent: 'center',
@@ -91,26 +112,21 @@ export function ProLockOverlay({ onUpgrade, dim = true }: ProLockOverlayProps) {
         zIndex:         10,
       }}
     >
-      <div
-        style={{
-          display:        'flex',
-          flexDirection:  'column',
-          alignItems:     'center',
-          gap:            4,
-        }}
-      >
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+        {/* Gold crown circle */}
         <div
           style={{
-            background:   PRO_COLOR,
-            borderRadius: 999,
-            width:        24,
-            height:       24,
-            display:      'flex',
-            alignItems:   'center',
+            background:     'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+            borderRadius:   999,
+            width:          26,
+            height:         26,
+            display:        'flex',
+            alignItems:     'center',
             justifyContent: 'center',
+            boxShadow:      '0 2px 6px rgba(217,119,6,0.4)',
           }}
         >
-          <Lock size={12} color={PRO_ACCENT} strokeWidth={2.5} />
+          <CrownIcon size={13} color="#ffffff" />
         </div>
         <ProBadge size="xs" />
       </div>
@@ -120,14 +136,11 @@ export function ProLockOverlay({ onUpgrade, dim = true }: ProLockOverlayProps) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 3.  ProFeatureGuard — wraps any clickable element
-//     If isPro is false, clicks fire onUpgradeClick instead of the child's
-//     own onClick. Adds a PRO badge in the top-right corner.
 // ─────────────────────────────────────────────────────────────────────────────
 interface ProFeatureGuardProps {
   isPro:           boolean
   onUpgradeClick?: () => void
   children:        React.ReactNode
-  /** Where to render the badge relative to the wrapper */
   badgePosition?:  'top-right' | 'top-left' | 'inline-end'
   style?:          React.CSSProperties
   className?:      string
@@ -148,7 +161,7 @@ export function ProFeatureGuard({
       ? { position: 'absolute', top: -6, right: -6 }
       : badgePosition === 'top-left'
       ? { position: 'absolute', top: -6, left: -6 }
-      : { marginLeft: 4 }          // inline-end: sits beside the label
+      : { marginLeft: 4 }
 
   const isAbsolute = badgePosition !== 'inline-end'
 
@@ -156,20 +169,18 @@ export function ProFeatureGuard({
     <div
       className={className}
       style={{
-        position: 'relative',
-        display:  isAbsolute ? 'inline-block' : 'inline-flex',
+        position:   'relative',
+        display:    isAbsolute ? 'inline-block' : 'inline-flex',
         alignItems: 'center',
-        cursor:   'pointer',
+        cursor:     'pointer',
         ...style,
       }}
       onClick={(e) => { e.stopPropagation(); onUpgradeClick?.() }}
       title="Upgrade to Pro to unlock this feature"
     >
-      {/* Render children but intercept all pointer events */}
       <div style={{ pointerEvents: 'none', opacity: 0.5 }}>
         {children}
       </div>
-
       {isAbsolute ? (
         <ProBadge size="xs" style={badgeStyle} />
       ) : (
@@ -182,7 +193,7 @@ export function ProFeatureGuard({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 4.  useProGate — tiny hook: returns helpers for checking plan + firing modal
+// 4.  useProGate — hook: isPro + requirePro()
 // ─────────────────────────────────────────────────────────────────────────────
 export function useProGate(
   designStudioPlan: 'free' | 'pro',
@@ -190,7 +201,6 @@ export function useProGate(
 ) {
   const isPro = designStudioPlan === 'pro'
 
-  /** Call before any pro action. Returns true if allowed, false + opens modal if not. */
   function requirePro(): boolean {
     if (isPro) return true
     openUpgradeModal()
