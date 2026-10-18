@@ -75,6 +75,8 @@ interface SidebarPanelProps {
     canvasSettings: CanvasSettings
     onUpdateSettings: (settings: CanvasSettings) => void
     onApplyGlobalToAll?: () => void
+    designStudioPlan?: 'free' | 'pro'
+    onUpgradeClick?: () => void
 
     // ImagesTab props
     onInsertImage: (url: string, alt: string, propKey?: string, propIndex?: number) => void
@@ -115,6 +117,8 @@ export default function SidebarPanel({
     canvasSettings,
     onUpdateSettings,
     onApplyGlobalToAll,
+    designStudioPlan,
+    onUpgradeClick,
     onInsertImage,
     selectedId,
     selectedSubSlot,
@@ -187,6 +191,8 @@ export default function SidebarPanel({
                             settings={canvasSettings}
                             onUpdate={onUpdateSettings}
                             onApplyToAll={onApplyGlobalToAll}
+                            designStudioPlan={designStudioPlan}
+                            onUpgradeClick={onUpgradeClick}
                         />
                     )}
 

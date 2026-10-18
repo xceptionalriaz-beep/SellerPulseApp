@@ -47,16 +47,16 @@ const C = {
     successLight: '#dcfce7',
 }
 
-// ── Font options ──────────────────────────────────────────────────────────────
+// ── Font options — pro:true = gated behind Pro plan ──────────────────────────
 const FONT_OPTIONS = [
-    { label: 'Arial (Default)', value: 'Arial, Helvetica, sans-serif', preview: 'Arial' },
-    { label: 'Inter', value: 'Inter, Arial, sans-serif', preview: 'Inter' },
-    { label: 'Roboto', value: 'Roboto, Arial, sans-serif', preview: 'Roboto' },
-    { label: 'Montserrat', value: 'Montserrat, Arial, sans-serif', preview: 'Montserrat' },
-    { label: 'Trebuchet MS', value: 'Trebuchet MS, Arial, sans-serif', preview: 'Trebuchet MS' },
-    { label: 'Georgia (Serif)', value: 'Georgia, Times New Roman, serif', preview: 'Georgia' },
-    { label: 'Verdana', value: 'Verdana, Geneva, sans-serif', preview: 'Verdana' },
-    { label: 'Tahoma', value: 'Tahoma, Geneva, sans-serif', preview: 'Tahoma' },
+    { label: 'Arial (Default)', value: 'Arial, Helvetica, sans-serif',    preview: 'Arial',        pro: false },
+    { label: 'Inter',           value: 'Inter, Arial, sans-serif',         preview: 'Inter',        pro: false },
+    { label: 'Roboto',          value: 'Roboto, Arial, sans-serif',        preview: 'Roboto',       pro: false },
+    { label: 'Montserrat',      value: 'Montserrat, Arial, sans-serif',    preview: 'Montserrat',   pro: true  },
+    { label: 'Trebuchet MS',    value: 'Trebuchet MS, Arial, sans-serif',  preview: 'Trebuchet MS', pro: true  },
+    { label: 'Georgia (Serif)', value: 'Georgia, Times New Roman, serif',  preview: 'Georgia',      pro: true  },
+    { label: 'Verdana',         value: 'Verdana, Geneva, sans-serif',      preview: 'Verdana',      pro: true  },
+    { label: 'Tahoma',          value: 'Tahoma, Geneva, sans-serif',       preview: 'Tahoma',       pro: true  },
 ]
 
 // ── eBay category options ─────────────────────────────────────────────────────
@@ -121,12 +121,16 @@ interface BodySettingsProps {
     settings: CanvasSettings
     onUpdate: (settings: CanvasSettings) => void
     onApplyToAll?: () => void
+    /** 'free' | 'pro' — gates Pro-only font options */
+    designStudioPlan?: 'free' | 'pro'
+    /** Called when a free user clicks a Pro font — typically opens upgrade modal */
+    onUpgradeClick?: () => void
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
-export default function BodySettings({ settings, onUpdate, onApplyToAll }: BodySettingsProps) {
+export default function BodySettings({ settings, onUpdate, onApplyToAll, designStudioPlan = 'free', onUpgradeClick }: BodySettingsProps) {
     const [customWidth, setCustomWidth] = useState(String(settings.maxWidth))
     const [customWidthFocused, setCustomWidthFocused] = useState(false)
     const [resetConfirm, setResetConfirm] = useState(false)
@@ -417,41 +421,73 @@ export default function BodySettings({ settings, onUpdate, onApplyToAll }: BodyS
                             Font Family
                         </p>
                         <div style={{ display: 'flex', flexDirection: 'column' as const, gap: 4 }}>
-                            {FONT_OPTIONS.map(font => (
-                                <button
-                                    key={font.value}
-                                    onClick={() => patch({ fontStack: font.value })}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        padding: '7px 10px',
-                                        border: `1px solid ${settings.fontStack === font.value ? C.primary : C.border}`,
-                                        borderRadius: 7,
-                                        backgroundColor: settings.fontStack === font.value ? C.primaryLight : 'transparent',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.12s',
-                                        textAlign: 'left' as const,
-                                    }}
-                                >
-                                    <span style={{
-                                        fontFamily: font.value,
-                                        fontSize: 13,
-                                        color: settings.fontStack === font.value ? C.primary : C.body,
-                                        fontWeight: settings.fontStack === font.value ? 700 : 400,
-                                    }}>
-                                        {font.preview}
-                                    </span>
-                                    <span style={{
-                                        fontFamily: 'DM Sans, sans-serif',
-                                        fontSize: 9,
-                                        color: settings.fontStack === font.value ? C.primary : C.muted,
-                                        fontWeight: 600,
-                                    }}>
-                                        {font.label}
-                                    </span>
-                                </button>
-                            ))}
+                            {FONT_OPTIONS.map(font => {
+                                const isLocked = font.pro && designStudioPlan !== 'pro'
+                                const isSelected = settings.fontStack === font.value
+                                return (
+                                    <button
+                                        key={font.value}
+                                        onClick={() => {
+                                            if (isLocked) {
+                                                onUpgradeClick?.()
+                                            } else {
+                                                patch({ fontStack: font.value })
+                                            }
+                                        }}
+                                        title={isLocked ? 'Pro font — upgrade to unlock' : font.label}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                            padding: '7px 10px',
+                                            border: `1px solid ${isSelected ? C.primary : isLocked ? '#f59e0b33' : C.border}`,
+                                            borderRadius: 7,
+                                            backgroundColor: isSelected ? C.primaryLight : isLocked ? '#fffbeb' : 'transparent',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.12s',
+                                            textAlign: 'left' as const,
+                                            opacity: isLocked ? 0.85 : 1,
+                                            position: 'relative' as const,
+                                        }}
+                                    >
+                                        <span style={{
+                                            fontFamily: font.value,
+                                            fontSize: 13,
+                                            color: isSelected ? C.primary : isLocked ? C.secondary : C.body,
+                                            fontWeight: isSelected ? 700 : 400,
+                                        }}>
+                                            {font.preview}
+                                        </span>
+
+                                        {isLocked ? (
+                                            /* Pro badge — shown for locked fonts */
+                                            <span style={{
+                                                display: 'inline-flex', alignItems: 'center', gap: 2,
+                                                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                                                color: '#fff', fontSize: 8, fontWeight: 700,
+                                                padding: '2px 5px', borderRadius: 4, lineHeight: 1,
+                                                letterSpacing: '0.04em', flexShrink: 0,
+                                            }}>
+                                                <svg width={7} height={6} viewBox="0 0 16 14" fill="none">
+                                                    <path d="M1 13h14M2 13L0.5 5.5L5 9L8 1L11 9L15.5 5.5L14 13H2Z"
+                                                        fill="#fff" stroke="#fff" strokeWidth="0.5"
+                                                        strokeLinejoin="round" strokeLinecap="round" />
+                                                </svg>
+                                                PRO
+                                            </span>
+                                        ) : (
+                                            <span style={{
+                                                fontFamily: 'DM Sans, sans-serif',
+                                                fontSize: 9,
+                                                color: isSelected ? C.primary : C.muted,
+                                                fontWeight: 600,
+                                            }}>
+                                                {font.label}
+                                            </span>
+                                        )}
+                                    </button>
+                                )
+                            })}
                         </div>
                     </div>
 
