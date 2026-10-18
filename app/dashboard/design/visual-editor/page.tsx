@@ -34,7 +34,10 @@ import ProDropdown, { DropdownOption } from '@/components/ui/ProDropdown'
 import { auditHtml } from '@/components/ui/VisualEditor/audit'
 import type { TemplateSlot } from '@/app/dashboard/listing-generator/types/listing.types'
 import VersionHistoryPanel, { saveTemplateVersion } from '@/components/ui/VersionHistoryPanel'
-import { DIVIDER_FREE_VARIANTS } from '@/components/ui/VisualEditor/PropertiesPanel'
+import { getFreeVariantIds } from '@/components/ui/VisualEditor/PropertiesPanel'
+import { getVariants } from '@/components/ui/VisualEditor/variants/index'
+import { ProExportGate } from '@/components/ui/VisualEditor/ProExportGate'
+import { ProUpgradeModal } from '@/components/ui/VisualEditor/ProUpgradeModal'
 import type { Block } from '@/components/ui/VisualEditor/blocks'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
@@ -223,6 +226,13 @@ function VisualEditorInner() {
     const [showUpgradeModal, setShowUpgradeModal] = useState(false)
     const blocksRef = useRef<Block[]>([]) // live blocks for Pro-style detection
 
+    // Pro export gate popup
+    const [showProExportGate, setShowProExportGate] = useState(false)
+    const [proGateBlocks, setProGateBlocks] = useState<Array<{
+        blockId: string; blockType: string; variantId: string; variantLabel: string
+    }>>([])
+    const proGateRef = useRef<HTMLDivElement>(null)
+
     // ── Close action menu on outside click ───────────────────────────────────
     useEffect(() => {
         if (!actionMenuOpen) return
@@ -234,6 +244,18 @@ function VisualEditorInner() {
         document.addEventListener('mousedown', handler)
         return () => document.removeEventListener('mousedown', handler)
     }, [actionMenuOpen])
+
+    // ── Close Pro export gate on outside click ────────────────────────────────
+    useEffect(() => {
+        if (!showProExportGate) return
+        const handler = (e: MouseEvent) => {
+            if (proGateRef.current && !proGateRef.current.contains(e.target as Node)) {
+                setShowProExportGate(false)
+            }
+        }
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [showProExportGate])
 
     // ── Dirty / baseline tracking ────────────────────────────────────────────
     // dirty = true only after a real user edit (VisualEditor onChange,
@@ -421,15 +443,48 @@ function VisualEditorInner() {
     }, [savedId, name, category, html, slots, tags, sortOrder, isFeatured, isNewBadge, supabase])
 
     // ── Publish ───────────────────────────────────────────────────────────────
-    // Check if any block uses a Pro-only Divider style
+    // Check if any block uses a Pro-only style (first 2 variants are free for
+    // blocks with ≥10 styles; divider has its own 5-free set).
     const hasProStyles = useCallback((blocks: Block[]) => {
         return blocks.some(b => {
-            const isDivider = b.type === 'divider' || (b.type as string) === 'separator'
-            if (!isDivider) return false
-            const variantId = (b.props as any).variant ?? 'minimal_diamond'
-            return !DIVIDER_FREE_VARIANTS.has(variantId)
+            const freeIds = getFreeVariantIds(b.type)
+            if (!freeIds) return false       // block has <10 variants → all free
+            const variantId = (b.props as any).variant ?? (b.props as any).layoutStyle
+            if (!variantId) return false
+            return !freeIds.has(variantId)
         })
     }, [])
+
+    // Collect all blocks using Pro styles (for the export gate popup)
+    const collectProBlocks = useCallback((blocks: Block[]) => {
+        return blocks
+            .filter(b => {
+                const freeIds = getFreeVariantIds(b.type)
+                if (!freeIds) return false
+                const variantId = (b.props as any).variant ?? (b.props as any).layoutStyle
+                return variantId && !freeIds.has(variantId)
+            })
+            .map(b => {
+                const variantId = (b.props as any).variant ?? (b.props as any).layoutStyle as string
+                const variants = getVariants(b.type)
+                const variantDef = variants?.find(v => v.id === variantId)
+                return {
+                    blockId: b.id,
+                    blockType: b.type,
+                    variantId,
+                    variantLabel: variantDef?.label ?? variantId.replace(/_/g, ' '),
+                }
+            })
+    }, [])
+
+    // Try a gated action — if free + Pro styles, show the gate popup instead
+    const tryGatedAction = useCallback((action: () => void) => {
+        if (designStudioPlan === 'pro') { action(); return }
+        const proBlocks = collectProBlocks(blocksRef.current)
+        if (proBlocks.length === 0) { action(); return }
+        setProGateBlocks(proBlocks)
+        setShowProExportGate(true)
+    }, [designStudioPlan, collectProBlocks])
 
     const handlePublish = useCallback(async () => {
         // Gate: free users with Pro styles must upgrade before publishing
@@ -1171,7 +1226,7 @@ function VisualEditorInner() {
                                                 </button>
                                             )}
                                             <button
-                                                onClick={() => { handleOpenInCodeEditor(); setActionMenuOpen(false) }}
+                                                onClick={() => { setActionMenuOpen(false); tryGatedAction(() => handleOpenInCodeEditor()) }}
                                                 style={{
                                                     width: '100%', display: 'flex', alignItems: 'center', gap: 10,
                                                     padding: '9px 10px', border: 'none', borderRadius: 8,
@@ -1196,7 +1251,7 @@ function VisualEditorInner() {
                                             </button>
                                             {!isAdmin && (
                                                 <button
-                                                    onClick={() => { exportFnRef.current?.(); setActionMenuOpen(false) }}
+                                                    onClick={() => { setActionMenuOpen(false); tryGatedAction(() => exportFnRef.current?.()) }}
                                                     style={{
                                                         width: '100%', display: 'flex', alignItems: 'center', gap: 10,
                                                         padding: '9px 10px', border: 'none', borderRadius: 8,
@@ -1384,107 +1439,26 @@ function VisualEditorInner() {
                     copiedId={previewCopied ? (savedId || 'preview') : null}
                 />
             )}
+            {/* ── Pro Export Gate Popup ── */}
+            {showProExportGate && (
+                <ProExportGate
+                    blocks={proGateBlocks}
+                    containerRef={proGateRef}
+                    onDismiss={() => setShowProExportGate(false)}
+                    onUpgrade={() => { setShowProExportGate(false); setShowUpgradeModal(true) }}
+                />
+            )}
+
             {/* ── Pro Upgrade Modal ── */}
             {showUpgradeModal && (
-                <div
-                    onClick={() => setShowUpgradeModal(false)}
-                    style={{
-                        position: 'fixed', inset: 0, zIndex: 9999,
-                        backgroundColor: 'rgba(0,0,0,0.45)',
-                        backdropFilter: 'blur(4px)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        padding: 24,
+                <ProUpgradeModal
+                    onClose={() => setShowUpgradeModal(false)}
+                    onUpgrade={() => {
+                        setShowUpgradeModal(false)
+                        // TODO: route to Stripe checkout
+                        // router.push('/dashboard/upgrade?plan=design-studio-pro')
                     }}
-                >
-                    <div
-                        onClick={e => e.stopPropagation()}
-                        style={{
-                            backgroundColor: '#ffffff',
-                            borderRadius: 16,
-                            padding: '32px 28px',
-                            maxWidth: 420,
-                            width: '100%',
-                            boxShadow: '0 20px 60px rgba(0,0,0,0.18)',
-                            fontFamily: 'DM Sans, sans-serif',
-                            textAlign: 'center',
-                        }}
-                    >
-                        {/* Crown icon */}
-                        <div style={{
-                            width: 56, height: 56, borderRadius: '50%',
-                            background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            margin: '0 auto 16px',
-                            boxShadow: '0 4px 16px rgba(217,119,6,0.35)',
-                        }}>
-                            <svg width={26} height={22} viewBox="0 0 16 14" fill="none">
-                                <path d="M1 13h14M2 13L0.5 5.5L5 9L8 1L11 9L15.5 5.5L14 13H2Z" fill="#fff" stroke="#fff" strokeWidth="0.5" strokeLinejoin="round" strokeLinecap="round" />
-                                <circle cx="8" cy="1.5" r="1.2" fill="#fff" opacity="0.9" />
-                                <circle cx="0.5" cy="5.5" r="1" fill="#fff" opacity="0.9" />
-                                <circle cx="15.5" cy="5.5" r="1" fill="#fff" opacity="0.9" />
-                            </svg>
-                        </div>
-
-                        <h2 style={{ margin: '0 0 8px', fontSize: 20, fontWeight: 800, color: '#1e1535' }}>
-                            Upgrade to Design Studio Pro
-                        </h2>
-                        <p style={{ margin: '0 0 24px', fontSize: 14, color: '#64748b', lineHeight: 1.6 }}>
-                            Your template uses <strong>Pro divider styles</strong>. Upgrade to publish and share it with buyers.
-                        </p>
-
-                        {/* Benefit list */}
-                        <div style={{ textAlign: 'left', marginBottom: 24 }}>
-                            {[
-                                'Unlock all 15 Pro divider styles',
-                                'Publish templates with Pro styling',
-                                'Priority support',
-                            ].map(item => (
-                                <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                                    <div style={{
-                                        width: 18, height: 18, borderRadius: '50%',
-                                        background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                                    }}>
-                                        <svg width={10} height={10} viewBox="0 0 10 10" fill="none">
-                                            <path d="M2 5l2.5 2.5L8 3" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                                        </svg>
-                                    </div>
-                                    <span style={{ fontSize: 13, color: '#374151' }}>{item}</span>
-                                </div>
-                            ))}
-                        </div>
-
-                        <button
-                            onClick={() => {
-                                setShowUpgradeModal(false)
-                                // TODO: route to Stripe checkout for Design Studio Pro
-                                // router.push('/dashboard/upgrade?plan=design-studio-pro')
-                            }}
-                            style={{
-                                width: '100%', padding: '12px 0',
-                                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                                color: '#fff', fontSize: 15, fontWeight: 700,
-                                border: 'none', borderRadius: 10, cursor: 'pointer',
-                                boxShadow: '0 2px 8px rgba(217,119,6,0.35)',
-                                marginBottom: 10,
-                                fontFamily: 'DM Sans, sans-serif',
-                            }}
-                        >
-                            Upgrade to Pro — $9/month
-                        </button>
-                        <button
-                            onClick={() => setShowUpgradeModal(false)}
-                            style={{
-                                width: '100%', padding: '10px 0',
-                                backgroundColor: 'transparent', color: '#94a3b8',
-                                fontSize: 13, fontWeight: 500, border: 'none',
-                                cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
-                            }}
-                        >
-                            Continue editing (publish disabled)
-                        </button>
-                    </div>
-                </div>
+                />
             )}
         </div>
     )

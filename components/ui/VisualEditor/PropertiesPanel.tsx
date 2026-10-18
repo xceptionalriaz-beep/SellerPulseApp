@@ -1059,6 +1059,25 @@ export const DIVIDER_FREE_VARIANTS = new Set([
     'minimal_diamond', 'clean_hairline', 'shadow_groove', 'gradient_taper', 'executive_pinstripe',
 ])
 
+/**
+ * Returns the set of free variant IDs for a given block type.
+ *
+ * Rules (Canva-style soft gate):
+ *   • divider / separator  → 5 fixed free styles  (DIVIDER_FREE_VARIANTS)
+ *   • any block with ≥ 10 variants → first 2 are free, the rest are Pro
+ *   • blocks with < 10 variants    → all free (returns undefined = no gate)
+ *
+ * Exported so Canvas.tsx and page.tsx can share the same logic.
+ */
+export function getFreeVariantIds(blockType: string): Set<string> | undefined {
+    // Divider has its own curated 5-free set
+    if (blockType === 'divider' || blockType === 'separator') return DIVIDER_FREE_VARIANTS
+    // For all other blocks: if 10+ variants, first 2 are free
+    const variants = getVariants(blockType)
+    if (!variants || variants.length < 10) return undefined
+    return new Set(variants.slice(0, 2).map(v => v.id))
+}
+
 function StylesTab({
     block,
     props,
@@ -1081,7 +1100,7 @@ function StylesTab({
                     blockType={block.type}
                     currentVariant={(props as any).variant ?? (props as any).layoutStyle ?? (block.type === 'features' || (block.type as string) === 'features_bar' ? 'feat-simple-centered' : block.type === 'trust_badge_block' || (block.type as string) === 'trust_badge' || (block.type as string) === 'trust_satisfaction' ? 'trust-banner-soft' : block.type === 'rectangle' || (block.type as string) === 'shape' ? 'rect-solid-fill' : block.type === 'urgency_bar' || (block.type as string) === 'urgency' ? 'urgency-classic-pulse' : block.type === 'why_buy_from_us' || (block.type as string) === 'why_buy' ? 'why-classic-centered' : block.type === 'quote_block' || (block.type as string) === 'quote' ? 'qb-classic-left-border' : block.type === 'faq_block' || (block.type as string) === 'faq' || (block.type as string) === 'faq_section' ? 'faq-classic-stacked' : block.type === 'bullet_list' ? 'bl-classic-check' : block.type === 'paragraph' ? 'para-classic-plain' : block.type === 'heading' ? 'hd-classic-accent-bar' : block.type === 'product_title' || (block.type as string) === 'title' ? 'pt-classic-baseline' : block.type === 'highlight_text' || (block.type as string) === 'highlight' ? 'ht-classic-neon-strip' : block.type === 'international_shipping' || (block.type as string) === 'international' ? 'is-classic-amber-notice' : block.type === 'breadcrumb_bar' || (block.type as string) === 'breadcrumb' ? 'bb-classic-inline' : block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : block.type === 'category_nav' ? 'cat-classic-dark' : (block.type as string) === 'free_shipping_banner' || (block.type as string) === 'free_shipping' ? 'ship-express-courier-strip' : block.type === 'item_specifics' || (block.type as string) === 'specifics_table' ? 'is-dual-column-zebra-card' : block.type === 'authenticity_guarantee' || (block.type as string) === 'authenticity' ? 'auth-ebay-blue-official-shield' : block.type === 'condition_details' || (block.type as string) === 'condition' ? 'cd-cosmetic-grade-split' : block.type === 'compatibility_table' || (block.type as string) === 'compatibility' ? 'compat-classic-zebra-table' : block.type === 'product_comparison' || (block.type as string) === 'comparison' ? 'comp-classic-header-table' : block.type === 'key_features_grid' ? 'feat-classic-cards-grid' : block.type === 'vat_notice' || (block.type as string) === 'vat' ? 'vat-classic-card' : block.type === 'feedback_score' || (block.type as string) === 'feedback' ? 'fb-classic-split-card' : block.type === 'pull_quote' || (block.type as string) === 'quote' ? 'pq-classic-serif-centered' : block.type === 'section_label' || (block.type as string) === 'label' ? 'sl-classic-pill-capsule' : block.type === 'testimonial_block' || (block.type as string) === 'testimonials' || (block.type as string) === 'testimonial' ? 'test-classic-grid' : block.type === 'info_box' || (block.type as string) === 'infobox' || (block.type as string) === 'info' ? 'info-classic-banner' : block.type === 'shipping_info' || (block.type as string) === 'shipping_info_bar' ? 'ship-classic-card' : block.type === 'store_header' || (block.type as string) === 'storeheader' ? 'sh-classic-banner' : block.type === 'divider' || (block.type as string) === 'separator' ? 'minimal_diamond' : block.type === 'numbered_list' || (block.type as string) === 'numberedlist' || (block.type as string) === 'steps' ? 'num-classic-badge' : 'default')}
                     onChange={v => updateProps({ variant: v } as any)}
-                    freeVariantIds={(block.type === 'divider' || (block.type as string) === 'separator') ? DIVIDER_FREE_VARIANTS : undefined}
+                    freeVariantIds={getFreeVariantIds(block.type)}
                     isPro={designStudioPlan === 'pro'}
                     onUpgradeClick={onUpgradeClick}
                 />

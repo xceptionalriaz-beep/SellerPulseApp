@@ -29,7 +29,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import { SLOT_SELECTION_CSS } from './slotSelection'
 import React, { useState, useRef, useCallback } from 'react'
-import { DIVIDER_FREE_VARIANTS } from './PropertiesPanel'
+import { getFreeVariantIds } from './PropertiesPanel'
 import ImageEditorModal from '@/components/ui/ImageEditor/ImageEditorModal'
 import type { ImageEditorState } from '@/components/ui/ImageEditor/types'
 import {
@@ -896,10 +896,11 @@ function BlockCard({
             {/* ── Pro style watermark — editor-only, never exported ── */}
             {(() => {
                 if (designStudioPlan === 'pro') return null
-                const isDivider = block.type === 'divider' || (block.type as string) === 'separator'
-                if (!isDivider) return null
-                const variantId = (block.props as any).variant ?? 'minimal_diamond'
-                if (DIVIDER_FREE_VARIANTS.has(variantId)) return null
+                const freeIds = getFreeVariantIds(block.type)
+                if (!freeIds) return null          // block has <10 variants → all free
+                const variantId = (block.props as any).variant ?? (block.props as any).layoutStyle
+                if (!variantId) return null
+                if (freeIds.has(variantId)) return null
                 return (
                     <div
                         title="Pro style — upgrade to publish"
