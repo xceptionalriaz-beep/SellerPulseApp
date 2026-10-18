@@ -54,7 +54,7 @@ const FEATURES: FeatureRow[] = [
     { label: 'Export HTML', free: false, pro: true },
     { label: 'Open in Code Editor', free: false, pro: true },
     { label: 'Publish Pro templates', free: false, pro: true },
-    { label: 'Saved templates', free: '3 templates', pro: 'Unlimited' },
+    { label: 'Saved templates', free: '5 templates', pro: 'Unlimited' },
     { label: 'Support', free: 'Standard', pro: 'Priority' },
 ]
 

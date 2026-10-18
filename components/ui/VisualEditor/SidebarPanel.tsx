@@ -97,6 +97,8 @@ interface SidebarPanelProps {
     // SavedTab props
     onLoadTemplate: (name: string, blocks: Block[], settings: CanvasSettings) => void
     savedCount?: number
+    savedTabPlan?: 'free' | 'pro'
+    savedTabOnUpgrade?: () => void
 
     // IconsPanel props
     selectedFeatureIndex: number | null
@@ -131,6 +133,8 @@ export default function SidebarPanel({
     selectedBlockLabel,
     onLoadTemplate,
     savedCount,
+    savedTabPlan,
+    savedTabOnUpgrade,
     selectedFeatureIndex,
     onIconSelect,
 }: SidebarPanelProps) {
@@ -225,6 +229,8 @@ export default function SidebarPanel({
                         <SavedTab
                             onLoad={onLoadTemplate}
                             savedCount={savedCount}
+                            designStudioPlan={savedTabPlan}
+                            onUpgradeClick={savedTabOnUpgrade}
                         />
                     )}
 
