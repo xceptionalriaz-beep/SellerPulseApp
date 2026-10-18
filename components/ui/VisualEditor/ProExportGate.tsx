@@ -196,7 +196,7 @@ export function ProExportGate({ blocks, onUpgrade, onDismiss, containerRef }: Pr
                     onMouseLeave={e => { e.currentTarget.style.opacity = '1'  }}
                 >
                     <CrownSvg size={13} />
-                    Upgrade to Pro — $9/mo
+                    Try Pro for Free — 14 Days
                 </button>
 
                 {/* ── Maybe later ── */}
