@@ -160,6 +160,12 @@ interface VisualEditorProps {
     onSlotsChange?: (slots: TemplateSlot[]) => void
     /** When true (admin mode), hides seller-specific UI like "Link to Listing" */
     isAdmin?: boolean
+    /** Design Studio plan — gates Pro-only layout styles */
+    designStudioPlan?: 'free' | 'pro'
+    /** Called when a free user needs to upgrade (e.g. tries to publish with Pro styles) */
+    onUpgradeClick?: () => void
+    /** Called whenever blocks change — lets parent detect Pro style usage for gating */
+    onBlocksChange?: (blocks: Block[]) => void
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -179,6 +185,9 @@ export default function VisualEditor({
     slots = [],
     onSlotsChange,
     isAdmin = false,
+    designStudioPlan = 'free',
+    onUpgradeClick,
+    onBlocksChange,
 }: VisualEditorProps) {
     // ── Core block state ──────────────────────────────────────────────────────
     const [blocks, setBlocks] = useState<Block[]>([])
@@ -389,10 +398,14 @@ export default function VisualEditor({
         setRedoStack([])
     }, [])
 
+    const onBlocksChangeRef = useRef(onBlocksChange)
+    useEffect(() => { onBlocksChangeRef.current = onBlocksChange }, [onBlocksChange])
+
     const commitBlocks = useCallback((next: Block[], prev: Block[]) => {
         pushUndo(prev)
         setBlocks(next)
         rebuildAndEmit(next)
+        onBlocksChangeRef.current?.(next)
     }, [pushUndo, rebuildAndEmit])
 
     // ── Block mutations ───────────────────────────────────────────────────────
@@ -1938,6 +1951,7 @@ export default function VisualEditor({
                                     setSelectedId(null)
                                     setActiveSlotEdit(null)
                                 }}
+                                designStudioPlan={designStudioPlan}
                             />
                         </div>
                     )}
@@ -1966,6 +1980,8 @@ export default function VisualEditor({
                                 )
                             }}
                             onDeselect={() => setActiveSlotEdit(null)}
+                            designStudioPlan={designStudioPlan}
+                            onUpgradeClick={onUpgradeClick}
                         />
                     ) : activeSlotEdit ? (
                         <div style={{
@@ -2016,6 +2032,8 @@ export default function VisualEditor({
                             onPaletteChange={p => handleUpdateSettings({ ...canvasSettings, palette: p })}
                             slots={slots}
                             onSlotChange={onSlotsChange ? handleSlotChange : undefined}
+                            designStudioPlan={designStudioPlan}
+                            onUpgradeClick={onUpgradeClick}
                         />
                     )
                 )}

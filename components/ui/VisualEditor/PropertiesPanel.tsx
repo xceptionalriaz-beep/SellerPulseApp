@@ -996,29 +996,26 @@ function VariantPicker({
                     return (
                         <button
                             key={variant.id}
-                            onClick={() => {
-                                if (isLocked) { onUpgradeClick?.(); return }
-                                onChange(variant.id)
-                            }}
-                            title={isLocked ? 'Upgrade to Pro to unlock' : variant.description}
+                            onClick={() => onChange(variant.id)}
+                            title={isLocked ? `${variant.description} · Pro style (applies freely, upgrade to publish)` : variant.description}
                             style={{
                                 position: 'relative',
                                 width: '100%',
                                 minWidth: 0,
                                 boxSizing: 'border-box',
                                 padding: '8px 6px',
-                                border: `2px solid ${isSelected ? C.primary : isLocked ? '#e2e8f0' : C.border}`,
+                                border: `2px solid ${isSelected ? C.primary : C.border}`,
                                 borderRadius: 8,
-                                backgroundColor: isSelected ? C.primaryLight : isLocked ? '#f8fafc' : C.surface,
-                                cursor: isLocked ? 'pointer' : 'pointer',
+                                backgroundColor: isSelected ? C.primaryLight : C.surface,
+                                cursor: 'pointer',
                                 textAlign: 'center' as const,
                                 transition: 'all 0.12s',
                                 overflow: 'hidden',
                             }}
                         >
                             {/* Mini visual thumbnail */}
-                            <div style={{ opacity: isLocked ? 0.4 : 1 }}>
-                                <VariantThumbnail variantId={variant.id} isSelected={isSelected && !isLocked} />
+                            <div>
+                                <VariantThumbnail variantId={variant.id} isSelected={isSelected} />
                             </div>
                             <p style={{
                                 margin: '5px 0 0',
@@ -1028,15 +1025,14 @@ function VariantPicker({
                                 fontFamily: 'DM Sans, sans-serif',
                                 fontSize: 10,
                                 fontWeight: isSelected ? 700 : 500,
-                                color: isLocked ? '#94a3b8' : isSelected ? C.primary : C.secondary,
+                                color: isSelected ? C.primary : C.secondary,
                                 whiteSpace: 'nowrap' as const,
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
-                                opacity: isLocked ? 0.6 : 1,
                             }}>
                                 {variant.label}
                             </p>
-                            {/* Pro badge overlay on locked variants */}
+                            {/* Pro crown badge — informational only, style still applies */}
                             {isLocked && (
                                 <div style={{
                                     position: 'absolute',
@@ -1057,8 +1053,9 @@ function VariantPicker({
 // Mini SVG thumbnails for each Hero Header variant
 // ── Variant thumbnail SVGs — add a new entry here when adding a new variant ──
 // The picker itself is fully dynamic — thumbnails fall back to auto-generated
-// Divider styles that are free — everything else requires Pro
-const DIVIDER_FREE_VARIANTS = new Set([
+// Divider styles that are free — everything else requires Pro.
+// Exported so Canvas.tsx and page.tsx can identify Pro styles without duplicating the list.
+export const DIVIDER_FREE_VARIANTS = new Set([
     'minimal_diamond', 'clean_hairline', 'shadow_groove', 'gradient_taper', 'executive_pinstripe',
 ])
 

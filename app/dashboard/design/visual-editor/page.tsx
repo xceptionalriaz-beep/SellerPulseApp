@@ -34,6 +34,8 @@ import ProDropdown, { DropdownOption } from '@/components/ui/ProDropdown'
 import { auditHtml } from '@/components/ui/VisualEditor/audit'
 import type { TemplateSlot } from '@/app/dashboard/listing-generator/types/listing.types'
 import VersionHistoryPanel, { saveTemplateVersion } from '@/components/ui/VersionHistoryPanel'
+import { DIVIDER_FREE_VARIANTS } from '@/components/ui/VisualEditor/PropertiesPanel'
+import type { Block } from '@/components/ui/VisualEditor/blocks'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -216,6 +218,10 @@ function VisualEditorInner() {
     const [previewCopied, setPreviewCopied] = useState(false)
     // Duplicate
     const [duplicating, setDuplicating] = useState(false)
+    // Design Studio Pro gating
+    const [designStudioPlan] = useState<'free' | 'pro'>('free') // TODO: derive from user subscription
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+    const blocksRef = useRef<Block[]>([]) // live blocks for Pro-style detection
 
     // ── Close action menu on outside click ───────────────────────────────────
     useEffect(() => {
@@ -415,7 +421,22 @@ function VisualEditorInner() {
     }, [savedId, name, category, html, slots, tags, sortOrder, isFeatured, isNewBadge, supabase])
 
     // ── Publish ───────────────────────────────────────────────────────────────
+    // Check if any block uses a Pro-only Divider style
+    const hasProStyles = useCallback((blocks: Block[]) => {
+        return blocks.some(b => {
+            const isDivider = b.type === 'divider' || (b.type as string) === 'separator'
+            if (!isDivider) return false
+            const variantId = (b.props as any).variant ?? 'minimal_diamond'
+            return !DIVIDER_FREE_VARIANTS.has(variantId)
+        })
+    }, [])
+
     const handlePublish = useCallback(async () => {
+        // Gate: free users with Pro styles must upgrade before publishing
+        if (designStudioPlan === 'free' && hasProStyles(blocksRef.current)) {
+            setShowUpgradeModal(true)
+            return
+        }
         setPublishStatus('publishing')
         try {
             const { data: { user } } = await supabase.auth.getUser()
@@ -474,7 +495,7 @@ function VisualEditorInner() {
             console.error('[visual-editor] publish error:', err)
             setPublishStatus('idle')
         }
-    }, [savedId, name, category, html, slots, tags, sortOrder, isFeatured, isNewBadge, supabase, isAdmin])
+    }, [savedId, name, category, html, slots, tags, sortOrder, isFeatured, isNewBadge, supabase, isAdmin, designStudioPlan, hasProStyles])
 
     // ── Unpublish (admin only) ────────────────────────────────────────────────
     const handleUnpublish = useCallback(async () => {
@@ -636,6 +657,9 @@ function VisualEditorInner() {
                     }}
                     onExportReady={(fn) => { exportFnRef.current = fn }}
                     onPublish={handlePublish}
+                    designStudioPlan={designStudioPlan}
+                    onUpgradeClick={() => setShowUpgradeModal(true)}
+                    onBlocksChange={(b) => { blocksRef.current = b }}
                     publishStatus={publishStatus}
                     onBack={() => router.push(isAdmin ? '/dashboard/admin' : '/dashboard/design')}
                     toolbarSlot={
@@ -1359,6 +1383,108 @@ function VisualEditorInner() {
                     }}
                     copiedId={previewCopied ? (savedId || 'preview') : null}
                 />
+            )}
+            {/* ── Pro Upgrade Modal ── */}
+            {showUpgradeModal && (
+                <div
+                    onClick={() => setShowUpgradeModal(false)}
+                    style={{
+                        position: 'fixed', inset: 0, zIndex: 9999,
+                        backgroundColor: 'rgba(0,0,0,0.45)',
+                        backdropFilter: 'blur(4px)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        padding: 24,
+                    }}
+                >
+                    <div
+                        onClick={e => e.stopPropagation()}
+                        style={{
+                            backgroundColor: '#ffffff',
+                            borderRadius: 16,
+                            padding: '32px 28px',
+                            maxWidth: 420,
+                            width: '100%',
+                            boxShadow: '0 20px 60px rgba(0,0,0,0.18)',
+                            fontFamily: 'DM Sans, sans-serif',
+                            textAlign: 'center',
+                        }}
+                    >
+                        {/* Crown icon */}
+                        <div style={{
+                            width: 56, height: 56, borderRadius: '50%',
+                            background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            margin: '0 auto 16px',
+                            boxShadow: '0 4px 16px rgba(217,119,6,0.35)',
+                        }}>
+                            <svg width={26} height={22} viewBox="0 0 16 14" fill="none">
+                                <path d="M1 13h14M2 13L0.5 5.5L5 9L8 1L11 9L15.5 5.5L14 13H2Z" fill="#fff" stroke="#fff" strokeWidth="0.5" strokeLinejoin="round" strokeLinecap="round" />
+                                <circle cx="8" cy="1.5" r="1.2" fill="#fff" opacity="0.9" />
+                                <circle cx="0.5" cy="5.5" r="1" fill="#fff" opacity="0.9" />
+                                <circle cx="15.5" cy="5.5" r="1" fill="#fff" opacity="0.9" />
+                            </svg>
+                        </div>
+
+                        <h2 style={{ margin: '0 0 8px', fontSize: 20, fontWeight: 800, color: '#1e1535' }}>
+                            Upgrade to Design Studio Pro
+                        </h2>
+                        <p style={{ margin: '0 0 24px', fontSize: 14, color: '#64748b', lineHeight: 1.6 }}>
+                            Your template uses <strong>Pro divider styles</strong>. Upgrade to publish and share it with buyers.
+                        </p>
+
+                        {/* Benefit list */}
+                        <div style={{ textAlign: 'left', marginBottom: 24 }}>
+                            {[
+                                'Unlock all 15 Pro divider styles',
+                                'Publish templates with Pro styling',
+                                'Priority support',
+                            ].map(item => (
+                                <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                                    <div style={{
+                                        width: 18, height: 18, borderRadius: '50%',
+                                        background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                                    }}>
+                                        <svg width={10} height={10} viewBox="0 0 10 10" fill="none">
+                                            <path d="M2 5l2.5 2.5L8 3" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
+                                    </div>
+                                    <span style={{ fontSize: 13, color: '#374151' }}>{item}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <button
+                            onClick={() => {
+                                setShowUpgradeModal(false)
+                                // TODO: route to Stripe checkout for Design Studio Pro
+                                // router.push('/dashboard/upgrade?plan=design-studio-pro')
+                            }}
+                            style={{
+                                width: '100%', padding: '12px 0',
+                                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                                color: '#fff', fontSize: 15, fontWeight: 700,
+                                border: 'none', borderRadius: 10, cursor: 'pointer',
+                                boxShadow: '0 2px 8px rgba(217,119,6,0.35)',
+                                marginBottom: 10,
+                                fontFamily: 'DM Sans, sans-serif',
+                            }}
+                        >
+                            Upgrade to Pro — $9/month
+                        </button>
+                        <button
+                            onClick={() => setShowUpgradeModal(false)}
+                            style={{
+                                width: '100%', padding: '10px 0',
+                                backgroundColor: 'transparent', color: '#94a3b8',
+                                fontSize: 13, fontWeight: 500, border: 'none',
+                                cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                            }}
+                        >
+                            Continue editing (publish disabled)
+                        </button>
+                    </div>
+                </div>
             )}
         </div>
     )
