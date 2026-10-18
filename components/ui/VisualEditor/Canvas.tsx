@@ -906,7 +906,7 @@ function BlockCard({
                         style={{
                             position: 'absolute',
                             bottom: 6,
-                            right: 8,
+                            left: 8,
                             display: 'flex',
                             alignItems: 'center',
                             gap: 4,
