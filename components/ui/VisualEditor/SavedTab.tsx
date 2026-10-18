@@ -8,7 +8,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useEffect, useState, useCallback } from 'react'
-import { Folder, Trash2, Download, RefreshCw, Clock, Copy } from 'lucide-react'
+import { Folder, Trash2, Download, RefreshCw, Clock, Copy, Zap } from 'lucide-react'
+import { ProBadge } from './ProBadge'
 import { createClient } from '@/lib/supabase'
 import { Block, CanvasSettings, assembleDocument } from './blocks'
 
@@ -50,15 +51,19 @@ const CATEGORY_LABELS: Record<string, string> = {
     toys: 'Toys & Games',
 }
 
+const FREE_TEMPLATE_LIMIT = 5
+
 interface SavedTabProps {
     onLoad: (name: string, blocks: Block[], settings: CanvasSettings, id: string) => void
     savedCount?: number   // increments on each successful save — triggers a re-fetch
+    designStudioPlan?: 'free' | 'pro'
+    onUpgradeClick?: () => void
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
-export default function SavedTab({ onLoad, savedCount = 0 }: SavedTabProps) {
+export default function SavedTab({ onLoad, savedCount = 0, designStudioPlan = 'free', onUpgradeClick }: SavedTabProps) {
     const [templates, setTemplates] = useState<SavedTemplate[]>([])
     const [loading, setLoading] = useState(true)
     const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -116,6 +121,11 @@ export default function SavedTab({ onLoad, savedCount = 0 }: SavedTabProps) {
     }, [])
 
     const handleDuplicate = useCallback(async (t: SavedTemplate) => {
+        // Gate: free users can't duplicate if already at limit
+        if (designStudioPlan !== 'pro' && templates.length >= FREE_TEMPLATE_LIMIT) {
+            onUpgradeClick?.()
+            return
+        }
         setDuplicatingId(t.id)
         try {
             const supabase = createClient()
@@ -137,7 +147,7 @@ export default function SavedTab({ onLoad, savedCount = 0 }: SavedTabProps) {
         } finally {
             setDuplicatingId(null)
         }
-    }, [fetchTemplates])
+    }, [fetchTemplates, designStudioPlan, onUpgradeClick, templates.length])
 
     // ── Relative time helper ──────────────────────────────────────────────────
     function relativeTime(iso: string): string {
@@ -225,6 +235,9 @@ export default function SavedTab({ onLoad, savedCount = 0 }: SavedTabProps) {
         )
     }
 
+    // ── Limit state ───────────────────────────────────────────────────────────
+    const isAtLimit = designStudioPlan !== 'pro' && templates.length >= FREE_TEMPLATE_LIMIT
+
     // ── Template list ─────────────────────────────────────────────────────────
     const categories = ['all', ...Array.from(new Set(templates.map(t => t.category ?? 'general')))]
     const filtered = categoryFilter === 'all'
@@ -284,6 +297,91 @@ export default function SavedTab({ onLoad, savedCount = 0 }: SavedTabProps) {
                             {cat === 'all' ? 'All' : (CATEGORY_LABELS[cat] ?? cat)}
                         </button>
                     ))}
+                </div>
+            )}
+
+            {/* Free plan limit banner */}
+            {isAtLimit && (
+                <div style={{
+                    margin: '0 10px 8px',
+                    padding: '10px 12px',
+                    borderRadius: 10,
+                    background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+                    border: '1.5px solid #f59e0b',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 7,
+                    flexShrink: 0,
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <ProBadge size="xs" />
+                        <span style={{
+                            fontFamily: 'DM Sans, sans-serif',
+                            fontSize: 11, fontWeight: 700,
+                            color: '#92400e',
+                        }}>
+                            {templates.length}/{FREE_TEMPLATE_LIMIT} saved · Upgrade for unlimited
+                        </span>
+                    </div>
+                    <p style={{
+                        margin: 0,
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontSize: 10, color: '#78350f', lineHeight: 1.4,
+                    }}>
+                        Free plan includes {FREE_TEMPLATE_LIMIT} saved templates. Delete one to save a new template, or upgrade to Pro for unlimited.
+                    </p>
+                    <button
+                        onClick={onUpgradeClick}
+                        style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                            padding: '5px 10px',
+                            borderRadius: 7,
+                            border: 'none',
+                            background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                            color: '#ffffff',
+                            fontFamily: 'DM Sans, sans-serif',
+                            fontSize: 11, fontWeight: 700,
+                            cursor: 'pointer',
+                            width: '100%',
+                        }}
+                    >
+                        <Zap size={11} />
+                        Upgrade to Pro
+                    </button>
+                </div>
+            )}
+
+            {/* Free plan progress (not at limit) */}
+            {!isAtLimit && designStudioPlan !== 'pro' && templates.length > 0 && (
+                <div style={{
+                    margin: '0 10px 6px',
+                    padding: '6px 10px',
+                    borderRadius: 8,
+                    backgroundColor: C.primaryLight,
+                    border: `1px solid ${C.border}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexShrink: 0,
+                }}>
+                    <span style={{
+                        fontFamily: 'DM Sans, sans-serif',
+                        fontSize: 10, color: C.primary, fontWeight: 600,
+                    }}>
+                        {templates.length}/{FREE_TEMPLATE_LIMIT} free templates used
+                    </span>
+                    <div style={{
+                        width: 60, height: 4, borderRadius: 4,
+                        backgroundColor: C.border, overflow: 'hidden',
+                    }}>
+                        <div style={{
+                            width: `${(templates.length / FREE_TEMPLATE_LIMIT) * 100}%`,
+                            height: '100%',
+                            borderRadius: 4,
+                            backgroundColor: C.primary,
+                            transition: 'width 0.3s',
+                        }} />
+                    </div>
                 </div>
             )}
 

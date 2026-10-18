@@ -50,12 +50,12 @@ interface FeatureRow {
 }
 
 const FEATURES: FeatureRow[] = [
-    { label: 'Block style variants', free: 'First 2 per block', pro: 'All 10+ variants' },
-    { label: 'Export HTML', free: false, pro: true },
-    { label: 'Open in Code Editor', free: false, pro: true },
-    { label: 'Publish Pro templates', free: false, pro: true },
-    { label: 'Saved templates', free: '3 templates', pro: 'Unlimited' },
-    { label: 'Support', free: 'Standard', pro: 'Priority' },
+    { label: 'Block style variants',     free: 'First 2 per block',  pro: 'All 10+ variants'  },
+    { label: 'Export HTML',              free: false,                pro: true                },
+    { label: 'Open in Code Editor',      free: false,                pro: true                },
+    { label: 'Publish Pro templates',    free: false,                pro: true                },
+    { label: 'Saved templates',          free: '5 templates',        pro: 'Unlimited'         },
+    { label: 'Support',                  free: 'Standard',           pro: 'Priority'          },
 ]
 
 // ── Cell renderer ─────────────────────────────────────────────────────────────

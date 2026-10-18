@@ -829,6 +829,17 @@ export default function VisualEditor({
                     .eq('user_id', user.id) // defence in depth — ensure user owns the row
                 if (error) throw error
             } else {
+                // ── Free plan: enforce 5-template limit on new saves ──
+                if (designStudioPlan !== 'pro') {
+                    const { count, error: countErr } = await (supabase.from('visual_templates') as any)
+                        .select('id', { count: 'exact', head: true })
+                        .eq('user_id', user.id)
+                    if (!countErr && count !== null && count >= 5) {
+                        setSaveStatus('idle')
+                        onUpgradeClick?.()
+                        return
+                    }
+                }
                 // ── INSERT new row ──
                 const { data, error } = await tbl
                     .insert({ ...payload, user_id: user.id })
@@ -863,7 +874,7 @@ export default function VisualEditor({
             setTokenFeedback({ type: 'error', msg: e?.message ?? 'Save failed — try again' })
             setTimeout(() => { setSaveStatus('idle'); setTokenFeedback(null) }, 4000)
         }
-    }, [blocks, canvasSettings, templateName, currentTemplateId, linkedListing])
+    }, [blocks, canvasSettings, templateName, currentTemplateId, linkedListing, designStudioPlan, onUpgradeClick])
 
     const handleLoadTemplate = useCallback((
         name: string,
@@ -1756,6 +1767,8 @@ export default function VisualEditor({
                     selectedBlockLabel={selectedBlock ? (getDefinition(selectedBlock.type)?.label ?? null) : null}
                     onLoadTemplate={handleLoadTemplate}
                     savedCount={savedCount}
+                    savedTabPlan={designStudioPlan}
+                    savedTabOnUpgrade={onUpgradeClick}
                     selectedFeatureIndex={selectedFeatureIndex}
                     onIconSelect={(iconId) => {
                         // Find block by ID (supports Heading, Features, Divider, and all block types)
