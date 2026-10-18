@@ -125,7 +125,12 @@ interface BlockToolbarProps {
     onFormatSlot?: (blockId: string, propKey: string, format: string, value: string, selection?: { selectedHtml: string; selectedText: string } | null) => void
     onToggleLivePreview?: () => void
     livePreview?: boolean
+    designStudioPlan?: 'free' | 'pro'
+    onUpgradeClick?: () => void
 }
+
+// Fonts available on the free plan — everything else shows a PRO badge
+const FREE_FONTS = new Set(['Arial', 'Inter', 'Roboto'])
 
 export default function BlockToolbar({
     blockType,
@@ -140,6 +145,8 @@ export default function BlockToolbar({
     onFormatSlot,
     onToggleLivePreview,
     livePreview = false,
+    designStudioPlan = 'free',
+    onUpgradeClick,
 }: BlockToolbarProps) {
     const toolbarRef = useRef<HTMLDivElement>(null)
     const modalRef = useRef<HTMLDivElement>(null)
@@ -641,11 +648,16 @@ export default function BlockToolbar({
                                 })
                                 .map(font => {
                                     const isCurrent = (activeProps.fontFamily || '').toLowerCase().includes(font.name.toLowerCase())
+                                    const isLocked = !FREE_FONTS.has(font.name) && designStudioPlan !== 'pro'
                                     return (
                                         <button
                                             key={font.name}
-                                            onMouseEnter={() => loadFont(font.name)}
+                                            onMouseEnter={() => { if (!isLocked) loadFont(font.name) }}
                                             onClick={() => {
+                                                if (isLocked) {
+                                                    onUpgradeClick?.()
+                                                    return
+                                                }
                                                 loadFont(font.name)
                                                 // Load into canvas iframe as well
                                                 document.querySelectorAll('iframe').forEach(ifr => {
@@ -665,20 +677,21 @@ export default function BlockToolbar({
                                                 justifyContent: 'space-between',
                                                 padding: '7px 12px',
                                                 border: 'none',
-                                                backgroundColor: isCurrent ? '#f3eeff' : 'transparent',
+                                                backgroundColor: isCurrent ? '#f3eeff' : isLocked ? '#fffbeb' : 'transparent',
                                                 cursor: 'pointer',
                                                 textAlign: 'left',
                                                 transition: 'background 0.1s',
                                             }}
-                                            onMouseOver={e => { if (!isCurrent) e.currentTarget.style.backgroundColor = '#f8fafc' }}
-                                            onMouseOut={e => { if (!isCurrent) e.currentTarget.style.backgroundColor = 'transparent' }}
+                                            onMouseOver={e => { if (!isCurrent && !isLocked) e.currentTarget.style.backgroundColor = '#f8fafc' }}
+                                            onMouseOut={e => { if (!isCurrent) e.currentTarget.style.backgroundColor = isLocked ? '#fffbeb' : 'transparent' }}
                                         >
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                                 <span style={{
                                                     fontFamily: `"${font.name}", ${font.fallback}`,
                                                     fontSize: 13,
-                                                    color: isCurrent ? '#7530fb' : '#1e1535',
+                                                    color: isCurrent ? '#7530fb' : isLocked ? '#92400e' : '#1e1535',
                                                     fontWeight: isCurrent ? 700 : 500,
+                                                    opacity: isLocked ? 0.75 : 1,
                                                 }}>
                                                     {font.name}
                                                 </span>
@@ -686,7 +699,28 @@ export default function BlockToolbar({
                                                     {font.category}
                                                 </span>
                                             </div>
-                                            {isCurrent && <Check size={13} color="#7530fb" />}
+                                            {isLocked ? (
+                                                <span style={{
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    gap: 3,
+                                                    padding: '2px 6px',
+                                                    borderRadius: 4,
+                                                    background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                                                    fontSize: 9,
+                                                    fontWeight: 800,
+                                                    color: '#fff',
+                                                    letterSpacing: '0.05em',
+                                                    flexShrink: 0,
+                                                }}>
+                                                    <svg width="8" height="8" viewBox="0 0 16 16" fill="currentColor">
+                                                        <path d="M8 1l2 4h4l-3 3 1 4-4-2-4 2 1-4-3-3h4z"/>
+                                                    </svg>
+                                                    PRO
+                                                </span>
+                                            ) : isCurrent ? (
+                                                <Check size={13} color="#7530fb" />
+                                            ) : null}
                                         </button>
                                     )
                                 })}

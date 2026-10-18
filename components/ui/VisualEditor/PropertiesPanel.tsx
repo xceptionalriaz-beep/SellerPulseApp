@@ -1127,10 +1127,9 @@ function StylesTab({
                 {/* ── Block-specific style props ── */}
                 <BlockStyleProps block={block} props={props} updateProps={updateProps} />
 
-                {/* ── Universal: Border + Shadow + Typography ── */}
+                {/* ── Universal: Border + Shadow ── */}
                 <UniversalBorder props={props as any} updateProps={p => updateProps(p as any)} />
                 <UniversalShadow props={props as any} updateProps={p => updateProps(p as any)} />
-                <UniversalTypography props={props as any} updateProps={p => updateProps(p as any)} />
             </div>
         </div>
     )
