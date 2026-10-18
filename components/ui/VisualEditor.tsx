@@ -1850,6 +1850,8 @@ export default function VisualEditor({
                                         setPanelOpen(true)
                                     }}
                                     persistent
+                                    designStudioPlan={designStudioPlan}
+                                    onUpgradeClick={onUpgradeClick}
                                 />
                             </div>
                             {/* Undo / Redo — left of the eye icon */}

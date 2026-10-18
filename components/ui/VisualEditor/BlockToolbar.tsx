@@ -54,20 +54,20 @@ const C = {
 //   color      — text colour picker
 // ─────────────────────────────────────────────────────────────────────────────
 const BLOCK_TOOLBAR_CAPS: Record<string, ReadonlySet<string>> = {
-    heading:           new Set(['font', 'bold', 'link', 'clear', 'highlight', 'level', 'align', 'size', 'color']),
-    paragraph:         new Set(['font', 'bold', 'blockquote', 'link', 'clear', 'highlight', 'align', 'size', 'color']),
-    bullet_list:       new Set(['font', 'bold', 'clear', 'highlight', 'list', 'size', 'color']),
-    numbered_list:     new Set(['font', 'bold', 'clear', 'highlight', 'list', 'size', 'color']),
-    quote_block:       new Set(['font', 'bold', 'link', 'clear', 'highlight', 'align', 'size', 'color']),
-    warning_box:       new Set(['font', 'bold', 'size', 'color']),
-    info_box:          new Set(['font', 'bold', 'size', 'color']),
-    data_table:        new Set(['font', 'bold', 'size', 'color']),
-    faq_block:         new Set(['font', 'bold', 'size', 'color']),
-    faq_section:       new Set(['font', 'bold', 'size', 'color']),
-    testimonials:      new Set(['font', 'bold', 'size', 'color']),
+    heading: new Set(['font', 'bold', 'link', 'clear', 'highlight', 'level', 'align', 'size', 'color']),
+    paragraph: new Set(['font', 'bold', 'blockquote', 'link', 'clear', 'highlight', 'align', 'size', 'color']),
+    bullet_list: new Set(['font', 'bold', 'clear', 'highlight', 'list', 'size', 'color']),
+    numbered_list: new Set(['font', 'bold', 'clear', 'highlight', 'list', 'size', 'color']),
+    quote_block: new Set(['font', 'bold', 'link', 'clear', 'highlight', 'align', 'size', 'color']),
+    warning_box: new Set(['font', 'bold', 'size', 'color']),
+    info_box: new Set(['font', 'bold', 'size', 'color']),
+    data_table: new Set(['font', 'bold', 'size', 'color']),
+    faq_block: new Set(['font', 'bold', 'size', 'color']),
+    faq_section: new Set(['font', 'bold', 'size', 'color']),
+    testimonials: new Set(['font', 'bold', 'size', 'color']),
     testimonial_block: new Set(['font', 'bold', 'size', 'color']),
-    badge_row:         new Set(['font', 'size', 'color']),
-    divider:           new Set(['color']),
+    badge_row: new Set(['font', 'size', 'color']),
+    divider: new Set(['color']),
 }
 
 /**
@@ -125,7 +125,12 @@ interface BlockToolbarProps {
     onFormatSlot?: (blockId: string, propKey: string, format: string, value: string, selection?: { selectedHtml: string; selectedText: string } | null) => void
     onToggleLivePreview?: () => void
     livePreview?: boolean
+    designStudioPlan?: 'free' | 'pro'
+    onUpgradeClick?: () => void
 }
+
+// Fonts available on the free plan — everything else shows a PRO badge
+const FREE_FONTS = new Set(['Arial', 'Inter', 'Roboto'])
 
 export default function BlockToolbar({
     blockType,
@@ -140,6 +145,8 @@ export default function BlockToolbar({
     onFormatSlot,
     onToggleLivePreview,
     livePreview = false,
+    designStudioPlan = 'free',
+    onUpgradeClick,
 }: BlockToolbarProps) {
     const toolbarRef = useRef<HTMLDivElement>(null)
     const modalRef = useRef<HTMLDivElement>(null)
@@ -641,11 +648,16 @@ export default function BlockToolbar({
                                 })
                                 .map(font => {
                                     const isCurrent = (activeProps.fontFamily || '').toLowerCase().includes(font.name.toLowerCase())
+                                    const isLocked = !FREE_FONTS.has(font.name) && designStudioPlan !== 'pro'
                                     return (
                                         <button
                                             key={font.name}
-                                            onMouseEnter={() => loadFont(font.name)}
+                                            onMouseEnter={() => { if (!isLocked) loadFont(font.name) }}
                                             onClick={() => {
+                                                if (isLocked) {
+                                                    onUpgradeClick?.()
+                                                    return
+                                                }
                                                 loadFont(font.name)
                                                 // Load into canvas iframe as well
                                                 document.querySelectorAll('iframe').forEach(ifr => {
@@ -665,20 +677,21 @@ export default function BlockToolbar({
                                                 justifyContent: 'space-between',
                                                 padding: '7px 12px',
                                                 border: 'none',
-                                                backgroundColor: isCurrent ? '#f3eeff' : 'transparent',
+                                                backgroundColor: isCurrent ? '#f3eeff' : isLocked ? '#fffbeb' : 'transparent',
                                                 cursor: 'pointer',
                                                 textAlign: 'left',
                                                 transition: 'background 0.1s',
                                             }}
-                                            onMouseOver={e => { if (!isCurrent) e.currentTarget.style.backgroundColor = '#f8fafc' }}
-                                            onMouseOut={e => { if (!isCurrent) e.currentTarget.style.backgroundColor = 'transparent' }}
+                                            onMouseOver={e => { if (!isCurrent && !isLocked) e.currentTarget.style.backgroundColor = '#f8fafc' }}
+                                            onMouseOut={e => { if (!isCurrent) e.currentTarget.style.backgroundColor = isLocked ? '#fffbeb' : 'transparent' }}
                                         >
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                                 <span style={{
                                                     fontFamily: `"${font.name}", ${font.fallback}`,
                                                     fontSize: 13,
-                                                    color: isCurrent ? '#7530fb' : '#1e1535',
+                                                    color: isCurrent ? '#7530fb' : isLocked ? '#92400e' : '#1e1535',
                                                     fontWeight: isCurrent ? 700 : 500,
+                                                    opacity: isLocked ? 0.75 : 1,
                                                 }}>
                                                     {font.name}
                                                 </span>
@@ -686,7 +699,28 @@ export default function BlockToolbar({
                                                     {font.category}
                                                 </span>
                                             </div>
-                                            {isCurrent && <Check size={13} color="#7530fb" />}
+                                            {isLocked ? (
+                                                <span style={{
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    gap: 3,
+                                                    padding: '2px 6px',
+                                                    borderRadius: 4,
+                                                    background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                                                    fontSize: 9,
+                                                    fontWeight: 800,
+                                                    color: '#fff',
+                                                    letterSpacing: '0.05em',
+                                                    flexShrink: 0,
+                                                }}>
+                                                    <svg width="8" height="8" viewBox="0 0 16 16" fill="currentColor">
+                                                        <path d="M8 1l2 4h4l-3 3 1 4-4-2-4 2 1-4-3-3h4z" />
+                                                    </svg>
+                                                    PRO
+                                                </span>
+                                            ) : isCurrent ? (
+                                                <Check size={13} color="#7530fb" />
+                                            ) : null}
                                         </button>
                                     )
                                 })}
@@ -802,78 +836,78 @@ export default function BlockToolbar({
 
             {/* ── Highlight picker ── */}
             {hasCap(blockType, 'highlight', !!slotEdit) && (
-            <div ref={highlightRef} style={{ position: 'relative', display: 'inline-flex' }}>
-                <button
-                    onClick={() => setShowHighlightPicker(p => !p)}
-                    title="Highlight text"
-                    style={{
-                        ...miniBtn,
-                        backgroundColor: showHighlightPicker ? C.primary : 'transparent',
-                        color: showHighlightPicker ? '#ffffff' : '#1f1d2e',
-                    }}
-                >
-                    <Highlighter size={14} />
-                </button>
-                {showHighlightPicker && (
-                    <div style={{
-                        position: 'absolute',
-                        top: 'calc(100% + 8px)',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        background: '#ffffff',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: 10,
-                        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-                        padding: '8px 10px',
-                        zIndex: 9999,
-                        display: 'flex',
-                        flexDirection: 'column' as const,
-                        gap: 6,
-                        minWidth: 140,
-                    }}>
-                        <p style={{ margin: 0, fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                            Highlight colour
-                        </p>
-                        <div style={{ display: 'flex', gap: 6 }}>
-                            {[
-                                { color: '#fef08a', label: 'Yellow' },
-                                { color: '#bbf7d0', label: 'Green' },
-                                { color: '#fbcfe8', label: 'Pink' },
-                                { color: '#bfdbfe', label: 'Blue' },
-                            ].map(s => (
-                                <button
-                                    key={s.color}
-                                    title={s.label}
-                                    onClick={() => handleHighlight(s.color)}
-                                    style={{
-                                        width: 22, height: 22,
-                                        borderRadius: 5,
-                                        backgroundColor: s.color,
-                                        border: '1.5px solid rgba(0,0,0,0.1)',
-                                        cursor: 'pointer',
-                                        padding: 0,
-                                    }}
-                                />
-                            ))}
+                <div ref={highlightRef} style={{ position: 'relative', display: 'inline-flex' }}>
+                    <button
+                        onClick={() => setShowHighlightPicker(p => !p)}
+                        title="Highlight text"
+                        style={{
+                            ...miniBtn,
+                            backgroundColor: showHighlightPicker ? C.primary : 'transparent',
+                            color: showHighlightPicker ? '#ffffff' : '#1f1d2e',
+                        }}
+                    >
+                        <Highlighter size={14} />
+                    </button>
+                    {showHighlightPicker && (
+                        <div style={{
+                            position: 'absolute',
+                            top: 'calc(100% + 8px)',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            background: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: 10,
+                            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                            padding: '8px 10px',
+                            zIndex: 9999,
+                            display: 'flex',
+                            flexDirection: 'column' as const,
+                            gap: 6,
+                            minWidth: 140,
+                        }}>
+                            <p style={{ margin: 0, fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                Highlight colour
+                            </p>
+                            <div style={{ display: 'flex', gap: 6 }}>
+                                {[
+                                    { color: '#fef08a', label: 'Yellow' },
+                                    { color: '#bbf7d0', label: 'Green' },
+                                    { color: '#fbcfe8', label: 'Pink' },
+                                    { color: '#bfdbfe', label: 'Blue' },
+                                ].map(s => (
+                                    <button
+                                        key={s.color}
+                                        title={s.label}
+                                        onClick={() => handleHighlight(s.color)}
+                                        style={{
+                                            width: 22, height: 22,
+                                            borderRadius: 5,
+                                            backgroundColor: s.color,
+                                            border: '1.5px solid rgba(0,0,0,0.1)',
+                                            cursor: 'pointer',
+                                            padding: 0,
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                            <button
+                                onClick={() => handleHighlight('none')}
+                                style={{
+                                    fontSize: 10, fontWeight: 600,
+                                    color: '#ef4444',
+                                    background: '#fff5f5',
+                                    border: '1px solid #fecaca',
+                                    borderRadius: 6,
+                                    padding: '3px 8px',
+                                    cursor: 'pointer',
+                                    textAlign: 'left' as const,
+                                }}
+                            >
+                                Clear highlight
+                            </button>
                         </div>
-                        <button
-                            onClick={() => handleHighlight('none')}
-                            style={{
-                                fontSize: 10, fontWeight: 600,
-                                color: '#ef4444',
-                                background: '#fff5f5',
-                                border: '1px solid #fecaca',
-                                borderRadius: 6,
-                                padding: '3px 8px',
-                                cursor: 'pointer',
-                                textAlign: 'left' as const,
-                            }}
-                        >
-                            Clear highlight
-                        </button>
-                    </div>
-                )}
-            </div>
+                    )}
+                </div>
             )}
 
             {/* ── Separator before structural controls ── */}
