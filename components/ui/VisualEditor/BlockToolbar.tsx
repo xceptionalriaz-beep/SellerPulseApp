@@ -18,6 +18,7 @@ import {
     RefreshCw, Trash2, ChevronDown, Check, Type,
 } from 'lucide-react'
 import { FONT_REGISTRY, loadFont, getFontStack, type FontCategory } from './fonts'
+import { ProBadge } from './ProBadge'
 
 const C = {
     bg: '#1e1535',
@@ -129,8 +130,14 @@ interface BlockToolbarProps {
     onUpgradeClick?: () => void
 }
 
-// Fonts available on the free plan — everything else shows a PRO badge
-const FREE_FONTS = new Set(['Arial', 'Inter', 'Roboto'])
+// Free plan fonts — system fonts everyone has + the 4 most ubiquitous Google basics.
+// Everything else (fonts with personality / design value) requires Pro.
+const FREE_FONTS = new Set([
+    // System fonts — no download, always work in eBay HTML
+    'Arial', 'Georgia', 'Verdana', 'Trebuchet MS', 'Times New Roman', 'Tahoma', 'Impact',
+    // The 4 Google basics — so common they feel built-in
+    'Inter', 'Roboto', 'Open Sans', 'Lato',
+])
 
 export default function BlockToolbar({
     blockType,
@@ -677,21 +684,20 @@ export default function BlockToolbar({
                                                 justifyContent: 'space-between',
                                                 padding: '7px 12px',
                                                 border: 'none',
-                                                backgroundColor: isCurrent ? '#f3eeff' : isLocked ? '#fffbeb' : 'transparent',
+                                                backgroundColor: isCurrent ? '#f3eeff' : 'transparent',
                                                 cursor: 'pointer',
                                                 textAlign: 'left',
                                                 transition: 'background 0.1s',
                                             }}
-                                            onMouseOver={e => { if (!isCurrent && !isLocked) e.currentTarget.style.backgroundColor = '#f8fafc' }}
-                                            onMouseOut={e => { if (!isCurrent) e.currentTarget.style.backgroundColor = isLocked ? '#fffbeb' : 'transparent' }}
+                                            onMouseOver={e => { if (!isCurrent) e.currentTarget.style.backgroundColor = '#f8fafc' }}
+                                            onMouseOut={e => { if (!isCurrent) e.currentTarget.style.backgroundColor = 'transparent' }}
                                         >
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                                 <span style={{
                                                     fontFamily: `"${font.name}", ${font.fallback}`,
                                                     fontSize: 13,
-                                                    color: isCurrent ? '#7530fb' : isLocked ? '#92400e' : '#1e1535',
+                                                    color: isCurrent ? '#7530fb' : '#1e1535',
                                                     fontWeight: isCurrent ? 700 : 500,
-                                                    opacity: isLocked ? 0.75 : 1,
                                                 }}>
                                                     {font.name}
                                                 </span>
@@ -700,24 +706,7 @@ export default function BlockToolbar({
                                                 </span>
                                             </div>
                                             {isLocked ? (
-                                                <span style={{
-                                                    display: 'inline-flex',
-                                                    alignItems: 'center',
-                                                    gap: 3,
-                                                    padding: '2px 6px',
-                                                    borderRadius: 4,
-                                                    background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                                                    fontSize: 9,
-                                                    fontWeight: 800,
-                                                    color: '#fff',
-                                                    letterSpacing: '0.05em',
-                                                    flexShrink: 0,
-                                                }}>
-                                                    <svg width="8" height="8" viewBox="0 0 16 16" fill="currentColor">
-                                                        <path d="M8 1l2 4h4l-3 3 1 4-4-2-4 2 1-4-3-3h4z" />
-                                                    </svg>
-                                                    PRO
-                                                </span>
+                                                <ProBadge size="xs" />
                                             ) : isCurrent ? (
                                                 <Check size={13} color="#7530fb" />
                                             ) : null}
