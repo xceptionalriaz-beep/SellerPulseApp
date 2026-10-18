@@ -130,8 +130,14 @@ interface BlockToolbarProps {
     onUpgradeClick?: () => void
 }
 
-// Fonts available on the free plan — everything else shows a PRO badge
-const FREE_FONTS = new Set(['Arial', 'Inter', 'Roboto'])
+// Free plan fonts — system fonts everyone has + the 4 most ubiquitous Google basics.
+// Everything else (fonts with personality / design value) requires Pro.
+const FREE_FONTS = new Set([
+    // System fonts — no download, always work in eBay HTML
+    'Arial', 'Georgia', 'Verdana', 'Trebuchet MS', 'Times New Roman', 'Tahoma', 'Impact',
+    // The 4 Google basics — so common they feel built-in
+    'Inter', 'Roboto', 'Open Sans', 'Lato',
+])
 
 export default function BlockToolbar({
     blockType,

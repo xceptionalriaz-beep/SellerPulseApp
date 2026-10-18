@@ -100,6 +100,41 @@ export const FONT_REGISTRY: FontDefinition[] = [
     { name: 'Satisfy',           category: 'display', fallback: 'cursive', google: true },     // elegant script — gifts, cards, wedding
     { name: 'Great Vibes',       category: 'display', fallback: 'cursive', google: true },     // luxury script — jewellery, flowers, spa
 
+    // ── Elegant scripts — handmade, gifts, jewellery, wedding, luxury ───────
+    // Best for: handmade goods, gift items, wedding accessories, jewellery, flowers.
+    { name: 'Dancing Script', category: 'display', fallback: 'cursive', google: true },  // warm friendly script — #1 most-used script font
+    { name: 'Allura',         category: 'display', fallback: 'cursive', google: true },  // formal elegant — jewellery, stationery
+    { name: 'Sacramento',     category: 'display', fallback: 'cursive', google: true },  // thin elegant — luxury, wedding, spa
+    { name: 'Alex Brush',     category: 'display', fallback: 'cursive', google: true },  // refined — wedding gifts, luxury packaging
+    { name: 'Tangerine',      category: 'display', fallback: 'cursive', google: true },  // very thin — ultra-luxury, fine jewellery
+
+    // ── Slab serifs & vintage display ────────────────────────────────────────
+    // Best for: tools, books, vintage collectibles, rustic/craft items.
+    { name: 'Alfa Slab One',  category: 'display', fallback: 'serif', google: true },    // heavy slab — SALE banners, bold headers
+    { name: 'Domine',         category: 'serif',   fallback: 'serif', google: true },    // readable slab — books, tools, products with manuals
+    { name: 'Teko',           category: 'display', fallback: 'sans-serif', google: true }, // condensed sport — fitness, activewear
+    { name: 'Passion One',    category: 'display', fallback: 'sans-serif', google: true }, // bold sport — outdoor, fitness, gym
+    { name: 'Yeseva One',     category: 'display', fallback: 'serif', google: true },    // vintage editorial — antiques, retro collectibles
+    { name: 'Rye',            category: 'display', fallback: 'serif', google: true },    // western vintage — cowboy, antique, rustic
+    { name: 'Fredoka',        category: 'display', fallback: 'sans-serif', google: true }, // rounded fun — kids, toys, baby products
+    { name: 'Lobster',        category: 'display', fallback: 'cursive', google: true },  // retro casual — food, drinks, casual goods
+    { name: 'Poiret One',     category: 'display', fallback: 'sans-serif', google: true }, // Art Deco — perfume, luxury vintage
+    { name: 'Grandstander',   category: 'display', fallback: 'cursive', google: true },  // playful bold — games, events, kids
+
+    // ── More refined serifs ───────────────────────────────────────────────────
+    // Best for: body text in premium/editorial listings, antiques, books.
+    { name: 'Source Serif 4',  category: 'serif', fallback: 'serif', google: true },  // beautiful readable — any description-heavy listing
+    { name: 'Quattrocento',    category: 'serif', fallback: 'serif', google: true },  // classic Roman — antiques, collectibles, art
+    { name: 'IM Fell English', category: 'serif', fallback: 'serif', google: true },  // old-print character — vintage, historical items
+
+    // ── More clean sans-serifs ────────────────────────────────────────────────
+    // Best for: sellers who want a clean look beyond Inter/Roboto.
+    { name: 'Nunito Sans',    category: 'sans', fallback: 'sans-serif', google: true },  // professional sibling of Nunito
+    { name: 'Chivo',          category: 'sans', fallback: 'sans-serif', google: true },  // editorial versatile — books, stationery, office
+    { name: 'Be Vietnam Pro', category: 'sans', fallback: 'sans-serif', google: true },  // modern clean — lifestyle, home goods
+    { name: 'Instrument Sans',category: 'sans', fallback: 'sans-serif', google: true },  // crisp professional — premium brand listings
+    { name: 'Saira Condensed',category: 'sans', fallback: 'sans-serif', google: true },  // compact industrial — auto parts, machinery
+
     // ── Monospace — specs, measurements, part numbers, code/model IDs ────────
     // Best for: electronics, auto parts, tools — anywhere you list SKUs or specs.
     { name: 'IBM Plex Mono',  category: 'mono', fallback: 'monospace', google: true },  // cleanest mono for spec tables

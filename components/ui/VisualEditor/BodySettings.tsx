@@ -47,16 +47,46 @@ const C = {
     successLight: '#dcfce7',
 }
 
-// ── Font options — pro:true = gated behind Pro plan ──────────────────────────
+// ── Canvas-wide font options — pro:false = free, pro:true = Pro badge + gate ──
+// FREE  = system fonts + the 4 most ubiquitous Google basics (no design value)
+// PRO   = every font with a distinct personality / visual character
 const FONT_OPTIONS = [
-    { label: 'Arial (Default)', value: 'Arial, Helvetica, sans-serif',    preview: 'Arial',        pro: false },
-    { label: 'Inter',           value: 'Inter, Arial, sans-serif',         preview: 'Inter',        pro: false },
-    { label: 'Roboto',          value: 'Roboto, Arial, sans-serif',        preview: 'Roboto',       pro: false },
-    { label: 'Montserrat',      value: 'Montserrat, Arial, sans-serif',    preview: 'Montserrat',   pro: true  },
-    { label: 'Trebuchet MS',    value: 'Trebuchet MS, Arial, sans-serif',  preview: 'Trebuchet MS', pro: true  },
-    { label: 'Georgia (Serif)', value: 'Georgia, Times New Roman, serif',  preview: 'Georgia',      pro: true  },
-    { label: 'Verdana',         value: 'Verdana, Geneva, sans-serif',      preview: 'Verdana',      pro: true  },
-    { label: 'Tahoma',          value: 'Tahoma, Geneva, sans-serif',       preview: 'Tahoma',       pro: true  },
+    // ── Free — system & basic Google ──────────────────────────────────────
+    { label: 'Arial (Default)',  value: 'Arial, Helvetica, sans-serif',          preview: 'Arial',          pro: false },
+    { label: 'Georgia',          value: 'Georgia, Times New Roman, serif',        preview: 'Georgia',        pro: false },
+    { label: 'Verdana',          value: 'Verdana, Geneva, sans-serif',            preview: 'Verdana',        pro: false },
+    { label: 'Trebuchet MS',     value: "'Trebuchet MS', Helvetica, sans-serif",  preview: 'Trebuchet MS',   pro: false },
+    { label: 'Times New Roman',  value: "'Times New Roman', Times, serif",        preview: 'Times New Roman',pro: false },
+    { label: 'Tahoma',           value: 'Tahoma, Geneva, sans-serif',             preview: 'Tahoma',         pro: false },
+    { label: 'Impact',           value: 'Impact, Charcoal, sans-serif',           preview: 'Impact',         pro: false },
+    { label: 'Inter',            value: 'Inter, Arial, sans-serif',               preview: 'Inter',          pro: false },
+    { label: 'Roboto',           value: 'Roboto, Arial, sans-serif',              preview: 'Roboto',         pro: false },
+    { label: 'Open Sans',        value: "'Open Sans', Arial, sans-serif",         preview: 'Open Sans',      pro: false },
+    { label: 'Lato',             value: 'Lato, Arial, sans-serif',                preview: 'Lato',           pro: false },
+
+    // ── Pro — clean modern sans ────────────────────────────────────────────
+    { label: 'Poppins',          value: 'Poppins, Arial, sans-serif',             preview: 'Poppins',        pro: true  },
+    { label: 'Montserrat',       value: 'Montserrat, Arial, sans-serif',          preview: 'Montserrat',     pro: true  },
+    { label: 'DM Sans',          value: "'DM Sans', Arial, sans-serif",           preview: 'DM Sans',        pro: true  },
+    { label: 'Raleway',          value: 'Raleway, Arial, sans-serif',             preview: 'Raleway',        pro: true  },
+    { label: 'Nunito',           value: 'Nunito, Arial, sans-serif',              preview: 'Nunito',         pro: true  },
+    { label: 'Plus Jakarta Sans',value: "'Plus Jakarta Sans', Arial, sans-serif", preview: 'Plus Jakarta Sans', pro: true },
+    { label: 'Work Sans',        value: "'Work Sans', Arial, sans-serif",         preview: 'Work Sans',      pro: true  },
+    { label: 'Josefin Sans',     value: "'Josefin Sans', Arial, sans-serif",      preview: 'Josefin Sans',   pro: true  },
+    { label: 'Urbanist',         value: 'Urbanist, Arial, sans-serif',            preview: 'Urbanist',       pro: true  },
+
+    // ── Pro — elegant serifs ───────────────────────────────────────────────
+    { label: 'Playfair Display', value: "'Playfair Display', Georgia, serif",     preview: 'Playfair Display',   pro: true },
+    { label: 'Cormorant Garamond',value:"'Cormorant Garamond', Georgia, serif",   preview: 'Cormorant Garamond', pro: true },
+    { label: 'Lora',             value: 'Lora, Georgia, serif',                   preview: 'Lora',               pro: true },
+    { label: 'Libre Baskerville',value: "'Libre Baskerville', Georgia, serif",    preview: 'Libre Baskerville',  pro: true },
+    { label: 'Merriweather',     value: 'Merriweather, Georgia, serif',           preview: 'Merriweather',       pro: true },
+
+    // ── Pro — bold display / headings ─────────────────────────────────────
+    { label: 'Oswald',           value: 'Oswald, Arial, sans-serif',              preview: 'Oswald',         pro: true  },
+    { label: 'Bebas Neue',       value: "'Bebas Neue', Arial, sans-serif",        preview: 'Bebas Neue',     pro: true  },
+    { label: 'Barlow Condensed', value: "'Barlow Condensed', Arial, sans-serif",  preview: 'Barlow Condensed', pro: true },
+    { label: 'Russo One',        value: "'Russo One', Arial, sans-serif",         preview: 'Russo One',      pro: true  },
 ]
 
 // ── eBay category options ─────────────────────────────────────────────────────
