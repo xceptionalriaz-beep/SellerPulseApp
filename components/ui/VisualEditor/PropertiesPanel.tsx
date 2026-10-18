@@ -20,6 +20,7 @@
 
 import React, { useState, useCallback } from 'react'
 import type { TemplateSlot, TemplateSlotRole } from '@/app/dashboard/listing-generator/types/listing.types'
+import { ProBadge, ProLockOverlay } from './ProBadge'
 import { getVariants, hasVariants } from './variants/index'
 import type { BlockVariant } from './variants/hero_header.variants'
 import {
@@ -263,6 +264,10 @@ interface PropertiesPanelProps {
     onSlotChange?: (blockId: string, role: TemplateSlotRole | null) => void
     /** Template category — passed to AI actions for context */
     templateCategory?: string
+    /** Design Studio plan — used to gate Pro-only layout styles */
+    designStudioPlan?: 'free' | 'pro'
+    /** Called when a free user clicks a locked Pro style */
+    onUpgradeClick?: () => void
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -312,6 +317,8 @@ export default function PropertiesPanel({
     slots,
     onSlotChange,
     templateCategory = 'general',
+    designStudioPlan = 'free',
+    onUpgradeClick,
 }: PropertiesPanelProps) {
     const [activeTab, setActiveTab] = useState<PanelTab>('styles')
 
@@ -605,7 +612,7 @@ export default function PropertiesPanel({
                 {/* ── Tab content ── */}
                 <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
                     {activeTab === 'styles' && (
-                        <StylesTab block={block} props={props} updateProps={updateProps} />
+                        <StylesTab block={block} props={props} updateProps={updateProps} designStudioPlan={designStudioPlan} onUpgradeClick={onUpgradeClick} />
                     )}
                     {activeTab === 'attributes' && (
                         <AttributesTab
@@ -944,10 +951,17 @@ function VariantPicker({
     blockType,
     currentVariant,
     onChange,
+    freeVariantIds,
+    isPro = false,
+    onUpgradeClick,
 }: {
     blockType: string
     currentVariant: string
     onChange: (variantId: string) => void
+    /** When provided, any variant NOT in this set is treated as Pro-only */
+    freeVariantIds?: Set<string>
+    isPro?: boolean
+    onUpgradeClick?: () => void
 }) {
     const variants = getVariants(blockType)
     if (!variants) return null
@@ -978,27 +992,34 @@ function VariantPicker({
             }}>
                 {variants.map((variant: BlockVariant) => {
                     const isSelected = currentVariant === variant.id
+                    const isLocked = freeVariantIds !== undefined && !freeVariantIds.has(variant.id) && !isPro
                     return (
                         <button
                             key={variant.id}
-                            onClick={() => onChange(variant.id)}
-                            title={variant.description}
+                            onClick={() => {
+                                if (isLocked) { onUpgradeClick?.(); return }
+                                onChange(variant.id)
+                            }}
+                            title={isLocked ? 'Upgrade to Pro to unlock' : variant.description}
                             style={{
+                                position: 'relative',
                                 width: '100%',
                                 minWidth: 0,
                                 boxSizing: 'border-box',
                                 padding: '8px 6px',
-                                border: `2px solid ${isSelected ? C.primary : C.border}`,
+                                border: `2px solid ${isSelected ? C.primary : isLocked ? '#e2e8f0' : C.border}`,
                                 borderRadius: 8,
-                                backgroundColor: isSelected ? C.primaryLight : C.surface,
-                                cursor: 'pointer',
+                                backgroundColor: isSelected ? C.primaryLight : isLocked ? '#f8fafc' : C.surface,
+                                cursor: isLocked ? 'pointer' : 'pointer',
                                 textAlign: 'center' as const,
                                 transition: 'all 0.12s',
                                 overflow: 'hidden',
                             }}
                         >
                             {/* Mini visual thumbnail */}
-                            <VariantThumbnail variantId={variant.id} isSelected={isSelected} />
+                            <div style={{ opacity: isLocked ? 0.4 : 1 }}>
+                                <VariantThumbnail variantId={variant.id} isSelected={isSelected && !isLocked} />
+                            </div>
                             <p style={{
                                 margin: '5px 0 0',
                                 width: '100%',
@@ -1007,13 +1028,24 @@ function VariantPicker({
                                 fontFamily: 'DM Sans, sans-serif',
                                 fontSize: 10,
                                 fontWeight: isSelected ? 700 : 500,
-                                color: isSelected ? C.primary : C.secondary,
+                                color: isLocked ? '#94a3b8' : isSelected ? C.primary : C.secondary,
                                 whiteSpace: 'nowrap' as const,
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
+                                opacity: isLocked ? 0.6 : 1,
                             }}>
                                 {variant.label}
                             </p>
+                            {/* Pro badge overlay on locked variants */}
+                            {isLocked && (
+                                <div style={{
+                                    position: 'absolute',
+                                    top: 4,
+                                    right: 4,
+                                }}>
+                                    <ProBadge size="xs" />
+                                </div>
+                            )}
                         </button>
                     )
                 })}
@@ -1025,14 +1057,23 @@ function VariantPicker({
 // Mini SVG thumbnails for each Hero Header variant
 // ── Variant thumbnail SVGs — add a new entry here when adding a new variant ──
 // The picker itself is fully dynamic — thumbnails fall back to auto-generated
+// Divider styles that are free — everything else requires Pro
+const DIVIDER_FREE_VARIANTS = new Set([
+    'minimal_diamond', 'clean_hairline', 'shadow_groove', 'gradient_taper', 'executive_pinstripe',
+])
+
 function StylesTab({
     block,
     props,
     updateProps,
+    designStudioPlan = 'free',
+    onUpgradeClick,
 }: {
     block: Block
     props: any
     updateProps: (patch: Partial<BlockProps>) => void
+    designStudioPlan?: 'free' | 'pro'
+    onUpgradeClick?: () => void
 }) {
     return (
         <div style={{ padding: '0 0 24px' }}>
@@ -1043,6 +1084,9 @@ function StylesTab({
                     blockType={block.type}
                     currentVariant={(props as any).variant ?? (props as any).layoutStyle ?? (block.type === 'features' || (block.type as string) === 'features_bar' ? 'feat-simple-centered' : block.type === 'trust_badge_block' || (block.type as string) === 'trust_badge' || (block.type as string) === 'trust_satisfaction' ? 'trust-banner-soft' : block.type === 'rectangle' || (block.type as string) === 'shape' ? 'rect-solid-fill' : block.type === 'urgency_bar' || (block.type as string) === 'urgency' ? 'urgency-classic-pulse' : block.type === 'why_buy_from_us' || (block.type as string) === 'why_buy' ? 'why-classic-centered' : block.type === 'quote_block' || (block.type as string) === 'quote' ? 'qb-classic-left-border' : block.type === 'faq_block' || (block.type as string) === 'faq' || (block.type as string) === 'faq_section' ? 'faq-classic-stacked' : block.type === 'bullet_list' ? 'bl-classic-check' : block.type === 'paragraph' ? 'para-classic-plain' : block.type === 'heading' ? 'hd-classic-accent-bar' : block.type === 'product_title' || (block.type as string) === 'title' ? 'pt-classic-baseline' : block.type === 'highlight_text' || (block.type as string) === 'highlight' ? 'ht-classic-neon-strip' : block.type === 'international_shipping' || (block.type as string) === 'international' ? 'is-classic-amber-notice' : block.type === 'breadcrumb_bar' || (block.type as string) === 'breadcrumb' ? 'bb-classic-inline' : block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : block.type === 'category_nav' ? 'cat-classic-dark' : (block.type as string) === 'free_shipping_banner' || (block.type as string) === 'free_shipping' ? 'ship-express-courier-strip' : block.type === 'item_specifics' || (block.type as string) === 'specifics_table' ? 'is-dual-column-zebra-card' : block.type === 'authenticity_guarantee' || (block.type as string) === 'authenticity' ? 'auth-ebay-blue-official-shield' : block.type === 'condition_details' || (block.type as string) === 'condition' ? 'cd-cosmetic-grade-split' : block.type === 'compatibility_table' || (block.type as string) === 'compatibility' ? 'compat-classic-zebra-table' : block.type === 'product_comparison' || (block.type as string) === 'comparison' ? 'comp-classic-header-table' : block.type === 'key_features_grid' ? 'feat-classic-cards-grid' : block.type === 'vat_notice' || (block.type as string) === 'vat' ? 'vat-classic-card' : block.type === 'feedback_score' || (block.type as string) === 'feedback' ? 'fb-classic-split-card' : block.type === 'pull_quote' || (block.type as string) === 'quote' ? 'pq-classic-serif-centered' : block.type === 'section_label' || (block.type as string) === 'label' ? 'sl-classic-pill-capsule' : block.type === 'testimonial_block' || (block.type as string) === 'testimonials' || (block.type as string) === 'testimonial' ? 'test-classic-grid' : block.type === 'info_box' || (block.type as string) === 'infobox' || (block.type as string) === 'info' ? 'info-classic-banner' : block.type === 'shipping_info' || (block.type as string) === 'shipping_info_bar' ? 'ship-classic-card' : block.type === 'store_header' || (block.type as string) === 'storeheader' ? 'sh-classic-banner' : block.type === 'divider' || (block.type as string) === 'separator' ? 'minimal_diamond' : block.type === 'numbered_list' || (block.type as string) === 'numberedlist' || (block.type as string) === 'steps' ? 'num-classic-badge' : 'default')}
                     onChange={v => updateProps({ variant: v } as any)}
+                    freeVariantIds={(block.type === 'divider' || (block.type as string) === 'separator') ? DIVIDER_FREE_VARIANTS : undefined}
+                    isPro={designStudioPlan === 'pro'}
+                    onUpgradeClick={onUpgradeClick}
                 />
             )}
 
