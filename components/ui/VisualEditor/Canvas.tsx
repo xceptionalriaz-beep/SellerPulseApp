@@ -54,6 +54,7 @@ import {
 } from './blocks'
 import { renderForCanvas, extractTokens, type CategoryId, renderBannerForCanvas } from './sampleData'
 import { getGoogleFontLinkHtml } from './fonts'
+import ColumnControls from './ColumnControls'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -148,6 +149,9 @@ interface CanvasProps {
     onToggleHide?: (id: string) => void
     onAddBlock?: (type: BlockType) => void
     onAddBlockBelow?: (blockId: string, type: BlockType) => void
+    onUpdateBlock?: (block: Block) => void
+    onClearSlot?: (blockId: string, propKey: string) => void
+    selectedSubSlot?: string | null
     hasActiveSlot?: boolean
     onDeselect?: () => void
     onLoadTemplate?: (blocks: Block[], templateId: string) => void
@@ -183,6 +187,9 @@ export default function Canvas({
     onToggleHide,
     onAddBlock,
     onAddBlockBelow,
+    onUpdateBlock,
+    onClearSlot,
+    selectedSubSlot = null,
     hasActiveSlot = false,
     onDeselect,
     onLoadTemplate,
@@ -371,6 +378,17 @@ export default function Canvas({
                                     index={index}
                                     total={blocks.length}
                                     isSelected={isSelected}
+                                    onAddBlock={onAddBlock}
+                                    onClearSlot={onClearSlot}
+                                    selectedSubSlot={isSelected ? selectedSubSlot : null}
+                                    onUpdateProps={(patch) => {
+                                        if (onUpdateBlock) {
+                                            onUpdateBlock({
+                                                ...block,
+                                                props: { ...block.props, ...patch } as any,
+                                            })
+                                        }
+                                    }}
                                     isLocked={lockedIds.has(block.id)}
                                     isHidden={hiddenIds.has(block.id)}
                                     searchMatch={
@@ -663,6 +681,10 @@ interface BlockCardProps {
     total: number
     isSelected: boolean
     isBeingDragged: boolean
+    onUpdateProps?: (patch: Record<string, any>) => void
+    onAddBlock?: (type: BlockType) => void
+    onClearSlot?: (blockId: string, propKey: string) => void
+    selectedSubSlot?: string | null
     onSelect: () => void
     onDelete: () => void
     onDuplicate: () => void
@@ -694,6 +716,10 @@ function BlockCard({
     total,
     isSelected,
     isBeingDragged,
+    onUpdateProps,
+    onAddBlock,
+    onClearSlot,
+    selectedSubSlot,
     onSelect,
     onDelete,
     onDuplicate,
@@ -793,6 +819,82 @@ function BlockCard({
                 overflow: 'visible',
             }}
         >
+
+            {/* ── Floating In-Canvas Column Controls for Two / Three / Four Column ── */}
+            {isSelected && onUpdateProps && ['two_column', 'three_column', 'four_column'].includes(block.type) && (
+                <ColumnControls
+                    block={block}
+                    onUpdateProps={onUpdateProps}
+                    isFirst={index === 0}
+                />
+            )}
+
+            {/* ── Small Red Delete Icon at Top-Right Corner of Active Column (Only when content exists) ── */}
+            {(() => {
+                if (!isSelected || !selectedSubSlot || !onClearSlot) return null;
+                if (!['two_column', 'three_column', 'four_column', 'full_width_section'].includes(block.type)) return null;
+
+                // Check if the slot actually contains real content (never show on empty "+ Add Content")
+                const slotContent = (block.props as any)[selectedSubSlot] ?? '';
+                const isPlaceholder = !slotContent || slotContent.includes('+ Add Content') || slotContent.includes('class="add-btn"');
+                if (isPlaceholder) return null;
+
+                // Position the delete icon directly at the top-left corner of that specific column
+                let posStyle: React.CSSProperties = { top: 10, left: 12 };
+                if (block.type === 'two_column') {
+                    if (selectedSubSlot === 'leftContent') posStyle = { top: 10, left: 12 };
+                    else posStyle = { top: 10, left: 'calc(50% + 8px)' };
+                } else if (block.type === 'three_column') {
+                    if (selectedSubSlot === 'col1Content') posStyle = { top: 10, left: 12 };
+                    else if (selectedSubSlot === 'col2Content') posStyle = { top: 10, left: 'calc(33.33% + 8px)' };
+                    else posStyle = { top: 10, left: 'calc(66.66% + 8px)' };
+                } else if (block.type === 'four_column') {
+                    if (selectedSubSlot === 'col1Content') posStyle = { top: 10, left: 12 };
+                    else if (selectedSubSlot === 'col2Content') posStyle = { top: 10, left: 'calc(25% + 6px)' };
+                    else if (selectedSubSlot === 'col3Content') posStyle = { top: 10, left: 'calc(50% + 6px)' };
+                    else posStyle = { top: 10, left: 'calc(75% + 6px)' };
+                }
+
+                return (
+                    <button
+                        key={`${block.id}-${selectedSubSlot}`}
+                        type="button"
+                        onClick={e => {
+                            e.stopPropagation();
+                            onClearSlot(block.id, selectedSubSlot);
+                        }}
+                        title="Delete column content"
+                        style={{
+                            position: 'absolute',
+                            ...posStyle,
+                            zIndex: 45,
+                            width: 22,
+                            height: 22,
+                            borderRadius: '50%',
+                            border: '1px solid #fecaca',
+                            backgroundColor: '#ffffff',
+                            color: '#ef4444',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: 0,
+                            boxShadow: '0 2px 6px rgba(239, 68, 68, 0.25)',
+                            transition: 'background-color 0.12s, color 0.12s',
+                        }}
+                        onMouseEnter={e => {
+                            e.currentTarget.style.backgroundColor = '#ef4444';
+                            e.currentTarget.style.color = '#ffffff';
+                        }}
+                        onMouseLeave={e => {
+                            e.currentTarget.style.backgroundColor = '#ffffff';
+                            e.currentTarget.style.color = '#ef4444';
+                        }}
+                    >
+                        <Trash2 size={11} />
+                    </button>
+                );
+            })()}
 
             {/* ── Selected label badge — sleek designer tab attached to top-left ── */}
             {isSelected && (
@@ -1777,6 +1879,9 @@ ${fontOverrideCss}${colorOverrideCss}${fontSizeOverrideCss}${fontWeightOverrideC
         // Clear all previous highlights
         document.querySelectorAll('.riazify-active-slot').forEach(function(el) {
           el.classList.remove('riazify-active-slot');
+        });
+        document.querySelectorAll('.riazify-slot-del-btn').forEach(function(btn) {
+          btn.remove();
         });
         if (!prop) return;
 

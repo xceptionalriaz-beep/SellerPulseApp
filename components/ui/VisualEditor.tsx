@@ -685,18 +685,38 @@ export default function VisualEditor({
 
     const handleClearSlot = (blockId: string, propKey: string) => {
         const EMPTY_SLOT = (slot: string) =>
-            `<div data-canvas-dropzone="${slot}"><span class="add-btn" style="display:flex;justify-content:center;align-items:center;height:100%;background:#f8f8f8;color:#555;border:1px dashed #ddd;padding:8px;cursor:pointer;">+ Add Content</span></div>`
+            `<div data-canvas-dropzone="${slot}" style="width:100%;min-height:80px;background:#f8f8f8;border:1px dashed #ddd;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span class="add-btn" style="font-family:Arial,sans-serif;font-size:13px;color:#6b7280;">+ Add Content</span></div>`
         const idx = blocks.findIndex(b => b.id === blockId)
         if (idx < 0) return
         const target = blocks[idx]
-        const updatedProps = { ...(target.props as any), [propKey]: EMPTY_SLOT(propKey) }
+        const emptyHtml = EMPTY_SLOT(propKey)
+        const updatedProps = { ...(target.props as any), [propKey]: emptyHtml }
+
+        // Also reset matching slot in rows if multi-row exists
+        if (Array.isArray(updatedProps.rows) && updatedProps.rows.length > 0) {
+            updatedProps.rows = updatedProps.rows.map((row: any) => {
+                if (row && typeof row === 'object' && propKey in row) {
+                    return { ...row, [propKey]: emptyHtml }
+                }
+                return row
+            })
+        }
+
         const newBlocks = [...blocks]
         newBlocks[idx] = { ...target, props: updatedProps } as any
         commitBlocks(newBlocks, blocks)
-        // Bug #4 fix: clear stale slotBlockMapRef entry so empty slot shows no stale props
+
         delete slotBlockMapRef.current[`${blockId}__${propKey}`]
         setActiveSlotEdit(null)
         setSelectedSubSlot(null)
+        setActiveDropSlot(null)
+
+        // Clear active slot highlight in all iframes
+        document.querySelectorAll('iframe').forEach(iframe => {
+            try {
+                iframe.contentWindow?.postMessage({ type: 'RIAZIFY_UPDATE_ACTIVE_SLOT', propKey: null }, '*')
+            } catch (err) { }
+        })
     }
 
     const handleDelete = useCallback((id: string) => {
@@ -1432,6 +1452,11 @@ export default function VisualEditor({
                         commitBlocks(newBlocks, blocks);
                     }
                 }
+            } else if (event.data?.type === 'RIAZIFY_CLEAR_SLOT') {
+                const { blockId, propKey } = event.data;
+                if (blockId && propKey) {
+                    handleClearSlot(blockId, propKey);
+                }
             } else if (event.data?.type === 'RIAZIFY_ICON_CLICK') {
                 const { featureIndex, blockId } = event.data;
                 setSelectedFeatureIndex(featureIndex);
@@ -1962,6 +1987,9 @@ export default function VisualEditor({
                                 onToggleHide={handleToggleHide}
                                 onAddBlock={handleInsertOrAssignBlock}
                                 onAddBlockBelow={handleAddBlockBelow}
+                                onUpdateBlock={handleBlockChange}
+                                onClearSlot={handleClearSlot}
+                                selectedSubSlot={selectedSubSlot}
                                 hasActiveSlot={activeDropSlot !== null}
                                 onLoadTemplate={handleInsertTemplate}
                                 onDeselect={() => {
@@ -1981,6 +2009,7 @@ export default function VisualEditor({
                             block={activeSlotEdit.slotBlock}
                             placeholders={placeholders}
                             templateCategory={templateCategory}
+                            onClearColumn={() => handleClearSlot(activeSlotEdit.blockId, activeSlotEdit.propKey)}
                             onChange={(updatedSlotBlock) => {
                                 // Apply prop changes back to slot HTML and keep
                                 // activeSlotEdit.slotBlock in sync so the panel

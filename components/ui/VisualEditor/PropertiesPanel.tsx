@@ -39,7 +39,7 @@ import {
     Clock, Share2, ChevronRight, Type, Quote,
     Check, CreditCard, HelpCircle, LayoutTemplate,
     type LucideIcon,
-    Layers, ShoppingCart,
+    Layers, ShoppingCart, Trash2,
 } from 'lucide-react'
 import {
     Block,
@@ -255,6 +255,7 @@ interface PropertiesPanelProps {
     placeholders: PlaceholderGroup[]
     onChange: (updated: Block) => void
     onDeselect: () => void
+    onClearColumn?: () => void
     selectedSubSlot?: string | null
     palette?: string[]
     onPaletteChange?: (palette: string[]) => void
@@ -311,6 +312,7 @@ export default function PropertiesPanel({
     placeholders,
     onChange,
     onDeselect,
+    onClearColumn,
     selectedSubSlot,
     palette = [],
     onPaletteChange,
@@ -466,28 +468,53 @@ export default function PropertiesPanel({
                                 </p>
                             </div>
                         </div>
-                        {/* Deselect */}
-                        <button
-                            onClick={onDeselect}
-                            title="Deselect block"
-                            style={{
-                                width: 24,
-                                height: 24,
-                                borderRadius: 6,
-                                border: `1px solid ${C.border}`,
-                                backgroundColor: 'transparent',
-                                cursor: 'pointer',
-                                color: C.muted,
-                                fontSize: 14,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                padding: 0,
-                                fontFamily: 'DM Sans, sans-serif',
-                            }}
-                        >
-                            ×
-                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            {onClearColumn && (
+                                <button
+                                    onClick={onClearColumn}
+                                    title="Clear this block from the column"
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 4,
+                                        padding: '3px 8px',
+                                        borderRadius: 6,
+                                        border: '1px solid #fecaca',
+                                        backgroundColor: '#fee2e2',
+                                        color: '#ef4444',
+                                        cursor: 'pointer',
+                                        fontFamily: 'DM Sans, sans-serif',
+                                        fontSize: 10,
+                                        fontWeight: 700,
+                                        transition: 'all 0.15s',
+                                    }}
+                                >
+                                    <Trash2 size={11} /> Clear Column
+                                </button>
+                            )}
+                            {/* Deselect */}
+                            <button
+                                onClick={onDeselect}
+                                title="Deselect block"
+                                style={{
+                                    width: 24,
+                                    height: 24,
+                                    borderRadius: 6,
+                                    border: `1px solid ${C.border}`,
+                                    backgroundColor: 'transparent',
+                                    cursor: 'pointer',
+                                    color: C.muted,
+                                    fontSize: 14,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    padding: 0,
+                                    fontFamily: 'DM Sans, sans-serif',
+                                }}
+                            >
+                                ×
+                            </button>
+                        </div>
                     </div>
 
                     {/* eBay compliant badge — reflects THIS block's actual HTML */}
@@ -2163,7 +2190,37 @@ function BlockStyleProps({ block, props, updateProps }: {
         case 'three_column':
             return (
                 <>
-                    <Section title="Layout">
+                    <Section title="Width Ratio Presets">
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 10 }}>
+                            <button
+                                type="button"
+                                onClick={() => updateProps({ customWidths: true, col1Width: 33, col2Width: 34, col3Width: 33 })}
+                                style={{ padding: '6px 4px', borderRadius: 6, border: '1px solid #ede9fe', background: '#f8f7ff', fontSize: 11, fontWeight: 600, color: '#7530fb', cursor: 'pointer' }}
+                            >
+                                33 / 34 / 33 (Equal)
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => updateProps({ customWidths: true, col1Width: 25, col2Width: 50, col3Width: 25 })}
+                                style={{ padding: '6px 4px', borderRadius: 6, border: '1px solid #ede9fe', background: '#f8f7ff', fontSize: 11, fontWeight: 600, color: '#7530fb', cursor: 'pointer' }}
+                            >
+                                25 / 50 / 25 (Center Hero)
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => updateProps({ customWidths: true, col1Width: 50, col2Width: 25, col3Width: 25 })}
+                                style={{ padding: '6px 4px', borderRadius: 6, border: '1px solid #ede9fe', background: '#f8f7ff', fontSize: 11, fontWeight: 600, color: '#7530fb', cursor: 'pointer' }}
+                            >
+                                50 / 25 / 25 (Left Hero)
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => updateProps({ customWidths: true, col1Width: 25, col2Width: 25, col3Width: 50 })}
+                                style={{ padding: '6px 4px', borderRadius: 6, border: '1px solid #ede9fe', background: '#f8f7ff', fontSize: 11, fontWeight: 600, color: '#7530fb', cursor: 'pointer' }}
+                            >
+                                25 / 25 / 50 (Right Hero)
+                            </button>
+                        </div>
                         <SliderInput label="Column gap" value={props.gap ?? 12} min={0} max={48} suffix="px" onChange={v => updateProps({ gap: v })} />
                     </Section>
                     <Section title="Column colours">
@@ -4801,73 +4858,137 @@ function BlockAttributeProps({ block, props, updateProps, phButton, tokenButton,
                 </div>
             )
 
-        case 'two_column':
-            if (block.type === 'two_column' && (selectedSubSlot === 'leftContent' || selectedSubSlot === 'rightContent')) {
-                return (
-                    <Section title={`Column: ${selectedSubSlot === 'leftContent' ? 'Left' : 'Right'}`}>
-                        <TextareaInput
-                            label="Content (HTML)"
-                            value={props[selectedSubSlot] ?? ''}
-                            rows={8}
-                            onChange={v => updateProps({ [selectedSubSlot]: v })}
-                        />
-                        {phButton(selectedSubSlot, selectedSubSlot === 'leftContent' ? 'Left Column' : 'Right Column')}
-                    </Section>
-                )
-            }
-            return (
-                <div style={{ padding: '8px 0' }}>
-                    <InfoBox>
-                        Layout block content is edited directly in the code editor. Switch to <strong>HTML Code Editor</strong> to edit inner content.
-                    </InfoBox>
-                </div>
-            )
+        case 'two_column': {
+            const cols = [
+                { key: 'leftContent', label: 'Left Column' },
+                { key: 'rightContent', label: 'Right Column' },
+            ];
+            const emptyPlaceholder = (slot: string) => `<div data-canvas-dropzone="${slot}" style="width:100%;min-height:80px;background:#f8f8f8;border:1px dashed #ddd;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span class="add-btn" style="font-family:Arial,sans-serif;font-size:13px;color:#6b7280;">+ Add Content</span></div>`;
 
-        case 'three_column':
-            if (selectedSubSlot === 'col1Content' || selectedSubSlot === 'col2Content' || selectedSubSlot === 'col3Content') {
-                const label = selectedSubSlot === 'col1Content' ? 'Column 1' : selectedSubSlot === 'col2Content' ? 'Column 2' : 'Column 3';
-                return (
-                    <Section title={label}>
-                        <TextareaInput
-                            label="Content (HTML)"
-                            value={props[selectedSubSlot] ?? ''}
-                            rows={8}
-                            onChange={v => updateProps({ [selectedSubSlot]: v })}
-                        />
-                        {phButton(selectedSubSlot, label)}
-                    </Section>
-                )
-            }
             return (
-                <div style={{ padding: '8px 0' }}>
-                    <InfoBox>
-                        Layout block content is edited directly in the code editor. Switch to <strong>HTML Code Editor</strong> to edit inner content.
-                    </InfoBox>
-                </div>
-            )
+                <>
+                    <Section title="Column Content Manager">
+                        <InfoBox>Edit column content directly below or click any dropzone on the canvas.</InfoBox>
+                        {cols.map((col, idx) => {
+                            const val = props[col.key] ?? '';
+                            const isPlaceholder = typeof val === 'string' && val.includes('data-canvas-dropzone');
+                            return (
+                                <div key={col.key} style={{ marginTop: 12, padding: '10px 12px', background: C.bg, borderRadius: 8, border: `1px solid ${C.border}` }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                                        <span style={{ fontSize: 11, fontWeight: 700, color: C.dark }}>{col.label}</span>
+                                        {!isPlaceholder && (
+                                            <button
+                                                type="button"
+                                                onClick={() => updateProps({ [col.key]: emptyPlaceholder(col.key) })}
+                                                style={{ border: 'none', background: '#fee2e2', color: '#ef4444', fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, cursor: 'pointer' }}
+                                            >
+                                                Reset to Empty
+                                            </button>
+                                        )}
+                                    </div>
+                                    <TextareaInput
+                                        label=""
+                                        value={val}
+                                        rows={4}
+                                        onChange={v => updateProps({ [col.key]: v })}
+                                    />
+                                    {phButton(col.key, col.label)}
+                                </div>
+                            );
+                        })}
+                    </Section>
+                </>
+            );
+        }
 
-        case 'four_column':
-            if (selectedSubSlot === 'col1Content' || selectedSubSlot === 'col2Content' || selectedSubSlot === 'col3Content' || selectedSubSlot === 'col4Content') {
-                const label = selectedSubSlot === 'col1Content' ? 'Column 1' : selectedSubSlot === 'col2Content' ? 'Column 2' : selectedSubSlot === 'col3Content' ? 'Column 3' : 'Column 4';
-                return (
-                    <Section title={label}>
-                        <TextareaInput
-                            label="Content (HTML)"
-                            value={props[selectedSubSlot] ?? ''}
-                            rows={8}
-                            onChange={v => updateProps({ [selectedSubSlot]: v })}
-                        />
-                        {phButton(selectedSubSlot, label)}
-                    </Section>
-                )
-            }
+        case 'three_column': {
+            const cols = [
+                { key: 'col1Content', label: 'Column 1 (Left)' },
+                { key: 'col2Content', label: 'Column 2 (Center)' },
+                { key: 'col3Content', label: 'Column 3 (Right)' },
+            ];
+            const emptyPlaceholder = (slot: string) => `<div data-canvas-dropzone="${slot}" style="width:100%;min-height:80px;background:#f8f8f8;border:1px dashed #ddd;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span class="add-btn" style="font-family:Arial,sans-serif;font-size:13px;color:#6b7280;">+ Add Content</span></div>`;
+
             return (
-                <div style={{ padding: '8px 0' }}>
-                    <InfoBox>
-                        Layout block content is edited directly in the code editor. Switch to <strong>HTML Code Editor</strong> to edit inner content.
-                    </InfoBox>
-                </div>
-            )
+                <>
+                    <Section title="Three Column Manager">
+                        <InfoBox>Edit content for each column below or click any dropzone on the canvas.</InfoBox>
+                        {cols.map((col, idx) => {
+                            const val = props[col.key] ?? '';
+                            const isPlaceholder = typeof val === 'string' && val.includes('data-canvas-dropzone');
+                            return (
+                                <div key={col.key} style={{ marginTop: 12, padding: '10px 12px', background: C.bg, borderRadius: 8, border: `1px solid ${C.border}` }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                                        <span style={{ fontSize: 11, fontWeight: 700, color: C.dark }}>{col.label}</span>
+                                        {!isPlaceholder && (
+                                            <button
+                                                type="button"
+                                                onClick={() => updateProps({ [col.key]: emptyPlaceholder(col.key) })}
+                                                style={{ border: 'none', background: '#fee2e2', color: '#ef4444', fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, cursor: 'pointer' }}
+                                            >
+                                                Reset to Empty
+                                            </button>
+                                        )}
+                                    </div>
+                                    <TextareaInput
+                                        label=""
+                                        value={val}
+                                        rows={4}
+                                        onChange={v => updateProps({ [col.key]: v })}
+                                    />
+                                    {phButton(col.key, col.label)}
+                                </div>
+                            );
+                        })}
+                    </Section>
+                </>
+            );
+        }
+
+        case 'four_column': {
+            const cols = [
+                { key: 'col1Content', label: 'Column 1' },
+                { key: 'col2Content', label: 'Column 2' },
+                { key: 'col3Content', label: 'Column 3' },
+                { key: 'col4Content', label: 'Column 4' },
+            ];
+            const emptyPlaceholder = (slot: string) => `<div data-canvas-dropzone="${slot}" style="width:100%;min-height:80px;background:#f8f8f8;border:1px dashed #ddd;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span class="add-btn" style="font-family:Arial,sans-serif;font-size:13px;color:#6b7280;">+ Add Content</span></div>`;
+
+            return (
+                <>
+                    <Section title="Four Column Manager">
+                        <InfoBox>Manage each column below or click dropzones on the canvas.</InfoBox>
+                        {cols.map((col, idx) => {
+                            const val = props[col.key] ?? '';
+                            const isPlaceholder = typeof val === 'string' && val.includes('data-canvas-dropzone');
+                            return (
+                                <div key={col.key} style={{ marginTop: 12, padding: '10px 12px', background: C.bg, borderRadius: 8, border: `1px solid ${C.border}` }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                                        <span style={{ fontSize: 11, fontWeight: 700, color: C.dark }}>{col.label}</span>
+                                        {!isPlaceholder && (
+                                            <button
+                                                type="button"
+                                                onClick={() => updateProps({ [col.key]: emptyPlaceholder(col.key) })}
+                                                style={{ border: 'none', background: '#fee2e2', color: '#ef4444', fontSize: 10, fontWeight: 600, padding: '2px 6px', borderRadius: 4, cursor: 'pointer' }}
+                                            >
+                                                Reset to Empty
+                                            </button>
+                                        )}
+                                    </div>
+                                    <TextareaInput
+                                        label=""
+                                        value={val}
+                                        rows={3}
+                                        onChange={v => updateProps({ [col.key]: v })}
+                                    />
+                                    {phButton(col.key, col.label)}
+                                </div>
+                            );
+                        })}
+                    </Section>
+                </>
+            );
+        }
 
         case 'sidebar_layout':
             if (selectedSubSlot === 'leftImage' || selectedSubSlot === null) {

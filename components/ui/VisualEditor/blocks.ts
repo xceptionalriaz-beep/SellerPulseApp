@@ -1496,11 +1496,12 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
           </td>
         </tr>
             `).join('')
+            const stackClass = pa.stackMobile === false ? '' : ' class="mobile-stack"'
             return wrapBlock('two_column', id,
                 `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" class="mobile-stack"${contStyle ? ` style="${contStyle}"` : ''}>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"${stackClass}${contStyle ? ` style="${contStyle}"` : ''}>
         ${rowsHtml}
       </table>
     </td>
@@ -1569,11 +1570,12 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
           <td width="${w3}%" valign="${valign3}" style="padding-left:${p.gap / 2}px;${cp3}${cr3}${cb3}${mh3}background-color:${pa3.col3Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col3Content}</td>
         </tr>
             `).join('')
+            const stackClass3 = pa3.stackMobile === false ? '' : ' class="mobile-stack"'
             return wrapBlock('three_column', id,
                 `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" class="mobile-stack"${contStyle3 ? ` style="${contStyle3}"` : ''}>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"${stackClass3}${contStyle3 ? ` style="${contStyle3}"` : ''}>
         ${rowsHtml}
       </table>
     </td>
@@ -2691,11 +2693,16 @@ ${thumbCells}
           <td width="${fw4}%" valign="${valign4}" style="padding-left:${g}px;${cp44}${cr44}${cb44}${mh44}background-color:${pa4.col4Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col4Content}</td>
         </tr>
                 `).join('')
+                const stackClass4 = pa4.stackTo2
+                    ? ' class="mobile-grid-2x2"'
+                    : pa4.stackTo1 || pa4.stackMobile !== false
+                        ? ' class="mobile-stack"'
+                        : ''
                 return wrapBlock('four_column' as BlockType, id,
                     `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" class="mobile-stack"${contStyle4 ? ` style="${contStyle4}"` : ''}>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"${stackClass4}${contStyle4 ? ` style="${contStyle4}"` : ''}>
         ${rowsHtml}
       </table>
     </td>
@@ -4608,6 +4615,8 @@ export function assembleDocument(blocks: Block[], settings: CanvasSettings = DEF
       td[class="block-pad"] { padding-left: ${Math.round(16 * (settings.mobilePaddingScale ?? 80) / 100)}px !important; padding-right: ${Math.round(16 * (settings.mobilePaddingScale ?? 80) / 100)}px !important; }
       .mobile-stack td { display: block !important; width: 100% !important; box-sizing: border-box !important; padding-left: 0 !important; padding-right: 0 !important; }
       .mobile-stack td img { width: 100% !important; max-width: 100% !important; height: auto !important; }
+      .mobile-grid-2x2 td { display: inline-block !important; width: 50% !important; box-sizing: border-box !important; vertical-align: top !important; }
+      .mobile-grid-2x2 td img { width: 100% !important; height: auto !important; }
     }
   </style>
 </head>

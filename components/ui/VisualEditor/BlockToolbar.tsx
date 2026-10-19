@@ -15,7 +15,7 @@ import {
     Link, Quote, Eraser, Highlighter,
     AlertCircle, AlertTriangle, CheckCircle,
     Store, Search, Package, Anchor,
-    RefreshCw, Trash2, ChevronDown, Check, Type,
+    ChevronDown, Check, Type,
 } from 'lucide-react'
 import { FONT_REGISTRY, loadFont, getFontStack, type FontCategory } from './fonts'
 import { ProBadge } from './ProBadge'
@@ -160,7 +160,6 @@ export default function BlockToolbar({
     const [showLinkModal, setShowLinkModal] = useState(false)
     const [linkInput, setLinkInput] = useState('')
     const [linkError, setLinkError] = useState<string | null>(null)
-    const [replaceActive, setReplaceActive] = useState(false)
     const [showRedirectTooltip, setShowRedirectTooltip] = useState(false)
     const [showHighlightPicker, setShowHighlightPicker] = useState(false)
     const highlightRef = useRef<HTMLDivElement>(null)
@@ -259,9 +258,6 @@ export default function BlockToolbar({
     }, [slotEdit?.currentHtml])
 
     const activeProps = slotEdit ? { ...safeProps, ...slotDerivedProps } : safeProps
-
-    // Reset replace mode when slot changes
-    useEffect(() => { setReplaceActive(false) }, [slotEdit?.propKey])
 
     // ── ALL HOOKS MUST COME BEFORE ANY EARLY RETURN ──────────────────────────
 
@@ -514,34 +510,7 @@ export default function BlockToolbar({
                             </span>
                         </span>
                     )}
-                    <button
-                        onClick={() => { setReplaceActive(true); onReplaceSlot?.() }}
-                        title="Replace slot content"
-                        style={{
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            width: 28, height: 28,
-                            border: replaceActive ? '1px solid #7530fb' : '1px solid #e2e8f0',
-                            borderRadius: 6,
-                            backgroundColor: replaceActive ? '#f3eeff' : '#fff',
-                            color: replaceActive ? '#7530fb' : '#1e1535',
-                            cursor: 'pointer', flexShrink: 0,
-                        }}
-                    >
-                        <RefreshCw size={13} />
-                    </button>
-                    <button
-                        onClick={() => onClearSlot?.(slotEdit.blockId, slotEdit.propKey)}
-                        title="Clear slot"
-                        style={{
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            width: 28, height: 28, border: '1px solid #fecaca',
-                            borderRadius: 6, backgroundColor: '#fff8f8',
-                            color: '#ef4444', cursor: 'pointer', flexShrink: 0,
-                        }}
-                    >
-                        <Trash2 size={13} />
-                    </button>
-                    <div style={{ width: 1, height: 20, backgroundColor: '#e2e8f0', flexShrink: 0 }} />
+                    <div style={{ width: 1, height: 20, backgroundColor: '#e2e8f0', flexShrink: 0, margin: '0 4px' }} />
                 </>
             )}
             {/* ── 100+ Searchable Font Dropdown ── */}
