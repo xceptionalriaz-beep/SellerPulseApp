@@ -179,20 +179,27 @@ export default function ColumnControls({ block, onUpdateProps, isFirst = false }
 
     // ── 8. Add Another Row of Columns ──
     const addRow = () => {
+        const currentCount = props.rowCount ?? (Array.isArray(props.rows) ? props.rows.length : 1)
+        const nextCount = currentCount + 1
         const emptySlot = (slot: string) => `<div data-canvas-dropzone="${slot}" style="width:100%;min-height:80px;background:#f8f8f8;border:1px dashed #ddd;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span class="add-btn" style="font-family:Arial,sans-serif;font-size:13px;color:#6b7280;">+ Add Content</span></div>`
-        const currentRows = Array.isArray(props.rows) && props.rows.length > 0
-            ? [...props.rows]
-            : [isTwo ? { leftContent: props.leftContent, rightContent: props.rightContent }
-                : isThree ? { col1Content: props.col1Content, col2Content: props.col2Content, col3Content: props.col3Content }
-                    : { col1Content: props.col1Content, col2Content: props.col2Content, col3Content: props.col3Content, col4Content: props.col4Content }]
 
-        const newRow = isTwo
-            ? { leftContent: emptySlot('leftContent'), rightContent: emptySlot('rightContent') }
-            : isThree
-                ? { col1Content: emptySlot('col1Content'), col2Content: emptySlot('col2Content'), col3Content: emptySlot('col3Content') }
-                : { col1Content: emptySlot('col1Content'), col2Content: emptySlot('col2Content'), col3Content: emptySlot('col3Content'), col4Content: emptySlot('col4Content') }
-
-        onUpdateProps({ rows: [...currentRows, newRow] })
+        const newPatch: Record<string, any> = { rowCount: nextCount, rows: undefined }
+        if (isThree) {
+            const start = (nextCount - 1) * 3 + 1
+            newPatch[`col${start}Content`] = emptySlot(`col${start}Content`)
+            newPatch[`col${start + 1}Content`] = emptySlot(`col${start + 1}Content`)
+            newPatch[`col${start + 2}Content`] = emptySlot(`col${start + 2}Content`)
+        } else if (isTwo) {
+            const start = (nextCount - 1) * 2 + 1
+            newPatch[`col${start}Content`] = emptySlot(`col${start}Content`)
+            newPatch[`col${start + 1}Content`] = emptySlot(`col${start + 1}Content`)
+        } else if (isFour) {
+            const start = (nextCount - 1) * 4 + 1
+            for (let i = 0; i < 4; i++) {
+                newPatch[`col${start + i}Content`] = emptySlot(`col${start + i}Content`)
+            }
+        }
+        onUpdateProps(newPatch)
     }
 
     return (

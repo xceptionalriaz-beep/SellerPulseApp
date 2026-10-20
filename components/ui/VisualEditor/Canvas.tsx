@@ -845,7 +845,18 @@ function BlockCard({
                     if (selectedSubSlot === 'leftContent') posStyle = { top: 10, left: 12 };
                     else posStyle = { top: 10, left: 'calc(50% + 8px)' };
                 } else if (block.type === 'three_column') {
-                    if (selectedSubSlot === 'col1Content') posStyle = { top: 10, left: 12 };
+                    const m = selectedSubSlot.match(/col(\d+)Content/);
+                    if (m) {
+                        const num = parseInt(m[1], 10);
+                        const r = Math.floor((num - 1) / 3);
+                        const c = (num - 1) % 3;
+                        const totalRows = (block.props as any).rowCount ?? 2;
+                        const rowPercent = totalRows > 1 ? (100 / totalRows) * r : 0;
+                        posStyle = {
+                            top: r > 0 ? `calc(${rowPercent}% + 10px)` : 10,
+                            left: c === 0 ? 12 : c === 1 ? 'calc(33.33% + 8px)' : 'calc(66.66% + 8px)',
+                        };
+                    } else if (selectedSubSlot === 'col1Content') posStyle = { top: 10, left: 12 };
                     else if (selectedSubSlot === 'col2Content') posStyle = { top: 10, left: 'calc(33.33% + 8px)' };
                     else posStyle = { top: 10, left: 'calc(66.66% + 8px)' };
                 } else if (block.type === 'four_column') {
