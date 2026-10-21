@@ -1742,7 +1742,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
     {
         type: 'product_title',
         label: 'Product Title',
-        category: 'Product',
+        category: 'Content',
         icon: 'tag',
         description: 'Main product title with condition badge',
         defaultProps: {
@@ -1903,7 +1903,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
     {
         type: 'product_description',
         label: 'Product Description',
-        category: 'Product',
+        category: 'Content',
         icon: 'file-text',
         description: 'Full product description section',
         defaultProps: {
@@ -1939,7 +1939,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
     {
         type: 'specs_table',
         label: 'Specs Table',
-        category: 'Product',
+        category: 'Content',
         icon: 'table',
         description: 'Item specifics / specs table',
         defaultProps: {
@@ -3047,7 +3047,7 @@ ${thumbCells}
         {
             type: 'product_variants' as BlockType,
             label: 'Product Variants',
-            category: 'Product' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'layout-grid',
             description: 'Colour swatches and size options — 10 layout styles',
             defaultProps: {
@@ -3090,7 +3090,7 @@ ${thumbCells}
         {
             type: 'compatibility_table' as BlockType,
             label: 'Compatibility Table',
-            category: 'Product' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'check',
             description: 'Compatible models list — 10 layout styles',
             defaultProps: {
@@ -3118,7 +3118,7 @@ ${thumbCells}
         {
             type: 'condition_details' as BlockType,
             label: 'Condition Details',
-            category: 'Product' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'star',
             description: 'Graded condition explanation block — 10 layout styles',
             defaultProps: {
@@ -3144,7 +3144,7 @@ ${thumbCells}
         {
             type: 'whats_in_the_box' as BlockType,
             label: "What's In The Box",
-            category: 'Product' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'package',
             description: 'Checklist of included items',
             defaultProps: {
@@ -3170,7 +3170,7 @@ ${thumbCells}
         {
             type: 'key_features_grid' as BlockType,
             label: 'Key Features Grid',
-            category: 'Product' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'grid',
             description: 'Core specifications and feature highlights — 10 layout styles',
             defaultProps: {
@@ -3203,7 +3203,7 @@ ${thumbCells}
         {
             type: 'product_comparison' as BlockType,
             label: 'Product Comparison',
-            category: 'Product' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'table',
             description: 'This vs competitors comparison table — 10 layout styles',
             defaultProps: {
