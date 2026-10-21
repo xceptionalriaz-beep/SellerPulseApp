@@ -516,12 +516,11 @@ function avatarRatingCards(p: any, id: string): string {
 // ─────────────────────────────────────────────────────────────────────────────
 // 6. DARK LUXURY  [PRO]  — now: REVIEW ANALYTICS DASHBOARD
 // Header row: section title (left) + date range (right).
-// Stats panel (3 columns): Total Reviews + growth badge | Average Rating + stars
-// | Coloured mini rating-distribution bar chart.
+// Stats panel (stacked rows for mobile): Total Reviews + growth badge |
+// Average Rating + stars | Coloured mini rating-distribution bar chart.
 // Below: Stacked reviewer rows — square initials avatar, name, "Total Spend" +
-// "Total Review" meta, star row + date right-aligned, review text, then
-// decorative "Public Comment" / "Direct Message" outline buttons (no links,
-// 100% eBay safe — purely visual).
+// "Total Review" meta, stars + date, review text. No action buttons.
+// Fully mobile-safe: no fixed widths on outer columns, no right-float rows.
 // ─────────────────────────────────────────────────────────────────────────────
 function darkLuxury(p: any, id: string): string {
   const bg        = resolveBg(p, '#ffffff')
@@ -547,28 +546,28 @@ function darkLuxury(p: any, id: string): string {
   const maxCount = Math.max(...ratingCounts, 1)
   const fmtCount = (n: number) => n >= 1000 ? (n / 1000).toFixed(1).replace('.0', '') + 'k' : String(n)
 
-  // Coloured bar palette matching the screenshot
+  // Coloured bar palette
   const barColors = ['#22c55e', '#3b82f6', '#eab308', '#f97316', '#ef4444']
 
-  // Pre-build mini bar rows for the 3rd stats column
+  // Bar chart rows — bars use percentage width so they scale on any screen
   const miniBarRows = [5, 4, 3, 2, 1].map((star, i) => {
     const count = ratingCounts[5 - star] ?? 0
     const pct   = Math.max(Math.round((count / maxCount) * 100), 3)
     return `
     <tr>
-      <td style="padding:2px 5px 2px 0;white-space:nowrap;vertical-align:middle;">
-        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:9px;color:${subCol};line-height:1;">${star}</p>
+      <td width="14" style="width:14px;padding:3px 6px 3px 0;white-space:nowrap;vertical-align:middle;">
+        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};line-height:1;">${star}★</p>
       </td>
-      <td style="padding:2px 6px 2px 0;vertical-align:middle;">
-        <table width="72" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:72px;background-color:${borderCol};border-radius:99px;height:5px;">
+      <td style="padding:3px 8px 3px 0;vertical-align:middle;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;background-color:${borderCol};border-radius:99px;height:6px;">
           <tr>
-            <td width="${pct}%" style="width:${pct}%;background-color:${barColors[i]};border-radius:99px;height:5px;font-size:0;line-height:0;">&nbsp;</td>
-            <td style="height:5px;font-size:0;line-height:0;">&nbsp;</td>
+            <td width="${pct}%" style="width:${pct}%;background-color:${barColors[i]};border-radius:99px;height:6px;font-size:0;line-height:0;">&nbsp;</td>
+            <td style="height:6px;font-size:0;line-height:0;">&nbsp;</td>
           </tr>
         </table>
       </td>
-      <td style="padding:2px 0;white-space:nowrap;vertical-align:middle;">
-        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:9px;color:${subCol};line-height:1;">${fmtCount(count)}</p>
+      <td width="30" style="width:30px;padding:3px 0;white-space:nowrap;vertical-align:middle;text-align:right;">
+        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};line-height:1;">${fmtCount(count)}</p>
       </td>
     </tr>`
   }).join('')
@@ -576,75 +575,50 @@ function darkLuxury(p: any, id: string): string {
   // Avatar colour palette
   const avatarPalette = [accent, '#16a34a', '#0ea5e9', '#f59e0b', '#8b5cf6', '#ef4444']
 
-  // Stacked review rows
+  // Stacked review rows — no right-float column, no action buttons
   const reviewRows = reviews.slice(0, 4).map((r: ReviewItem, i: number) => {
-    const name      = r.author ?? r.name ?? 'Verified Buyer'
-    const quote     = r.text ?? r.quote ?? ''
-    const date      = r.date ?? 'Verified eBay Purchase'
-    const rating    = r.rating ?? 5
-    const ini       = initials(name)
-    const spend     = (r as any).spend       ?? '$200'
-    const revCount  = (r as any).reviewCount ?? '14'
-    const avatarBg  = avatarPalette[i % avatarPalette.length]
-    const heartCol  = rating >= 4 ? accent : borderCol
+    const name     = r.author ?? r.name ?? 'Verified Buyer'
+    const quote    = r.text ?? r.quote ?? ''
+    const date     = r.date ?? 'Verified eBay Purchase'
+    const rating   = r.rating ?? 5
+    const ini      = initials(name)
+    const spend    = (r as any).spend       ?? '$200'
+    const revCount = (r as any).reviewCount ?? '14'
+    const avatarBg = avatarPalette[i % avatarPalette.length]
+    const topPad   = i > 0 ? 'padding-top:20px;border-top:1px solid ' + borderCol + ';' : ''
 
     return `
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;${i > 0 ? `border-top:1px solid ${borderCol};margin-top:0;padding-top:20px;` : 'padding-bottom:20px;'}${i > 0 ? 'padding-bottom:20px;' : ''}">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;${topPad}padding-bottom:20px;">
       <tr>
-        <!-- Square initials avatar -->
-        <td width="58" valign="top" style="width:58px;vertical-align:top;padding-top:${i > 0 ? '20px' : '0'};">
-          <table width="50" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:50px;height:50px;background-color:${avatarBg};border-radius:8px;">
+        <!-- Square initials avatar — fixed 48px, won't shrink on mobile -->
+        <td width="48" valign="top" style="width:48px;min-width:48px;vertical-align:top;">
+          <table width="48" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:48px;height:48px;background-color:${avatarBg};border-radius:8px;">
             <tr>
-              <td align="center" style="text-align:center;vertical-align:middle;width:50px;height:50px;">
-                <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:17px;font-weight:700;color:#ffffff;line-height:50px;">${ini}</p>
+              <td align="center" style="text-align:center;vertical-align:middle;width:48px;height:48px;">
+                <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;color:#ffffff;line-height:48px;">${ini}</p>
               </td>
             </tr>
           </table>
         </td>
-        <!-- Review body -->
-        <td valign="top" style="vertical-align:top;padding-left:14px;padding-top:${i > 0 ? '20px' : '0'};">
-          <!-- Name row + stars/date right -->
-          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:10px;">
+        <!-- Review body — takes remaining width, wraps naturally on mobile -->
+        <td valign="top" style="vertical-align:top;padding-left:14px;">
+          <!-- Name bold -->
+          <p style="margin:0 0 3px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${textCol};line-height:1.3;">${name}</p>
+          <!-- Spend + Review count on one line, separated by bullet -->
+          <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:${subCol};">Total Spend: ${spend}&nbsp;&nbsp;·&nbsp;&nbsp;Total Review: ${revCount}</p>
+          <!-- Stars + date on same line (stars left, date right) using a simple inline layout -->
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:8px;">
             <tr>
-              <td valign="top" style="vertical-align:top;">
-                <p style="margin:0 0 2px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${textCol};">${name}</p>
-                <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:${subCol};">Total Spend: ${spend}</p>
-                <p style="margin:1px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:${subCol};">Total Review: ${revCount}</p>
+              <td valign="middle" style="vertical-align:middle;">
+                ${stars(rating, starCol, 13)}
               </td>
-              <td align="right" valign="top" style="text-align:right;vertical-align:top;white-space:nowrap;padding-left:12px;">
-                <p style="margin:0 0 3px;">${stars(rating, starCol, 13)}</p>
-                <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:${subCol};">${date}</p>
+              <td align="right" valign="middle" style="text-align:right;vertical-align:middle;padding-left:8px;">
+                <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};white-space:nowrap;">${date}</p>
               </td>
             </tr>
           </table>
-          <!-- Review text -->
-          <p style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${subCol};line-height:1.75;">${quote}</p>
-          <!-- Decorative action buttons (visual only — no links, 100% eBay safe) -->
-          <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
-            <tr>
-              <td style="padding-right:8px;">
-                <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid ${borderCol};border-radius:6px;">
-                  <tr><td style="padding:6px 16px;">
-                    <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:${textCol};white-space:nowrap;">Public Comment</p>
-                  </td></tr>
-                </table>
-              </td>
-              <td style="padding-right:8px;">
-                <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid ${borderCol};border-radius:6px;">
-                  <tr><td style="padding:6px 16px;">
-                    <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:${textCol};white-space:nowrap;">Direct Message</p>
-                  </td></tr>
-                </table>
-              </td>
-              <td>
-                <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:30px;height:30px;border:1px solid ${borderCol};border-radius:6px;">
-                  <tr><td align="center" style="text-align:center;vertical-align:middle;">
-                    <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:${heartCol};">&#9825;</p>
-                  </td></tr>
-                </table>
-              </td>
-            </tr>
-          </table>
+          <!-- Review text — wraps naturally, no overflow -->
+          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${subCol};line-height:1.75;word-break:break-word;">${quote}</p>
         </td>
       </tr>
     </table>`
@@ -653,57 +627,62 @@ function darkLuxury(p: any, id: string): string {
   return outerWrap(id, `
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${bg};">
   <tr>
-    <td style="${pad(p, 24, 20, 20, 20)}box-sizing:border-box;">
+    <td style="${pad(p, 20, 16, 16, 16)}box-sizing:border-box;">
 
-      <!-- HEADER: title left, date range right -->
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:16px;">
+      <!-- HEADER: title left, date range right — both wrap gracefully -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:14px;">
         <tr>
           <td valign="middle" style="vertical-align:middle;">
-            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:800;color:${textCol};">${sectionTitle}</p>
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:800;color:${textCol};">${sectionTitle}</p>
           </td>
-          <td align="right" valign="middle" style="text-align:right;vertical-align:middle;white-space:nowrap;padding-left:12px;">
-            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:${subCol};">${dateRange}</p>
+          <td align="right" valign="middle" style="text-align:right;vertical-align:middle;padding-left:10px;">
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};">${dateRange}</p>
           </td>
         </tr>
       </table>
 
-      <!-- STATS PANEL: 3 columns -->
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:#f9fafb;border:1px solid ${borderCol};border-radius:10px;margin-bottom:22px;">
+      <!-- STATS PANEL: 3 stacked rows — works perfectly on any screen width -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:#f9fafb;border:1px solid ${borderCol};border-radius:10px;margin-bottom:20px;">
+        <!-- Row 1: Total Reviews -->
         <tr>
-          <!-- Col 1: Total Reviews + growth -->
-          <td width="34%" valign="middle" style="width:34%;padding:18px 20px;vertical-align:middle;border-right:1px solid ${borderCol};box-sizing:border-box;">
-            <p style="margin:0 0 5px;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:600;color:${subCol};">Total Reviews</p>
-            <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:5px;">
+          <td style="padding:14px 16px;border-bottom:1px solid ${borderCol};">
+            <p style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:600;color:${subCol};text-transform:uppercase;letter-spacing:0.04em;">Total Reviews</p>
+            <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
               <tr>
-                <td valign="baseline" style="padding-right:8px;">
-                  <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:28px;font-weight:800;color:${textCol};line-height:1;">${totalReviews}</p>
+                <td valign="middle" style="padding-right:8px;">
+                  <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:26px;font-weight:800;color:${textCol};line-height:1;">${totalReviews}</p>
                 </td>
-                <td valign="baseline">
+                <td valign="middle">
                   <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:#dcfce7;border-radius:4px;">
-                    <tr><td style="padding:3px 7px;">
+                    <tr><td style="padding:3px 8px;">
                       <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:#16a34a;white-space:nowrap;">${reviewGrowth} &#x2197;</p>
                     </td></tr>
                   </table>
                 </td>
               </tr>
             </table>
-            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};">Growth in reviews on this year</p>
+            <p style="margin:4px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};">Growth in reviews this year</p>
           </td>
-          <!-- Col 2: Average Rating + stars -->
-          <td width="32%" valign="middle" style="width:32%;padding:18px 20px;vertical-align:middle;border-right:1px solid ${borderCol};box-sizing:border-box;">
-            <p style="margin:0 0 5px;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:600;color:${subCol};">Average Rating</p>
-            <p style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:28px;font-weight:800;color:${textCol};line-height:1;">${avgStr}</p>
-            <p style="margin:0 0 5px;">${stars(Math.round(avg), starCol, 15)}</p>
-            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};">Average rating on this year</p>
+        </tr>
+        <!-- Row 2: Average Rating -->
+        <tr>
+          <td style="padding:14px 16px;border-bottom:1px solid ${borderCol};">
+            <p style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:600;color:${subCol};text-transform:uppercase;letter-spacing:0.04em;">Average Rating</p>
+            <p style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:26px;font-weight:800;color:${textCol};line-height:1;">${avgStr}</p>
+            <p style="margin:0 0 4px;">${stars(Math.round(avg), starCol, 14)}</p>
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};">Average rating this year</p>
           </td>
-          <!-- Col 3: Coloured rating distribution bars -->
-          <td valign="middle" style="vertical-align:middle;padding:18px 20px;box-sizing:border-box;">
-            <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">${miniBarRows}</table>
+        </tr>
+        <!-- Row 3: Rating breakdown bars — bars fill full cell width, mobile-friendly -->
+        <tr>
+          <td style="padding:14px 16px;">
+            <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:600;color:${subCol};text-transform:uppercase;letter-spacing:0.04em;">Rating Breakdown</p>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">${miniBarRows}</table>
           </td>
         </tr>
       </table>
 
-      <!-- REVIEW ROWS: stacked with avatar, meta, text, action buttons -->
+      <!-- REVIEW ROWS: avatar + stacked content, no right-float column -->
       ${reviewRows}
 
     </td>
