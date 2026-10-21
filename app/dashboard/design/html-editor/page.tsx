@@ -3,6 +3,7 @@
 // Riazify — HTML Template Editor Studio
 
 import { useState, useRef, useEffect, Suspense } from 'react'
+// NOTE: HtmlEditorInner is also used via HtmlEditorPanel for the Visual Editor modal.
 import { useSearchParams, useRouter } from 'next/navigation'
 // next/link removed — using router.push instead
 import {
