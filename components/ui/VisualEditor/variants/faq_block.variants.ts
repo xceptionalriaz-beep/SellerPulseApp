@@ -1,24 +1,23 @@
 // components/ui/VisualEditor/variants/faq_block.variants.ts
 // ─────────────────────────────────────────────────────────────────────────────
-// FAQ Section — 12 High-Converting, Professional eBay Retail Variants
-// Engineered for eBay listing templates to answer buyer doubts before they leave,
-// eliminate repetitive messages, set clear return/warranty expectations,
-// and guarantee 100% compliant, JS-free table rendering across all devices.
+// FAQ Section — 12 Professional eBay Listing Variants
 //
-// Focus: Clean typography, durable table-based HTML, zero AI-slop, zero glassy filters.
+// Design philosophy: Clear typographic hierarchy, generous spacing, purposeful
+// colour. Every variant has a reason to exist. None look like AI-generated
+// templates. All are 100% eBay-compliant — table-based HTML, zero JavaScript.
 //
-// 1.  faq-classic-stacked         — Current clean question bars with white answer section (KEPT 100% SAME)
-// 2.  faq-boxed-cards-grid        — Independent crisp white cards with subtle borders & Q chip
-// 3.  faq-accent-rail-left        — 3.5px solid vertical accent rail flanking each question
-// 4.  faq-numbered-circle-steps   — Prominent numbered circular badges (01, 02, 03) for high readability
-// 5.  faq-split-speech-bubbles    — Two-tone conversational Q&A bubbles with distinct visual hierarchy
-// 6.  faq-minimalist-hairline-rule— High-end Scandinavian zero-fill design with delicate hairline dividers
-// 7.  faq-industrial-technical-ledger — Gunmetal & amber fitment ledger for auto parts, tools & hardware
-// 8.  faq-luxury-serif-editorial  — Roman serif typography with gold hairlines for watches & luxury goods
-// 9.  faq-verified-trust-shield   — Verified buyer protection callouts with green reassurance badges
-// 10. faq-compact-mobile-accordion— Mobile-first compact row ribbon with minimal vertical footprint
-// 11. faq-clean-chevron-accordion — Classic ▶ chevron rows, white answer area, open-state styling
-// 12. faq-dark-toggle-accordion   — Dark header bars with ▼ chevron, high-contrast open answers
+// 1.  faq-classic-stacked         — Professional stacked list with left accent rail
+// 2.  faq-boxed-cards-grid        — Numbered answer cards with clean borders
+// 3.  faq-accent-rail-left        — Full accordion-open style, most asked variant
+// 4.  faq-numbered-circle-steps   — Two-column policy grid (Q left, A right)
+// 5.  faq-split-speech-bubbles    — Dark premium cards on navy background
+// 6.  faq-minimalist-hairline-rule— Apple-style minimal typography, hairline dividers
+// 7.  faq-industrial-technical-ledger — Gunmetal & amber ledger for auto/tools
+// 8.  faq-luxury-serif-editorial  — Serif ivory card with gold accent for luxury goods
+// 9.  faq-verified-trust-shield   — Green trust badges for returns & warranty focus
+// 10. faq-compact-mobile-accordion— Alternating stripe rows, mobile-optimised
+// 11. faq-clean-chevron-accordion — ▼ chevron badge open accordion (professional)
+// 12. faq-dark-toggle-accordion   — Dark header bars with purple accent, high contrast
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface BlockVariant {
@@ -35,499 +34,518 @@ export interface FaqItem {
   answer: string
 }
 
-// ── Shared Helpers & Dynamic Resolvers ─────────────────────────────────────
+// ── Shared Helpers ─────────────────────────────────────────────────────────
 
-function pad(p: any, defaultT = 16, defaultR = 24, defaultB = 16, defaultL = 24): string {
-  const top = p.paddingTop ?? defaultT
-  const right = p.paddingRight ?? defaultR
-  const bottom = p.paddingBottom ?? defaultB
-  const left = p.paddingLeft ?? defaultL
-  return `padding:${top}px ${right}px ${bottom}px ${left}px;`
+function pad(p: any, dT = 20, dR = 24, dB = 20, dL = 24): string {
+  return `padding:${p.paddingTop ?? dT}px ${p.paddingRight ?? dR}px ${p.paddingBottom ?? dB}px ${p.paddingLeft ?? dL}px;`
 }
 
-function resolveBg(p: any, fallback = '#ffffff'): string {
-  return p.bgColor ?? fallback
-}
-
-function resolveQuestionBg(p: any, fallback = '#f8f7ff'): string {
-  return p.questionBg ?? fallback
-}
-
-function resolveQuestionCol(p: any, fallback = '#1e1535'): string {
-  return p.questionColor ?? p.color ?? fallback
-}
-
-function resolveAnswerCol(p: any, fallback = '#374151'): string {
-  return p.answerColor ?? fallback
-}
-
-function resolveAccentCol(p: any, fallback = '#7530fb'): string {
-  return p.accentColor ?? p.chevronColor ?? fallback
-}
-
-function resolveBorderCol(p: any, fallback = '#ede9fe'): string {
-  return p.borderColor ?? fallback
-}
+function resolveBg(p: any, fallback = '#ffffff'): string { return p.bgColor ?? fallback }
+function resolveQCol(p: any, fallback = '#111827'): string { return p.questionColor ?? p.color ?? fallback }
+function resolveACol(p: any, fallback = '#4b5563'): string { return p.answerColor ?? fallback }
+function resolveAccent(p: any, fallback = '#7530fb'): string { return p.accentColor ?? p.chevronColor ?? fallback }
+function resolveBorder(p: any, fallback = '#e5e7eb'): string { return p.borderColor ?? fallback }
 
 const DEFAULT_FAQ_ITEMS: FaqItem[] = [
-  { id: '1', question: 'What is the warranty?', answer: 'All items come with a 30-day money back guarantee.' },
-  { id: '2', question: 'How long does shipping take?', answer: 'Most orders ship within 24 hours.' },
-  { id: '3', question: 'Do you accept returns?', answer: 'Yes, we accept returns within 30 days.' },
+  { id: '1', question: 'What is the warranty on this item?', answer: 'All items come with a 30-day money back guarantee. If you are not fully satisfied, contact us and we will make it right.' },
+  { id: '2', question: 'How long does shipping take?', answer: 'Most orders ship within 24 hours. Standard delivery typically takes 3–5 business days after dispatch.' },
+  { id: '3', question: 'Do you accept returns?', answer: 'Yes, we accept returns within 30 days of delivery. Items must be in original condition. Return shipping is on us.' },
 ]
 
 function resolveItems(p: any): FaqItem[] {
-  // PropertiesPanel saves to p.faqs — check that first, then p.items, then defaults
   if (Array.isArray(p.faqs) && p.faqs.length > 0) return p.faqs
   if (Array.isArray(p.items) && p.items.length > 0) return p.items
   return DEFAULT_FAQ_ITEMS
 }
 
+// Outer wrapper identical across all variants — eBay-safe, 100% width
+function outerWrap(id: string, inner: string): string {
+  return `<!--[riazify:faq_block:${id}]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;">
+  <tr><td>${inner}</td></tr>
+</table>`
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
-// 1. CLASSIC STACKED — Clean professional Q&A list with section heading
+// 1. PROFESSIONAL STACKED
+// White background. "FREQUENTLY ASKED QUESTIONS" eyebrow in accent caps.
+// Each item: 3 px purple left rail, bold question, grey answer. Hairline rule.
+// The professional default every general seller should use.
 // ─────────────────────────────────────────────────────────────────────────────
 function classicStacked(p: any, id: string): string {
-  const bgCol = resolveBg(p, '#ffffff')
-  const qCol = resolveQuestionCol(p, '#111827')
-  const aCol = resolveAnswerCol(p, '#4b5563')
-  const accent = resolveAccentCol(p, '#7530fb')
-  const borderCol = resolveBorderCol(p, '#e5e7eb')
+  const bg = resolveBg(p, '#ffffff')
+  const qCol = resolveQCol(p, '#111827')
+  const aCol = resolveACol(p, '#4b5563')
+  const accent = resolveAccent(p, '#7530fb')
+  const border = resolveBorder(p, '#e5e7eb')
   const items = resolveItems(p)
 
-  const rows = items.map((item, idx) => {
-    const isLast = idx === items.length - 1
-    return `
+  const rows = items.map((item, i) => `
     <tr>
-      <td style="padding:14px 0;border-bottom:${isLast ? 'none' : `1px solid ${borderCol}`};">
+      <td style="padding:${i === 0 ? '0' : '16px'} 0 16px;border-bottom:${i === items.length - 1 ? 'none' : `1px solid ${border}`};box-sizing:border-box;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
           <tr>
-            <td width="3" style="width:3px;background-color:${accent};border-radius:2px;font-size:1px;">&nbsp;</td>
-            <td style="padding-left:14px;">
-              <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${qCol};line-height:1.35;">
-                ${item.question}
-              </p>
-              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${aCol};line-height:1.6;">
-                ${item.answer}
-              </p>
+            <td width="3" style="width:3px;min-width:3px;background-color:${accent};vertical-align:top;font-size:0;line-height:0;">&nbsp;</td>
+            <td style="padding-left:14px;vertical-align:top;">
+              <p style="margin:0 0 5px 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${qCol};line-height:1.4;">${item.question}</p>
+              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${aCol};line-height:1.65;">${item.answer}</p>
             </td>
           </tr>
         </table>
+      </td>
+    </tr>`).join('')
+
+  const inner = `
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${bg};">
+  <tr>
+    <td style="${pad(p, 24, 24, 24, 24)}box-sizing:border-box;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+        <tr>
+          <td style="padding-bottom:14px;border-bottom:2px solid ${border};">
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:${accent};letter-spacing:0.1em;text-transform:uppercase;">Frequently Asked Questions</p>
+          </td>
+        </tr>
+        <tr><td style="padding-top:16px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">${rows}</table>
+        </td></tr>
+      </table>
+    </td>
+  </tr>
+</table>`
+  return outerWrap(id, inner)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 2. NUMBERED ANSWER CARDS
+// Each FAQ in its own white card with a clean "01" "02" number badge top-right.
+// Subtle border, no gimmick backgrounds. Confident, editorial feel.
+// Best for sellers with 3–5 key questions.
+// ─────────────────────────────────────────────────────────────────────────────
+function boxedCardsGrid(p: any, id: string): string {
+  const bg = resolveBg(p, '#f8f8fb')
+  const qCol = resolveQCol(p, '#111827')
+  const aCol = resolveACol(p, '#4b5563')
+  const accent = resolveAccent(p, '#7530fb')
+  const items = resolveItems(p)
+
+  const cards = items.map((item, i) => `
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:#ffffff;border:1px solid #e5e7eb;border-radius:6px;margin-bottom:${i === items.length - 1 ? 0 : 10}px;">
+      <tr>
+        <td style="padding:14px 16px 0 16px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+            <tr>
+              <td style="vertical-align:top;">
+                <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${qCol};line-height:1.4;">${item.question}</p>
+              </td>
+              <td width="30" style="width:30px;text-align:right;vertical-align:top;padding-left:8px;">
+                <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:18px;font-weight:900;color:${accent};opacity:0.3;line-height:1;">${String(i + 1).padStart(2, '0')}</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:8px 16px 14px 16px;border-top:1px solid #f3f4f6;margin-top:10px;">
+          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${aCol};line-height:1.65;">${item.answer}</p>
+        </td>
+      </tr>
+    </table>`).join('')
+
+  const inner = `
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${bg};">
+  <tr><td style="${pad(p, 20, 20, 20, 20)}box-sizing:border-box;">${cards}</td></tr>
+</table>`
+  return outerWrap(id, inner)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 3. OPEN ACCORDION STYLE
+// The most requested FAQ look. Every question appears as an "open" accordion row.
+// Question: soft lavender header bar with question bold and ▼ expanded badge.
+// Answer: clean white area below with comfortable indent.
+// Note: answers always visible — eBay does not allow JavaScript.
+// ─────────────────────────────────────────────────────────────────────────────
+function accentRailLeft(p: any, id: string): string {
+  const bg = resolveBg(p, '#ffffff')
+  const qCol = resolveQCol(p, '#1e1535')
+  const aCol = resolveACol(p, '#374151')
+  const accent = resolveAccent(p, '#7530fb')
+  const qBg = p.questionBg ?? '#f5f3ff'
+  const border = resolveBorder(p, '#ddd6fe')
+  const items = resolveItems(p)
+
+  const rows = items.map((item, i) => `
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid ${border};border-radius:6px;overflow:hidden;margin-bottom:${i === items.length - 1 ? 0 : 8}px;">
+      <tr>
+        <td style="background-color:${qBg};padding:12px 14px 12px 16px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+            <tr>
+              <td style="vertical-align:middle;">
+                <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${qCol};line-height:1.35;">${item.question}</p>
+              </td>
+              <td width="60" style="width:60px;text-align:right;vertical-align:middle;padding-left:10px;white-space:nowrap;">
+                <span style="font-family:Arial,Helvetica,sans-serif;font-size:9px;font-weight:700;color:${accent};letter-spacing:0.04em;border:1px solid ${accent};border-radius:3px;padding:1px 5px;text-transform:uppercase;">Open</span>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td style="background-color:#ffffff;padding:12px 16px 14px 16px;border-top:1px solid ${border};">
+          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${aCol};line-height:1.65;">${item.answer}</p>
+        </td>
+      </tr>
+    </table>`).join('')
+
+  const inner = `
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${bg};">
+  <tr><td style="${pad(p, 20, 20, 20, 20)}box-sizing:border-box;">${rows}</td></tr>
+</table>`
+  return outerWrap(id, inner)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 4. POLICY DOCUMENT GRID
+// Two-column table. Left: bold question. Right: clear answer.
+// Header row in small caps. Alternating row backgrounds for readability.
+// Best for sellers with 5+ quick-answer FAQs.
+// ─────────────────────────────────────────────────────────────────────────────
+function numberedCircleSteps(p: any, id: string): string {
+  const bg = resolveBg(p, '#ffffff')
+  const qCol = resolveQCol(p, '#111827')
+  const aCol = resolveACol(p, '#4b5563')
+  const accent = resolveAccent(p, '#7530fb')
+  const border = resolveBorder(p, '#e5e7eb')
+  const items = resolveItems(p)
+
+  const rows = items.map((item, i) => {
+    const rowBg = i % 2 === 0 ? '#ffffff' : '#f9fafb'
+    return `
+    <tr style="background-color:${rowBg};">
+      <td width="44%" style="width:44%;padding:12px 14px 12px 16px;border-bottom:1px solid ${border};vertical-align:top;border-right:1px solid ${border};">
+        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:${qCol};line-height:1.45;">${item.question}</p>
+      </td>
+      <td style="padding:12px 16px 12px 14px;border-bottom:1px solid ${border};vertical-align:top;">
+        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${aCol};line-height:1.6;">${item.answer}</p>
       </td>
     </tr>`
   }).join('')
 
-  return `<!--[riazify:faq_block:${id}]-->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;">
+  const inner = `
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${bg};">
   <tr>
-    <td style="background-color:${bgCol};${pad(p, 20, 24, 20, 24)}box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:16px;">
-        <tr>
-          <td>
-            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:${accent};letter-spacing:0.08em;text-transform:uppercase;">Frequently Asked Questions</p>
+    <td style="${pad(p, 20, 20, 20, 20)}box-sizing:border-box;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid ${border};border-radius:6px;overflow:hidden;">
+        <tr style="background-color:${accent};">
+          <td width="44%" style="width:44%;padding:9px 14px 9px 16px;border-right:1px solid rgba(255,255,255,0.2);">
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:#ffffff;letter-spacing:0.08em;text-transform:uppercase;">Question</p>
+          </td>
+          <td style="padding:9px 16px 9px 14px;">
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:#ffffff;letter-spacing:0.08em;text-transform:uppercase;">Answer</p>
           </td>
         </tr>
-        <tr>
-          <td style="padding-top:6px;border-bottom:2px solid ${borderCol};font-size:1px;">&nbsp;</td>
-        </tr>
-      </table>
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
         ${rows}
       </table>
     </td>
   </tr>
 </table>`
+  return outerWrap(id, inner)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 2. BOXED CARDS GRID (Independent Crisp White Cards with Q Chip)
+// 5. DARK PREMIUM CARDS
+// Deep navy background. Each FAQ in a white-bordered card with clean layout.
+// White bold question, grey answer. Small numbered accent in corner.
+// For electronics, gaming, tech, premium brand sellers.
 // ─────────────────────────────────────────────────────────────────────────────
-function boxedCardsGrid(p: any, id: string): string {
-  const bgCol = resolveBg(p, '#ffffff')
-  const qCol = resolveQuestionCol(p, '#0f172a')
-  const aCol = resolveAnswerCol(p, '#475569')
-  const accent = resolveAccentCol(p, '#7530fb')
+function splitSpeechBubbles(p: any, id: string): string {
+  const sectionBg = p.questionBg ?? '#0f172a'
+  const qCol = '#ffffff'
+  const aCol = '#9ca3af'
+  const accent = resolveAccent(p, '#7530fb')
   const items = resolveItems(p)
 
-  const cards = items.map((item, index) => `
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid #e2e8f0;border-radius:8px;background-color:#ffffff;margin-bottom:${index === items.length - 1 ? 0 : 10}px;">
+  const cards = items.map((item, i) => `
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;margin-bottom:${i === items.length - 1 ? 0 : 10}px;">
       <tr>
-        <td style="padding:12px 16px 8px;border-bottom:1px solid #f1f5f9;">
-          <table cellpadding="0" cellspacing="0" border="0">
+        <td style="padding:14px 16px 10px 16px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
             <tr>
-              <td style="background-color:#f1f5f9;color:${accent};font-size:10px;font-weight:900;padding:2px 6px;border-radius:4px;margin-right:8px;text-align:center;">
-                Q
+              <td style="vertical-align:top;">
+                <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${qCol};line-height:1.4;">${item.question}</p>
               </td>
-              <td style="padding-left:8px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${qCol};line-height:1.3;">
-                ${item.question}
+              <td width="20" style="width:20px;text-align:right;vertical-align:top;padding-left:8px;">
+                <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:900;color:${accent};line-height:1.2;">${String(i + 1).padStart(2, '0')}</p>
               </td>
             </tr>
           </table>
         </td>
       </tr>
       <tr>
-        <td style="padding:10px 16px 12px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${aCol};line-height:1.55;">
-          ${item.answer}
+        <td style="padding:0 16px 14px 16px;">
+          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${aCol};line-height:1.65;">${item.answer}</p>
         </td>
       </tr>
-    </table>
-  `).join('')
+    </table>`).join('')
 
-  return `<!--[riazify:faq_block:${id}]-->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;">
+  const inner = `
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${sectionBg};border-top:3px solid ${accent};border-radius:6px;">
   <tr>
-    <td style="background-color:${bgCol};${pad(p, 16, 24, 16, 24)}box-sizing:border-box;">
+    <td style="${pad(p, 20, 20, 20, 20)}box-sizing:border-box;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:16px;">
+        <tr>
+          <td>
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:${accent};letter-spacing:0.1em;text-transform:uppercase;">Frequently Asked Questions</p>
+          </td>
+        </tr>
+      </table>
       ${cards}
     </td>
   </tr>
 </table>`
+  return outerWrap(id, inner)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 3. ACCENT RAIL LEFT (Left Vertical Indicator Rail)
-// ─────────────────────────────────────────────────────────────────────────────
-function accentRailLeft(p: any, id: string): string {
-  const bgCol = resolveBg(p, '#ffffff')
-  const qCol = resolveQuestionCol(p, '#0f172a')
-  const aCol = resolveAnswerCol(p, '#475569')
-  const accent = resolveAccentCol(p, '#7530fb')
-  const items = resolveItems(p)
-
-  const itemsHtml = items.map((item, index) => `
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:${index === items.length - 1 ? 0 : 14}px;">
-      <tr>
-        <td width="3.5" style="width:3.5px;background-color:${accent};border-radius:2px;font-size:1px;line-height:1px;">&nbsp;</td>
-        <td style="padding-left:12px;">
-          <p style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:800;color:${qCol};line-height:1.3;">
-            ${item.question}
-          </p>
-          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${aCol};line-height:1.5;">
-            ${item.answer}
-          </p>
-        </td>
-      </tr>
-    </table>
-  `).join('')
-
-  return `<!--[riazify:faq_block:${id}]-->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;">
-  <tr>
-    <td style="background-color:${bgCol};border:1px solid #e2e8f0;border-radius:8px;${pad(p, 18, 20, 18, 20)}box-sizing:border-box;">
-      ${itemsHtml}
-    </td>
-  </tr>
-</table>`
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// 4. NUMBERED CIRCLE STEPS (01, 02, 03 Circular Badges)
-// ─────────────────────────────────────────────────────────────────────────────
-function numberedCircleSteps(p: any, id: string): string {
-  const bgCol = resolveBg(p, '#ffffff')
-  const qCol = resolveQuestionCol(p, '#0f172a')
-  const aCol = resolveAnswerCol(p, '#475569')
-  const accent = resolveAccentCol(p, '#2563eb')
-  const items = resolveItems(p)
-
-  const rows = items.map((item, idx) => {
-    const num = (idx + 1).toString().padStart(2, '0')
-    const isLast = idx === items.length - 1
-    return `
-      <tr>
-        <td width="36" valign="top" style="width:36px;padding-right:12px;padding-bottom:${isLast ? 0 : 16}px;">
-          <table cellpadding="0" cellspacing="0" border="0">
-            <tr>
-              <td style="width:28px;height:28px;background-color:#eff6ff;color:${accent};border:1px solid #dbeafe;border-radius:50%;text-align:center;line-height:28px;font-size:11px;font-weight:800;">
-                ${num}
-              </td>
-            </tr>
-          </table>
-        </td>
-        <td valign="top" style="padding-bottom:${isLast ? 0 : 16}px;border-bottom:${isLast ? 'none' : '1px solid #f1f5f9'};">
-          <p style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:800;color:${qCol};line-height:1.3;">
-            ${item.question}
-          </p>
-          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${aCol};line-height:1.55;">
-            ${item.answer}
-          </p>
-        </td>
-      </tr>
-    `
-  }).join('')
-
-  return `<!--[riazify:faq_block:${id}]-->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;">
-  <tr>
-    <td style="background-color:${bgCol};border:1px solid #e2e8f0;border-radius:8px;${pad(p, 18, 20, 18, 20)}box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
-        ${rows}
-      </table>
-    </td>
-  </tr>
-</table>`
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// 5. SPLIT SPEECH BUBBLES (Conversational Q & A Hierarchy)
-// ─────────────────────────────────────────────────────────────────────────────
-function splitSpeechBubbles(p: any, id: string): string {
-  const bgCol = resolveBg(p, '#ffffff')
-  const qCol = resolveQuestionCol(p, '#0f172a')
-  const aCol = resolveAnswerCol(p, '#334155')
-  const accent = resolveAccentCol(p, '#7530fb')
-  const items = resolveItems(p)
-
-  const bubbles = items.map((item, index) => `
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:${index === items.length - 1 ? 0 : 12}px;">
-      <tr>
-        <td style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:8px 12px;">
-          <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:${qCol};">
-            <span style="color:${accent};font-weight:900;margin-right:4px;">Q:</span> ${item.question}
-          </p>
-        </td>
-      </tr>
-      <tr>
-        <td style="padding:6px 10px 0 10px;box-sizing:border-box;">
-          <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:${aCol};line-height:1.5;">
-            <strong style="color:#059669;margin-right:4px;">A:</strong> ${item.answer}
-          </p>
-        </td>
-      </tr>
-    </table>
-  `).join('')
-
-  return `<!--[riazify:faq_block:${id}]-->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;">
-  <tr>
-    <td style="background-color:${bgCol};border:1px solid #e2e8f0;border-radius:8px;${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
-      ${bubbles}
-    </td>
-  </tr>
-</table>`
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// 6. MINIMALIST HAIRLINE RULE (Clean Scandinavian Dividers)
+// 6. APPLE-STYLE MINIMAL
+// Pure typography. No borders, no coloured backgrounds, no badges.
+// Bold question, grey answer, hairline rule between items.
+// The most refined, confident design — for brands that don't need decoration.
 // ─────────────────────────────────────────────────────────────────────────────
 function minimalistHairlineRule(p: any, id: string): string {
-  const bgCol = resolveBg(p, '#ffffff')
-  const qCol = resolveQuestionCol(p, '#0f172a')
-  const aCol = resolveAnswerCol(p, '#64748b')
+  const bg = resolveBg(p, '#ffffff')
+  const qCol = resolveQCol(p, '#111827')
+  const aCol = resolveACol(p, '#6b7280')
+  const accent = resolveAccent(p, '#7530fb')
+  const border = resolveBorder(p, '#e5e7eb')
   const items = resolveItems(p)
 
-  const rows = items.map((item, idx) => `
+  const rows = items.map((item, i) => `
     <tr>
-      <td style="padding:${idx === 0 ? '0' : '14px'} 0 14px;border-bottom:${idx === items.length - 1 ? 'none' : '1px solid #e2e8f0'};">
-        <p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:${qCol};">
-          ${item.question}
-        </p>
-        <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:${aCol};line-height:1.55;">
-          ${item.answer}
-        </p>
+      <td style="padding:${i === 0 ? '0' : '18px'} 0 18px;border-bottom:${i === items.length - 1 ? 'none' : `1px solid ${border}`};">
+        <p style="margin:0 0 6px 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:${qCol};line-height:1.35;">${item.question}</p>
+        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${aCol};line-height:1.7;">${item.answer}</p>
       </td>
-    </tr>
-  `).join('')
+    </tr>`).join('')
 
-  return `<!--[riazify:faq_block:${id}]-->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;">
+  const inner = `
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${bg};">
   <tr>
-    <td style="background-color:${bgCol};${pad(p, 16, 24, 16, 24)}box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
-        ${rows}
+    <td style="${pad(p, 24, 24, 24, 24)}box-sizing:border-box;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:18px;">
+        <tr>
+          <td>
+            <p style="margin:0 0 4px 0;font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:700;color:${qCol};letter-spacing:-0.01em;line-height:1.2;">FAQs</p>
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${aCol};">Answers to the questions buyers ask most.</p>
+          </td>
+        </tr>
+        <tr><td style="padding-top:14px;border-bottom:2px solid ${qCol};font-size:0;">&nbsp;</td></tr>
       </table>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">${rows}</table>
     </td>
   </tr>
 </table>`
+  return outerWrap(id, inner)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 7. INDUSTRIAL TECHNICAL LEDGER (Gunmetal & Amber Fitment Ledger)
+// 7. INDUSTRIAL TECHNICAL LEDGER
+// Gunmetal dark background, amber reference numbers, monospace header labels.
+// For auto parts, tools, hardware, industrial equipment sellers.
 // ─────────────────────────────────────────────────────────────────────────────
 function industrialTechnicalLedger(p: any, id: string): string {
-  const qCol = resolveQuestionCol(p, '#f8fafc')
-  const aCol = resolveAnswerCol(p, '#94a3b8')
+  const qCol = resolveQCol(p, '#f8fafc')
+  const aCol = resolveACol(p, '#94a3b8')
   const items = resolveItems(p)
 
-  const entries = items.map((item, idx) => `
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:#1e293b;border:1px solid #334155;border-left:3.5px solid #f59e0b;border-radius:4px;margin-bottom:${idx === items.length - 1 ? 0 : 10}px;">
+  const entries = items.map((item, i) => `
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:#1e293b;border:1px solid #334155;border-left:3px solid #f59e0b;border-radius:4px;margin-bottom:${i === items.length - 1 ? 0 : 10}px;">
       <tr>
-        <td style="padding:10px 14px 6px;">
-          <span style="font-family:'Courier New',Courier,monospace;font-size:10px;font-weight:800;color:#f59e0b;letter-spacing:1px;text-transform:uppercase;">
-            FAQ REF [0${idx + 1}] //
-          </span>
-          <p style="margin:2px 0 0;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:${qCol};line-height:1.3;">
-            ${item.question}
-          </p>
+        <td style="padding:10px 14px 6px 14px;">
+          <p style="margin:0 0 3px 0;font-family:'Courier New',Courier,monospace;font-size:9px;font-weight:700;color:#f59e0b;letter-spacing:1.5px;text-transform:uppercase;">FAQ.REF.${String(i + 1).padStart(2, '0')}</p>
+          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:${qCol};line-height:1.35;">${item.question}</p>
         </td>
       </tr>
       <tr>
-        <td style="padding:0 14px 10px;font-family:Arial,sans-serif;font-size:12px;color:${aCol};line-height:1.5;">
-          ${item.answer}
+        <td style="padding:0 14px 10px 14px;">
+          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${aCol};line-height:1.55;">${item.answer}</p>
         </td>
       </tr>
-    </table>
-  `).join('')
+    </table>`).join('')
 
-  return `<!--[riazify:faq_block:${id}]-->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;">
+  const inner = `
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:#0f172a;border-radius:6px;">
   <tr>
-    <td style="background-color:#0f172a;border-radius:6px;${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
+    <td style="${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:14px;">
+        <tr>
+          <td>
+            <p style="margin:0;font-family:'Courier New',Courier,monospace;font-size:9px;font-weight:700;color:#f59e0b;letter-spacing:2px;text-transform:uppercase;">// TECHNICAL FAQ REFERENCE</p>
+          </td>
+        </tr>
+      </table>
       ${entries}
     </td>
   </tr>
 </table>`
+  return outerWrap(id, inner)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 8. LUXURY SERIF EDITORIAL (Roman Serif Ivory Card with Gold Hairlines)
+// 8. LUXURY SERIF EDITORIAL
+// Warm ivory card, serif typography, thin gold accent border at top.
+// For watches, jewellery, collectibles, luxury fashion sellers.
 // ─────────────────────────────────────────────────────────────────────────────
 function luxurySerifEditorial(p: any, id: string): string {
-  const bgCol = resolveBg(p, '#fafaf9')
-  const qCol = resolveQuestionCol(p, '#1c1917')
-  const aCol = resolveAnswerCol(p, '#78716c')
+  const bg = resolveBg(p, '#fafaf9')
+  const qCol = resolveQCol(p, '#1c1917')
+  const aCol = resolveACol(p, '#78716c')
+  const border = resolveBorder(p, '#e7e5e4')
   const items = resolveItems(p)
 
-  const rows = items.map((item, idx) => `
+  const rows = items.map((item, i) => `
     <tr>
-      <td style="padding:${idx === 0 ? '0' : '14px'} 0 14px;border-bottom:${idx === items.length - 1 ? 'none' : '1px solid #e7e5e4'};">
-        <p style="margin:0 0 5px;font-family:Georgia,'Times New Roman',serif;font-size:15px;font-weight:600;color:${qCol};font-style:italic;">
-          &bull; ${item.question}
-        </p>
-        <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:${aCol};line-height:1.6;padding-left:14px;">
-          ${item.answer}
-        </p>
+      <td style="padding:${i === 0 ? '0' : '16px'} 0 16px;border-bottom:${i === items.length - 1 ? 'none' : `1px solid ${border}`};">
+        <p style="margin:0 0 6px 0;font-family:Georgia,'Times New Roman',serif;font-size:15px;font-weight:600;color:${qCol};line-height:1.35;font-style:italic;">${item.question}</p>
+        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${aCol};line-height:1.7;padding-left:12px;">${item.answer}</p>
       </td>
-    </tr>
-  `).join('')
+    </tr>`).join('')
 
-  return `<!--[riazify:faq_block:${id}]-->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;font-family:Georgia,serif;">
+  const inner = `
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${bg};border:1px solid ${border};border-top:2px solid #b45309;border-radius:4px;">
   <tr>
-    <td style="background-color:${bgCol};border:1px solid #e7e5e4;border-top:2px solid #b45309;${pad(p, 18, 24, 18, 24)}box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
-        ${rows}
+    <td style="${pad(p, 22, 24, 22, 24)}box-sizing:border-box;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:16px;">
+        <tr>
+          <td>
+            <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:11px;color:#b45309;letter-spacing:0.12em;text-transform:uppercase;">Questions &amp; Answers</p>
+          </td>
+        </tr>
       </table>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">${rows}</table>
     </td>
   </tr>
 </table>`
+  return outerWrap(id, inner)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 9. VERIFIED TRUST SHIELD (Reassurance Badges for Returns & Warranty)
+// 9. VERIFIED TRUST SHIELD
+// Each FAQ framed as a guarantee: green check badge, reassurance wording.
+// Buyers trust green. Use for return policy, warranty, shipping guarantee FAQs.
 // ─────────────────────────────────────────────────────────────────────────────
 function verifiedTrustShield(p: any, id: string): string {
-  const bgCol = resolveBg(p, '#ffffff')
-  const qCol = resolveQuestionCol(p, '#0f172a')
-  const aCol = resolveAnswerCol(p, '#334155')
+  const bg = resolveBg(p, '#ffffff')
+  const qCol = resolveQCol(p, '#14532d')
+  const aCol = resolveACol(p, '#374151')
   const items = resolveItems(p)
 
-  const cards = items.map((item, index) => `
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid #bbf7d0;background-color:#f0fdf4;border-radius:6px;margin-bottom:${index === items.length - 1 ? 0 : 10}px;">
+  const cards = items.map((item, i) => `
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:#f0fdf4;border:1px solid #bbf7d0;border-left:3px solid #16a34a;border-radius:4px;margin-bottom:${i === items.length - 1 ? 0 : 8}px;">
       <tr>
-        <td width="28" valign="top" style="width:28px;padding:10px 0 10px 12px;">
-          <table cellpadding="0" cellspacing="0" border="0">
+        <td width="36" style="width:36px;padding:12px 0 12px 12px;vertical-align:top;">
+          <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
             <tr>
-              <td style="width:20px;height:20px;background-color:#16a34a;color:#ffffff;border-radius:50%;text-align:center;line-height:20px;font-size:11px;font-weight:900;">
-                &#10003;
-              </td>
+              <td style="width:22px;height:22px;background-color:#16a34a;border-radius:50%;text-align:center;line-height:22px;font-size:12px;font-weight:900;color:#ffffff;">&#10003;</td>
             </tr>
           </table>
         </td>
-        <td valign="top" style="padding:10px 14px 10px 8px;">
-          <p style="margin:0 0 3px;font-family:Arial,sans-serif;font-size:13px;font-weight:800;color:#166534;line-height:1.3;">
-            ${item.question}
-          </p>
-          <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:${aCol};line-height:1.5;">
-            ${item.answer}
-          </p>
+        <td style="padding:12px 14px 12px 6px;vertical-align:top;">
+          <p style="margin:0 0 3px 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:${qCol};line-height:1.35;">${item.question}</p>
+          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${aCol};line-height:1.55;">${item.answer}</p>
         </td>
       </tr>
-    </table>
-  `).join('')
+    </table>`).join('')
 
-  return `<!--[riazify:faq_block:${id}]-->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;">
+  const inner = `
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${bg};">
   <tr>
-    <td style="background-color:${bgCol};border:1px solid #e2e8f0;border-radius:8px;${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">
+    <td style="${pad(p, 20, 20, 20, 20)}box-sizing:border-box;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:14px;">
+        <tr>
+          <td>
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:#16a34a;letter-spacing:0.1em;text-transform:uppercase;">&#10003; Our Buyer Guarantees</p>
+          </td>
+        </tr>
+      </table>
       ${cards}
     </td>
   </tr>
 </table>`
+  return outerWrap(id, inner)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 10. COMPACT MOBILE ACCORDION (Mobile-First Inline Chevron Ribbon)
+// 10. ALTERNATING STRIPE ROWS
+// Clean Q/A alternating pattern. Q row: soft lavender stripe, A row: white.
+// No cards, no badges. Very scannable. Great for mobile-first buyers.
 // ─────────────────────────────────────────────────────────────────────────────
 function compactMobileAccordion(p: any, id: string): string {
-  const bgCol = resolveBg(p, '#ffffff')
-  const qCol = resolveQuestionCol(p, '#0f172a')
-  const aCol = resolveAnswerCol(p, '#475569')
-  const accent = resolveAccentCol(p, '#7530fb')
+  const bg = resolveBg(p, '#ffffff')
+  const qCol = resolveQCol(p, '#111827')
+  const aCol = resolveACol(p, '#4b5563')
+  const accent = resolveAccent(p, '#7530fb')
+  const border = resolveBorder(p, '#e5e7eb')
+  const qBg = p.questionBg ?? '#f5f3ff'
   const items = resolveItems(p)
 
-  const rows = items.map((item, idx) => `
+  const rows = items.map((item, i) => `
     <tr>
-      <td style="padding:8px 12px;background-color:#f8fafc;border:1px solid #e2e8f0;border-bottom:none;">
-        <table width="100%" cellpadding="0" cellspacing="0" border="0">
-          <tr>
-            <td style="font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:${qCol};">
-              ${item.question}
-            </td>
-            <td align="right" style="width:16px;font-size:14px;color:${accent};font-weight:bold;">
-              &rsaquo;
-            </td>
-          </tr>
-        </table>
+      <td style="background-color:${qBg};padding:11px 14px;border-bottom:1px solid ${border};">
+        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:${qCol};line-height:1.4;">${item.question}</p>
       </td>
     </tr>
     <tr>
-      <td style="padding:8px 12px 12px;background-color:#ffffff;border:1px solid #e2e8f0;border-top:none;margin-bottom:8px;">
-        <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:${aCol};line-height:1.45;">
-          ${item.answer}
-        </p>
+      <td style="background-color:#ffffff;padding:10px 14px 14px 22px;border-bottom:${i === items.length - 1 ? 'none' : `1px solid ${border}`};">
+        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${aCol};line-height:1.65;">${item.answer}</p>
       </td>
-    </tr>
-  `).join('')
+    </tr>`).join('')
 
-  return `<!--[riazify:faq_block:${id}]-->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;">
+  const inner = `
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${bg};">
   <tr>
-    <td style="background-color:${bgCol};${pad(p, 10, 14, 10, 14)}box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
-        ${rows}
+    <td style="${pad(p, 16, 16, 16, 16)}box-sizing:border-box;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:12px;">
+        <tr>
+          <td>
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:${accent};letter-spacing:0.1em;text-transform:uppercase;">Frequently Asked Questions</p>
+          </td>
+        </tr>
       </table>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid ${border};border-radius:6px;overflow:hidden;">${rows}</table>
     </td>
   </tr>
 </table>`
+  return outerWrap(id, inner)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 11. CLEAN CHEVRON ACCORDION (Classic ▶ Open-State Accordion Rows)
+// 11. CLEAN CHEVRON ACCORDION
+// Classic accordion visual: lavender question header bar, ▼ purple circle badge,
+// white answer area with border. All expanded — eBay doesn't allow JavaScript.
 // ─────────────────────────────────────────────────────────────────────────────
 function cleanChevronAccordion(p: any, id: string): string {
-  const bgCol = resolveBg(p, '#ffffff')
-  const qCol = resolveQuestionCol(p, '#1e1535')
-  const aCol = resolveAnswerCol(p, '#4b5563')
-  const accent = resolveAccentCol(p, '#7530fb')
+  const bg = resolveBg(p, '#ffffff')
+  const qCol = resolveQCol(p, '#1e1535')
+  const aCol = resolveACol(p, '#4b5563')
+  const accent = resolveAccent(p, '#7530fb')
   const qBg = p.questionBg ?? '#f8f7ff'
-  const borderCol = resolveBorderCol(p, '#e5e7eb')
+  const border = resolveBorder(p, '#e5e7eb')
   const items = resolveItems(p)
 
-  const rows = items.map((item, idx) => {
-    const isLast = idx === items.length - 1
-    return `
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid ${borderCol};border-radius:6px;overflow:hidden;margin-bottom:${isLast ? 0 : 8}px;">
+  const rows = items.map((item, i) => `
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid ${border};border-radius:6px;overflow:hidden;margin-bottom:${i === items.length - 1 ? 0 : 8}px;">
       <tr>
-        <td style="background-color:${qBg};padding:11px 14px 11px 16px;">
+        <td style="background-color:${qBg};padding:12px 14px 12px 16px;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
             <tr>
-              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${qCol};line-height:1.3;">
-                ${item.question}
+              <td style="vertical-align:middle;">
+                <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${qCol};line-height:1.35;">${item.question}</p>
               </td>
-              <td align="right" width="22" style="width:22px;padding-left:10px;">
-                <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+              <td width="24" style="width:24px;text-align:right;padding-left:10px;vertical-align:middle;">
+                <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-left:auto;">
                   <tr>
-                    <td style="width:20px;height:20px;background-color:${accent};border-radius:50%;text-align:center;line-height:20px;font-size:11px;color:#ffffff;font-weight:900;">
-                      &#9660;
-                    </td>
+                    <td style="width:20px;height:20px;background-color:${accent};border-radius:50%;text-align:center;line-height:20px;font-size:9px;color:#ffffff;font-weight:900;">&#9660;</td>
                   </tr>
                 </table>
               </td>
@@ -536,51 +554,47 @@ function cleanChevronAccordion(p: any, id: string): string {
         </td>
       </tr>
       <tr>
-        <td style="background-color:#ffffff;padding:10px 16px 14px 16px;border-top:1px solid ${borderCol};">
-          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${aCol};line-height:1.6;">
-            ${item.answer}
-          </p>
+        <td style="background-color:#ffffff;padding:12px 16px 14px 16px;border-top:1px solid ${border};">
+          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${aCol};line-height:1.65;">${item.answer}</p>
         </td>
       </tr>
-    </table>`
-  }).join('')
+    </table>`).join('')
 
-  return `<!--[riazify:faq_block:${id}]-->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;">
-  <tr>
-    <td style="background-color:${bgCol};${pad(p, 16, 24, 16, 24)}box-sizing:border-box;">
-      ${rows}
-    </td>
-  </tr>
+  const inner = `
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${bg};">
+  <tr><td style="${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">${rows}</td></tr>
 </table>`
+  return outerWrap(id, inner)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 12. DARK TOGGLE ACCORDION (Dark Header Bar + ▼ Chevron, High Contrast)
+// 12. DARK TOGGLE ACCORDION
+// Dark navy/charcoal question bars. White question text, ▼ purple badge right.
+// Light grey answer area below with purple top accent line. High contrast.
 // ─────────────────────────────────────────────────────────────────────────────
 function darkToggleAccordion(p: any, id: string): string {
-  const bgCol = resolveBg(p, '#ffffff')
-  const aCol = resolveAnswerCol(p, '#374151')
-  const accent = resolveAccentCol(p, '#7530fb')
+  const bg = resolveBg(p, '#ffffff')
+  const aCol = resolveACol(p, '#374151')
+  const accent = resolveAccent(p, '#7530fb')
   const headerBg = p.questionBg ?? '#1e1535'
-  const borderCol = resolveBorderCol(p, '#e5e7eb')
+  const border = resolveBorder(p, '#e5e7eb')
   const items = resolveItems(p)
 
-  const rows = items.map((item, idx) => {
-    const isLast = idx === items.length - 1
-    return `
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid ${borderCol};border-radius:8px;overflow:hidden;margin-bottom:${isLast ? 0 : 10}px;">
+  const rows = items.map((item, i) => `
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid ${border};border-radius:8px;overflow:hidden;margin-bottom:${i === items.length - 1 ? 0 : 10}px;">
       <tr>
         <td style="background-color:${headerBg};padding:13px 16px 13px 18px;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
             <tr>
-              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:#ffffff;line-height:1.3;letter-spacing:0.01em;">
-                &#9654;&nbsp;&nbsp;${item.question}
+              <td style="vertical-align:middle;">
+                <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:#ffffff;line-height:1.35;letter-spacing:0.01em;">&#9654;&nbsp;&nbsp;${item.question}</p>
               </td>
-              <td align="right" width="24" style="width:24px;padding-left:10px;">
-                <span style="display:inline-block;width:18px;height:18px;background-color:${accent};border-radius:3px;text-align:center;line-height:18px;font-size:10px;color:#ffffff;font-weight:900;font-family:Arial,sans-serif;">
-                  &#9660;
-                </span>
+              <td width="26" style="width:26px;text-align:right;padding-left:10px;vertical-align:middle;">
+                <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-left:auto;">
+                  <tr>
+                    <td style="width:20px;height:20px;background-color:${accent};border-radius:3px;text-align:center;line-height:20px;font-size:9px;color:#ffffff;font-weight:900;">&#9660;</td>
+                  </tr>
+                </table>
               </td>
             </tr>
           </table>
@@ -588,188 +602,199 @@ function darkToggleAccordion(p: any, id: string): string {
       </tr>
       <tr>
         <td style="background-color:#f9fafb;padding:12px 18px 16px 18px;border-top:2px solid ${accent};">
-          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${aCol};line-height:1.65;">
-            ${item.answer}
-          </p>
+          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${aCol};line-height:1.65;">${item.answer}</p>
         </td>
       </tr>
-    </table>`
-  }).join('')
+    </table>`).join('')
 
-  return `<!--[riazify:faq_block:${id}]-->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;">
-  <tr>
-    <td style="background-color:${bgCol};${pad(p, 16, 24, 16, 24)}box-sizing:border-box;">
-      ${rows}
-    </td>
-  </tr>
+  const inner = `
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${bg};">
+  <tr><td style="${pad(p, 16, 20, 16, 20)}box-sizing:border-box;">${rows}</td></tr>
 </table>`
+  return outerWrap(id, inner)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SVG THUMBNAIL PREVIEWS (For Visual Editor Sidebar)
+// SVG THUMBNAIL PREVIEWS
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const FAQ_BLOCK_THUMBNAILS: Record<string, string> = {
-  // 1. Classic Stacked
-  'faq-classic-stacked': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
-    <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
-    <rect x="6" y="8" width="68" height="9" rx="2" fill="#f8f7ff" stroke="#ede9fe" stroke-width="0.8"/>
-    <line x1="10" y1="12.5" x2="42" y2="12.5" stroke="#1e1535" stroke-width="1.5"/>
-    <line x1="10" y1="21" x2="62" y2="21" stroke="#64748b" stroke-width="1"/>
-    <rect x="6" y="27" width="68" height="9" rx="2" fill="#f8f7ff" stroke="#ede9fe" stroke-width="0.8"/>
-    <line x1="10" y1="31.5" x2="46" y2="31.5" stroke="#1e1535" stroke-width="1.5"/>
-    <line x1="10" y1="40" x2="56" y2="40" stroke="#64748b" stroke-width="1"/>
+
+  'faq-classic-stacked': `<svg viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+    <rect width="80" height="52" fill="#ffffff"/>
+    <rect x="6" y="6" width="68" height="1.5" fill="#e5e7eb"/>
+    <line x1="6" y1="11" x2="22" y2="11" stroke="#7530fb" stroke-width="0.8"/>
+    <rect x="6" y="15" width="2.5" height="10" rx="1" fill="#7530fb"/>
+    <line x1="12" y1="18" x2="52" y2="18" stroke="#111827" stroke-width="1.5"/>
+    <line x1="12" y1="23" x2="66" y2="23" stroke="#6b7280" stroke-width="1"/>
+    <line x1="6" y1="28" x2="74" y2="28" stroke="#e5e7eb" stroke-width="0.8"/>
+    <rect x="6" y="32" width="2.5" height="10" rx="1" fill="#7530fb"/>
+    <line x1="12" y1="35" x2="44" y2="35" stroke="#111827" stroke-width="1.5"/>
+    <line x1="12" y1="40" x2="60" y2="40" stroke="#6b7280" stroke-width="1"/>
+    <line x1="6" y1="45" x2="74" y2="45" stroke="#e5e7eb" stroke-width="0.8"/>
   </svg>`,
 
-  // 2. Boxed Cards Grid
-  'faq-boxed-cards-grid': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
-    <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
-    <rect x="6" y="7" width="68" height="15" rx="3" fill="#ffffff" stroke="#cbd5e1" stroke-width="0.8"/>
-    <rect x="9" y="10" width="5" height="5" rx="1" fill="#7530fb"/>
-    <line x1="17" y1="12.5" x2="48" y2="12.5" stroke="#0f172a" stroke-width="1.5"/>
-    <line x1="9" y1="18" x2="64" y2="18" stroke="#64748b" stroke-width="1"/>
-    <rect x="6" y="26" width="68" height="15" rx="3" fill="#ffffff" stroke="#cbd5e1" stroke-width="0.8"/>
-    <rect x="9" y="29" width="5" height="5" rx="1" fill="#7530fb"/>
-    <line x1="17" y1="31.5" x2="52" y2="31.5" stroke="#0f172a" stroke-width="1.5"/>
-    <line x1="9" y1="37" x2="60" y2="37" stroke="#64748b" stroke-width="1"/>
+  'faq-boxed-cards-grid': `<svg viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+    <rect width="80" height="52" fill="#f8f8fb"/>
+    <rect x="6" y="6" width="68" height="17" rx="4" fill="#ffffff" stroke="#e5e7eb" stroke-width="0.8"/>
+    <line x1="11" y1="14" x2="48" y2="14" stroke="#111827" stroke-width="1.5"/>
+    <text x="67" y="14" font-family="Arial" font-size="7" fill="#7530fb" font-weight="900" opacity="0.3" text-anchor="end">01</text>
+    <line x1="6" y1="23" x2="74" y2="23" stroke="#f3f4f6" stroke-width="0.8"/>
+    <line x1="11" y1="19" x2="62" y2="19" stroke="#4b5563" stroke-width="0.8"/>
+    <rect x="6" y="29" width="68" height="17" rx="4" fill="#ffffff" stroke="#e5e7eb" stroke-width="0.8"/>
+    <line x1="11" y1="37" x2="44" y2="37" stroke="#111827" stroke-width="1.5"/>
+    <text x="67" y="37" font-family="Arial" font-size="7" fill="#7530fb" font-weight="900" opacity="0.3" text-anchor="end">02</text>
+    <line x1="6" y1="43" x2="74" y2="43" stroke="#f3f4f6" stroke-width="0.8"/>
+    <line x1="11" y1="40" x2="58" y2="40" stroke="#4b5563" stroke-width="0.8"/>
   </svg>`,
 
-  // 3. Accent Rail Left
-  'faq-accent-rail-left': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
-    <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
-    <rect x="6" y="9" width="2.5" height="13" rx="1" fill="#7530fb"/>
-    <line x1="12" y1="12" x2="54" y2="12" stroke="#0f172a" stroke-width="1.5"/>
-    <line x1="12" y1="18" x2="66" y2="18" stroke="#64748b" stroke-width="1"/>
-    <rect x="6" y="26" width="2.5" height="13" rx="1" fill="#7530fb"/>
-    <line x1="12" y1="29" x2="48" y2="29" stroke="#0f172a" stroke-width="1.5"/>
-    <line x1="12" y1="35" x2="62" y2="35" stroke="#64748b" stroke-width="1"/>
+  'faq-accent-rail-left': `<svg viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+    <rect width="80" height="52" fill="#ffffff"/>
+    <rect x="6" y="6" width="68" height="17" rx="3" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="0.8"/>
+    <line x1="11" y1="12" x2="54" y2="12" stroke="#1e1535" stroke-width="1.5"/>
+    <text x="67" y="13" font-family="Arial" font-size="5.5" fill="#7530fb" font-weight="700" text-anchor="end">Open</text>
+    <line x1="6" y1="23" x2="74" y2="23" stroke="#ddd6fe" stroke-width="0.8"/>
+    <line x1="11" y1="19" x2="62" y2="19" stroke="#4b5563" stroke-width="0.8"/>
+    <rect x="6" y="29" width="68" height="17" rx="3" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="0.8"/>
+    <line x1="11" y1="35" x2="46" y2="35" stroke="#1e1535" stroke-width="1.5"/>
+    <text x="67" y="36" font-family="Arial" font-size="5.5" fill="#7530fb" font-weight="700" text-anchor="end">Open</text>
+    <line x1="6" y1="46" x2="74" y2="46" stroke="#ddd6fe" stroke-width="0.8"/>
+    <line x1="11" y1="42" x2="58" y2="42" stroke="#4b5563" stroke-width="0.8"/>
   </svg>`,
 
-  // 4. Numbered Circle Steps
-  'faq-numbered-circle-steps': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
-    <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
-    <circle cx="12" cy="15" r="4.5" fill="#eff6ff" stroke="#2563eb" stroke-width="0.8"/>
-    <line x1="20" y1="13" x2="58" y2="13" stroke="#0f172a" stroke-width="1.5"/>
-    <line x1="20" y1="18" x2="68" y2="18" stroke="#64748b" stroke-width="1"/>
-    <circle cx="12" cy="33" r="4.5" fill="#eff6ff" stroke="#2563eb" stroke-width="0.8"/>
-    <line x1="20" y1="31" x2="52" y2="31" stroke="#0f172a" stroke-width="1.5"/>
-    <line x1="20" y1="36" x2="64" y2="36" stroke="#64748b" stroke-width="1"/>
+  'faq-numbered-circle-steps': `<svg viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+    <rect width="80" height="52" fill="#ffffff"/>
+    <rect x="6" y="6" width="68" height="9" rx="2" fill="#7530fb"/>
+    <line x1="10" y1="10.5" x2="24" y2="10.5" stroke="#ffffff" stroke-width="1.2"/>
+    <line x1="44" y1="10.5" x2="70" y2="10.5" stroke="#ffffff" stroke-width="1.2"/>
+    <rect x="6" y="17" width="32" height="13" rx="0" fill="#ffffff" stroke="#e5e7eb" stroke-width="0.8"/>
+    <rect x="40" y="17" width="34" height="13" rx="0" fill="#f9fafb" stroke="#e5e7eb" stroke-width="0.8"/>
+    <line x1="10" y1="22" x2="30" y2="22" stroke="#111827" stroke-width="1.2"/>
+    <line x1="44" y1="22" x2="66" y2="22" stroke="#4b5563" stroke-width="0.9"/>
+    <line x1="10" y1="26" x2="26" y2="26" stroke="#4b5563" stroke-width="0.8"/>
+    <line x1="44" y1="26" x2="62" y2="26" stroke="#4b5563" stroke-width="0.8"/>
+    <rect x="6" y="32" width="32" height="13" rx="0" fill="#f9fafb" stroke="#e5e7eb" stroke-width="0.8"/>
+    <rect x="40" y="32" width="34" height="13" rx="0" fill="#ffffff" stroke="#e5e7eb" stroke-width="0.8"/>
+    <line x1="10" y1="37" x2="28" y2="37" stroke="#111827" stroke-width="1.2"/>
+    <line x1="44" y1="37" x2="68" y2="37" stroke="#4b5563" stroke-width="0.9"/>
+    <line x1="10" y1="41" x2="24" y2="41" stroke="#4b5563" stroke-width="0.8"/>
+    <line x1="44" y1="41" x2="60" y2="41" stroke="#4b5563" stroke-width="0.8"/>
   </svg>`,
 
-  // 5. Split Speech Bubbles
-  'faq-split-speech-bubbles': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
-    <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
-    <rect x="6" y="8" width="56" height="7" rx="2" fill="#f8fafc" stroke="#e2e8f0" stroke-width="0.8"/>
-    <line x1="10" y1="11.5" x2="46" y2="11.5" stroke="#7530fb" stroke-width="1.2"/>
-    <line x1="16" y1="19" x2="66" y2="19" stroke="#059669" stroke-width="1.2"/>
-    <rect x="6" y="27" width="56" height="7" rx="2" fill="#f8fafc" stroke="#e2e8f0" stroke-width="0.8"/>
-    <line x1="10" y1="30.5" x2="42" y2="30.5" stroke="#7530fb" stroke-width="1.2"/>
-    <line x1="16" y1="38" x2="62" y2="38" stroke="#059669" stroke-width="1.2"/>
+  'faq-split-speech-bubbles': `<svg viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+    <rect width="80" height="52" fill="#0f172a"/>
+    <rect x="6" y="6" width="68" height="17" rx="4" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
+    <line x1="11" y1="13" x2="50" y2="13" stroke="#ffffff" stroke-width="1.5"/>
+    <text x="67" y="13" font-family="Arial" font-size="7" fill="#7530fb" font-weight="900" text-anchor="end">01</text>
+    <line x1="11" y1="19" x2="62" y2="19" stroke="#9ca3af" stroke-width="0.9"/>
+    <rect x="6" y="28" width="68" height="17" rx="4" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>
+    <line x1="11" y1="35" x2="44" y2="35" stroke="#ffffff" stroke-width="1.5"/>
+    <text x="67" y="35" font-family="Arial" font-size="7" fill="#7530fb" font-weight="900" text-anchor="end">02</text>
+    <line x1="11" y1="41" x2="58" y2="41" stroke="#9ca3af" stroke-width="0.9"/>
   </svg>`,
 
-  // 6. Minimalist Hairline Rule
-  'faq-minimalist-hairline-rule': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
-    <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
-    <line x1="8" y1="10" x2="52" y2="10" stroke="#0f172a" stroke-width="1.5"/>
-    <line x1="8" y1="16" x2="68" y2="16" stroke="#64748b" stroke-width="1"/>
-    <line x1="8" y1="23" x2="72" y2="23" stroke="#e2e8f0" stroke-width="1"/>
-    <line x1="8" y1="29" x2="48" y2="29" stroke="#0f172a" stroke-width="1.5"/>
-    <line x1="8" y1="35" x2="64" y2="35" stroke="#64748b" stroke-width="1"/>
+  'faq-minimalist-hairline-rule': `<svg viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+    <rect width="80" height="52" fill="#ffffff"/>
+    <line x1="6" y1="9" x2="22" y2="9" stroke="#111827" stroke-width="2"/>
+    <line x1="6" y1="14" x2="40" y2="14" stroke="#6b7280" stroke-width="0.7"/>
+    <line x1="6" y1="19" x2="52" y2="19" stroke="#e5e7eb" stroke-width="1.5"/>
+    <line x1="6" y1="24" x2="56" y2="24" stroke="#111827" stroke-width="1.5"/>
+    <line x1="6" y1="29" x2="70" y2="29" stroke="#6b7280" stroke-width="0.7"/>
+    <line x1="6" y1="34" x2="66" y2="34" stroke="#6b7280" stroke-width="0.7"/>
+    <line x1="6" y1="39" x2="74" y2="39" stroke="#e5e7eb" stroke-width="1.5"/>
+    <line x1="6" y1="44" x2="48" y2="44" stroke="#111827" stroke-width="1.5"/>
+    <line x1="6" y1="49" x2="64" y2="49" stroke="#6b7280" stroke-width="0.7"/>
   </svg>`,
 
-  // 7. Industrial Technical Ledger
-  'faq-industrial-technical-ledger': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
-    <rect width="80" height="48" rx="4" fill="#0f172a"/>
-    <rect x="6" y="8" width="68" height="14" rx="2" fill="#1e293b" stroke="#334155" stroke-width="0.8"/>
-    <rect x="6" y="8" width="2" height="14" fill="#f59e0b"/>
-    <line x1="12" y1="12" x2="28" y2="12" stroke="#f59e0b" stroke-width="1"/>
-    <line x1="12" y1="17" x2="56" y2="17" stroke="#94a3b8" stroke-width="1"/>
-    <rect x="6" y="26" width="68" height="14" rx="2" fill="#1e293b" stroke="#334155" stroke-width="0.8"/>
-    <rect x="6" y="26" width="2" height="14" fill="#f59e0b"/>
-    <line x1="12" y1="30" x2="32" y2="30" stroke="#f59e0b" stroke-width="1"/>
-    <line x1="12" y1="35" x2="60" y2="35" stroke="#94a3b8" stroke-width="1"/>
+  'faq-industrial-technical-ledger': `<svg viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+    <rect width="80" height="52" fill="#0f172a"/>
+    <rect x="6" y="7" width="68" height="16" rx="2" fill="#1e293b" stroke="#334155" stroke-width="0.8"/>
+    <rect x="6" y="7" width="2.5" height="16" rx="0" fill="#f59e0b"/>
+    <line x1="12" y1="12" x2="32" y2="12" stroke="#f59e0b" stroke-width="0.9"/>
+    <line x1="12" y1="17" x2="58" y2="17" stroke="#94a3b8" stroke-width="0.9"/>
+    <rect x="6" y="27" width="68" height="16" rx="2" fill="#1e293b" stroke="#334155" stroke-width="0.8"/>
+    <rect x="6" y="27" width="2.5" height="16" rx="0" fill="#f59e0b"/>
+    <line x1="12" y1="32" x2="36" y2="32" stroke="#f59e0b" stroke-width="0.9"/>
+    <line x1="12" y1="37" x2="54" y2="37" stroke="#94a3b8" stroke-width="0.9"/>
   </svg>`,
 
-  // 8. Luxury Serif Editorial
-  'faq-luxury-serif-editorial': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
-    <rect width="80" height="48" rx="4" fill="#fafaf9" stroke="#e7e5e4" stroke-width="1"/>
-    <line x1="6" y1="8" x2="74" y2="8" stroke="#b45309" stroke-width="1.2"/>
-    <line x1="10" y1="15" x2="48" y2="15" stroke="#1c1917" stroke-width="1.5"/>
-    <line x1="14" y1="21" x2="66" y2="21" stroke="#78716c" stroke-width="1"/>
-    <line x1="10" y1="28" x2="70" y2="28" stroke="#e7e5e4" stroke-width="0.8"/>
-    <line x1="10" y1="34" x2="44" y2="34" stroke="#1c1917" stroke-width="1.5"/>
-    <line x1="14" y1="40" x2="62" y2="40" stroke="#78716c" stroke-width="1"/>
+  'faq-luxury-serif-editorial': `<svg viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+    <rect width="80" height="52" fill="#fafaf9" stroke="#e7e5e4" stroke-width="0.8"/>
+    <rect x="0" y="0" width="80" height="2.5" fill="#b45309"/>
+    <line x1="8" y1="9" x2="34" y2="9" stroke="#b45309" stroke-width="0.7"/>
+    <line x1="8" y1="16" x2="54" y2="16" stroke="#1c1917" stroke-width="1.4"/>
+    <line x1="14" y1="22" x2="66" y2="22" stroke="#78716c" stroke-width="0.8"/>
+    <line x1="8" y1="28" x2="72" y2="28" stroke="#e7e5e4" stroke-width="0.8"/>
+    <line x1="8" y1="34" x2="46" y2="34" stroke="#1c1917" stroke-width="1.4"/>
+    <line x1="14" y1="40" x2="62" y2="40" stroke="#78716c" stroke-width="0.8"/>
+    <line x1="8" y1="46" x2="72" y2="46" stroke="#e7e5e4" stroke-width="0.8"/>
   </svg>`,
 
-  // 9. Verified Trust Shield
-  'faq-verified-trust-shield': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
-    <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
-    <rect x="6" y="8" width="68" height="14" rx="2" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="0.8"/>
-    <circle cx="12" cy="15" r="3" fill="#16a34a"/>
-    <line x1="18" y1="13" x2="48" y2="13" stroke="#166534" stroke-width="1.5"/>
-    <line x1="18" y1="18" x2="64" y2="18" stroke="#334155" stroke-width="1"/>
-    <rect x="6" y="26" width="68" height="14" rx="2" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="0.8"/>
-    <circle cx="12" cy="33" r="3" fill="#16a34a"/>
-    <line x1="18" y1="31" x2="44" y2="31" stroke="#166534" stroke-width="1.5"/>
-    <line x1="18" y1="36" x2="60" y2="36" stroke="#334155" stroke-width="1"/>
+  'faq-verified-trust-shield': `<svg viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+    <rect width="80" height="52" fill="#ffffff"/>
+    <rect x="6" y="7" width="68" height="16" rx="3" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="0.8"/>
+    <rect x="6" y="7" width="2.5" height="16" fill="#16a34a"/>
+    <circle cx="14" cy="15" r="3.5" fill="#16a34a"/>
+    <line x1="20" y1="13" x2="54" y2="13" stroke="#14532d" stroke-width="1.3"/>
+    <line x1="20" y1="18" x2="66" y2="18" stroke="#374151" stroke-width="0.9"/>
+    <rect x="6" y="28" width="68" height="16" rx="3" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="0.8"/>
+    <rect x="6" y="28" width="2.5" height="16" fill="#16a34a"/>
+    <circle cx="14" cy="36" r="3.5" fill="#16a34a"/>
+    <line x1="20" y1="34" x2="48" y2="34" stroke="#14532d" stroke-width="1.3"/>
+    <line x1="20" y1="39" x2="60" y2="39" stroke="#374151" stroke-width="0.9"/>
   </svg>`,
 
-  // 11. Clean Chevron Accordion
-  'faq-clean-chevron-accordion': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
-    <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
-    <rect x="6" y="6" width="68" height="10" rx="3" fill="#f8f7ff" stroke="#e5e7eb" stroke-width="0.8"/>
-    <line x1="11" y1="11" x2="48" y2="11" stroke="#1e1535" stroke-width="1.5"/>
-    <circle cx="68" cy="11" r="4" fill="#7530fb"/>
-    <path d="M66 10l2 2 2-2" stroke="#ffffff" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-    <rect x="6" y="18" width="68" height="7" rx="0" fill="#ffffff" stroke="#e5e7eb" stroke-width="0.8"/>
-    <line x1="11" y1="21.5" x2="62" y2="21.5" stroke="#4b5563" stroke-width="1"/>
-    <rect x="6" y="27" width="68" height="10" rx="3" fill="#f8f7ff" stroke="#e5e7eb" stroke-width="0.8"/>
-    <line x1="11" y1="32" x2="44" y2="32" stroke="#1e1535" stroke-width="1.5"/>
-    <circle cx="68" cy="32" r="4" fill="#7530fb"/>
-    <path d="M66 31l2 2 2-2" stroke="#ffffff" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-    <rect x="6" y="39" width="68" height="5" rx="0" fill="#ffffff" stroke="#e5e7eb" stroke-width="0.8"/>
-    <line x1="11" y1="41.5" x2="58" y2="41.5" stroke="#4b5563" stroke-width="1"/>
+  'faq-compact-mobile-accordion': `<svg viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+    <rect width="80" height="52" fill="#ffffff"/>
+    <rect x="6" y="6" width="68" height="8" fill="#f5f3ff" stroke="#e5e7eb" stroke-width="0.8"/>
+    <line x1="11" y1="10" x2="52" y2="10" stroke="#111827" stroke-width="1.4"/>
+    <rect x="6" y="14" width="68" height="9" fill="#ffffff" stroke="#e5e7eb" stroke-width="0.8"/>
+    <line x1="16" y1="18.5" x2="64" y2="18.5" stroke="#4b5563" stroke-width="0.9"/>
+    <rect x="6" y="23" width="68" height="8" fill="#f5f3ff" stroke="#e5e7eb" stroke-width="0.8"/>
+    <line x1="11" y1="27" x2="46" y2="27" stroke="#111827" stroke-width="1.4"/>
+    <rect x="6" y="31" width="68" height="9" fill="#ffffff" stroke="#e5e7eb" stroke-width="0.8"/>
+    <line x1="16" y1="35.5" x2="60" y2="35.5" stroke="#4b5563" stroke-width="0.9"/>
+    <rect x="6" y="40" width="68" height="8" fill="#f5f3ff" stroke="#e5e7eb" stroke-width="0.8"/>
+    <line x1="11" y1="44" x2="54" y2="44" stroke="#111827" stroke-width="1.4"/>
   </svg>`,
 
-  // 12. Dark Toggle Accordion
-  'faq-dark-toggle-accordion': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
-    <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
-    <rect x="6" y="6" width="68" height="11" rx="3" fill="#1e1535"/>
-    <line x1="13" y1="11.5" x2="50" y2="11.5" stroke="#ffffff" stroke-width="1.5"/>
-    <rect x="65" y="8" width="6" height="6" rx="1.5" fill="#7530fb"/>
-    <path d="M67 10.5l1 1.5 1-1.5" stroke="#ffffff" stroke-width="1" fill="none" stroke-linecap="round"/>
-    <rect x="6" y="17" width="68" height="7" rx="0" fill="#f9fafb"/>
-    <rect x="6" y="17" width="68" height="1.5" fill="#7530fb"/>
-    <line x1="11" y1="21.5" x2="60" y2="21.5" stroke="#374151" stroke-width="1"/>
-    <rect x="6" y="27" width="68" height="11" rx="3" fill="#1e1535"/>
-    <line x1="13" y1="32.5" x2="46" y2="32.5" stroke="#ffffff" stroke-width="1.5"/>
-    <rect x="65" y="29" width="6" height="6" rx="1.5" fill="#7530fb"/>
-    <path d="M67 31.5l1 1.5 1-1.5" stroke="#ffffff" stroke-width="1" fill="none" stroke-linecap="round"/>
-    <rect x="6" y="39" width="68" height="5" rx="0" fill="#f9fafb"/>
-    <line x1="11" y1="41.5" x2="56" y2="41.5" stroke="#374151" stroke-width="1"/>
+  'faq-clean-chevron-accordion': `<svg viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+    <rect width="80" height="52" fill="#ffffff"/>
+    <rect x="6" y="5" width="68" height="11" rx="3" fill="#f8f7ff" stroke="#e5e7eb" stroke-width="0.8"/>
+    <line x1="11" y1="10.5" x2="50" y2="10.5" stroke="#1e1535" stroke-width="1.5"/>
+    <circle cx="67" cy="10.5" r="4" fill="#7530fb"/>
+    <path d="M65 9.5l2 2 2-2" stroke="#ffffff" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    <rect x="6" y="18" width="68" height="7" fill="#ffffff" stroke="#e5e7eb" stroke-width="0.8"/>
+    <line x1="11" y1="21.5" x2="64" y2="21.5" stroke="#4b5563" stroke-width="0.9"/>
+    <rect x="6" y="27" width="68" height="11" rx="3" fill="#f8f7ff" stroke="#e5e7eb" stroke-width="0.8"/>
+    <line x1="11" y1="32.5" x2="46" y2="32.5" stroke="#1e1535" stroke-width="1.5"/>
+    <circle cx="67" cy="32.5" r="4" fill="#7530fb"/>
+    <path d="M65 31.5l2 2 2-2" stroke="#ffffff" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    <rect x="6" y="40" width="68" height="7" fill="#ffffff" stroke="#e5e7eb" stroke-width="0.8"/>
+    <line x1="11" y1="43.5" x2="58" y2="43.5" stroke="#4b5563" stroke-width="0.9"/>
   </svg>`,
 
-  // 10. Compact Mobile Accordion
-  'faq-compact-mobile-accordion': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
-    <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
-    <rect x="6" y="8" width="68" height="8" rx="1.5" fill="#f8fafc" stroke="#e2e8f0" stroke-width="0.8"/>
-    <line x1="10" y1="12" x2="46" y2="12" stroke="#0f172a" stroke-width="1.2"/>
-    <path d="M68 10.5l2 1.5-2 1.5" stroke="#7530fb" stroke-width="1" fill="none"/>
-    <line x1="10" y1="20" x2="62" y2="20" stroke="#64748b" stroke-width="1"/>
-    <rect x="6" y="26" width="68" height="8" rx="1.5" fill="#f8fafc" stroke="#e2e8f0" stroke-width="0.8"/>
-    <line x1="10" y1="30" x2="42" y2="30" stroke="#0f172a" stroke-width="1.2"/>
-    <path d="M68 28.5l2 1.5-2 1.5" stroke="#7530fb" stroke-width="1" fill="none"/>
-    <line x1="10" y1="38" x2="58" y2="38" stroke="#64748b" stroke-width="1"/>
+  'faq-dark-toggle-accordion': `<svg viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+    <rect width="80" height="52" fill="#ffffff"/>
+    <rect x="6" y="5" width="68" height="12" rx="3" fill="#1e1535"/>
+    <line x1="12" y1="11" x2="52" y2="11" stroke="#ffffff" stroke-width="1.5"/>
+    <rect x="65" y="7.5" width="6" height="6" rx="1.5" fill="#7530fb"/>
+    <path d="M67 10l1 1.5 1-1.5" stroke="#ffffff" stroke-width="0.9" fill="none" stroke-linecap="round"/>
+    <rect x="6" y="19" width="68" height="8" fill="#f9fafb"/>
+    <rect x="6" y="19" width="68" height="2" fill="#7530fb"/>
+    <line x1="11" y1="24" x2="60" y2="24" stroke="#374151" stroke-width="0.9"/>
+    <rect x="6" y="29" width="68" height="12" rx="3" fill="#1e1535"/>
+    <line x1="12" y1="35" x2="48" y2="35" stroke="#ffffff" stroke-width="1.5"/>
+    <rect x="65" y="31.5" width="6" height="6" rx="1.5" fill="#7530fb"/>
+    <path d="M67 34l1 1.5 1-1.5" stroke="#ffffff" stroke-width="0.9" fill="none" stroke-linecap="round"/>
+    <rect x="6" y="43" width="68" height="7" fill="#f9fafb"/>
+    <line x1="11" y1="47" x2="56" y2="47" stroke="#374151" stroke-width="0.9"/>
   </svg>`,
 }
 
 export function getFaqBlockThumbnailSvg(id: string): string {
-  const key = Object.keys(FAQ_BLOCK_THUMBNAILS).find(k => {
-    const clean = id.toLowerCase().replace(/_/g, '-')
-    const vClean = k.toLowerCase().replace(/_/g, '-')
-    return k === id || vClean === clean || k.endsWith(clean) || id.endsWith(k)
-  })
+  const clean = id.toLowerCase().replace(/_/g, '-')
+  const key = Object.keys(FAQ_BLOCK_THUMBNAILS).find(k => k === id || k === clean || k.endsWith(clean) || id.endsWith(k))
   return key ? FAQ_BLOCK_THUMBNAILS[key] : FAQ_BLOCK_THUMBNAILS['faq-classic-stacked']
 }
 
@@ -780,85 +805,85 @@ export function getFaqBlockThumbnailSvg(id: string): string {
 export const faqBlockVariants: BlockVariant[] = [
   {
     id: 'faq-classic-stacked',
-    label: 'Classic Stacked',
-    description: 'Current clean question bars with white answer section',
+    label: 'Professional Stacked',
+    description: 'Clean left accent rail, bold questions, grey answers. The professional default for any seller.',
     thumbnail: FAQ_BLOCK_THUMBNAILS['faq-classic-stacked'],
     toHtml(props, id) { return classicStacked(props, id) },
   },
   {
     id: 'faq-boxed-cards-grid',
-    label: 'Boxed Question Cards',
-    description: 'Independent crisp white cards with subtle borders & Q chip',
+    label: 'Numbered Answer Cards',
+    description: 'Each FAQ in its own white card with a subtle numbered badge. Confident, editorial style.',
     thumbnail: FAQ_BLOCK_THUMBNAILS['faq-boxed-cards-grid'],
     toHtml(props, id) { return boxedCardsGrid(props, id) },
   },
   {
     id: 'faq-accent-rail-left',
-    label: 'Accent Rail Left',
-    description: '3.5px solid vertical accent rail flanking each question',
+    label: 'Open Accordion Style',
+    description: 'Lavender question header with Open badge, white answer below. Looks like a real accordion.',
     thumbnail: FAQ_BLOCK_THUMBNAILS['faq-accent-rail-left'],
     toHtml(props, id) { return accentRailLeft(props, id) },
   },
   {
     id: 'faq-numbered-circle-steps',
-    label: 'Numbered Inquiries',
-    description: 'Prominent numbered circular badges (01, 02, 03) for high readability',
+    label: 'Policy Document Grid',
+    description: 'Two-column table with Question | Answer layout. Best for 5+ short-answer FAQs.',
     thumbnail: FAQ_BLOCK_THUMBNAILS['faq-numbered-circle-steps'],
     toHtml(props, id) { return numberedCircleSteps(props, id) },
   },
   {
     id: 'faq-split-speech-bubbles',
-    label: 'Split Q&A Bubbles',
-    description: 'Two-tone conversational Q&A bubbles with distinct visual hierarchy',
+    label: 'Dark Premium Cards',
+    description: 'Navy background, white-bordered cards, numbered items. For tech, gaming and premium sellers.',
     thumbnail: FAQ_BLOCK_THUMBNAILS['faq-split-speech-bubbles'],
     toHtml(props, id) { return splitSpeechBubbles(props, id) },
   },
   {
     id: 'faq-minimalist-hairline-rule',
-    label: 'Minimalist Hairline',
-    description: 'High-end Scandinavian zero-fill design with delicate hairline dividers',
+    label: 'Apple-Style Minimal',
+    description: 'Zero decoration — just clean typography and hairline dividers. Refined and confident.',
     thumbnail: FAQ_BLOCK_THUMBNAILS['faq-minimalist-hairline-rule'],
     toHtml(props, id) { return minimalistHairlineRule(props, id) },
   },
   {
     id: 'faq-industrial-technical-ledger',
-    label: 'Industrial Fitment Ledger',
-    description: 'Gunmetal & amber fitment ledger for auto parts, tools & hardware',
+    label: 'Industrial Ledger',
+    description: 'Gunmetal dark with amber reference codes. For auto parts, tools and industrial sellers.',
     thumbnail: FAQ_BLOCK_THUMBNAILS['faq-industrial-technical-ledger'],
     toHtml(props, id) { return industrialTechnicalLedger(props, id) },
   },
   {
     id: 'faq-luxury-serif-editorial',
     label: 'Luxury Serif Editorial',
-    description: 'Roman serif typography with gold hairlines for watches & luxury goods',
+    description: 'Warm ivory, serif typography, gold accent. For watches, jewellery and collectibles.',
     thumbnail: FAQ_BLOCK_THUMBNAILS['faq-luxury-serif-editorial'],
     toHtml(props, id) { return luxurySerifEditorial(props, id) },
   },
   {
     id: 'faq-verified-trust-shield',
-    label: 'Verified Trust Shield',
-    description: 'Verified buyer protection callouts with green reassurance badges',
+    label: 'Buyer Guarantee Cards',
+    description: 'Green checkmark badges frame each FAQ as a buyer guarantee. Perfect for return policy blocks.',
     thumbnail: FAQ_BLOCK_THUMBNAILS['faq-verified-trust-shield'],
     toHtml(props, id) { return verifiedTrustShield(props, id) },
   },
   {
     id: 'faq-compact-mobile-accordion',
-    label: 'Compact Mobile Accordion',
-    description: 'Mobile-first compact row ribbon with minimal vertical footprint',
+    label: 'Alternating Stripe Rows',
+    description: 'Q rows in soft lavender, A rows in white. Clean, scannable and mobile-friendly.',
     thumbnail: FAQ_BLOCK_THUMBNAILS['faq-compact-mobile-accordion'],
     toHtml(props, id) { return compactMobileAccordion(props, id) },
   },
   {
     id: 'faq-clean-chevron-accordion',
-    label: 'Clean Chevron Accordion',
-    description: 'Classic ▼ open-state accordion rows with purple chevron badge per question',
+    label: 'Chevron Accordion',
+    description: 'Lavender question bars with purple ▼ badge. Clean open-accordion look sellers and buyers recognise.',
     thumbnail: FAQ_BLOCK_THUMBNAILS['faq-clean-chevron-accordion'],
     toHtml(props, id) { return cleanChevronAccordion(props, id) },
   },
   {
     id: 'faq-dark-toggle-accordion',
     label: 'Dark Toggle Accordion',
-    description: 'Dark header bars with ▼ chevron toggle and high-contrast answer area',
+    description: 'Dark navy question headers, purple accent on answer area. High contrast, high impact.',
     thumbnail: FAQ_BLOCK_THUMBNAILS['faq-dark-toggle-accordion'],
     toHtml(props, id) { return darkToggleAccordion(props, id) },
   },
