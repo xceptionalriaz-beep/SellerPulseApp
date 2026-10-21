@@ -963,7 +963,37 @@ export default function VisualEditor({
 
     const handleExport = useCallback(() => {
         if (blocks.length === 0) return
-        const html = stripInternalAttributes(assembleBodyOnly(blocks, canvasSettings))
+        let html = stripInternalAttributes(assembleBodyOnly(blocks, canvasSettings))
+
+        // ── Free plan watermark ───────────────────────────────────────────────
+        // Injected into the exported HTML for free users only.
+        // Pro users export clean HTML with no attribution footer.
+        if (designStudioPlan !== 'pro') {
+            const watermark = `
+<!-- SellerZing watermark — sellerzing.com -->
+<div style="
+  display:block;
+  width:100%;
+  padding:10px 0;
+  text-align:center;
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:12px;
+  color:#9ca3af;
+  border-top:1px solid #e5e7eb;
+  margin-top:24px;
+  box-sizing:border-box;
+">
+  Made with <a href="https://sellerzing.com" target="_blank" rel="noopener" style="color:#7530fb;text-decoration:none;font-weight:600;">SellerZing</a>
+  &nbsp;&middot;&nbsp;Professional eBay listing templates
+</div>`
+            // Insert just before closing </body> if present, otherwise append
+            if (html.includes('</body>')) {
+                html = html.replace('</body>', `${watermark}\n</body>`)
+            } else {
+                html = html + watermark
+            }
+        }
+
         const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
@@ -974,7 +1004,7 @@ export default function VisualEditor({
         a.click()
         document.body.removeChild(a)
         URL.revokeObjectURL(url)
-    }, [blocks, canvasSettings, templateName])
+    }, [blocks, canvasSettings, templateName, designStudioPlan])
 
     // Expose export fn to parent (page.tsx calls it from the dropdown)
     const onExportReadyRef = useRef(onExportReady)
