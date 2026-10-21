@@ -76,45 +76,60 @@ const DEFAULT_FAQ_ITEMS: FaqItem[] = [
 ]
 
 function resolveItems(p: any): FaqItem[] {
-  if (Array.isArray(p.items) && p.items.length > 0) {
-    return p.items
-  }
+  // PropertiesPanel saves to p.faqs — check that first, then p.items, then defaults
+  if (Array.isArray(p.faqs) && p.faqs.length > 0) return p.faqs
+  if (Array.isArray(p.items) && p.items.length > 0) return p.items
   return DEFAULT_FAQ_ITEMS
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 1. CLASSIC STACKED (CURRENT STYLE — KEPT 100% IDENTICAL)
+// 1. CLASSIC STACKED — Clean professional Q&A list with section heading
 // ─────────────────────────────────────────────────────────────────────────────
 function classicStacked(p: any, id: string): string {
   const bgCol = resolveBg(p, '#ffffff')
-  const qBg = resolveQuestionBg(p, '#f8f7ff')
-  const qCol = resolveQuestionCol(p, '#1e1535')
-  const aCol = resolveAnswerCol(p, '#374151')
-  const borderCol = resolveBorderCol(p, '#ede9fe')
+  const qCol = resolveQuestionCol(p, '#111827')
+  const aCol = resolveAnswerCol(p, '#4b5563')
+  const accent = resolveAccentCol(p, '#7530fb')
+  const borderCol = resolveBorderCol(p, '#e5e7eb')
   const items = resolveItems(p)
 
-  const rows = items.map(item => `
+  const rows = items.map((item, idx) => {
+    const isLast = idx === items.length - 1
+    return `
     <tr>
-      <td style="background-color:${qBg};padding:10px 14px;border-bottom:1px solid ${borderCol};">
-        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${qCol};">
-          ${item.question}
-        </p>
+      <td style="padding:14px 0;border-bottom:${isLast ? 'none' : `1px solid ${borderCol}`};">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+          <tr>
+            <td width="3" style="width:3px;background-color:${accent};border-radius:2px;font-size:1px;">&nbsp;</td>
+            <td style="padding-left:14px;">
+              <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${qCol};line-height:1.35;">
+                ${item.question}
+              </p>
+              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${aCol};line-height:1.6;">
+                ${item.answer}
+              </p>
+            </td>
+          </tr>
+        </table>
       </td>
-    </tr>
-    <tr>
-      <td style="padding:10px 14px 16px;background-color:#ffffff;">
-        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${aCol};line-height:1.5;">
-          ${item.answer}
-        </p>
-      </td>
-    </tr>
-  `).join('')
+    </tr>`
+  }).join('')
 
   return `<!--[riazify:faq_block:${id}]-->
 <table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;">
   <tr>
-    <td style="background-color:${bgCol};${pad(p, 16, 24, 16, 24)}box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid ${borderCol};border-radius:6px;overflow:hidden;">
+    <td style="background-color:${bgCol};${pad(p, 20, 24, 20, 24)}box-sizing:border-box;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:16px;">
+        <tr>
+          <td>
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:${accent};letter-spacing:0.08em;text-transform:uppercase;">Frequently Asked Questions</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding-top:6px;border-bottom:2px solid ${borderCol};font-size:1px;">&nbsp;</td>
+        </tr>
+      </table>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
         ${rows}
       </table>
     </td>

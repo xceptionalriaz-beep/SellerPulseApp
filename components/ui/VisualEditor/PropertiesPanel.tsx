@@ -3627,8 +3627,8 @@ function BlockStyleProps({ block, props, updateProps }: {
                     <Section title="Colours">
                         <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
                         <ColorRow label="Question background" value={props.questionBg ?? '#f8f7ff'} onChange={v => updateProps({ questionBg: v })} />
-                        <ColorRow label="Question text" value={props.questionText ?? '#1e1535'} onChange={v => updateProps({ questionText: v })} />
-                        <ColorRow label="Answer text" value={props.answerText ?? '#374151'} onChange={v => updateProps({ answerText: v })} />
+                        <ColorRow label="Question text" value={props.questionColor ?? '#1e1535'} onChange={v => updateProps({ questionColor: v })} />
+                        <ColorRow label="Answer text" value={props.answerColor ?? '#374151'} onChange={v => updateProps({ answerColor: v })} />
                         <ColorRow label="Chevron colour" value={props.accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v })} />
                         <ColorRow label="Border colour" value={props.borderColor ?? '#e9e3ff'} onChange={v => updateProps({ borderColor: v })} />
                     </Section>
