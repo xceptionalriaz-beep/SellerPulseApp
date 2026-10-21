@@ -40,7 +40,9 @@ export interface ReviewItem {
   rating?: number
   date?: string
   location?: string
-  link?: string  // eBay feedback/review URL — buyer name becomes a clickable link
+  link?: string     // eBay feedback/review URL — buyer name becomes a clickable link
+  spend?: string    // e.g. '$200' — total spend shown in darkLuxury rows
+  reviewCount?: string // e.g. '14' — total reviews by this buyer shown in darkLuxury rows
 }
 
 // ── Default Reviews ───────────────────────────────────────────────────────────
@@ -171,7 +173,7 @@ function starCards(p: any, id: string): string {
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:14px;">
         <tr>
           <td>
-            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:${accent};letter-spacing:0.1em;text-transform:uppercase;">What Our Buyers Say</p>
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:${accent};letter-spacing:0.1em;text-transform:uppercase;">${p.sectionHeading ?? 'What Our Buyers Say'}</p>
           </td>
         </tr>
       </table>
@@ -193,6 +195,7 @@ function boldQuoteStrip(p: any, id: string): string {
   const starCol    = resolveStarColor(p)
   const accent     = resolveAccent(p)
   const feedbackPct = p.feedbackPct ?? '99.8'
+  const boldScore  = p.boldScore ?? '5.0'
   const reviews    = resolveReviews(p)
 
   const rows = reviews.map((r, i) => {
@@ -229,14 +232,14 @@ function boldQuoteStrip(p: any, id: string): string {
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${sectionBg};border-left:4px solid ${accent};">
   <tr>
     <td>
-      <!-- Trust bar -->
+      ${p.showFeedbackBadge !== false ? `<!-- Trust bar -->
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:rgba(255,255,255,0.05);border-bottom:1px solid rgba(255,255,255,0.08);">
         <tr>
           <td style="padding:11px 24px;">
             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
               <tr>
                 <td style="vertical-align:middle;">
-                  <p style="margin:0;">${stars(5, starCol, 13)}<span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:#ffffff;vertical-align:middle;margin-left:8px;">5.0 / 5.0</span></p>
+                  <p style="margin:0;">${stars(5, starCol, 13)}<span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:#ffffff;vertical-align:middle;margin-left:8px;">${boldScore} / 5.0</span></p>
                 </td>
                 <td align="right" style="vertical-align:middle;">
                   <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:rgba(22,163,74,0.2);border:1px solid rgba(22,163,74,0.45);border-radius:4px;">
@@ -251,7 +254,7 @@ function boldQuoteStrip(p: any, id: string): string {
             </table>
           </td>
         </tr>
-      </table>
+      </table>` : ''}
       <!-- Quotes -->
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
         <tr>
@@ -293,11 +296,11 @@ function verifiedBuyerRows(p: any, id: string): string {
                 <tr>
                   <td style="width:36px;height:36px;background-color:#16a34a;border-radius:50%;text-align:center;line-height:36px;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:#ffffff;">${ini}</td>
                 </tr>
-                <tr>
+                ${p.showVerifiedBadge !== false ? `<tr>
                   <td style="padding-top:4px;text-align:center;">
                     <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:8px;font-weight:700;color:#16a34a;letter-spacing:0.03em;">&#10003;&nbsp;Verified</p>
                   </td>
-                </tr>
+                </tr>` : ''}
               </table>
             </td>
             <td style="vertical-align:top;">
@@ -321,7 +324,7 @@ function verifiedBuyerRows(p: any, id: string): string {
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:14px;">
         <tr>
           <td style="border-bottom:2px solid ${borderCol};padding-bottom:12px;">
-            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:${textCol};">Buyer Reviews</p>
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:${textCol};">${p.sectionHeading ?? 'Buyer Reviews'}</p>
           </td>
         </tr>
       </table>
@@ -465,7 +468,7 @@ function magazineEditorial(p: any, id: string): string {
         <tr>
 
           <!-- LEFT: Overall rating + bar chart ─────────────────────────────── -->
-          <td width="36%" valign="top" style="width:36%;vertical-align:top;padding-right:10px;box-sizing:border-box;">
+          ${p.showRatingBars !== false ? `<td width="36%" valign="top" style="width:36%;vertical-align:top;padding-right:10px;box-sizing:border-box;">
             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:#f9fafb;border:1px solid ${borderCol};border-radius:10px;">
               <tr>
                 <td style="padding:16px 14px;">
@@ -480,10 +483,10 @@ function magazineEditorial(p: any, id: string): string {
                 </td>
               </tr>
             </table>
-          </td>
+          </td>` : ''}
 
           <!-- RIGHT: Featured review detail card ──────────────────────────── -->
-          <td valign="top" style="vertical-align:top;box-sizing:border-box;">
+          ${p.showFeaturedReview !== false ? `<td valign="top" style="vertical-align:top;box-sizing:border-box;">
             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:#f9fafb;border:1px solid ${borderCol};border-radius:10px;">
               <tr>
                 <td style="padding:16px 14px;">
@@ -530,7 +533,7 @@ function magazineEditorial(p: any, id: string): string {
                   <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:${subCol};line-height:1.75;word-break:break-word;">${featText}</p>
 
                   <!-- Stat tiles: Rating Score + Helpful Votes -->
-                  <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:10px;">
+                  ${p.showStatTiles !== false ? `<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:10px;">
                     <tr>
                       <td style="padding-right:8px;">
                         <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:#ede9fe;border-radius:8px;">
@@ -549,10 +552,10 @@ function magazineEditorial(p: any, id: string): string {
                         </table>
                       </td>
                     </tr>
-                  </table>
+                  </table>` : ''}
 
                   <!-- View Full Review button — links to eBay review URL if seller added one -->
-                  ${viewFullReviewUrl
+                  ${p.showViewFullReview !== false ? (viewFullReviewUrl
                     ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:7px;">
                     <tr><td>
                       <a href="${viewFullReviewUrl}" style="display:block;text-decoration:none;">
@@ -572,13 +575,12 @@ function magazineEditorial(p: any, id: string): string {
                         </td></tr>
                       </table>
                     </td></tr>
-                  </table>`
-                  }
+                  </table>`) : ''}
 
                 </td>
               </tr>
             </table>
-          </td>
+          </td>` : ''}
 
         </tr>
       </table>
@@ -588,7 +590,7 @@ function magazineEditorial(p: any, id: string): string {
         <!-- List header -->
         <tr>
           <td style="padding:10px 14px;background-color:#f3f4f6;border-bottom:1px solid ${borderCol};border-radius:10px 10px 0 0;">
-            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:${subCol};text-transform:uppercase;letter-spacing:0.07em;">Customer Reviews</p>
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:${subCol};text-transform:uppercase;letter-spacing:0.07em;">${p.listHeading ?? 'Customer Reviews'}</p>
           </td>
         </tr>
         <!-- Review rows (accent border on first = matches featured panel) -->
@@ -633,6 +635,10 @@ function avatarRatingCards(p: any, id: string): string {
       <p style="margin:4px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:9px;font-weight:700;color:${subCol};letter-spacing:0.05em;text-transform:uppercase;">${m.label}</p>
     </td>`).join('')
 
+  const dsrLabel1 = p.dsrLabel1 ?? 'Item as Described'
+  const dsrLabel2 = p.dsrLabel2 ?? 'Dispatch Speed'
+  const dsrLabel3 = p.dsrLabel3 ?? 'Communication'
+
   const dsrRow = (label: string) =>
     `<tr><td style="padding:2px 0;"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr><td><p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:9px;color:${subCol};">${label}</p></td><td align="right">${stars(5, starCol, 9)}</td></tr></table></td></tr>`
 
@@ -661,7 +667,10 @@ function avatarRatingCards(p: any, id: string): string {
                   </table>
                 </td>
                 <td style="vertical-align:middle;">
-                  <p style="margin:0 0 2px;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:${textCol};">${author}</p>
+                  ${r.link
+                    ? `<a href="${r.link}" style="display:inline;margin:0 0 2px;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:${accent};text-decoration:none;">${author}</a>`
+                    : `<p style="margin:0 0 2px;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:${textCol};">${author}</p>`
+                  }
                   <p style="margin:0;">${stars(r.rating ?? 5, starCol, 10)}</p>
                 </td>
               </tr>
@@ -675,11 +684,11 @@ function avatarRatingCards(p: any, id: string): string {
         </tr>
         <tr>
           <td style="padding:8px 12px 12px;border-top:1px solid ${borderCol};">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
-              ${dsrRow('Item as Described')}
-              ${dsrRow('Dispatch Speed')}
-              ${dsrRow('Communication')}
-            </table>
+            ${p.showDsrRatings !== false ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+              ${dsrRow(dsrLabel1)}
+              ${dsrRow(dsrLabel2)}
+              ${dsrRow(dsrLabel3)}
+            </table>` : ''}
             <p style="margin:6px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:9px;color:${subCol};">${date}</p>
           </td>
         </tr>
@@ -692,9 +701,9 @@ function avatarRatingCards(p: any, id: string): string {
   <tr>
     <td style="${pad(p, 20, 20, 20, 20)}box-sizing:border-box;">
       <!-- Seller metrics dashboard -->
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid ${borderCol};border-radius:8px;background-color:#f9fafb;margin-bottom:16px;">
+      ${p.showScoreboard !== false ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid ${borderCol};border-radius:8px;background-color:#f9fafb;margin-bottom:16px;">
         <tr>${metricTiles}</tr>
-      </table>
+      </table>` : ''}
       <!-- Review cards with DSR ratings -->
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;table-layout:fixed;">
         <tr>${cards}</tr>
@@ -773,8 +782,8 @@ function darkLuxury(p: any, id: string): string {
     const date     = r.date ?? 'Verified eBay Purchase'
     const rating   = r.rating ?? 5
     const ini      = initials(name)
-    const spend    = (r as any).spend       ?? '$200'
-    const revCount = (r as any).reviewCount ?? '14'
+    const spend    = r.spend       ?? '$200'
+    const revCount = r.reviewCount ?? '14'
     const avatarBg = avatarPalette[i % avatarPalette.length]
     const topPad   = i > 0 ? 'padding-top:20px;border-top:1px solid ' + borderCol + ';' : ''
 
@@ -824,7 +833,7 @@ function darkLuxury(p: any, id: string): string {
     <td style="${pad(p, 20, 16, 16, 16)}box-sizing:border-box;">
 
       <!-- HEADER: title left, date range right — both wrap gracefully -->
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:14px;">
+      ${p.showAnalyticsHeader !== false ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:14px;">
         <tr>
           <td valign="middle" style="vertical-align:middle;">
             <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:800;color:${textCol};">${sectionTitle}</p>
@@ -833,10 +842,10 @@ function darkLuxury(p: any, id: string): string {
             <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};">${dateRange}</p>
           </td>
         </tr>
-      </table>
+      </table>` : ''}
 
       <!-- STATS PANEL: 3 stacked rows — works perfectly on any screen width -->
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:#f9fafb;border:1px solid ${borderCol};border-radius:10px;margin-bottom:20px;">
+      ${p.showStatPanel !== false ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:#f9fafb;border:1px solid ${borderCol};border-radius:10px;margin-bottom:20px;">
         <!-- Row 1: Total Reviews -->
         <tr>
           <td style="padding:14px 16px;border-bottom:1px solid ${borderCol};">
@@ -874,7 +883,7 @@ function darkLuxury(p: any, id: string): string {
             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;">${miniBarRows}</table>
           </td>
         </tr>
-      </table>
+      </table>` : ''}
 
       <!-- REVIEW ROWS: avatar + stacked content, no right-float column -->
       ${reviewRows}
@@ -903,6 +912,8 @@ function trustScoreBanner(p: any, id: string): string {
   const avg = reviews.reduce((s, r) => s + (r.rating ?? 5), 0) / reviews.length
   const displayAvg = avg.toFixed(1)
 
+  const ratingLabel = p.ratingLabel ?? 'Buyer Rating'
+
   const reviewList = reviews.slice(0, 4).map((r, i) => {
     const quote = r.text ?? r.quote ?? ''
     const author = r.author ?? r.name ?? 'Verified Buyer'
@@ -912,7 +923,10 @@ function trustScoreBanner(p: any, id: string): string {
         <td>
           <p style="margin:0 0 2px;">${stars(r.rating ?? 5, starCol, 10)}</p>
           <p style="margin:0 0 2px;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${textCol};line-height:1.5;">&ldquo;${quote.length > 90 ? quote.slice(0, 87) + '&hellip;' : quote}&rdquo;</p>
-          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:${subCol};">&#8212; ${author}</p>
+          ${r.link
+            ? `<a href="${r.link}" style="display:inline;margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:${accent};text-decoration:none;">&#8212; ${author}</a>`
+            : `<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:${subCol};">&#8212; ${author}</p>`
+          }
         </td>
       </tr>
     </table>`
@@ -925,7 +939,7 @@ function trustScoreBanner(p: any, id: string): string {
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
         <tr>
           <td width="38%" style="width:38%;vertical-align:middle;border-right:1px solid ${borderCol};padding-right:20px;">
-            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:${accent};letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">Buyer Rating</p>
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:${accent};letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">${ratingLabel}</p>
             <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:52px;font-weight:900;color:${textCol};line-height:1;">${displayAvg}</p>
             <p style="margin:4px 0;">${stars(Math.round(avg), starCol, 16)}</p>
             <p style="margin:4px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:${subCol};">out of 5.0</p>
@@ -976,7 +990,10 @@ function minimalSerifGrid(p: any, id: string): string {
       <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:${subCol};letter-spacing:0.06em;">0${i + 2}</p>
       <p style="margin:0 0 12px;font-family:Georgia,'Times New Roman',serif;font-size:13px;font-style:italic;color:${textCol};line-height:1.75;">&ldquo;${quote}&rdquo;</p>
       <p style="margin:0 0 5px;">${stars(r.rating ?? 5, starCol, 11)}</p>
-      <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};letter-spacing:0.04em;text-transform:uppercase;">${author} &middot; ${date}</p>
+      ${r.link
+        ? `<a href="${r.link}" style="display:inline;margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${accent};text-decoration:none;letter-spacing:0.04em;text-transform:uppercase;">${author}</a><span style="font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};letter-spacing:0.04em;text-transform:uppercase;"> &middot; ${date}</span>`
+        : `<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};letter-spacing:0.04em;text-transform:uppercase;">${author} &middot; ${date}</p>`
+      }
     </td>`
   }).join('')
 
@@ -995,7 +1012,10 @@ function minimalSerifGrid(p: any, id: string): string {
             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border-top:2px solid ${textCol};">
               <tr>
                 <td style="padding-top:12px;vertical-align:middle;">
-                  <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:${textCol};letter-spacing:0.05em;text-transform:uppercase;">${heroAuthor}</p>
+                  ${hero.link
+                    ? `<a href="${hero.link}" style="display:inline;margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:${accent};text-decoration:none;letter-spacing:0.05em;text-transform:uppercase;">${heroAuthor}</a>`
+                    : `<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:${textCol};letter-spacing:0.05em;text-transform:uppercase;">${heroAuthor}</p>`
+                  }
                   <p style="margin:2px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};">${heroDate}</p>
                 </td>
                 <td align="right" style="padding-top:12px;vertical-align:middle;">
@@ -1111,7 +1131,10 @@ function ratingBreakdownGrid(p: any, id: string): string {
                     </table>
                   </td>
                   <td valign="middle" style="vertical-align:middle;padding-left:10px;">
-                    <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:${textCol};line-height:1.2;">${name}</p>
+                    ${r.link
+                      ? `<a href="${r.link}" style="display:inline;margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:${accent};text-decoration:none;line-height:1.2;">${name}</a>`
+                      : `<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:${textCol};line-height:1.2;">${name}</p>`
+                    }
                     <p style="margin:2px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};line-height:1.2;">${date}</p>
                   </td>
                   <td align="right" valign="middle" style="text-align:right;vertical-align:middle;white-space:nowrap;">
@@ -1156,18 +1179,16 @@ function ratingBreakdownGrid(p: any, id: string): string {
             <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
               <tr>
                 <td style="padding-right:8px;">
-                  <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${accent};border-radius:6px;">
-                    <tr><td style="padding:9px 16px;">
-                      <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:#ffffff;white-space:nowrap;">View All Feedback</p>
-                    </td></tr>
-                  </table>
+                  ${p.viewAllFeedbackUrl
+                    ? `<a href="${p.viewAllFeedbackUrl}" style="display:inline;text-decoration:none;"><table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${accent};border-radius:6px;"><tr><td style="padding:9px 16px;"><p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:#ffffff;white-space:nowrap;">View All Feedback</p></td></tr></table></a>`
+                    : `<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${accent};border-radius:6px;"><tr><td style="padding:9px 16px;"><p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:#ffffff;white-space:nowrap;">View All Feedback</p></td></tr></table>`
+                  }
                 </td>
                 <td>
-                  <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1.5px solid ${accent};border-radius:6px;">
-                    <tr><td style="padding:8px 16px;">
-                      <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:${accent};white-space:nowrap;">Read Reviews</p>
-                    </td></tr>
-                  </table>
+                  ${p.readReviewsUrl
+                    ? `<a href="${p.readReviewsUrl}" style="display:inline;text-decoration:none;"><table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1.5px solid ${accent};border-radius:6px;"><tr><td style="padding:8px 16px;"><p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:${accent};white-space:nowrap;">Read Reviews</p></td></tr></table></a>`
+                    : `<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1.5px solid ${accent};border-radius:6px;"><tr><td style="padding:8px 16px;"><p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:${accent};white-space:nowrap;">Read Reviews</p></td></tr></table>`
+                  }
                 </td>
               </tr>
             </table>
@@ -1585,7 +1606,10 @@ function scoreShowcase(p: any, id: string): string {
         </tr>
         <tr>
           <td style="padding:0 16px 16px;border-top:1px solid ${borderCol};">
-            <p style="margin:8px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:${accent};">&#8212; ${author}</p>
+            ${r.link
+              ? `<a href="${r.link}" style="margin:8px 0 0;display:block;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:${accent};text-decoration:none;">&#8212; ${author}</a>`
+              : `<p style="margin:8px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:${accent};">&#8212; ${author}</p>`
+            }
             <p style="margin:2px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};">${date}</p>
           </td>
         </tr>

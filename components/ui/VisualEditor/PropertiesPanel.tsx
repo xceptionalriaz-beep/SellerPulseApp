@@ -4063,6 +4063,20 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <ColorRow label="Accent colour" value={(props as any).accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v } as any)} />
                         <ColorRow label="Border colour" value={(props as any).borderColor ?? '#e5e7eb'} onChange={v => updateProps({ borderColor: v } as any)} />
                     </Section>
+                    <Section title="Typography">
+                        <SelectInput
+                            label="Font family"
+                            value={(props as any).fontFamily ?? ''}
+                            options={[
+                                { v: '', l: 'Default (Arial)' },
+                                { v: 'Georgia, serif', l: 'Georgia' },
+                                { v: 'Verdana, sans-serif', l: 'Verdana' },
+                                { v: 'Trebuchet MS, sans-serif', l: 'Trebuchet MS' },
+                                { v: 'monospace', l: 'Monospace' },
+                            ]}
+                            onChange={v => updateProps({ fontFamily: v } as any)}
+                        />
+                    </Section>
                     <Section title="Spacing">
                         <NumberInput label="Padding top" value={(props as any).paddingTop ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingTop: v } as any)} />
                         <NumberInput label="Padding bottom" value={(props as any).paddingBottom ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v } as any)} />
@@ -7515,33 +7529,87 @@ function BlockAttributeProps({ block, props, updateProps, phButton, tokenButton,
         }
 
         case 'customer_reviews' as BlockType: {
-            const reviews: { text: string; author: string; rating: number; date?: string; link?: string }[] = (props as any).reviews ?? [
-                { text: 'Exactly as described. Arrived two days early and packaging was excellent.', author: 'Sarah M.', rating: 5, date: 'Verified eBay Purchase', link: '' },
-                { text: 'Great quality for the price. Seller answered my question within the hour.', author: 'James T.', rating: 5, date: 'Verified eBay Purchase', link: '' },
+            const reviews: { text: string; author: string; rating: number; date?: string; link?: string; spend?: string; reviewCount?: string }[] = (props as any).reviews ?? [
+                { text: 'Exactly as described. Arrived two days early and packaging was excellent.', author: 'Sarah M.', rating: 5, date: 'Verified eBay Purchase', link: '', spend: '', reviewCount: '' },
+                { text: 'Great quality for the price. Seller answered my question within the hour.', author: 'James T.', rating: 5, date: 'Verified eBay Purchase', link: '', spend: '', reviewCount: '' },
             ]
-            const variantId = (props as any).variant ?? 'rev-star-cards'
-            const isTrustpilot   = variantId === 'rev-trustpilot-showcase'
-            const isDashboard    = variantId === 'rev-magazine-editorial'
-            const isDarkLuxury   = variantId === 'rev-dark-luxury'
-            const isAvatarCards  = variantId === 'rev-avatar-rating-cards'
+            const variantId        = (props as any).variant ?? 'rev-star-cards'
+            const isTrustpilot     = variantId === 'rev-trustpilot-showcase'
+            const isDashboard      = variantId === 'rev-magazine-editorial'
+            const isDarkLuxury     = variantId === 'rev-dark-luxury'
+            const isAvatarCards    = variantId === 'rev-avatar-rating-cards'
+            const isBoldQuote      = variantId === 'rev-bold-quote-strip'
+            const isVerifiedRows   = variantId === 'rev-verified-buyer-rows'
+            const isTrustScore     = variantId === 'rev-trust-score-banner'
+            const isRatingBreakdown= variantId === 'rev-rating-breakdown-grid'
+            const isStarCards      = variantId === 'rev-star-cards'
             const reviewTitles: string[] = (props as any).reviewTitles ?? ['First time buying — won\'t be the last', 'Outstanding Customer Service', 'Amazing from start to finish']
-            const showLinkField  = isDashboard || isDarkLuxury || isAvatarCards || variantId === 'rev-star-cards' || variantId === 'rev-verified-buyer-rows' || variantId === 'rev-bold-quote-strip' || variantId === 'rev-trust-score-banner' || variantId === 'rev-minimal-serif-grid'
             return (
                 <>
-                    {/* ── Trustpilot Showcase settings ─────────────────────── */}
+                    {/* ── Score Showcase (Trustpilot-style) settings ────────── */}
                     {isTrustpilot && (
                         <Section title="Score Showcase">
                             <TextInput label="Badge name (e.g. your store name)" value={(props as any).badgeName ?? '★ Verified Reviews'} onChange={v => updateProps({ badgeName: v } as any)} />
                             <TextInput label="Section headline" value={(props as any).sectionTitle ?? 'What Our Buyers Say About Us'} onChange={v => updateProps({ sectionTitle: v } as any)} />
                             <TextInput label="Score (e.g. 4.9)" value={(props as any).trustScore ?? '4.9'} onChange={v => updateProps({ trustScore: v } as any)} />
                             <TextInput label="Score label (e.g. Excellent)" value={(props as any).trustLabel ?? 'Excellent'} onChange={v => updateProps({ trustLabel: v } as any)} />
-                            <TextInput label="Review count (e.g. 2,847)" value={(props as any).reviewCount ?? '2,847'} onChange={v => updateProps({ reviewCount: v } as any)} />
+                            <TextInput label="Review count (e.g. 2,847)" value={(props as any).trustReviewCount ?? '2,847'} onChange={v => updateProps({ trustReviewCount: v } as any)} />
                         </Section>
                     )}
 
-                    {/* ── Review Dashboard (magazine-editorial) settings ──── */}
+                    {/* ── Bold Quote Strip settings ─────────────────────────── */}
+                    {isBoldQuote && (
+                        <Section title="Quote Strip Stats">
+                            <TextInput label="Score (e.g. 5.0)" value={(props as any).boldScore ?? '5.0'} onChange={v => updateProps({ boldScore: v } as any)} />
+                            <TextInput label="Positive feedback % (e.g. 99.8)" value={(props as any).feedbackPct ?? '99.8'} onChange={v => updateProps({ feedbackPct: v } as any)} />
+                        </Section>
+                    )}
+
+                    {/* ── Verified Buyer Rows settings ──────────────────────── */}
+                    {isVerifiedRows && (
+                        <Section title="Section">
+                            <TextInput label="Section heading" value={(props as any).sectionHeading ?? 'What Our Buyers Say'} onChange={v => updateProps({ sectionHeading: v } as any)} />
+                        </Section>
+                    )}
+
+                    {/* ── Trust Score Banner settings ───────────────────────── */}
+                    {isTrustScore && (
+                        <Section title="Trust Score Banner">
+                            <TextInput label="Section heading" value={(props as any).sectionHeading ?? 'What Our Buyers Say'} onChange={v => updateProps({ sectionHeading: v } as any)} />
+                            <TextInput label="Rating label (e.g. Buyer Rating)" value={(props as any).ratingLabel ?? 'Buyer Rating'} onChange={v => updateProps({ ratingLabel: v } as any)} />
+                        </Section>
+                    )}
+
+                    {/* ── Star Cards section heading ────────────────────────── */}
+                    {isStarCards && (
+                        <Section title="Section">
+                            <TextInput label="Section heading" value={(props as any).sectionHeading ?? 'What Our Buyers Say'} onChange={v => updateProps({ sectionHeading: v } as any)} />
+                        </Section>
+                    )}
+
+                    {/* ── Rating Breakdown Grid settings ────────────────────── */}
+                    {isRatingBreakdown && (
+                        <Section title="Rating Breakdown">
+                            <TextInput label="Section title" value={(props as any).sectionTitle ?? 'Customer Reviews'} onChange={v => updateProps({ sectionTitle: v } as any)} />
+                            <TextInput label="Section description" value={(props as any).sectionDesc ?? 'Every review below comes from a verified eBay purchase — honest feedback from real buyers.'} onChange={v => updateProps({ sectionDesc: v } as any)} />
+                            <TextInput label="View All Feedback URL (eBay)" value={(props as any).viewAllFeedbackUrl ?? ''} onChange={v => updateProps({ viewAllFeedbackUrl: v } as any)} />
+                            <TextInput label="Read Reviews URL (eBay)" value={(props as any).readReviewsUrl ?? ''} onChange={v => updateProps({ readReviewsUrl: v } as any)} />
+                            <InfoBox>Rating bar counts: 5 numbers 5★ → 1★ (comma separated).</InfoBox>
+                            <TextInput
+                                label="Bar counts 5★→1★"
+                                value={((props as any).ratingCounts ?? [14000, 8000, 4000, 800, 3000]).join(', ')}
+                                onChange={v => {
+                                    const nums = v.split(',').map((s: string) => parseInt(s.trim(), 10) || 0)
+                                    updateProps({ ratingCounts: nums.slice(0, 5) } as any)
+                                }}
+                            />
+                        </Section>
+                    )}
+
+                    {/* ── Review Dashboard (magazine-editorial) settings ──────── */}
                     {isDashboard && (
                         <Section title="Dashboard Stats">
+                            <TextInput label="List heading" value={(props as any).listHeading ?? 'Customer Reviews'} onChange={v => updateProps({ listHeading: v } as any)} />
                             <TextInput label="Overall rating (e.g. 4.8)" value={(props as any).overallRating ?? '4.0'} onChange={v => updateProps({ overallRating: v } as any)} />
                             <TextInput label="Total ratings (e.g. 38,000)" value={(props as any).totalRatings ?? '38,000'} onChange={v => updateProps({ totalRatings: v } as any)} />
                             <TextInput label="Helpful votes count" value={(props as any).helpfulVotes ?? '24'} onChange={v => updateProps({ helpfulVotes: v } as any)} />
@@ -7563,7 +7631,7 @@ function BlockAttributeProps({ block, props, updateProps, phButton, tokenButton,
                         </Section>
                     )}
 
-                    {/* ── Analytics Dashboard (dark-luxury) settings ────── */}
+                    {/* ── Analytics Dashboard (dark-luxury) settings ────────── */}
                     {isDarkLuxury && (
                         <Section title="Analytics Header">
                             <TextInput label="Section title" value={(props as any).sectionTitle ?? 'Reviews'} onChange={v => updateProps({ sectionTitle: v } as any)} />
@@ -7582,7 +7650,7 @@ function BlockAttributeProps({ block, props, updateProps, phButton, tokenButton,
                         </Section>
                     )}
 
-                    {/* ── Avatar Rating Cards settings ─────────────────────── */}
+                    {/* ── Avatar Rating Cards settings ──────────────────────── */}
                     {isAvatarCards && (
                         <Section title="Seller Scoreboard">
                             <TextInput label="Feedback score (e.g. 4,832)" value={(props as any).feedbackScore ?? '4,832'} onChange={v => updateProps({ feedbackScore: v } as any)} />
@@ -7591,8 +7659,33 @@ function BlockAttributeProps({ block, props, updateProps, phButton, tokenButton,
                             <TextInput label="Seller status (e.g. Top Rated)" value={(props as any).sellerStatus ?? 'Top Rated'} onChange={v => updateProps({ sellerStatus: v } as any)} />
                         </Section>
                     )}
+                    {isAvatarCards && (
+                        <Section title="DSR Rating Labels">
+                            <InfoBox>Customise the three Detailed Seller Ratings labels shown below the scoreboard.</InfoBox>
+                            <TextInput label="DSR label 1" value={(props as any).dsrLabel1 ?? 'Item as Described'} onChange={v => updateProps({ dsrLabel1: v } as any)} />
+                            <TextInput label="DSR label 2" value={(props as any).dsrLabel2 ?? 'Dispatch Speed'} onChange={v => updateProps({ dsrLabel2: v } as any)} />
+                            <TextInput label="DSR label 3" value={(props as any).dsrLabel3 ?? 'Communication'} onChange={v => updateProps({ dsrLabel3: v } as any)} />
+                        </Section>
+                    )}
 
-                    {/* ── Reviews list ─────────────────────────────────────── */}
+                    {/* ── Section visibility toggles ────────────────────────── */}
+                    <Section title="Show / Hide Sections">
+                        {isBoldQuote    && <ToggleRow label="Feedback Badge bar"       value={(props as any).showFeedbackBadge   !== false} onChange={v => updateProps({ showFeedbackBadge:   v } as any)} />}
+                        {isVerifiedRows && <ToggleRow label="Verified Buyer badge"     value={(props as any).showVerifiedBadge   !== false} onChange={v => updateProps({ showVerifiedBadge:   v } as any)} />}
+                        {isDashboard    && <ToggleRow label="Featured review panel"    value={(props as any).showFeaturedReview  !== false} onChange={v => updateProps({ showFeaturedReview:  v } as any)} />}
+                        {isDashboard    && <ToggleRow label="Rating bars"              value={(props as any).showRatingBars      !== false} onChange={v => updateProps({ showRatingBars:      v } as any)} />}
+                        {isDashboard    && <ToggleRow label="Stat tiles"               value={(props as any).showStatTiles       !== false} onChange={v => updateProps({ showStatTiles:       v } as any)} />}
+                        {isDashboard    && <ToggleRow label="'View Full Review' button" value={(props as any).showViewFullReview !== false} onChange={v => updateProps({ showViewFullReview:  v } as any)} />}
+                        {isAvatarCards  && <ToggleRow label="Seller Scoreboard"        value={(props as any).showScoreboard      !== false} onChange={v => updateProps({ showScoreboard:      v } as any)} />}
+                        {isAvatarCards  && <ToggleRow label="DSR Ratings"              value={(props as any).showDsrRatings      !== false} onChange={v => updateProps({ showDsrRatings:      v } as any)} />}
+                        {isDarkLuxury   && <ToggleRow label="Analytics header"         value={(props as any).showAnalyticsHeader !== false} onChange={v => updateProps({ showAnalyticsHeader: v } as any)} />}
+                        {isDarkLuxury   && <ToggleRow label="Stats panel"              value={(props as any).showStatPanel       !== false} onChange={v => updateProps({ showStatPanel:       v } as any)} />}
+                        {!isBoldQuote && !isVerifiedRows && !isDashboard && !isAvatarCards && !isDarkLuxury && (
+                            <InfoBox>No section toggles available for this variant. Switch to another layout to see show/hide controls.</InfoBox>
+                        )}
+                    </Section>
+
+                    {/* ── Reviews list ──────────────────────────────────────── */}
                     <Section title={`Reviews (${reviews.length})`}>
                         {reviews.map((r, i) => (
                             <div key={i} style={{ background: 'var(--pp-section-bg, rgba(255,255,255,0.04))', border: '1px solid var(--pp-border)', borderRadius: 6, marginBottom: 6, padding: '8px' }}>
@@ -7603,8 +7696,8 @@ function BlockAttributeProps({ block, props, updateProps, phButton, tokenButton,
                                 {isTrustpilot && (
                                     <input placeholder="Card title (e.g. Outstanding Service)" style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', marginBottom: 3, boxSizing: 'border-box' }} value={reviewTitles[i] ?? ''} onChange={e => { const next = [...reviewTitles]; next[i] = e.target.value; updateProps({ reviewTitles: next } as any) }} />
                                 )}
-                                <textarea placeholder="Review text" rows={3} style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', marginBottom: 3, resize: 'vertical', boxSizing: 'border-box' }} value={r.text} onChange={e => { const next = [...reviews]; next[i] = { ...next[i], text: e.target.value }; updateProps({ reviews: next } as any) }} />
-                                <input placeholder="Buyer name" style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', marginBottom: 3, boxSizing: 'border-box' }} value={r.author} onChange={e => { const next = [...reviews]; next[i] = { ...next[i], author: e.target.value }; updateProps({ reviews: next } as any) }} />
+                                <textarea placeholder="Review text" rows={3} style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', marginBottom: 3, resize: 'vertical', boxSizing: 'border-box' }} value={r.text ?? ''} onChange={e => { const next = [...reviews]; next[i] = { ...next[i], text: e.target.value }; updateProps({ reviews: next } as any) }} />
+                                <input placeholder="Buyer name" style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', marginBottom: 3, boxSizing: 'border-box' }} value={r.author ?? ''} onChange={e => { const next = [...reviews]; next[i] = { ...next[i], author: e.target.value }; updateProps({ reviews: next } as any) }} />
                                 <input placeholder="Date / label (e.g. Verified eBay Purchase)" style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', marginBottom: 3, boxSizing: 'border-box' }} value={r.date ?? ''} onChange={e => { const next = [...reviews]; next[i] = { ...next[i], date: e.target.value }; updateProps({ reviews: next } as any) }} />
                                 <SelectInput
                                     label="Rating"
@@ -7613,27 +7706,33 @@ function BlockAttributeProps({ block, props, updateProps, phButton, tokenButton,
                                         { v: '5', l: '★★★★★ 5 stars' },
                                         { v: '4', l: '★★★★☆ 4 stars' },
                                         { v: '3', l: '★★★☆☆ 3 stars' },
+                                        { v: '2', l: '★★☆☆☆ 2 stars' },
+                                        { v: '1', l: '★☆☆☆☆ 1 star' },
                                     ]}
                                     onChange={v => { const next = [...reviews]; next[i] = { ...next[i], rating: Number(v) }; updateProps({ reviews: next } as any) }}
                                 />
-                                {showLinkField && (
-                                    <input
-                                        placeholder="Buyer eBay review URL (optional — makes name clickable)"
-                                        style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 11, padding: '3px 6px', marginTop: 3, boxSizing: 'border-box' }}
-                                        value={r.link ?? ''}
-                                        onChange={e => { const next = [...reviews]; next[i] = { ...next[i], link: e.target.value }; updateProps({ reviews: next } as any) }}
-                                    />
+                                <input
+                                    placeholder="Buyer eBay feedback URL (optional — makes name clickable)"
+                                    style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 11, padding: '3px 6px', marginTop: 3, boxSizing: 'border-box' }}
+                                    value={r.link ?? ''}
+                                    onChange={e => { const next = [...reviews]; next[i] = { ...next[i], link: e.target.value }; updateProps({ reviews: next } as any) }}
+                                />
+                                {isDarkLuxury && (
+                                    <>
+                                        <input placeholder="Total spend (e.g. $200) — shown in Dark Luxury rows" style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 11, padding: '3px 6px', marginTop: 3, boxSizing: 'border-box' }} value={r.spend ?? ''} onChange={e => { const next = [...reviews]; next[i] = { ...next[i], spend: e.target.value }; updateProps({ reviews: next } as any) }} />
+                                        <input placeholder="Buyer review count (e.g. 14) — shown in Dark Luxury rows" style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 11, padding: '3px 6px', marginTop: 3, boxSizing: 'border-box' }} value={r.reviewCount ?? ''} onChange={e => { const next = [...reviews]; next[i] = { ...next[i], reviewCount: e.target.value }; updateProps({ reviews: next } as any) }} />
+                                    </>
                                 )}
                             </div>
                         ))}
                         {reviews.length < 6 && (
                             <button
                                 style={{ background: 'var(--pp-accent, #7530fb)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 12, marginTop: 4, padding: '4px 12px' }}
-                                onClick={() => updateProps({ reviews: [...reviews, { text: 'Excellent seller, highly recommend!', author: 'Happy Buyer', rating: 5, date: 'Verified eBay Purchase', link: '' }] } as any)}
+                                onClick={() => updateProps({ reviews: [...reviews, { text: 'Excellent seller, highly recommend!', author: 'Happy Buyer', rating: 5, date: 'Verified eBay Purchase', link: '', spend: '', reviewCount: '' }] } as any)}
                             >+ Add review</button>
                         )}
                     </Section>
-                    <InfoBox>Tip: Paste an eBay feedback URL into &quot;Buyer eBay review URL&quot; and the buyer&apos;s name will become a clickable link to their original review.</InfoBox>
+                    <InfoBox>Tip: Paste an eBay feedback URL into each review&apos;s link field and the buyer&apos;s name becomes a clickable link to their original review.</InfoBox>
                 </>
             )
         }
