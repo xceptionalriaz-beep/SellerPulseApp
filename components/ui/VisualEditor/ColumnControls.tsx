@@ -10,7 +10,7 @@ import { Block, BlockType } from './blocks'
 import {
     Maximize2, Minimize2, MoveHorizontal, AlignVerticalJustifyCenter,
     AlignVerticalJustifyStart, AlignVerticalJustifyEnd, Layers, ArrowLeftRight,
-    Square, Star, Split, Moon, Plus
+    Square, Star, Split, Moon, Plus, Minus
 } from 'lucide-react'
 
 interface ColumnControlsProps {
@@ -32,6 +32,7 @@ export default function ColumnControls({ block, onUpdateProps, isFirst = false }
     const currentPadding = isTwo ? (props.lPadTop ?? 0) : (props.colPadding ?? 0)
     const showDivider = Boolean(props.showDivider)
     const isFeatured = Boolean(props.isFeaturedCol)
+    const currentRowCount = props.rowCount ?? (Array.isArray(props.rows) ? props.rows.length : 1)
 
     // ── 1. Height (Long / Short) ──
     const setHeight = (h: number) => {
@@ -179,8 +180,7 @@ export default function ColumnControls({ block, onUpdateProps, isFirst = false }
 
     // ── 8. Add Another Row of Columns ──
     const addRow = () => {
-        const currentCount = props.rowCount ?? (Array.isArray(props.rows) ? props.rows.length : 1)
-        const nextCount = currentCount + 1
+        const nextCount = currentRowCount + 1
         const emptySlot = (slot: string) => `<div data-canvas-dropzone="${slot}" style="width:100%;min-height:80px;background:#f8f8f8;border:1px dashed #ddd;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span class="add-btn" style="font-family:Arial,sans-serif;font-size:13px;color:#6b7280;">+ Add Content</span></div>`
 
         const newPatch: Record<string, any> = { rowCount: nextCount, rows: undefined }
@@ -197,6 +197,30 @@ export default function ColumnControls({ block, onUpdateProps, isFirst = false }
             const start = (nextCount - 1) * 4 + 1
             for (let i = 0; i < 4; i++) {
                 newPatch[`col${start + i}Content`] = emptySlot(`col${start + i}Content`)
+            }
+        }
+        onUpdateProps(newPatch)
+    }
+
+    // ── 9. Remove Last Row of Columns ──
+    const removeRow = () => {
+        if (currentRowCount <= 1) return
+        const nextCount = currentRowCount - 1
+        const newPatch: Record<string, any> = { rowCount: nextCount }
+
+        if (isThree) {
+            const start = (currentRowCount - 1) * 3 + 1
+            newPatch[`col${start}Content`] = undefined
+            newPatch[`col${start + 1}Content`] = undefined
+            newPatch[`col${start + 2}Content`] = undefined
+        } else if (isTwo) {
+            const start = (currentRowCount - 1) * 2 + 1
+            newPatch[`col${start}Content`] = undefined
+            newPatch[`col${start + 1}Content`] = undefined
+        } else if (isFour) {
+            const start = (currentRowCount - 1) * 4 + 1
+            for (let i = 0; i < 4; i++) {
+                newPatch[`col${start + i}Content`] = undefined
             }
         }
         onUpdateProps(newPatch)
@@ -453,6 +477,31 @@ export default function ColumnControls({ block, onUpdateProps, isFirst = false }
                 <Plus size={10} />
                 Row
             </button>
+
+            {/* ── Remove Row (shows whenever you have 2 or more rows) ── */}
+            {currentRowCount > 1 && (
+                <button
+                    type="button"
+                    onClick={removeRow}
+                    title="Remove last row of columns"
+                    style={{
+                        border: 'none',
+                        borderRadius: 4,
+                        padding: '2px 6px',
+                        fontSize: 10,
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        backgroundColor: '#dc2626',
+                        color: '#ffffff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 3,
+                    }}
+                >
+                    <Minus size={10} />
+                    Row
+                </button>
+            )}
 
             {/* ── Swap (2-col / 3-col) ── */}
             {!isFour && (

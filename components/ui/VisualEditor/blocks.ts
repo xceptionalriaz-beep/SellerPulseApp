@@ -1485,14 +1485,15 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             const contBorder = pa.containerBorderWidth ? `border:${pa.containerBorderWidth}px ${pa.containerBorderStyle ?? 'solid'} ${pa.containerBorderColor ?? '#e5e7eb'};` : ''
             const contRadius = pa.containerBorderRadius ? `border-radius:${pa.containerBorderRadius}px;overflow:hidden;` : ''
             const contStyle = contBorder + contRadius
+            const colWrapStyle = 'width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;'
             const rowsHtml = rows.map((r: any, idx: number) => `
         <tr>
           <td width="${p.leftWidth}%" valign="${valign}" style="padding-right:${p.gap / 2}px;${lPad}${lRadius}${lBorder}${lMinH}background-color:${pa.leftBg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">
-            <div style="width:100%;box-sizing:border-box;">${r.leftContent}</div>
+            <div style="${colWrapStyle}">${r.leftContent}</div>
           </td>
           ${divider}
           <td width="${rightWidth}%" valign="${valign}" style="padding-left:${p.gap / 2}px;${rPad}${rRadius}${rBorder}${rMinH}background-color:${pa.rightBg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">
-            <div style="width:100%;box-sizing:border-box;">${r.rightContent}</div>
+            <div style="${colWrapStyle}">${r.rightContent}</div>
           </td>
         </tr>
             `).join('')
@@ -1501,7 +1502,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
                 `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0"${stackClass}${contStyle ? ` style="${contStyle}"` : ''}>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"${stackClass} style="table-layout:fixed;width:100%;${contStyle ? contStyle : ''}">
         ${rowsHtml}
       </table>
     </td>
@@ -1528,8 +1529,8 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             col3Bg: '#ffffff',
         } as ThreeColumnProps,
         toHtml(props, id) {
-            const p = props as ThreeColumnProps
-            const rows = (p as any).rows && Array.isArray((p as any).rows) ? (p as any).rows : [{ col1Content: p.col1Content, col2Content: p.col2Content, col3Content: p.col3Content }]
+            const p = props as ThreeColumnProps & any
+            const rowCount = p.rowCount ?? (Array.isArray(p.rows) ? p.rows.length : 1)
             const pa3 = p as any
             const valign3 = pa3.colAlign === 'middle' ? 'middle' : pa3.colAlign === 'bottom' ? 'bottom' : 'top'
             const w1 = pa3.customWidths ? (pa3.col1Width ?? 33) : 33
@@ -1561,21 +1562,44 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             const contBorder3 = pa3.containerBorderWidth ? `border:${pa3.containerBorderWidth}px ${pa3.containerBorderStyle ?? 'solid'} ${pa3.containerBorderColor ?? '#e5e7eb'};` : ''
             const contRadius3 = pa3.containerBorderRadius ? `border-radius:${pa3.containerBorderRadius}px;overflow:hidden;` : ''
             const contStyle3 = contBorder3 + contRadius3
-            const rowsHtml = rows.map((r: any, idx: number) => `
+
+            const emptyPh = (slotKey: string) => `<div data-canvas-dropzone="${slotKey}" style="width:100%;min-height:80px;background:#f8f8f8;border:1px dashed #ddd;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span class="add-btn" style="font-family:Arial,sans-serif;font-size:13px;color:#6b7280;">+ Add Content</span></div>`
+
+            const formatSlot = (html: string, key: string) => {
+                if (!html) return emptyPh(key)
+                if (html.includes('data-canvas-dropzone=')) {
+                    return html.replace(/data-canvas-dropzone="[^"]*"/, `data-canvas-dropzone="${key}"`)
+                }
+                return `<div data-canvas-dropzone="${key}" style="width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;">${html}</div>`
+            }
+
+            let rowsHtml = ''
+            for (let r = 0; r < rowCount; r++) {
+                const k1 = r === 0 ? 'col1Content' : `col${r * 3 + 1}Content`
+                const k2 = r === 0 ? 'col2Content' : `col${r * 3 + 2}Content`
+                const k3 = r === 0 ? 'col3Content' : `col${r * 3 + 3}Content`
+
+                const c1 = p[k1] ?? p.rows?.[r]?.col1Content ?? emptyPh(k1)
+                const c2 = p[k2] ?? p.rows?.[r]?.col2Content ?? emptyPh(k2)
+                const c3 = p[k3] ?? p.rows?.[r]?.col3Content ?? emptyPh(k3)
+
+                rowsHtml += `
         <tr>
-          <td width="${w1}%" valign="${valign3}" style="padding-right:${p.gap / 2}px;${cp1}${cr1}${cb1}${mh1}background-color:${pa3.col1Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col1Content}</td>
+          <td width="${w1}%" valign="${valign3}" style="padding-right:${p.gap / 2}px;${cp1}${cr1}${cb1}${mh1}background-color:${pa3.col1Bg ?? 'transparent'}; ${r > 0 ? 'padding-top:16px;' : ''}">${formatSlot(c1, k1)}</td>
           ${div3}
-          <td width="${w2}%" valign="${valign3}" style="padding-left:${p.gap / 2}px;padding-right:${p.gap / 2}px;${cp2}${cr2}${cb2}${mh2}background-color:${pa3.col2Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col2Content}</td>
+          <td width="${w2}%" valign="${valign3}" style="padding-left:${p.gap / 2}px;padding-right:${p.gap / 2}px;${cp2}${cr2}${cb2}${mh2}background-color:${pa3.col2Bg ?? 'transparent'}; ${r > 0 ? 'padding-top:16px;' : ''}">${formatSlot(c2, k2)}</td>
           ${div3}
-          <td width="${w3}%" valign="${valign3}" style="padding-left:${p.gap / 2}px;${cp3}${cr3}${cb3}${mh3}background-color:${pa3.col3Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col3Content}</td>
+          <td width="${w3}%" valign="${valign3}" style="padding-left:${p.gap / 2}px;${cp3}${cr3}${cb3}${mh3}background-color:${pa3.col3Bg ?? 'transparent'}; ${r > 0 ? 'padding-top:16px;' : ''}">${formatSlot(c3, k3)}</td>
         </tr>
-            `).join('')
+                `
+            }
+
             const stackClass3 = pa3.stackMobile === false ? '' : ' class="mobile-stack"'
             return wrapBlock('three_column', id,
                 `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0"${stackClass3}${contStyle3 ? ` style="${contStyle3}"` : ''}>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"${stackClass3} style="table-layout:fixed;width:100%;${contStyle3 ? contStyle3 : ''}">
         ${rowsHtml}
       </table>
     </td>
@@ -3023,22 +3047,20 @@ ${thumbCells}
                         .trim() || text.trim()
                 }
 
-                // eBay-safe: table-based layout only — no flexbox, no <style> tags (eBay strips both)
-                const tdWidth = `${colWidth}%`
-                const badgeCells = rawBadges.map((raw, idx) => {
+                const badgePills = rawBadges.map((raw, idx) => {
                     const iconSvg = getBadgeIcon(raw, badgeText)
                     const label = cleanLabel(raw)
-                    return `<td width="${tdWidth}" style="width:${tdWidth};padding:4px 5px;vertical-align:middle;text-align:center;">` +
-                        `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;background-color:${badgeBg};border:1px solid ${badgeBorder};border-radius:100px;">` +
-                        `<tr><td style="padding:8px 10px;text-align:center;vertical-align:middle;white-space:nowrap;">` +
+                    return `<div style="display:inline-block;vertical-align:middle;margin:4px 3px;">` +
+                        `<table cellpadding="0" cellspacing="0" border="0" style="background-color:${badgeBg};border:1px solid ${badgeBorder};border-radius:100px;">` +
+                        `<tr><td style="padding:6px 10px;text-align:center;vertical-align:middle;white-space:nowrap;">` +
                         `<span data-feature-index="${idx}" data-icon-slot="true" style="display:inline-block;vertical-align:middle;line-height:1;">${iconSvg}</span>` +
-                        `<span style="display:inline-block;vertical-align:middle;margin-left:6px;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:${badgeText};line-height:16px;">${label}</span>` +
+                        `<span style="display:inline-block;vertical-align:middle;margin-left:5px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:${badgeText};line-height:14px;">${label}</span>` +
                         `</td></tr></table>` +
-                        `</td>`
+                        `</div>`
                 }).join('')
 
                 return wrapBlock('badge_row' as BlockType, id,
-                    `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;border-collapse:collapse;"><tr><td style="background-color:${p.bgColor ?? '#ffffff'};${pad(p)}width:100%;"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;"><tr>${badgeCells}</tr></table></td></tr></table>`, p)
+                    `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;border-collapse:collapse;"><tr><td style="background-color:${p.bgColor ?? '#ffffff'};${pad(p)}width:100%;text-align:center;"><div style="text-align:center;">${badgePills}</div></td></tr></table>`, p)
             },
         },
 
@@ -3772,6 +3794,35 @@ ${thumbCells}
                 const p = props as any
                 const variantId = p.variant ?? 'sh-classic-banner'
                 return wrapBlock('store_header' as BlockType, id, getStoreHeaderVariant(variantId).toHtml(p, id), p)
+            },
+        },
+
+        {
+            type: 'category_nav' as BlockType,
+            label: 'Category Navigation',
+            category: 'Header & Footer' as BlockCategory,
+            icon: 'layout',
+            description: 'Header category navigation bar — 10 high-converting eBay layout styles',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                variant: 'cat-classic-dark',
+                bgColor: '#1e1535',
+                linkColor: '#ffffff',
+                activeColor: '#b8fa33',
+                categories: [
+                    { label: 'All Items', url: '#' },
+                    { label: 'Featured Deals', url: '#' },
+                    { label: 'New Arrivals', url: '#' },
+                    { label: 'Best Sellers', url: '#' },
+                    { label: 'Clearance', url: '#' },
+                ],
+                paddingTop: 12,
+                paddingBottom: 12,
+            } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as any
+                const variantId = p.variant ?? 'cat-classic-dark'
+                return wrapBlock('category_nav' as BlockType, id, _getCategoryNavVariant(variantId).toHtml(p, id), p)
             },
         },
 

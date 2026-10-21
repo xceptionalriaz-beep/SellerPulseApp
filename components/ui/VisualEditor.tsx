@@ -211,8 +211,8 @@ export default function VisualEditor({
     const [panelOpen, setPanelOpen] = useState(true)
     const [selectedFeatureIndex, setSelectedFeatureIndex] = useState<number | null>(null)
     const [selectedIconBlockId, setSelectedIconBlockId] = useState<string | null>(null)
-    type DropSlot = 'leftImage' | 'leftContent' | 'rightContent' | 'content' | 'col1Content' | 'col2Content' | 'col3Content' | 'col4Content'
-    const [activeDropSlot, setActiveDropSlot] = useState<{ blockId: string; slot: DropSlot } | null>(null)
+    type DropSlot = string
+    const [activeDropSlot, setActiveDropSlot] = useState<{ blockId: string; slot: string } | null>(null)
 
     // ── Auto-switch to Images tab when an image block is selected ─────────────
     // Set is module-level (not per-render) — no need to recreate on every render
@@ -386,8 +386,11 @@ export default function VisualEditor({
     const rebuildAndEmit = useCallback((nextBlocks: Block[], settings?: CanvasSettings) => {
         isInternalChange.current = true
         const html = assembleDocument(nextBlocks, settings ?? canvasSettings)
+        const stripped = stripInternalAttributes(html)
+        // Synchronously update lastSeenValue so the parent's value prop echo never triggers a destructive re-parse
+        lastSeenValue.current = stripped
         setCurrentHtml(html)
-        onChange(stripInternalAttributes(html))
+        onChange(stripped)
         setIsDirty(true)
         requestAnimationFrame(() => { isInternalChange.current = false })
     }, [onChange, canvasSettings])
@@ -502,9 +505,7 @@ export default function VisualEditor({
             const { slot, blockId } = activeDropSlot;
             const idx = blocks.findIndex(b =>
                 b.id === blockId &&
-                ['two_column', 'full_width_section', 'three_column', 'four_column', 'container', 'sidebar_layout'].includes(b.type) &&
-                b.props &&
-                typeof (b.props as any)[slot] === 'string'
+                ['two_column', 'full_width_section', 'three_column', 'four_column', 'container', 'sidebar_layout'].includes(b.type)
             );
             if (idx >= 0) {
                 const target = blocks[idx];
@@ -513,7 +514,18 @@ export default function VisualEditor({
                 const rawHtml = def ? def.toHtml(newBlock.props, newBlock.id) : '';
                 // Wrap in dropzone div so clicking filled content fires RIAZIFY_EDIT_SLOT_CONTENT
                 const newHtml = `<div data-canvas-dropzone="${slot}" data-slot-block-type="${type}" data-slot-block-props='${JSON.stringify(newBlock.props)}'>${rawHtml}</div>`;
+
                 const updatedProps = { ...(target.props as any), [slot]: newHtml };
+                // Also update matching slot in rows array if multi-row exists
+                if (Array.isArray(updatedProps.rows)) {
+                    updatedProps.rows = updatedProps.rows.map((row: any) => {
+                        if (row && typeof row === 'object' && slot in row) {
+                            return { ...row, [slot]: newHtml };
+                        }
+                        return row;
+                    });
+                }
+
                 const updatedBlock = { ...target, props: updatedProps } as any;
                 const newBlocks = [...blocks];
                 newBlocks[idx] = updatedBlock;
@@ -692,14 +704,33 @@ export default function VisualEditor({
         const emptyHtml = EMPTY_SLOT(propKey)
         const updatedProps = { ...(target.props as any), [propKey]: emptyHtml }
 
-        // Also reset matching slot in rows if multi-row exists
+        // Multi-row slot clearing: handle both direct key and mapped row index
         if (Array.isArray(updatedProps.rows) && updatedProps.rows.length > 0) {
-            updatedProps.rows = updatedProps.rows.map((row: any) => {
-                if (row && typeof row === 'object' && propKey in row) {
-                    return { ...row, [propKey]: emptyHtml }
+            const m = propKey.match(/col(\d+)Content/);
+            const colNum = m ? parseInt(m[1], 10) : 0;
+            const colsPerRow = target.type === 'two_column' ? 2 : target.type === 'four_column' ? 4 : 3;
+
+            updatedProps.rows = updatedProps.rows.map((row: any, rIdx: number) => {
+                if (!row || typeof row !== 'object') return row;
+                const nextRow = { ...row };
+
+                // 1. Direct key match (e.g. { col6Content: ... })
+                if (propKey in nextRow) {
+                    nextRow[propKey] = emptyHtml;
                 }
-                return row
-            })
+
+                // 2. Row index mapping (e.g. col6 in 3-column is row 1, col3)
+                if (colNum > 0) {
+                    const targetRow = Math.floor((colNum - 1) / colsPerRow);
+                    const localCol = ((colNum - 1) % colsPerRow) + 1;
+                    const localKey = `col${localCol}Content`;
+                    if (rIdx === targetRow) {
+                        nextRow[localKey] = emptyHtml;
+                    }
+                }
+
+                return nextRow;
+            });
         }
 
         const newBlocks = [...blocks]
@@ -1357,10 +1388,13 @@ export default function VisualEditor({
                     // If this slot is empty (no block assigned yet), arm activeDropSlot so that
                     // clicking any content item in the sidebar will assign it into this slot
                     // rather than adding a new top-level block to the canvas.
-                    const CONTENT_SLOT_NAMES: DropSlot[] = ['leftContent', 'rightContent', 'content', 'col1Content', 'col2Content', 'col3Content', 'col4Content'];
-                    if (CONTENT_SLOT_NAMES.includes(propKey as DropSlot)) {
+                    const isContentSlot = (k: string) =>
+                        ['leftContent', 'rightContent', 'content'].includes(k) ||
+                        /^col\d+Content$/i.test(k) ||
+                        k.endsWith('Content');
+                    if (isContentSlot(propKey)) {
                         // Arm activeDropSlot for both empty slots (insert) and filled slots (replace)
-                        setActiveDropSlot({ blockId, slot: propKey as DropSlot });
+                        setActiveDropSlot({ blockId, slot: propKey });
                     }
                     // Send highlight message back to iframe so slot gets purple outline
                     const iframe = document.querySelector(`iframe[data-block-id="${blockId}"]`) as HTMLIFrameElement;
@@ -1466,8 +1500,11 @@ export default function VisualEditor({
                 setSelectedId(blockId ?? null);
             } else if (event.data?.type === 'RIAZIFY_DROP_BLOCK') {
                 const { propKey, blockType, blockId } = event.data;
-                const VALID_SLOTS: DropSlot[] = ['leftImage', 'leftContent', 'rightContent', 'content', 'col1Content', 'col2Content', 'col3Content', 'col4Content'];
-                if (VALID_SLOTS.includes(propKey) && blockType) {
+                const isDropSlot = (k: string) =>
+                    ['leftImage', 'leftContent', 'rightContent', 'content'].includes(k) ||
+                    /^col\d+Content$/i.test(k) ||
+                    k.endsWith('Content');
+                if (isDropSlot(propKey) && blockType) {
                     const targetBlockId = blockId || activeDropSlot?.blockId;
                     const idx = blocks.findIndex(b =>
                         b.id === targetBlockId &&

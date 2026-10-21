@@ -55,6 +55,7 @@ import {
 import { renderForCanvas, extractTokens, type CategoryId, renderBannerForCanvas } from './sampleData'
 import { getGoogleFontLinkHtml } from './fonts'
 import ColumnControls from './ColumnControls'
+import ColumnResizer from './ColumnResizer'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -822,90 +823,20 @@ function BlockCard({
 
             {/* ── Floating In-Canvas Column Controls for Two / Three / Four Column ── */}
             {isSelected && onUpdateProps && ['two_column', 'three_column', 'four_column'].includes(block.type) && (
-                <ColumnControls
-                    block={block}
-                    onUpdateProps={onUpdateProps}
-                    isFirst={index === 0}
-                />
+                <>
+                    <ColumnControls
+                        block={block}
+                        onUpdateProps={onUpdateProps}
+                        isFirst={index === 0}
+                    />
+                    <ColumnResizer
+                        block={block}
+                        onUpdateProps={onUpdateProps}
+                    />
+                </>
             )}
 
-            {/* ── Small Red Delete Icon at Top-Right Corner of Active Column (Only when content exists) ── */}
-            {(() => {
-                if (!isSelected || !selectedSubSlot || !onClearSlot) return null;
-                if (!['two_column', 'three_column', 'four_column', 'full_width_section'].includes(block.type)) return null;
 
-                // Check if the slot actually contains real content (never show on empty "+ Add Content")
-                const slotContent = (block.props as any)[selectedSubSlot] ?? '';
-                const isPlaceholder = !slotContent || slotContent.includes('+ Add Content') || slotContent.includes('class="add-btn"');
-                if (isPlaceholder) return null;
-
-                // Position the delete icon directly at the top-left corner of that specific column
-                let posStyle: React.CSSProperties = { top: 10, left: 12 };
-                if (block.type === 'two_column') {
-                    if (selectedSubSlot === 'leftContent') posStyle = { top: 10, left: 12 };
-                    else posStyle = { top: 10, left: 'calc(50% + 8px)' };
-                } else if (block.type === 'three_column') {
-                    const m = selectedSubSlot.match(/col(\d+)Content/);
-                    if (m) {
-                        const num = parseInt(m[1], 10);
-                        const r = Math.floor((num - 1) / 3);
-                        const c = (num - 1) % 3;
-                        const totalRows = (block.props as any).rowCount ?? 2;
-                        const rowPercent = totalRows > 1 ? (100 / totalRows) * r : 0;
-                        posStyle = {
-                            top: r > 0 ? `calc(${rowPercent}% + 10px)` : 10,
-                            left: c === 0 ? 12 : c === 1 ? 'calc(33.33% + 8px)' : 'calc(66.66% + 8px)',
-                        };
-                    } else if (selectedSubSlot === 'col1Content') posStyle = { top: 10, left: 12 };
-                    else if (selectedSubSlot === 'col2Content') posStyle = { top: 10, left: 'calc(33.33% + 8px)' };
-                    else posStyle = { top: 10, left: 'calc(66.66% + 8px)' };
-                } else if (block.type === 'four_column') {
-                    if (selectedSubSlot === 'col1Content') posStyle = { top: 10, left: 12 };
-                    else if (selectedSubSlot === 'col2Content') posStyle = { top: 10, left: 'calc(25% + 6px)' };
-                    else if (selectedSubSlot === 'col3Content') posStyle = { top: 10, left: 'calc(50% + 6px)' };
-                    else posStyle = { top: 10, left: 'calc(75% + 6px)' };
-                }
-
-                return (
-                    <button
-                        key={`${block.id}-${selectedSubSlot}`}
-                        type="button"
-                        onClick={e => {
-                            e.stopPropagation();
-                            onClearSlot(block.id, selectedSubSlot);
-                        }}
-                        title="Delete column content"
-                        style={{
-                            position: 'absolute',
-                            ...posStyle,
-                            zIndex: 45,
-                            width: 22,
-                            height: 22,
-                            borderRadius: '50%',
-                            border: '1px solid #fecaca',
-                            backgroundColor: '#ffffff',
-                            color: '#ef4444',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            padding: 0,
-                            boxShadow: '0 2px 6px rgba(239, 68, 68, 0.25)',
-                            transition: 'background-color 0.12s, color 0.12s',
-                        }}
-                        onMouseEnter={e => {
-                            e.currentTarget.style.backgroundColor = '#ef4444';
-                            e.currentTarget.style.color = '#ffffff';
-                        }}
-                        onMouseLeave={e => {
-                            e.currentTarget.style.backgroundColor = '#ffffff';
-                            e.currentTarget.style.color = '#ef4444';
-                        }}
-                    >
-                        <Trash2 size={11} />
-                    </button>
-                );
-            })()}
 
             {/* ── Selected label badge — sleek designer tab attached to top-left ── */}
             {isSelected && (
@@ -1899,6 +1830,28 @@ ${fontOverrideCss}${colorOverrideCss}${fontSizeOverrideCss}${fontWeightOverrideC
         // 1. Highlight standard dropzones & data-slot containers
         document.querySelectorAll('div[data-canvas-dropzone="' + prop + '"], div[data-slot="' + prop + '"], [data-slot="' + prop + '"]').forEach(function(el) {
           el.classList.add('riazify-active-slot');
+
+          // Place the delete icon perfectly in the top-left corner of this exact column
+          var isPlaceholder = el.querySelector('.add-btn') !== null || (el.textContent || '').trim() === '+ Add Content';
+          if (!isPlaceholder && !el.querySelector('.riazify-slot-del-btn')) {
+            if (window.getComputedStyle(el).position === 'static') {
+              el.style.position = 'relative';
+            }
+            var delBtn = document.createElement('button');
+            delBtn.className = 'riazify-slot-del-btn';
+            delBtn.type = 'button';
+            delBtn.title = 'Clear column content';
+            delBtn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>';
+            delBtn.style.cssText = 'position:absolute;top:4px;left:4px;z-index:9999;width:14px;height:14px;border:none;background:transparent;color:#ef4444;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;outline:none;opacity:0.75;transition:opacity 0.15s,transform 0.12s;line-height:1;';
+            delBtn.onmouseenter = function() { delBtn.style.opacity = '1'; delBtn.style.transform = 'scale(1.2)'; };
+            delBtn.onmouseleave = function() { delBtn.style.opacity = '0.75'; delBtn.style.transform = 'scale(1)'; };
+            delBtn.onclick = function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              window.parent.postMessage({ type: 'RIAZIFY_CLEAR_SLOT', blockId: BLOCK_ID, propKey: prop }, '*');
+            };
+            el.appendChild(delBtn);
+          }
         });
 
         // 2. Highlight hero_product thumbnail slots (thumb1 to thumb6) on both blank placeholders and images

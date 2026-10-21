@@ -2753,10 +2753,14 @@ export const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     'cat-classic-dark': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="48" rx="3" fill="#1e1535" />
-            <rect x="6" y="21" width="12" height="6" rx="2" fill="#b8fa33" />
-            <rect x="22" y="22.5" width="12" height="3" rx="1.5" fill="#ffffff" opacity="0.9" />
-            <rect x="38" y="22.5" width="14" height="3" rx="1.5" fill="#ffffff" opacity="0.9" />
-            <rect x="56" y="22.5" width="16" height="3" rx="1.5" fill="#ffffff" opacity="0.9" />
+            <rect x="5" y="19" width="16" height="10" rx="2" fill="rgba(255,255,255,0.12)" />
+            <rect x="7" y="23" width="12" height="2" rx="1" fill="#ffffff" opacity="0.9" />
+            <rect x="25" y="21" width="10" height="3" rx="1.5" fill="#b8fa33" />
+            <line x1="25" y1="26" x2="35" y2="26" stroke="#b8fa33" strokeWidth="1" />
+            <rect x="38" y="22" width="10" height="2.5" rx="1.25" fill="#ffffff" opacity="0.8" />
+            <rect x="50" y="22" width="10" height="2.5" rx="1.25" fill="#ffffff" opacity="0.8" />
+            <rect x="63" y="18" width="12" height="12" rx="3" fill="#b8fa33" />
+            <path d="M68 22l2 2-2 2" stroke="#1e1535" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
     ),
 
@@ -2764,15 +2768,16 @@ export const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     'cat-minimalist-divider': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="48" rx="3" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
-            <line x1="0" y1="14" x2="80" y2="14" stroke="#e2e8f0" strokeWidth="0.8" />
-            <line x1="0" y1="34" x2="80" y2="34" stroke="#e2e8f0" strokeWidth="0.8" />
-            <rect x="8" y="22" width="12" height="3" rx="1.5" fill="#475569" />
-            <line x1="24" y1="21" x2="24" y2="26" stroke="#cbd5e1" strokeWidth="1" />
-            <rect x="28" y="22" width="12" height="3" rx="1.5" fill="#475569" />
-            <line x1="44" y1="21" x2="44" y2="26" stroke="#cbd5e1" strokeWidth="1" />
-            <rect x="48" y="22" width="12" height="3" rx="1.5" fill="#475569" />
-            <line x1="64" y1="21" x2="64" y2="26" stroke="#cbd5e1" strokeWidth="1" />
-            <rect x="68" y="22" width="8" height="3" rx="1.5" fill="#475569" />
+            <line x1="0" y1="12" x2="80" y2="12" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="0" y1="36" x2="80" y2="36" stroke="#e2e8f0" strokeWidth="0.8" />
+            <rect x="8" y="22" width="12" height="2.5" rx="1.25" fill="#7530fb" />
+            <line x1="8" y1="27" x2="20" y2="27" stroke="#7530fb" strokeWidth="1.5" />
+            <circle cx="25" cy="23.5" r="1" fill="#94a3b8" />
+            <rect x="30" y="22" width="11" height="2.5" rx="1.25" fill="#475569" />
+            <circle cx="46" cy="23.5" r="1" fill="#94a3b8" />
+            <rect x="51" y="22" width="11" height="2.5" rx="1.25" fill="#475569" />
+            <circle cx="67" cy="23.5" r="1" fill="#94a3b8" />
+            <rect x="71" y="22" width="5" height="2.5" rx="1.25" fill="#475569" />
         </svg>
     ),
 
@@ -2780,23 +2785,33 @@ export const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     'cat-pill-badge': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="48" rx="3" fill="#1e1535" />
-            <rect x="5" y="18" width="16" height="12" rx="6" fill="#b8fa33" />
-            <rect x="24" y="18" width="16" height="12" rx="6" fill="rgba(255,255,255,0.12)" />
-            <rect x="43" y="18" width="16" height="12" rx="6" fill="rgba(255,255,255,0.12)" />
-            <rect x="62" y="18" width="14" height="12" rx="6" fill="rgba(255,255,255,0.12)" />
+            <rect x="5" y="18" width="18" height="12" rx="6" fill="#b8fa33" />
+            <circle cx="9" cy="24" r="1.5" fill="#1e1535" />
+            <rect x="12" y="23" width="8" height="2" rx="1" fill="#1e1535" />
+            <rect x="26" y="18" width="15" height="12" rx="6" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.18)" strokeWidth="0.6" />
+            <rect x="29" y="23" width="9" height="2" rx="1" fill="#ffffff" opacity="0.8" />
+            <rect x="44" y="18" width="15" height="12" rx="6" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.18)" strokeWidth="0.6" />
+            <rect x="47" y="23" width="9" height="2" rx="1" fill="#ffffff" opacity="0.8" />
+            <rect x="62" y="18" width="13" height="12" rx="6" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.18)" strokeWidth="0.6" />
+            <rect x="65" y="23" width="7" height="2" rx="1" fill="#ffffff" opacity="0.8" />
         </svg>
     ),
 
     // ── category_nav: cat-subtle-underline ────────────────────────────────────
     'cat-subtle-underline': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
-            <rect width="80" height="48" rx="3" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
-            <line x1="0" y1="36" x2="80" y2="36" stroke="#e2e8f0" strokeWidth="0.8" />
-            <rect x="8" y="20" width="14" height="4" rx="1" fill="#7530fb" />
-            <rect x="8" y="28" width="14" height="2" rx="1" fill="#7530fb" />
-            <rect x="28" y="20" width="14" height="4" rx="1" fill="#1e293b" opacity="0.6" />
-            <rect x="48" y="20" width="14" height="4" rx="1" fill="#1e293b" opacity="0.6" />
-            <rect x="68" y="20" width="8" height="4" rx="1" fill="#1e293b" opacity="0.6" />
+            <rect width="80" height="48" rx="3" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="0" y1="34" x2="80" y2="34" stroke="#e2e8f0" strokeWidth="1" />
+            <path d="M6 34V18h16v16" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.8" />
+            <line x1="6" y1="18" x2="22" y2="18" stroke="#7530fb" strokeWidth="2" />
+            <rect x="10" y="24" width="8" height="2.5" rx="1" fill="#7530fb" />
+            <rect x="26" y="21" width="14" height="13" rx="2" fill="#f1f5f9" />
+            <rect x="29" y="26" width="8" height="2.5" rx="1" fill="#64748b" />
+            <rect x="43" y="21" width="14" height="13" rx="2" fill="#f1f5f9" />
+            <rect x="46" y="26" width="8" height="2.5" rx="1" fill="#64748b" />
+            <path d="M60 34V18h16v16" fill="#ef4444" />
+            <polygon points="65 24 67 21 68 23 71 20 69 26" fill="#ffffff" />
+            <rect x="64" y="28" width="8" height="2" rx="0.5" fill="#ffffff" />
         </svg>
     ),
 
@@ -2804,12 +2819,16 @@ export const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     'cat-two-tier-grid': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="48" rx="3" fill="#1e1535" />
-            <rect x="6" y="11" width="18" height="10" rx="3" fill="#b8fa33" />
-            <rect x="28" y="11" width="22" height="10" rx="3" fill="rgba(255,255,255,0.1)" />
-            <rect x="54" y="11" width="20" height="10" rx="3" fill="rgba(255,255,255,0.1)" />
-            <rect x="10" y="26" width="20" height="10" rx="3" fill="rgba(255,255,255,0.1)" />
-            <rect x="34" y="26" width="20" height="10" rx="3" fill="rgba(255,255,255,0.1)" />
-            <rect x="58" y="26" width="16" height="10" rx="3" fill="rgba(255,255,255,0.1)" />
+            <rect width="80" height="14" fill="#140e26" />
+            <circle cx="10" cy="7" r="2" fill="#b8fa33" />
+            <rect x="15" y="5.5" width="55" height="3" rx="1.5" fill="#d1d5db" opacity="0.8" />
+            <rect x="5" y="21" width="20" height="18" rx="3" fill="#b8fa33" />
+            <rect x="8" y="29" width="14" height="2.5" rx="1" fill="#1e1535" />
+            <rect x="29" y="27" width="10" height="2.5" rx="1" fill="#ffffff" opacity="0.9" />
+            <path d="M41 28l1.5 1.5 1.5-1.5" stroke="#ffffff" strokeWidth="0.8" opacity="0.7" />
+            <rect x="47" y="27" width="10" height="2.5" rx="1" fill="#ffffff" opacity="0.9" />
+            <path d="M59 28l1.5 1.5 1.5-1.5" stroke="#ffffff" strokeWidth="0.8" opacity="0.7" />
+            <rect x="65" y="27" width="9" height="2.5" rx="1" fill="#ffffff" opacity="0.9" />
         </svg>
     ),
 
@@ -2817,26 +2836,34 @@ export const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     'cat-icon-hybrid': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="48" rx="3" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.8" />
-            <rect x="4" y="16" width="22" height="16" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.6" />
-            <circle cx="9" cy="24" r="2.5" fill="#3b82f6" />
-            <rect x="14" y="22.5" width="9" height="3" rx="1" fill="#1e1535" />
-            <rect x="29" y="16" width="22" height="16" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.6" />
-            <circle cx="34" cy="24" r="2.5" fill="#10b981" />
-            <rect x="39" y="22.5" width="9" height="3" rx="1" fill="#1e1535" />
-            <rect x="54" y="16" width="22" height="16" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.6" />
-            <circle cx="59" cy="24" r="2.5" fill="#f59e0b" />
-            <rect x="64" y="22.5" width="9" height="3" rx="1" fill="#1e1535" />
+            <rect x="4" y="10" width="22" height="28" rx="3" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.6" />
+            <line x1="4" y1="10" x2="26" y2="10" stroke="#7530fb" strokeWidth="2" />
+            <rect x="11" y="16" width="8" height="8" rx="1.5" fill="#f3eeff" stroke="#7530fb" strokeWidth="0.8" />
+            <rect x="8" y="28" width="14" height="2.5" rx="1" fill="#1e1535" />
+            <rect x="29" y="10" width="22" height="28" rx="3" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.6" />
+            <line x1="29" y1="10" x2="51" y2="10" stroke="#cbd5e1" strokeWidth="1.5" />
+            <rect x="36" y="16" width="8" height="8" rx="1.5" fill="#f1f5f9" stroke="#94a3b8" strokeWidth="0.8" />
+            <rect x="33" y="28" width="14" height="2.5" rx="1" fill="#64748b" />
+            <rect x="54" y="10" width="22" height="28" rx="3" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.6" />
+            <line x1="54" y1="10" x2="76" y2="10" stroke="#cbd5e1" strokeWidth="1.5" />
+            <rect x="61" y="16" width="8" height="8" rx="1.5" fill="#f1f5f9" stroke="#94a3b8" strokeWidth="0.8" />
+            <rect x="58" y="28" width="14" height="2.5" rx="1" fill="#64748b" />
         </svg>
     ),
 
     // ── category_nav: cat-modern-glass ────────────────────────────────────────
     'cat-modern-glass': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
-            <rect width="80" height="48" rx="3" fill="#1e1535" stroke="rgba(255,255,255,0.18)" strokeWidth="0.8" />
-            <rect x="6" y="18" width="16" height="12" rx="3" fill="#b8fa33" />
-            <rect x="26" y="18" width="15" height="12" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" />
-            <rect x="45" y="18" width="15" height="12" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" />
-            <rect x="64" y="18" width="11" height="12" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" />
+            <rect width="80" height="48" rx="3" fill="#0f172a" stroke="rgba(255,255,255,0.15)" strokeWidth="0.8" />
+            <rect x="5" y="17" width="18" height="14" rx="3" fill="rgba(56,189,248,0.15)" stroke="#38bdf8" strokeWidth="0.8" />
+            <polygon points="9 23 11 20 12 22 14 19 12 25" fill="#38bdf8" />
+            <rect x="12" y="27" width="8" height="1.5" rx="0.75" fill="#38bdf8" />
+            <rect x="26" y="17" width="15" height="14" rx="3" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)" strokeWidth="0.6" />
+            <rect x="29" y="23.5" width="9" height="2" rx="1" fill="#ffffff" opacity="0.8" />
+            <rect x="44" y="17" width="15" height="14" rx="3" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)" strokeWidth="0.6" />
+            <rect x="47" y="23.5" width="9" height="2" rx="1" fill="#ffffff" opacity="0.8" />
+            <rect x="62" y="17" width="13" height="14" rx="3" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)" strokeWidth="0.6" />
+            <rect x="65" y="23.5" width="7" height="2" rx="1" fill="#ffffff" opacity="0.8" />
         </svg>
     ),
 
@@ -2844,25 +2871,36 @@ export const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     'cat-wholesale-jump': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="48" rx="3" fill="#ffffff" stroke="#cbd5e1" strokeWidth="0.8" />
-            <line x1="20" y1="10" x2="20" y2="38" stroke="#cbd5e1" strokeWidth="0.8" />
-            <line x1="40" y1="10" x2="40" y2="38" stroke="#cbd5e1" strokeWidth="0.8" />
-            <line x1="60" y1="10" x2="60" y2="38" stroke="#cbd5e1" strokeWidth="0.8" />
-            <rect x="0" y="10" width="20" height="28" fill="#e2e8f0" />
-            <rect x="4" y="22.5" width="12" height="3" rx="1" fill="#0f172a" />
-            <rect x="24" y="22.5" width="12" height="3" rx="1" fill="#0f172a" />
-            <rect x="44" y="22.5" width="12" height="3" rx="1" fill="#0f172a" />
-            <rect x="64" y="22.5" width="12" height="3" rx="1" fill="#0f172a" />
+            <line x1="20" y1="8" x2="20" y2="40" stroke="#cbd5e1" strokeWidth="0.8" />
+            <line x1="40" y1="8" x2="40" y2="40" stroke="#cbd5e1" strokeWidth="0.8" />
+            <line x1="60" y1="8" x2="60" y2="40" stroke="#cbd5e1" strokeWidth="0.8" />
+            <rect x="0" y="8" width="20" height="32" fill="#f8fafc" />
+            <rect x="4" y="18" width="12" height="2" rx="0.5" fill="#64748b" />
+            <rect x="4" y="24" width="12" height="3" rx="1" fill="#0f172a" />
+            <rect x="24" y="18" width="12" height="2" rx="0.5" fill="#94a3b8" />
+            <rect x="24" y="24" width="12" height="3" rx="1" fill="#0f172a" />
+            <rect x="44" y="18" width="12" height="2" rx="0.5" fill="#94a3b8" />
+            <rect x="44" y="24" width="12" height="3" rx="1" fill="#0f172a" />
+            <rect x="64" y="18" width="12" height="2" rx="0.5" fill="#94a3b8" />
+            <rect x="64" y="24" width="12" height="3" rx="1" fill="#0f172a" />
         </svg>
     ),
 
     // ── category_nav: cat-high-contrast-flash ─────────────────────────────────
     'cat-high-contrast-flash': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
-            <rect width="80" height="48" rx="3" fill="#dc2626" />
-            <rect x="6" y="21" width="14" height="6" rx="2" fill="#ffffff" />
-            <rect x="24" y="22.5" width="12" height="3" rx="1.5" fill="#ffffff" />
-            <rect x="40" y="22.5" width="14" height="3" rx="1.5" fill="#ffffff" />
-            <rect x="58" y="22.5" width="16" height="3" rx="1.5" fill="#ffffff" />
+            <rect width="80" height="48" rx="3" fill="#1e293b" />
+            <line x1="0" y1="6" x2="80" y2="6" stroke="#f59e0b" strokeWidth="2.5" />
+            <rect x="5" y="17" width="16" height="16" rx="2" fill="#0f172a" stroke="#f59e0b" strokeWidth="0.8" />
+            <path d="M10 22l3 3m1-1l-3-3" stroke="#f59e0b" strokeWidth="1.2" strokeLinecap="round" />
+            <rect x="25" y="19" width="15" height="12" rx="1" fill="#f59e0b" />
+            <rect x="28" y="24" width="9" height="2" rx="0.5" fill="#0f172a" />
+            <rect x="43" y="19" width="15" height="12" rx="1" fill="#334155" />
+            <line x1="43" y1="19" x2="43" y2="31" stroke="#f59e0b" strokeWidth="1.5" />
+            <rect x="46" y="24" width="9" height="2" rx="0.5" fill="#ffffff" />
+            <rect x="61" y="19" width="14" height="12" rx="1" fill="#334155" />
+            <line x1="61" y1="19" x2="61" y2="31" stroke="#f59e0b" strokeWidth="1.5" />
+            <rect x="64" y="24" width="8" height="2" rx="0.5" fill="#ffffff" />
         </svg>
     ),
 
@@ -2870,14 +2908,17 @@ export const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
     'cat-elite-luxury': (col, light) => (
         <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
             <rect width="80" height="48" rx="3" fill="#ffffff" stroke="#e5e7eb" strokeWidth="0.8" />
-            <line x1="0" y1="12" x2="80" y2="12" stroke="#d97706" strokeWidth="1" />
-            <line x1="0" y1="36" x2="80" y2="36" stroke="#d97706" strokeWidth="1" />
-            <circle cx="40" cy="18" r="1.5" fill="#d97706" />
-            <rect x="12" y="24" width="12" height="3" rx="1" fill="#111827" />
-            <circle cx="30" cy="25.5" r="1" fill="#d97706" />
-            <rect x="35" y="24" width="10" height="3" rx="1" fill="#111827" />
-            <circle cx="50" cy="25.5" r="1" fill="#d97706" />
-            <rect x="55" y="24" width="12" height="3" rx="1" fill="#111827" />
+            <line x1="0" y1="10" x2="80" y2="10" stroke="#d97706" strokeWidth="0.8" />
+            <line x1="0" y1="12" x2="80" y2="12" stroke="#d97706" strokeWidth="0.5" opacity="0.6" />
+            <line x1="0" y1="36" x2="80" y2="36" stroke="#d97706" strokeWidth="0.5" opacity="0.6" />
+            <line x1="0" y1="38" x2="80" y2="38" stroke="#d97706" strokeWidth="0.8" />
+            <polygon points="40 16 42 18 40 20 38 18" fill="#d97706" />
+            <rect x="12" y="25" width="12" height="2.5" rx="1" fill="#d97706" />
+            <line x1="12" y1="29" x2="24" y2="29" stroke="#d97706" strokeWidth="0.8" />
+            <circle cx="30" cy="26" r="0.8" fill="#d97706" />
+            <rect x="35" y="25" width="10" height="2.5" rx="1" fill="#111827" />
+            <circle cx="50" cy="26" r="0.8" fill="#d97706" />
+            <rect x="55" y="25" width="13" height="2.5" rx="1" fill="#111827" />
         </svg>
     ),
 
