@@ -250,10 +250,12 @@ export default function HtmlEditorPanel({
     // ── Render ────────────────────────────────────────────────────────────
     return (
         <div style={{
-            position: 'fixed', inset: 0, zIndex: 9999,
+            position: 'fixed', top: 0, right: 0, bottom: 0, left: '25%',
+            zIndex: 9999,
             display: 'flex', flexDirection: 'column',
             backgroundColor: C.editorBg,
             overflow: 'hidden',
+            boxShadow: '-8px 0 32px rgba(0,0,0,0.4)',
         }}>
 
             {/* ── Top bar ──────────────────────────────────────────────── */}
