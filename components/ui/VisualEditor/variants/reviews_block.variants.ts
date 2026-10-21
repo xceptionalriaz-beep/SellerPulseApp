@@ -1,6 +1,6 @@
 // components/ui/VisualEditor/variants/reviews_block.variants.ts
 // ─────────────────────────────────────────────────────────────────────────────
-// Customer Reviews Block — 9 Professional eBay Listing Variants
+// Customer Reviews Block — 10 Professional eBay Listing Variants
 //
 // Design rules:
 //   • Every variant has a STRUCTURALLY DIFFERENT layout — not colour variations
@@ -21,6 +21,7 @@
 //   7. rev-trust-score-banner    — Big 4.9★ hero rating left, reviews stacked right
 //   8. rev-minimal-serif-grid    — Hero review + 2 numbered support reviews, pure typography
 //   9. rev-trustpilot-showcase   — Store score badge + headline + 3 titled green-star cards
+//  10. rev-rating-breakdown-grid — Rating bar chart (5★→1★) + heading/desc + avatar card grid [PRO]
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface BlockVariant {
@@ -730,6 +731,168 @@ function minimalSerifGrid(p: any, id: string): string {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 10. RATING BREAKDOWN GRID  [PRO]
+// LEFT PANEL: Star rating bar chart (5★→1★) with counts.
+// RIGHT PANEL: Section title + description paragraph + two CTA buttons.
+// BELOW: Grid of avatar review cards (up to 6) — circle initials, name, date,
+//        star/score on the right, review text below.
+// Most information-dense layout — ideal for sellers with many reviews.
+// ─────────────────────────────────────────────────────────────────────────────
+function ratingBreakdownGrid(p: any, id: string): string {
+  const bg        = resolveBg(p)
+  const textCol   = resolveTextColor(p)
+  const subCol    = resolveSubColor(p)
+  const starCol   = resolveStarColor(p)
+  const accent    = resolveAccent(p)
+  const borderCol = resolveBorder(p)
+  const reviews   = resolveReviews(p)
+
+  const sectionTitle = p.sectionTitle ?? 'Customer Ratings'
+  const sectionDesc  = p.sectionDesc  ?? 'Every review below comes from a verified eBay purchase — honest feedback from real buyers who received the item.'
+
+  // Rating breakdown counts: index 0 = 5-star, index 4 = 1-star
+  const ratingCounts: number[] = p.ratingCounts ?? [989, 4500, 50, 16, 8]
+  const maxCount = Math.max(...ratingCounts, 1)
+
+  const fmtCount = (n: number) =>
+    n >= 1000 ? (n / 1000).toFixed(1).replace('.0', '') + 'K' : String(n)
+
+  // Horizontal bar rows (5★ → 1★)
+  const barRows = [5, 4, 3, 2, 1].map(star => {
+    const idx   = 5 - star
+    const count = ratingCounts[idx] ?? 0
+    const pct   = Math.max(Math.round((count / maxCount) * 100), 2)
+    return `
+    <tr>
+      <td style="padding:3px 6px 3px 0;white-space:nowrap;vertical-align:middle;">
+        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:${textCol};line-height:1;">${star}</p>
+      </td>
+      <td style="padding:3px 4px 3px 0;vertical-align:middle;">
+        <p style="margin:0;line-height:1;">${stars(1, starCol, 10)}</p>
+      </td>
+      <td style="padding:3px 8px 3px 0;vertical-align:middle;width:100%;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${borderCol};border-radius:99px;height:7px;overflow:hidden;">
+          <tr>
+            <td width="${pct}%" style="width:${pct}%;background-color:${accent};border-radius:99px;height:7px;font-size:0;line-height:0;">&nbsp;</td>
+            <td style="height:7px;font-size:0;line-height:0;">&nbsp;</td>
+          </tr>
+        </table>
+      </td>
+      <td style="padding:3px 0;vertical-align:middle;white-space:nowrap;text-align:right;">
+        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:${subCol};line-height:1;">${fmtCount(count)}</p>
+      </td>
+    </tr>`
+  }).join('')
+
+  // Avatar colours — cycle through accent + fixed palette
+  const avatarPalette = [accent, '#16a34a', '#0ea5e9', '#f59e0b', '#8b5cf6', '#ef4444']
+
+  // Card grid — up to 6 reviews, rows of 3
+  const cardList = reviews.slice(0, 6)
+  const cardRows: typeof cardList[] = []
+  for (let i = 0; i < cardList.length; i += 3) cardRows.push(cardList.slice(i, i + 3))
+
+  const cardRowsHtml = cardRows.map((row, ri) => {
+    const cells = row.map((r, ci) => {
+      const name   = r.author ?? r.name ?? 'Verified Buyer'
+      const quote  = r.text ?? r.quote ?? ''
+      const date   = r.date ?? 'Verified eBay Purchase'
+      const rating = r.rating ?? 5
+      const ini    = initials(name)
+      const avatarBg = avatarPalette[(ri * 3 + ci) % avatarPalette.length]
+      const truncated = quote.length > 115 ? quote.slice(0, 112) + '&hellip;' : quote
+
+      return `
+      <td width="33%" valign="top" style="width:33%;padding:${ri > 0 ? '10' : '0'}px 4px 0;vertical-align:top;box-sizing:border-box;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:#ffffff;border:1px solid ${borderCol};border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05);">
+          <tr>
+            <td style="padding:14px 14px 10px;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+                <tr>
+                  <td width="38" style="width:38px;vertical-align:middle;">
+                    <table width="34" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:34px;height:34px;background-color:${avatarBg};border-radius:50%;">
+                      <tr>
+                        <td align="center" style="text-align:center;vertical-align:middle;width:34px;height:34px;">
+                          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:#ffffff;line-height:34px;">${ini}</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td valign="middle" style="vertical-align:middle;padding-left:10px;">
+                    <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:${textCol};line-height:1.2;">${name}</p>
+                    <p style="margin:2px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};line-height:1.2;">${date}</p>
+                  </td>
+                  <td align="right" valign="middle" style="text-align:right;vertical-align:middle;white-space:nowrap;">
+                    <p style="margin:0;line-height:1;">${stars(1, starCol, 12)}<span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:${textCol};vertical-align:middle;">&nbsp;${rating}.0</span></p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 14px 14px;">
+              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${subCol};line-height:1.65;">${truncated}</p>
+            </td>
+          </tr>
+        </table>
+      </td>`
+    }).join('')
+
+    let fill = ''
+    for (let e = row.length; e < 3; e++) fill += `<td width="33%" style="padding:0 4px;"></td>`
+    return `<tr>${cells}${fill}</tr>`
+  }).join('')
+
+  return outerWrap(id, `
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${bg};">
+  <tr>
+    <td style="${pad(p, 24, 20, 24, 20)}box-sizing:border-box;">
+
+      <!-- TOP: bars (left) + heading/desc/buttons (right) -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:20px;">
+        <tr>
+
+          <!-- LEFT: star breakdown bars -->
+          <td width="40%" valign="middle" style="width:40%;vertical-align:middle;padding-right:24px;border-right:1px solid ${borderCol};">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">${barRows}</table>
+          </td>
+
+          <!-- RIGHT: title + description + CTA buttons -->
+          <td valign="middle" style="vertical-align:middle;padding-left:24px;">
+            <p style="margin:0 0 10px;font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:800;color:${textCol};line-height:1.15;">${sectionTitle}</p>
+            <p style="margin:0 0 18px;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:${subCol};line-height:1.7;">${sectionDesc}</p>
+            <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+              <tr>
+                <td style="padding-right:8px;">
+                  <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${accent};border-radius:6px;">
+                    <tr><td style="padding:9px 16px;">
+                      <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:#ffffff;white-space:nowrap;">View All Feedback</p>
+                    </td></tr>
+                  </table>
+                </td>
+                <td>
+                  <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1.5px solid ${accent};border-radius:6px;">
+                    <tr><td style="padding:8px 16px;">
+                      <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:${accent};white-space:nowrap;">Read Reviews</p>
+                    </td></tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+
+        </tr>
+      </table>
+
+      <!-- BOTTOM: avatar review card grid -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;table-layout:fixed;">${cardRowsHtml}</table>
+
+    </td>
+  </tr>
+</table>`)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // SVG THUMBNAILS
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -938,6 +1101,64 @@ export const REVIEWS_BLOCK_THUMBNAILS: Record<string, string> = {
     <line x1="56" y1="38" x2="70" y2="38" stroke="#6b7280" stroke-width="0.6"/>
     <line x1="56" y1="42" x2="68" y2="42" stroke="#7530fb" stroke-width="0.7"/>
   </svg>`,
+
+  'rev-rating-breakdown-grid': `<svg viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+    <rect width="80" height="52" fill="#f9fafb"/>
+    <!-- LEFT: 5-star breakdown bars -->
+    <!-- 5★ long bar -->
+    <line x1="2" y1="6" x2="7" y2="6" stroke="#111827" stroke-width="1.4"/>
+    <rect x="9" y="4.5" width="19" height="3" rx="1.5" fill="#e5e7eb"/>
+    <rect x="9" y="4.5" width="17" height="3" rx="1.5" fill="#7530fb"/>
+    <line x1="30" y1="6" x2="34" y2="6" stroke="#9ca3af" stroke-width="0.9"/>
+    <!-- 4★ medium bar -->
+    <line x1="2" y1="11" x2="7" y2="11" stroke="#111827" stroke-width="1.4"/>
+    <rect x="9" y="9.5" width="19" height="3" rx="1.5" fill="#e5e7eb"/>
+    <rect x="9" y="9.5" width="13" height="3" rx="1.5" fill="#7530fb"/>
+    <line x1="30" y1="11" x2="34" y2="11" stroke="#9ca3af" stroke-width="0.9"/>
+    <!-- 3★ short bar -->
+    <line x1="2" y1="16" x2="7" y2="16" stroke="#111827" stroke-width="1.4"/>
+    <rect x="9" y="14.5" width="19" height="3" rx="1.5" fill="#e5e7eb"/>
+    <rect x="9" y="14.5" width="4" height="3" rx="1.5" fill="#7530fb"/>
+    <line x1="30" y1="16" x2="34" y2="16" stroke="#9ca3af" stroke-width="0.9"/>
+    <!-- 2★ tiny bar -->
+    <line x1="2" y1="21" x2="7" y2="21" stroke="#111827" stroke-width="1.4"/>
+    <rect x="9" y="19.5" width="19" height="3" rx="1.5" fill="#e5e7eb"/>
+    <rect x="9" y="19.5" width="2" height="3" rx="1.5" fill="#7530fb"/>
+    <line x1="30" y1="21" x2="34" y2="21" stroke="#9ca3af" stroke-width="0.9"/>
+    <!-- 1★ minimal bar -->
+    <line x1="2" y1="26" x2="7" y2="26" stroke="#111827" stroke-width="1.4"/>
+    <rect x="9" y="24.5" width="19" height="3" rx="1.5" fill="#e5e7eb"/>
+    <rect x="9" y="24.5" width="1.5" height="3" rx="1.5" fill="#7530fb"/>
+    <line x1="30" y1="26" x2="34" y2="26" stroke="#9ca3af" stroke-width="0.9"/>
+    <!-- vertical divider -->
+    <line x1="37" y1="3" x2="37" y2="29" stroke="#e5e7eb" stroke-width="0.8"/>
+    <!-- RIGHT: title + desc lines + 2 buttons -->
+    <line x1="40" y1="7" x2="72" y2="7" stroke="#111827" stroke-width="1.8"/>
+    <line x1="40" y1="11.5" x2="77" y2="11.5" stroke="#9ca3af" stroke-width="0.8"/>
+    <line x1="40" y1="14.5" x2="75" y2="14.5" stroke="#9ca3af" stroke-width="0.8"/>
+    <line x1="40" y1="17.5" x2="68" y2="17.5" stroke="#9ca3af" stroke-width="0.8"/>
+    <rect x="40" y="21" width="16" height="6" rx="2" fill="#7530fb"/>
+    <rect x="58" y="21" width="16" height="6" rx="2" fill="none" stroke="#7530fb" stroke-width="0.9"/>
+    <!-- BOTTOM: 3 avatar cards -->
+    <rect x="2" y="31" width="23" height="18" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width="0.8"/>
+    <circle cx="8" cy="37.5" r="4" fill="#7530fb"/>
+    <line x1="14" y1="35.5" x2="23" y2="35.5" stroke="#111827" stroke-width="0.9"/>
+    <line x1="14" y1="39" x2="23" y2="39" stroke="#9ca3af" stroke-width="0.7"/>
+    <line x1="4" y1="43.5" x2="23" y2="43.5" stroke="#9ca3af" stroke-width="0.7"/>
+    <line x1="4" y1="46.5" x2="20" y2="46.5" stroke="#9ca3af" stroke-width="0.7"/>
+    <rect x="28" y="31" width="23" height="18" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width="0.8"/>
+    <circle cx="34" cy="37.5" r="4" fill="#16a34a"/>
+    <line x1="40" y1="35.5" x2="49" y2="35.5" stroke="#111827" stroke-width="0.9"/>
+    <line x1="40" y1="39" x2="49" y2="39" stroke="#9ca3af" stroke-width="0.7"/>
+    <line x1="30" y1="43.5" x2="49" y2="43.5" stroke="#9ca3af" stroke-width="0.7"/>
+    <line x1="30" y1="46.5" x2="46" y2="46.5" stroke="#9ca3af" stroke-width="0.7"/>
+    <rect x="55" y="31" width="23" height="18" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width="0.8"/>
+    <circle cx="61" cy="37.5" r="4" fill="#0ea5e9"/>
+    <line x1="67" y1="35.5" x2="76" y2="35.5" stroke="#111827" stroke-width="0.9"/>
+    <line x1="67" y1="39" x2="76" y2="39" stroke="#9ca3af" stroke-width="0.7"/>
+    <line x1="57" y1="43.5" x2="76" y2="43.5" stroke="#9ca3af" stroke-width="0.7"/>
+    <line x1="57" y1="46.5" x2="73" y2="46.5" stroke="#9ca3af" stroke-width="0.7"/>
+  </svg>`,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1129,6 +1350,13 @@ export const reviewsBlockVariants: BlockVariant[] = [
     description: 'PRO — Store badge + score + headline + 3 titled review cards with green stars. Highest-trust layout.',
     thumbnail: REVIEWS_BLOCK_THUMBNAILS['rev-trustpilot-showcase'],
     toHtml(props, id) { return scoreShowcase(props, id) },
+  },
+  {
+    id: 'rev-rating-breakdown-grid',
+    label: 'Rating Breakdown Grid',
+    description: 'PRO — Star rating bar chart (5★→1★ with counts) + section heading & CTA buttons + grid of avatar review cards.',
+    thumbnail: REVIEWS_BLOCK_THUMBNAILS['rev-rating-breakdown-grid'],
+    toHtml(props, id) { return ratingBreakdownGrid(props, id) },
   },
 ]
 
