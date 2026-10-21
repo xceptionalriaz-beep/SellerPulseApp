@@ -25,6 +25,7 @@ import {
     Pencil, ChevronLeft, ChevronRight, Code2,
     Tag, FileText, Hash, Zap,
 } from 'lucide-react'
+import { ProBadge } from '@/components/ui/VisualEditor/ProBadge'
 
 // ── Design tokens ──────────────────────────────────────────────────────────
 const C = {
@@ -51,6 +52,7 @@ export interface PreviewTemplate {
     description_html: string | null
     is_system: boolean | null
     is_shared: boolean | null
+    is_pro?: boolean | null
     use_count: number | null
     created_at: string | null
 }
@@ -214,6 +216,7 @@ export default function TemplatePreviewModal({
                             </p>
                             <div className="flex items-center gap-1.5 mt-0.5">
                                 <CategoryBadge category={current.category} />
+                                {current.is_pro && <ProBadge size="xs" />}
                                 {current.is_system && (
                                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                                         style={{ backgroundColor: C.primaryLight, color: C.primary, fontFamily: 'DM Sans, sans-serif' }}>
