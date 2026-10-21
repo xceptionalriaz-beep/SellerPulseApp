@@ -32,6 +32,7 @@ import {
 } from 'lucide-react'
 import { hydrateTemplateContent } from '@/lib/template-utils'
 import { assembleDocument } from '@/components/ui/VisualEditor/blocks'
+import { ProBadge } from '@/components/ui/VisualEditor/ProBadge'
 import { sanitiseHtml } from '@/components/ui/EditorToolbar'
 import { AIButton, IconButton } from '@/components/ui/Buttons'
 import ProDropdown from '@/components/ui/ProDropdown'
@@ -337,6 +338,7 @@ function DesignStudioInner() {
                         sort_order: null,
                         is_featured: null,
                         is_new_badge: null,
+                        is_pro: null,
                     }
                 })
             }
@@ -1002,9 +1004,16 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy
 
                 {/* Badges */}
                 {badge && (
-                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[9px] font-black tracking-wide"
-                        style={{ backgroundColor: badge.bg, color: badge.text, fontFamily: 'DM Sans, sans-serif', zIndex: 2 }}>
-                        {badge.label}
+                    <div className="absolute top-2.5 left-2.5" style={{ zIndex: 2 }}>
+                        {template.is_pro
+                            ? <ProBadge size="xs" />
+                            : (
+                                <div className="px-2 py-0.5 rounded-full text-[9px] font-black tracking-wide"
+                                    style={{ backgroundColor: badge.bg, color: badge.text, fontFamily: 'DM Sans, sans-serif' }}>
+                                    {badge.label}
+                                </div>
+                            )
+                        }
                     </div>
                 )}
                 {isOwn && (

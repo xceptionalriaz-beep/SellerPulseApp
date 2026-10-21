@@ -13,6 +13,7 @@ import {
 import AiTemplateGenerator from '@/components/ui/AiTemplateGenerator'
 import { wrapTemplateHtml, hydrateTemplateContent } from '@/lib/template-utils'
 import toast from 'react-hot-toast'
+import { ProBadge } from '@/components/ui/VisualEditor/ProBadge'
 
 // ── Design tokens ──────────────────────────────────────────────────────────
 const C = {
@@ -635,11 +636,7 @@ export default function TemplatesTab() {
                                                         {isPublished ? 'Published' : 'Draft'}
                                                     </span>
                                                 </div>
-                                                {t.is_pro && (
-                                                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 9, fontWeight: 900, letterSpacing: '0.06em', backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fde68a', borderRadius: 4, padding: '1px 5px', width: 'fit-content', fontFamily: 'DM Sans, sans-serif' }}>
-                                                        ⭐ PRO
-                                                    </span>
-                                                )}
+                                                {t.is_pro && <ProBadge size="xs" />}
                                             </div>
 
                                             {/* Uses */}
