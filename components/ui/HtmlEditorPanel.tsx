@@ -40,6 +40,7 @@ const PLACEHOLDER_GROUPS: PlaceholderGroup[] = [
     {
         group: 'Product Info',
         items: [
+<<<<<<< HEAD
             { label: 'Product Title', value: '{{PRODUCT_TITLE}}', example: 'Premium Dog Clippers Pro' },
             { label: 'Item Description', value: '{{ITEM_DESCRIPTION}}', example: 'High-quality grooming kit...' },
             { label: 'Item Condition', value: '{{ITEM_CONDITION}}', example: 'Brand New' },
@@ -52,39 +53,76 @@ const PLACEHOLDER_GROUPS: PlaceholderGroup[] = [
             { label: 'Warranty', value: '{{WARRANTY}}', example: '2 Year Manufacturer Warranty' },
             { label: 'Weight', value: '{{WEIGHT}}', example: '1.2 kg' },
             { label: 'Dimensions', value: '{{DIMENSIONS}}', example: '30 x 15 x 10 cm' },
+=======
+            { label: 'Product Title',   value: '{{PRODUCT_TITLE}}',   example: 'Premium Dog Clippers Pro' },
+            { label: 'Item Description',value: '{{ITEM_DESCRIPTION}}',example: 'High-quality grooming kit...' },
+            { label: 'Item Condition',  value: '{{ITEM_CONDITION}}',  example: 'Brand New' },
+            { label: 'Brand',           value: '{{BRAND}}',           example: 'Wahl' },
+            { label: 'Model',           value: '{{MODEL}}',           example: 'KM10' },
+            { label: 'MPN',             value: '{{MPN}}',             example: '9788-100' },
+            { label: 'EAN / Barcode',   value: '{{EAN}}',             example: '0043917978819' },
+            { label: 'Item Category',   value: '{{ITEM_CATEGORY}}',   example: 'Pet Supplies' },
+            { label: 'Item SKU',        value: '{{ITEM_SKU}}',        example: 'SKU-12345' },
+            { label: 'Warranty',        value: '{{WARRANTY}}',        example: '2 Year Manufacturer Warranty' },
+            { label: 'Weight',          value: '{{WEIGHT}}',          example: '1.2 kg' },
+            { label: 'Dimensions',      value: '{{DIMENSIONS}}',      example: '30 x 15 x 10 cm' },
+>>>>>>> 225fa352826856d159739ea69c36569fb76a9cb3
         ],
     },
     {
         group: 'Pricing',
         items: [
+<<<<<<< HEAD
             { label: 'Item Price', value: '{{ITEM_PRICE}}', example: '£29.99' },
             { label: 'Original Price', value: '{{ORIGINAL_PRICE}}', example: '£49.99' },
             { label: 'Discount %', value: '{{DISCOUNT_PERCENT}}', example: '40%' },
+=======
+            { label: 'Item Price',     value: '{{ITEM_PRICE}}',      example: '£29.99' },
+            { label: 'Original Price', value: '{{ORIGINAL_PRICE}}',  example: '£49.99' },
+            { label: 'Discount %',     value: '{{DISCOUNT_PERCENT}}',example: '40%' },
+>>>>>>> 225fa352826856d159739ea69c36569fb76a9cb3
         ],
     },
     {
         group: 'Media',
         items: [
             { label: 'Main Image URL', value: '{{MAIN_IMAGE_URL}}', example: 'https://i.ebayimg.com/...' },
+<<<<<<< HEAD
             { label: 'Image 2 URL', value: '{{IMAGE_2_URL}}', example: 'https://i.ebayimg.com/...' },
             { label: 'Image 3 URL', value: '{{IMAGE_3_URL}}', example: 'https://i.ebayimg.com/...' },
+=======
+            { label: 'Image 2 URL',    value: '{{IMAGE_2_URL}}',    example: 'https://i.ebayimg.com/...' },
+            { label: 'Image 3 URL',    value: '{{IMAGE_3_URL}}',    example: 'https://i.ebayimg.com/...' },
+>>>>>>> 225fa352826856d159739ea69c36569fb76a9cb3
         ],
     },
     {
         group: 'Shipping & Returns',
         items: [
+<<<<<<< HEAD
             { label: 'Shipping Time', value: '{{SHIPPING_TIME}}', example: 'Same Day Dispatch' },
             { label: 'Return Policy', value: '{{RETURN_POLICY}}', example: '30-Day Free Returns' },
             { label: 'Seller Name', value: '{{SELLER_NAME}}', example: 'UKTopDeals' },
+=======
+            { label: 'Shipping Time',  value: '{{SHIPPING_TIME}}',  example: 'Same Day Dispatch' },
+            { label: 'Return Policy',  value: '{{RETURN_POLICY}}',  example: '30-Day Free Returns' },
+            { label: 'Seller Name',    value: '{{SELLER_NAME}}',    example: 'UKTopDeals' },
+>>>>>>> 225fa352826856d159739ea69c36569fb76a9cb3
         ],
     },
 ]
 
 // ── Devices ────────────────────────────────────────────────────────────────
 const DEVICES = [
+<<<<<<< HEAD
     { id: 'desktop', icon: Monitor, label: 'Desktop' },
     { id: 'tablet', icon: Tablet, label: 'Tablet' },
     { id: 'mobile', icon: Smartphone, label: 'Mobile' },
+=======
+    { id: 'desktop', icon: Monitor,    label: 'Desktop' },
+    { id: 'tablet',  icon: Tablet,     label: 'Tablet'  },
+    { id: 'mobile',  icon: Smartphone, label: 'Mobile'  },
+>>>>>>> 225fa352826856d159739ea69c36569fb76a9cb3
 ] as const
 type DeviceId = typeof DEVICES[number]['id']
 
@@ -106,6 +144,7 @@ export default function HtmlEditorPanel({
     onApply,
     onDiscard,
 }: HtmlEditorPanelProps) {
+<<<<<<< HEAD
     const [html, setHtml] = useState(initialHtml)
     const [name, setName] = useState(initialName)
     const [device, setDevice] = useState<DeviceId>('desktop')
@@ -118,6 +157,20 @@ export default function HtmlEditorPanel({
     const gutterRef = useRef<HTMLDivElement>(null)
 
     const lines = html.split('\n')
+=======
+    const [html, setHtml]   = useState(initialHtml)
+    const [name, setName]   = useState(initialName)
+    const [device, setDevice] = useState<DeviceId>('desktop')
+    const [ebayId, setEbayId] = useState('')
+    const [fullscreen, setFullscreen]   = useState(false)
+    const [testLoading, setTestLoading] = useState(false)
+    const [previewHtml, setPreviewHtml] = useState('')
+
+    const textareaRef  = useRef<HTMLTextAreaElement>(null)
+    const gutterRef    = useRef<HTMLDivElement>(null)
+
+    const lines     = html.split('\n')
+>>>>>>> 225fa352826856d159739ea69c36569fb76a9cb3
     const lineCount = lines.length
 
     // ── eBay test preview ─────────────────────────────────────────────────
@@ -125,6 +178,7 @@ export default function HtmlEditorPanel({
         if (!ebayId.trim()) return
         setTestLoading(true)
         try {
+<<<<<<< HEAD
             const res = await fetch(`/api/ebay/import-listing?item=${encodeURIComponent(ebayId.trim())}`)
             const data = await res.json()
             if (!res.ok || !data.item) { alert(data.error || 'Could not fetch listing'); return }
@@ -144,11 +198,36 @@ export default function HtmlEditorPanel({
                 .replace(/\{\{EAN\}\}/g, item.ean ?? ''))
         } catch { alert('Network error fetching listing') }
         finally { setTestLoading(false) }
+=======
+            const res  = await fetch(`/api/ebay/import-listing?item=${encodeURIComponent(ebayId.trim())}`)
+            const data = await res.json()
+            if (!res.ok || !data.item) { alert(data.error || 'Could not fetch listing'); return }
+            const item     = data.item
+            const currency = item.currency === 'GBP' ? '£' : item.currency === 'EUR' ? '€' : '$'
+            setPreviewHtml(html
+                .replace(/\{\{PRODUCT_TITLE\}\}/g,    item.title       ?? '')
+                .replace(/\{\{ITEM_PRICE\}\}/g,        `${currency}${parseFloat(item.price).toFixed(2)}`)
+                .replace(/\{\{MAIN_IMAGE_URL\}\}/g,    item.imageUrl    ?? '')
+                .replace(/\{\{ITEM_DESCRIPTION\}\}/g,  item.title       ?? '')
+                .replace(/\{\{ITEM_CONDITION\}\}/g,    item.condition   ?? '')
+                .replace(/\{\{SELLER_NAME\}\}/g,       item.seller      ?? '')
+                .replace(/\{\{ITEM_CATEGORY\}\}/g,     item.categoryName ?? '')
+                .replace(/\{\{ITEM_SKU\}\}/g,          item.itemId      ?? '')
+                .replace(/\{\{BRAND\}\}/g,             item.brand       ?? '')
+                .replace(/\{\{MPN\}\}/g,               item.mpn         ?? '')
+                .replace(/\{\{EAN\}\}/g,               item.ean         ?? ''))
+        } catch { alert('Network error fetching listing') }
+        finally  { setTestLoading(false) }
+>>>>>>> 225fa352826856d159739ea69c36569fb76a9cb3
     }
 
     const iframeWidth =
         device === 'desktop' ? '100%' :
+<<<<<<< HEAD
             device === 'tablet' ? '768px' : '390px'
+=======
+        device === 'tablet'  ? '768px' : '390px'
+>>>>>>> 225fa352826856d159739ea69c36569fb76a9cb3
 
     // ── Render ────────────────────────────────────────────────────────────
     return (
