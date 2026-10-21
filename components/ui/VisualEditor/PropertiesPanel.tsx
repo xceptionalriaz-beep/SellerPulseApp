@@ -7519,8 +7519,18 @@ function BlockAttributeProps({ block, props, updateProps, phButton, tokenButton,
                 { text: 'Exactly as described. Arrived two days early and packaging was excellent.', author: 'Sarah M.', rating: 5, date: 'Verified eBay Purchase' },
                 { text: 'Great quality for the price. Seller answered my question within the hour.', author: 'James T.', rating: 5, date: 'Verified eBay Purchase' },
             ]
+            const isTrustpilot = (props as any).variant === 'rev-trustpilot-showcase'
+            const reviewTitles: string[] = (props as any).reviewTitles ?? ['First time buying — won\'t be the last', 'Outstanding Customer Service', 'Amazing from start to finish']
             return (
                 <>
+                    {isTrustpilot && (
+                        <Section title="Trustpilot Showcase">
+                            <TextInput label="Section headline" value={(props as any).sectionTitle ?? 'People Love What We Do and How We Do It'} onChange={v => updateProps({ sectionTitle: v } as any)} />
+                            <TextInput label="Score (e.g. 4.9)" value={(props as any).trustScore ?? '4.9'} onChange={v => updateProps({ trustScore: v } as any)} />
+                            <TextInput label="Label (e.g. Excellent)" value={(props as any).trustLabel ?? 'Excellent'} onChange={v => updateProps({ trustLabel: v } as any)} />
+                            <TextInput label="Review count (e.g. 2,847)" value={(props as any).reviewCount ?? '2,847'} onChange={v => updateProps({ reviewCount: v } as any)} />
+                        </Section>
+                    )}
                     <Section title={`Reviews (${reviews.length})`}>
                         {reviews.map((r, i) => (
                             <div key={i} style={{ background: 'var(--pp-section-bg, rgba(255,255,255,0.04))', border: '1px solid var(--pp-border)', borderRadius: 6, marginBottom: 6, padding: '8px' }}>
@@ -7528,6 +7538,9 @@ function BlockAttributeProps({ block, props, updateProps, phButton, tokenButton,
                                     <span style={{ color: 'var(--pp-text-muted)', fontSize: 11 }}>Review {i + 1}</span>
                                     <button style={{ background: 'var(--pp-danger, #dc2626)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }} onClick={() => updateProps({ reviews: reviews.filter((_, j) => j !== i) } as any)}>✕</button>
                                 </div>
+                                {isTrustpilot && (
+                                    <input placeholder="Card title (e.g. Outstanding Service)" style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', marginBottom: 3, boxSizing: 'border-box' }} value={reviewTitles[i] ?? ''} onChange={e => { const next = [...reviewTitles]; next[i] = e.target.value; updateProps({ reviewTitles: next } as any) }} />
+                                )}
                                 <textarea placeholder="Review text" rows={3} style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', marginBottom: 3, resize: 'vertical', boxSizing: 'border-box' }} value={r.text} onChange={e => { const next = [...reviews]; next[i] = { ...next[i], text: e.target.value }; updateProps({ reviews: next } as any) }} />
                                 <input placeholder="Buyer name" style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', marginBottom: 3, boxSizing: 'border-box' }} value={r.author} onChange={e => { const next = [...reviews]; next[i] = { ...next[i], author: e.target.value }; updateProps({ reviews: next } as any) }} />
                                 <input placeholder="Date / label (e.g. Verified eBay Purchase)" style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', marginBottom: 3, boxSizing: 'border-box' }} value={r.date ?? ''} onChange={e => { const next = [...reviews]; next[i] = { ...next[i], date: e.target.value }; updateProps({ reviews: next } as any) }} />
