@@ -1278,6 +1278,32 @@ export const IMAGE_PLACEHOLDER_SVG = `<svg viewBox="0 0 4 3" preserveAspectRatio
 
 export const CONTENT_PLACEHOLDER = `<div data-canvas-dropzone="content" style="width:100%;min-height:80px;background:#f8f8f8;border:1px dashed #ddd;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span class="add-btn" style="font-family:Arial,sans-serif;font-size:13px;color:#6b7280;">+ Add Content</span></div>`
 
+/** Ensures column dropzones and placeholders expand 100% to follow the bottom resize line */
+export function formatColContent(html: string, minH?: number): string {
+    if (!html) return html
+    if (html.includes('data-canvas-dropzone')) {
+        return html.replace(
+            /(<div[^>]*data-canvas-dropzone[^>]*style=")([^"]*)(")/i,
+            (_, prefix, styles, suffix) => {
+                let s = styles
+                if (!s.includes('height:')) s += 'height:100%;'
+                else s = s.replace(/height:[^;]+;?/g, 'height:100%;')
+                if (!s.includes('flex:')) s += 'flex:1 1 auto;'
+                if (!s.includes('box-sizing:')) s += 'box-sizing:border-box;'
+                if (minH && minH > 0) {
+                    if (s.includes('min-height:')) {
+                        s = s.replace(/min-height:[^;]+;?/g, `min-height:${minH}px;`)
+                    } else {
+                        s += `min-height:${minH}px;`
+                    }
+                }
+                return `${prefix}${s}${suffix}`
+            }
+        )
+    }
+    return html
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // BLOCK DEFINITIONS
 // Meta information for each block type — used by BlockLibrary sidebar
@@ -1452,8 +1478,8 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             const rMinH = rightH > 0 ? `min-height:${rightH}px;height:${rightH}px;` : ''
             const tblH = Math.max(leftH, rightH, rowMinH)
             const tblMinH = tblH > 0 ? `min-height:${tblH}px;height:${tblH}px;` : ''
-            const lWrapStyle = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;${lMinH}`
-            const rWrapStyle = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;${rMinH}`
+            const lWrapStyle = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;display:flex;flex-direction:column;height:100%;${lMinH}`
+            const rWrapStyle = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;display:flex;flex-direction:column;height:100%;${rMinH}`
             // Divider
             const divider = pa.showDivider
                 ? `<td width="${pa.dividerWidth ?? 1}px" style="width:${pa.dividerWidth ?? 1}px;background-color:${pa.dividerColor ?? '#ede9fe'};font-size:1px;line-height:1px;">&nbsp;</td>`
@@ -1464,12 +1490,12 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             const contStyle = contBorder + contRadius
             const rowsHtml = rows.map((r: any, idx: number) => `
         <tr>
-          <td width="${p.leftWidth}%" valign="${valign}" style="padding-right:${p.gap / 2}px;${lPad}${lRadius}${lBorder}${lMinH}background-color:${pa.leftBg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">
-            <div style="${lWrapStyle}">${r.leftContent}</div>
+          <td width="${p.leftWidth}%" valign="${valign}" style="padding-right:${p.gap / 2}px;${lPad}${lRadius}${lBorder}${lMinH}background-color:${pa.leftBg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}height:100%;">
+            <div style="${lWrapStyle}">${formatColContent(r.leftContent, leftH)}</div>
           </td>
           ${divider}
-          <td width="${rightWidth}%" valign="${valign}" style="padding-left:${p.gap / 2}px;${rPad}${rRadius}${rBorder}${rMinH}background-color:${pa.rightBg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">
-            <div style="${rWrapStyle}">${r.rightContent}</div>
+          <td width="${rightWidth}%" valign="${valign}" style="padding-left:${p.gap / 2}px;${rPad}${rRadius}${rBorder}${rMinH}background-color:${pa.rightBg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}height:100%;">
+            <div style="${rWrapStyle}">${formatColContent(r.rightContent, rightH)}</div>
           </td>
         </tr>
             `).join('')
@@ -1536,9 +1562,9 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             const mh3 = h3 > 0 ? `min-height:${h3}px;height:${h3}px;` : ''
             const maxH3 = Math.max(h1, h2, h3, rowMinH3)
             const tblMinH3 = maxH3 > 0 ? `min-height:${maxH3}px;height:${maxH3}px;` : ''
-            const wrap1 = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;${mh1}`
-            const wrap2 = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;${mh2}`
-            const wrap3 = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;${mh3}`
+            const wrap1 = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;display:flex;flex-direction:column;height:100%;${mh1}`
+            const wrap2 = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;display:flex;flex-direction:column;height:100%;${mh2}`
+            const wrap3 = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;display:flex;flex-direction:column;height:100%;${mh3}`
             // Divider
             const div3 = pa3.showDivider
                 ? `<td width="${pa3.dividerWidth ?? 1}px" style="width:${pa3.dividerWidth ?? 1}px;background-color:${pa3.dividerColor ?? '#ede9fe'};font-size:1px;">&nbsp;</td>`
@@ -1549,11 +1575,11 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             const contStyle3 = contBorder3 + contRadius3
             const rowsHtml = rows.map((r: any, idx: number) => `
         <tr>
-          <td width="${w1}%" valign="${valign3}" style="padding-right:${p.gap / 2}px;${cp1}${cr1}${cb1}${mh1}background-color:${pa3.col1Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}"><div style="${wrap1}">${r.col1Content}</div></td>
+          <td width="${w1}%" valign="${valign3}" style="padding-right:${p.gap / 2}px;${cp1}${cr1}${cb1}${mh1}background-color:${pa3.col1Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}height:100%;"><div style="${wrap1}">${formatColContent(r.col1Content, h1)}</div></td>
           ${div3}
-          <td width="${w2}%" valign="${valign3}" style="padding-left:${p.gap / 2}px;padding-right:${p.gap / 2}px;${cp2}${cr2}${cb2}${mh2}background-color:${pa3.col2Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}"><div style="${wrap2}">${r.col2Content}</div></td>
+          <td width="${w2}%" valign="${valign3}" style="padding-left:${p.gap / 2}px;padding-right:${p.gap / 2}px;${cp2}${cr2}${cb2}${mh2}background-color:${pa3.col2Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}height:100%;"><div style="${wrap2}">${formatColContent(r.col2Content, h2)}</div></td>
           ${div3}
-          <td width="${w3}%" valign="${valign3}" style="padding-left:${p.gap / 2}px;${cp3}${cr3}${cb3}${mh3}background-color:${pa3.col3Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}"><div style="${wrap3}">${r.col3Content}</div></td>
+          <td width="${w3}%" valign="${valign3}" style="padding-left:${p.gap / 2}px;${cp3}${cr3}${cb3}${mh3}background-color:${pa3.col3Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}height:100%;"><div style="${wrap3}">${formatColContent(r.col3Content, h3)}</div></td>
         </tr>
             `).join('')
             const stackClass3 = pa3.stackMobile === false ? '' : ' class="mobile-stack"'
@@ -2666,10 +2692,10 @@ ${thumbCells}
                 const mh44 = h44 > 0 ? `min-height:${h44}px;height:${h44}px;` : ''
                 const maxH4 = Math.max(h41, h42, h43, h44, rowMinH4)
                 const tblMinH4 = maxH4 > 0 ? `min-height:${maxH4}px;height:${maxH4}px;` : ''
-                const wrap41 = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;${mh41}`
-                const wrap42 = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;${mh42}`
-                const wrap43 = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;${mh43}`
-                const wrap44 = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;${mh44}`
+                const wrap41 = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;display:flex;flex-direction:column;height:100%;${mh41}`
+                const wrap42 = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;display:flex;flex-direction:column;height:100%;${mh42}`
+                const wrap43 = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;display:flex;flex-direction:column;height:100%;${mh43}`
+                const wrap44 = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;display:flex;flex-direction:column;height:100%;${mh44}`
                 // Divider
                 const div4 = pa4.showDivider
                     ? `<td width="${pa4.dividerWidth ?? 1}px" style="width:${pa4.dividerWidth ?? 1}px;background-color:${pa4.dividerColor ?? '#ede9fe'};font-size:1px;">&nbsp;</td>`
@@ -2681,13 +2707,13 @@ ${thumbCells}
                 const g = (p.gap || 8) / 2
                 const rowsHtml = rows.map((r: any, idx: number) => `
         <tr>
-          <td width="${fw1}%" valign="${valign4}" style="padding-right:${g}px;${cp41}${cr41}${cb41}${mh41}background-color:${pa4.col1Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}"><div style="${wrap41}">${r.col1Content}</div></td>
+          <td width="${fw1}%" valign="${valign4}" style="padding-right:${g}px;${cp41}${cr41}${cb41}${mh41}background-color:${pa4.col1Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}height:100%;"><div style="${wrap41}">${formatColContent(r.col1Content, h41)}</div></td>
           ${div4}
-          <td width="${fw2}%" valign="${valign4}" style="padding-left:${g}px;padding-right:${g}px;${cp42}${cr42}${cb42}${mh42}background-color:${pa4.col2Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}"><div style="${wrap42}">${r.col2Content}</div></td>
+          <td width="${fw2}%" valign="${valign4}" style="padding-left:${g}px;padding-right:${g}px;${cp42}${cr42}${cb42}${mh42}background-color:${pa4.col2Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}height:100%;"><div style="${wrap42}">${formatColContent(r.col2Content, h42)}</div></td>
           ${div4}
-          <td width="${fw3}%" valign="${valign4}" style="padding-left:${g}px;padding-right:${g}px;${cp43}${cr43}${cb43}${mh43}background-color:${pa4.col3Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}"><div style="${wrap43}">${r.col3Content}</div></td>
+          <td width="${fw3}%" valign="${valign4}" style="padding-left:${g}px;padding-right:${g}px;${cp43}${cr43}${cb43}${mh43}background-color:${pa4.col3Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}height:100%;"><div style="${wrap43}">${formatColContent(r.col3Content, h43)}</div></td>
           ${div4}
-          <td width="${fw4}%" valign="${valign4}" style="padding-left:${g}px;${cp44}${cr44}${cb44}${mh44}background-color:${pa4.col4Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}"><div style="${wrap44}">${r.col4Content}</div></td>
+          <td width="${fw4}%" valign="${valign4}" style="padding-left:${g}px;${cp44}${cr44}${cb44}${mh44}background-color:${pa4.col4Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}height:100%;"><div style="${wrap44}">${formatColContent(r.col4Content, h44)}</div></td>
         </tr>
                 `).join('')
                 const stackClass4 = pa4.stackTo2
@@ -2765,18 +2791,18 @@ ${thumbCells}
                 const rightWidth = 100 - leftWidth
                 const minH = Number(p.minHeight || p.leftMinHeight || 0)
                 const minHStyle = minH > 0 ? `min-height:${minH}px;height:${minH}px;` : ''
-                const colWrapStyle = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;${minHStyle}`
+                const colWrapStyle = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;display:flex;flex-direction:column;height:100%;${minHStyle}`
                 return wrapBlock('sidebar_layout' as BlockType, id,
                     `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;${minHStyle}">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}${minHStyle}">
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed;width:100%;${minHStyle}">
         <tr>
-          <td width="${leftWidth}%" valign="${p.colAlign === 'middle' ? 'middle' : p.colAlign === 'bottom' ? 'bottom' : 'top'}" style="${minHStyle}padding-right:${(p.gap || 16) / 2}px;background-color:${p.imageBg ?? 'transparent'};border-radius:${p.imageRadius ?? 0}px;">
-            <div style="${colWrapStyle}">${leftHtml}</div>
+          <td width="${leftWidth}%" valign="${p.colAlign === 'middle' ? 'middle' : p.colAlign === 'bottom' ? 'bottom' : 'top'}" style="${minHStyle}padding-right:${(p.gap || 16) / 2}px;background-color:${p.imageBg ?? 'transparent'};border-radius:${p.imageRadius ?? 0}px;height:100%;">
+            <div style="${colWrapStyle}">${formatColContent(leftHtml, minH)}</div>
           </td>
-          <td width="${rightWidth}%" valign="${p.colAlign === 'middle' ? 'middle' : p.colAlign === 'bottom' ? 'bottom' : 'top'}" style="${minHStyle}padding-left:${(p.gap || 16) / 2}px;${p.contentPadding ? `padding:${p.contentPadding}px;` : ''}">
-            <div style="${colWrapStyle}">${rightHtml}</div>
+          <td width="${rightWidth}%" valign="${p.colAlign === 'middle' ? 'middle' : p.colAlign === 'bottom' ? 'bottom' : 'top'}" style="${minHStyle}padding-left:${(p.gap || 16) / 2}px;${p.contentPadding ? `padding:${p.contentPadding}px;` : ''}height:100%;">
+            <div style="${colWrapStyle}">${formatColContent(rightHtml, minH)}</div>
           </td>
         </tr>
       </table>
