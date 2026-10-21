@@ -8165,6 +8165,57 @@ export const VARIANT_THUMBNAILS: Record<string, ThumbFn> = {
             <rect x="39" y="22" width="34" height="3" rx="1" fill="#78350f" opacity="0.8" />
         </svg>
     ),
+
+    // ── Customer Reviews: Review Dashboard ───────────────────────────────────
+    'rev-magazine-editorial': (col, _light) => (
+        <svg viewBox="0 0 80 48" fill="none" style={{ width: '100%', height: 36 }}>
+            {/* Outer card */}
+            <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
+
+            {/* TOP LEFT: Rating Card with 5-bar breakdown */}
+            <rect x="4" y="5" width="26" height="25" rx="2" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.7" />
+            {/* Big rating number 4.0 */}
+            <rect x="7" y="8" width="9" height="4" rx="1" fill="#0f172a" />
+            {/* Stars row */}
+            <rect x="7" y="13.5" width="12" height="1.5" rx="0.7" fill="#f59e0b" />
+            {/* 5 colored bars (5★ to 1★) */}
+            <rect x="7" y="16.5" width="16" height="1.2" rx="0.6" fill="#22c55e" />
+            <rect x="7" y="18.8" width="12" height="1.2" rx="0.6" fill="#3b82f6" />
+            <rect x="7" y="21.1" width="8" height="1.2" rx="0.6" fill="#eab308" />
+            <rect x="7" y="23.4" width="4" height="1.2" rx="0.6" fill="#f97316" />
+            <rect x="7" y="25.7" width="6" height="1.2" rx="0.6" fill="#ef4444" />
+
+            {/* TOP RIGHT: Featured Review Card */}
+            <rect x="33" y="5" width="43" height="25" rx="2" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.7" />
+            {/* Initials avatar circle */}
+            <circle cx="39" cy="11" r="3.5" fill={col} />
+            {/* Reviewer name + rating badge */}
+            <rect x="44" y="9.5" width="16" height="2" rx="1" fill="#0f172a" />
+            <rect x="62" y="8.5" width="11" height="4" rx="1" fill={col} />
+            {/* Stars */}
+            <rect x="37" y="16" width="14" height="1.5" rx="0.7" fill="#f59e0b" />
+            {/* Review quote line */}
+            <rect x="37" y="19" width="34" height="1.2" rx="0.6" fill="#64748b" opacity="0.7" />
+            {/* Stat tiles (Rating Score & Helpful Votes) */}
+            <rect x="37" y="21.5" width="10" height="3" rx="1" fill="#ede9fe" />
+            <rect x="49" y="21.5" width="10" height="3" rx="1" fill="#e2e8f0" />
+            {/* View Full Review button */}
+            <rect x="37" y="25.5" width="35" height="3" rx="1" fill={col} />
+
+            {/* BOTTOM: Customer Reviews List */}
+            <rect x="4" y="32" width="72" height="12" rx="2" fill="#ffffff" stroke="#e2e8f0" strokeWidth="0.7" />
+            <rect x="4" y="32" width="72" height="3" rx="1" fill="#f1f5f9" />
+            {/* Row 1 */}
+            <circle cx="8" cy="38" r="1.8" fill={col} />
+            <rect x="12" y="37" width="18" height="2" rx="1" fill="#0f172a" />
+            <rect x="66" y="36.5" width="7" height="3" rx="0.8" fill={col} />
+            {/* Row 2 */}
+            <circle cx="8" cy="42" r="1.8" fill="#16a34a" />
+            <rect x="12" y="41" width="20" height="2" rx="1" fill="#0f172a" />
+            <rect x="66" y="40.5" width="7" height="3" rx="0.8" fill={col} />
+        </svg>
+    ),
+    'review-dashboard': (col, light) => VARIANT_THUMBNAILS['rev-magazine-editorial'](col, light),
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

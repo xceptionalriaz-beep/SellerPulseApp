@@ -1444,9 +1444,16 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             // Per-column border
             const lBorder = pa.leftBorderWidth ? `border:${pa.leftBorderWidth}px ${pa.leftBorderStyle ?? 'solid'} ${pa.leftBorderColor ?? '#ede9fe'};` : ''
             const rBorder = pa.rightBorderWidth ? `border:${pa.rightBorderWidth}px ${pa.rightBorderStyle ?? 'solid'} ${pa.rightBorderColor ?? '#ede9fe'};` : ''
-            // Per-column min-height
-            const lMinH = pa.leftMinHeight ? `height:${pa.leftMinHeight}px;` : ''
-            const rMinH = pa.rightMinHeight ? `height:${pa.rightMinHeight}px;` : ''
+            // Min-height (supports row-level minHeight as well as leftMinHeight / rightMinHeight)
+            const rowMinH = Number(pa.minHeight || 0)
+            const leftH = Number(pa.leftMinHeight || rowMinH)
+            const rightH = Number(pa.rightMinHeight || rowMinH)
+            const lMinH = leftH > 0 ? `min-height:${leftH}px;height:${leftH}px;` : ''
+            const rMinH = rightH > 0 ? `min-height:${rightH}px;height:${rightH}px;` : ''
+            const tblH = Math.max(leftH, rightH, rowMinH)
+            const tblMinH = tblH > 0 ? `min-height:${tblH}px;height:${tblH}px;` : ''
+            const lWrapStyle = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;${lMinH}`
+            const rWrapStyle = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;${rMinH}`
             // Divider
             const divider = pa.showDivider
                 ? `<td width="${pa.dividerWidth ?? 1}px" style="width:${pa.dividerWidth ?? 1}px;background-color:${pa.dividerColor ?? '#ede9fe'};font-size:1px;line-height:1px;">&nbsp;</td>`
@@ -1458,20 +1465,20 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             const rowsHtml = rows.map((r: any, idx: number) => `
         <tr>
           <td width="${p.leftWidth}%" valign="${valign}" style="padding-right:${p.gap / 2}px;${lPad}${lRadius}${lBorder}${lMinH}background-color:${pa.leftBg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">
-            <div style="width:100%;box-sizing:border-box;">${r.leftContent}</div>
+            <div style="${lWrapStyle}">${r.leftContent}</div>
           </td>
           ${divider}
           <td width="${rightWidth}%" valign="${valign}" style="padding-left:${p.gap / 2}px;${rPad}${rRadius}${rBorder}${rMinH}background-color:${pa.rightBg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">
-            <div style="width:100%;box-sizing:border-box;">${r.rightContent}</div>
+            <div style="${rWrapStyle}">${r.rightContent}</div>
           </td>
         </tr>
             `).join('')
             const stackClass = pa.stackMobile === false ? '' : ' class="mobile-stack"'
             return wrapBlock('two_column', id,
-                `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;">
+                `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;${tblMinH}">
   <tr>
-    <td style="background-color:${p.bgColor};${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0"${stackClass}${contStyle ? ` style="${contStyle}"` : ''}>
+    <td style="background-color:${p.bgColor};${pad(p)}${tblMinH}">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"${stackClass} style="table-layout:fixed;width:100%;${tblMinH}${contStyle}">
         ${rowsHtml}
       </table>
     </td>
@@ -1519,10 +1526,19 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             const cb1 = pa3.col1BorderWidth ? `border:${pa3.col1BorderWidth}px ${pa3.col1BorderStyle ?? 'solid'} ${pa3.col1BorderColor ?? '#ede9fe'};` : ''
             const cb2 = pa3.col2BorderWidth ? `border:${pa3.col2BorderWidth}px ${pa3.col2BorderStyle ?? 'solid'} ${pa3.col2BorderColor ?? '#ede9fe'};` : ''
             const cb3 = pa3.col3BorderWidth ? `border:${pa3.col3BorderWidth}px ${pa3.col3BorderStyle ?? 'solid'} ${pa3.col3BorderColor ?? '#ede9fe'};` : ''
-            // Per-column min-height
-            const mh1 = pa3.col1MinHeight ? `height:${pa3.col1MinHeight}px;` : ''
-            const mh2 = pa3.col2MinHeight ? `height:${pa3.col2MinHeight}px;` : ''
-            const mh3 = pa3.col3MinHeight ? `height:${pa3.col3MinHeight}px;` : ''
+            // Per-column min-height with fallback to row/block minHeight
+            const rowMinH3 = Number(pa3.minHeight || 0)
+            const h1 = Number(pa3.col1MinHeight || rowMinH3)
+            const h2 = Number(pa3.col2MinHeight || rowMinH3)
+            const h3 = Number(pa3.col3MinHeight || rowMinH3)
+            const mh1 = h1 > 0 ? `min-height:${h1}px;height:${h1}px;` : ''
+            const mh2 = h2 > 0 ? `min-height:${h2}px;height:${h2}px;` : ''
+            const mh3 = h3 > 0 ? `min-height:${h3}px;height:${h3}px;` : ''
+            const maxH3 = Math.max(h1, h2, h3, rowMinH3)
+            const tblMinH3 = maxH3 > 0 ? `min-height:${maxH3}px;height:${maxH3}px;` : ''
+            const wrap1 = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;${mh1}`
+            const wrap2 = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;${mh2}`
+            const wrap3 = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;${mh3}`
             // Divider
             const div3 = pa3.showDivider
                 ? `<td width="${pa3.dividerWidth ?? 1}px" style="width:${pa3.dividerWidth ?? 1}px;background-color:${pa3.dividerColor ?? '#ede9fe'};font-size:1px;">&nbsp;</td>`
@@ -1533,19 +1549,19 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             const contStyle3 = contBorder3 + contRadius3
             const rowsHtml = rows.map((r: any, idx: number) => `
         <tr>
-          <td width="${w1}%" valign="${valign3}" style="padding-right:${p.gap / 2}px;${cp1}${cr1}${cb1}${mh1}background-color:${pa3.col1Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col1Content}</td>
+          <td width="${w1}%" valign="${valign3}" style="padding-right:${p.gap / 2}px;${cp1}${cr1}${cb1}${mh1}background-color:${pa3.col1Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}"><div style="${wrap1}">${r.col1Content}</div></td>
           ${div3}
-          <td width="${w2}%" valign="${valign3}" style="padding-left:${p.gap / 2}px;padding-right:${p.gap / 2}px;${cp2}${cr2}${cb2}${mh2}background-color:${pa3.col2Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col2Content}</td>
+          <td width="${w2}%" valign="${valign3}" style="padding-left:${p.gap / 2}px;padding-right:${p.gap / 2}px;${cp2}${cr2}${cb2}${mh2}background-color:${pa3.col2Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}"><div style="${wrap2}">${r.col2Content}</div></td>
           ${div3}
-          <td width="${w3}%" valign="${valign3}" style="padding-left:${p.gap / 2}px;${cp3}${cr3}${cb3}${mh3}background-color:${pa3.col3Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col3Content}</td>
+          <td width="${w3}%" valign="${valign3}" style="padding-left:${p.gap / 2}px;${cp3}${cr3}${cb3}${mh3}background-color:${pa3.col3Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}"><div style="${wrap3}">${r.col3Content}</div></td>
         </tr>
             `).join('')
             const stackClass3 = pa3.stackMobile === false ? '' : ' class="mobile-stack"'
             return wrapBlock('three_column', id,
-                `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;">
+                `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;${tblMinH3}">
   <tr>
-    <td style="background-color:${p.bgColor};${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0"${stackClass3}${contStyle3 ? ` style="${contStyle3}"` : ''}>
+    <td style="background-color:${p.bgColor};${pad(p)}${tblMinH3}">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"${stackClass3} style="table-layout:fixed;width:100%;${tblMinH3}${contStyle3 ? contStyle3 : ''}">
         ${rowsHtml}
       </table>
     </td>
@@ -2638,11 +2654,22 @@ ${thumbCells}
                 const cb42 = pa4.col2BorderWidth ? `border:${pa4.col2BorderWidth}px ${pa4.col2BorderStyle ?? 'solid'} ${pa4.col2BorderColor ?? '#ede9fe'};` : ''
                 const cb43 = pa4.col3BorderWidth ? `border:${pa4.col3BorderWidth}px ${pa4.col3BorderStyle ?? 'solid'} ${pa4.col3BorderColor ?? '#ede9fe'};` : ''
                 const cb44 = pa4.col4BorderWidth ? `border:${pa4.col4BorderWidth}px ${pa4.col4BorderStyle ?? 'solid'} ${pa4.col4BorderColor ?? '#ede9fe'};` : ''
-                // Per-column min-height
-                const mh41 = pa4.col1MinHeight ? `height:${pa4.col1MinHeight}px;` : ''
-                const mh42 = pa4.col2MinHeight ? `height:${pa4.col2MinHeight}px;` : ''
-                const mh43 = pa4.col3MinHeight ? `height:${pa4.col3MinHeight}px;` : ''
-                const mh44 = pa4.col4MinHeight ? `height:${pa4.col4MinHeight}px;` : ''
+                // Per-column min-height with fallback to row/block minHeight
+                const rowMinH4 = Number(pa4.minHeight || 0)
+                const h41 = Number(pa4.col1MinHeight || rowMinH4)
+                const h42 = Number(pa4.col2MinHeight || rowMinH4)
+                const h43 = Number(pa4.col3MinHeight || rowMinH4)
+                const h44 = Number(pa4.col4MinHeight || rowMinH4)
+                const mh41 = h41 > 0 ? `min-height:${h41}px;height:${h41}px;` : ''
+                const mh42 = h42 > 0 ? `min-height:${h42}px;height:${h42}px;` : ''
+                const mh43 = h43 > 0 ? `min-height:${h43}px;height:${h43}px;` : ''
+                const mh44 = h44 > 0 ? `min-height:${h44}px;height:${h44}px;` : ''
+                const maxH4 = Math.max(h41, h42, h43, h44, rowMinH4)
+                const tblMinH4 = maxH4 > 0 ? `min-height:${maxH4}px;height:${maxH4}px;` : ''
+                const wrap41 = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;${mh41}`
+                const wrap42 = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;${mh42}`
+                const wrap43 = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;${mh43}`
+                const wrap44 = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;${mh44}`
                 // Divider
                 const div4 = pa4.showDivider
                     ? `<td width="${pa4.dividerWidth ?? 1}px" style="width:${pa4.dividerWidth ?? 1}px;background-color:${pa4.dividerColor ?? '#ede9fe'};font-size:1px;">&nbsp;</td>`
@@ -2654,13 +2681,13 @@ ${thumbCells}
                 const g = (p.gap || 8) / 2
                 const rowsHtml = rows.map((r: any, idx: number) => `
         <tr>
-          <td width="${fw1}%" valign="${valign4}" style="padding-right:${g}px;${cp41}${cr41}${cb41}${mh41}background-color:${pa4.col1Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col1Content}</td>
+          <td width="${fw1}%" valign="${valign4}" style="padding-right:${g}px;${cp41}${cr41}${cb41}${mh41}background-color:${pa4.col1Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}"><div style="${wrap41}">${r.col1Content}</div></td>
           ${div4}
-          <td width="${fw2}%" valign="${valign4}" style="padding-left:${g}px;padding-right:${g}px;${cp42}${cr42}${cb42}${mh42}background-color:${pa4.col2Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col2Content}</td>
+          <td width="${fw2}%" valign="${valign4}" style="padding-left:${g}px;padding-right:${g}px;${cp42}${cr42}${cb42}${mh42}background-color:${pa4.col2Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}"><div style="${wrap42}">${r.col2Content}</div></td>
           ${div4}
-          <td width="${fw3}%" valign="${valign4}" style="padding-left:${g}px;padding-right:${g}px;${cp43}${cr43}${cb43}${mh43}background-color:${pa4.col3Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col3Content}</td>
+          <td width="${fw3}%" valign="${valign4}" style="padding-left:${g}px;padding-right:${g}px;${cp43}${cr43}${cb43}${mh43}background-color:${pa4.col3Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}"><div style="${wrap43}">${r.col3Content}</div></td>
           ${div4}
-          <td width="${fw4}%" valign="${valign4}" style="padding-left:${g}px;${cp44}${cr44}${cb44}${mh44}background-color:${pa4.col4Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}">${r.col4Content}</td>
+          <td width="${fw4}%" valign="${valign4}" style="padding-left:${g}px;${cp44}${cr44}${cb44}${mh44}background-color:${pa4.col4Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}"><div style="${wrap44}">${r.col4Content}</div></td>
         </tr>
                 `).join('')
                 const stackClass4 = pa4.stackTo2
@@ -2669,10 +2696,10 @@ ${thumbCells}
                         ? ' class="mobile-stack"'
                         : ''
                 return wrapBlock('four_column' as BlockType, id,
-                    `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;">
+                    `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;${tblMinH4}">
   <tr>
-    <td style="background-color:${p.bgColor};${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0"${stackClass4}${contStyle4 ? ` style="${contStyle4}"` : ''}>
+    <td style="background-color:${p.bgColor};${pad(p)}${tblMinH4}">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"${stackClass4} style="table-layout:fixed;width:100%;${tblMinH4}${contStyle4 ? contStyle4 : ''}">
         ${rowsHtml}
       </table>
     </td>
@@ -2736,17 +2763,20 @@ ${thumbCells}
                 const rightHtml = p.rightContent || ''
                 const leftWidth = p.imageWidth ?? 70
                 const rightWidth = 100 - leftWidth
+                const minH = Number(p.minHeight || p.leftMinHeight || 0)
+                const minHStyle = minH > 0 ? `min-height:${minH}px;height:${minH}px;` : ''
+                const colWrapStyle = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;${minHStyle}`
                 return wrapBlock('sidebar_layout' as BlockType, id,
-                    `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;">
+                    `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;${minHStyle}">
   <tr>
-    <td style="background-color:${p.bgColor};${pad(p)}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed;">
+    <td style="background-color:${p.bgColor};${pad(p)}${minHStyle}">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed;width:100%;${minHStyle}">
         <tr>
-          <td width="${leftWidth}%" valign="${p.colAlign === 'middle' ? 'middle' : p.colAlign === 'bottom' ? 'bottom' : 'top'}" style="padding-right:${(p.gap || 16) / 2}px;background-color:${p.imageBg ?? 'transparent'};border-radius:${p.imageRadius ?? 0}px;">
-            <div style="width:100%;box-sizing:border-box;">${leftHtml}</div>
+          <td width="${leftWidth}%" valign="${p.colAlign === 'middle' ? 'middle' : p.colAlign === 'bottom' ? 'bottom' : 'top'}" style="${minHStyle}padding-right:${(p.gap || 16) / 2}px;background-color:${p.imageBg ?? 'transparent'};border-radius:${p.imageRadius ?? 0}px;">
+            <div style="${colWrapStyle}">${leftHtml}</div>
           </td>
-          <td width="${rightWidth}%" valign="${p.colAlign === 'middle' ? 'middle' : p.colAlign === 'bottom' ? 'bottom' : 'top'}" style="padding-left:${(p.gap || 16) / 2}px;${p.contentPadding ? `padding:${p.contentPadding}px;` : ''}">
-            <div style="width:100%;box-sizing:border-box;">${rightHtml}</div>
+          <td width="${rightWidth}%" valign="${p.colAlign === 'middle' ? 'middle' : p.colAlign === 'bottom' ? 'bottom' : 'top'}" style="${minHStyle}padding-left:${(p.gap || 16) / 2}px;${p.contentPadding ? `padding:${p.contentPadding}px;` : ''}">
+            <div style="${colWrapStyle}">${rightHtml}</div>
           </td>
         </tr>
       </table>

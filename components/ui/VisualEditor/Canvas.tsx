@@ -2003,10 +2003,15 @@ ${fontOverrideCss}${colorOverrideCss}${fontSizeOverrideCss}${fontWeightOverrideC
         if (!iframe) return
         try {
             const doc = iframe.contentDocument || iframe.contentWindow?.document
-            if (doc) {
-                doc.open()
-                doc.write(html)
-                doc.close()
+            if (doc && doc.body) {
+                // Smooth in-place DOM update: Eliminates the blank white flashlight flicker
+                const parser = new DOMParser()
+                const newDoc = parser.parseFromString(html, 'text/html')
+                if (newDoc && newDoc.body) {
+                    doc.body.innerHTML = newDoc.body.innerHTML
+                } else {
+                    iframe.srcdoc = html
+                }
 
                 measureHeight()
                 setTimeout(measureHeight, 50)
@@ -2020,7 +2025,6 @@ ${fontOverrideCss}${colorOverrideCss}${fontSizeOverrideCss}${fontWeightOverrideC
                 })
 
                 // Observe the actual template root element for content changes
-                // Disconnect any previous observer before creating a new one (prevents leak)
                 if (roRef.current) {
                     roRef.current.disconnect()
                     roRef.current = null
@@ -2031,13 +2035,16 @@ ${fontOverrideCss}${colorOverrideCss}${fontSizeOverrideCss}${fontWeightOverrideC
                     ro.observe(target)
                     roRef.current = ro
                 }
+            } else {
+                iframe.srcdoc = html
             }
         } catch (e) {
             iframe.srcdoc = html
         }
     }, [html, measureHeight])
 
-    const htmlKey = `${block.id}-${block.type}-${JSON.stringify(block.props)}`
+    // Stable key: Keeps the iframe alive and never destroys it while resizing!
+    const htmlKey = `${block.id}-${block.type}`
 
     const onLoad = React.useCallback(() => {
         measureHeight()

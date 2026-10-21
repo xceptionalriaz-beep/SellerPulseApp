@@ -1,7 +1,13 @@
 'use client'
 // components/ui/VisualEditor/ColumnResizer.tsx
 // ─────────────────────────────────────────────────────────────────────────────
-// Excel / Google Sheets-style high-performance drag-to-resize dividers.
+// Zero-Flicker Live Drag-to-Resize (Excel / Google Sheets engine).
+//
+// Features:
+//   • Column Resizer: Divider lines glide smoothly left & right in real-time.
+//   • Row Height Resizer: Bottom drop line tracks mouse cursor downwards live.
+//   • Direct DOM Styling: Zero lag, zero re-parsing, zero flickering.
+//   • Clean commit on release: Saves final state cleanly on mouseup.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useState, useRef, useEffect, useCallback } from 'react'
@@ -25,19 +31,6 @@ export default function ColumnResizer({ block, onUpdateProps, containerRef }: Co
     // Hover states
     const [hoveredDivider, setHoveredDivider] = useState<number | null>(null)
     const [hoveredRow, setHoveredRow] = useState(false)
-
-    // Drag state
-    const [dragging, setDragging] = useState<{
-        type: 'col' | 'row'
-        dividerIndex?: number
-        startX?: number
-        startY?: number
-        initialWidths?: number[]
-        initialHeight?: number
-    } | null>(null)
-
-    // RAF reference to prevent lag
-    const rafRef = useRef<number | null>(null)
 
     // Current widths from props
     const widths = React.useMemo(() => {
@@ -66,20 +59,93 @@ export default function ColumnResizer({ block, onUpdateProps, containerRef }: Co
         ? (props.leftMinHeight ?? 0)
         : (props.col1MinHeight ?? props.minHeight ?? 0)
 
-    // ── Stop drag safely ──
+    // Live display widths & heights during drag (smooth 0ms local preview)
+    const [liveWidths, setLiveWidths] = useState<number[] | null>(null)
+    const [liveHeight, setLiveHeight] = useState<number | null>(null)
+
+    const liveWidthsRef = useRef(liveWidths)
+    liveWidthsRef.current = liveWidths
+    const liveHeightRef = useRef(liveHeight)
+    liveHeightRef.current = liveHeight
+
+    const displayWidths = liveWidths ?? widths
+
+    // Drag state
+    const [dragging, setDragging] = useState<{
+        type: 'col' | 'row'
+        dividerIndex?: number
+        startX?: number
+        startY?: number
+        initialWidths?: number[]
+        initialHeight?: number
+    } | null>(null)
+
+    const dragRef = useRef(dragging)
+    dragRef.current = dragging
+
+    const rafRef = useRef<number | null>(null)
+
+    // Calculate divider positions as cumulative percentages
+    const dividerPositions = React.useMemo(() => {
+        let cumulative = 0
+        const positions: number[] = []
+        for (let i = 0; i < displayWidths.length - 1; i++) {
+            cumulative += displayWidths[i]
+            positions.push(cumulative)
+        }
+        return positions
+    }, [displayWidths])
+
+    // ── Stop drag and commit ONCE to React state (Zero re-render flicker) ──
     const stopDrag = useCallback(() => {
         if (rafRef.current) {
             cancelAnimationFrame(rafRef.current)
             rafRef.current = null
         }
+
+        const finalWidths = liveWidthsRef.current
+        const finalHeight = liveHeightRef.current
+
         setDragging(null)
+        setLiveWidths(null)
+        setLiveHeight(null)
         setHoveredDivider(null)
         setHoveredRow(false)
         document.body.style.cursor = ''
         document.body.style.userSelect = ''
-    }, [])
 
-    // ── Handle Mouse Down for Column Divider ──
+        // Commit once on mouse release
+        if (finalWidths) {
+            if (isTwo) {
+                onUpdateProps({ leftWidth: finalWidths[0] })
+            } else if (isThree) {
+                onUpdateProps({
+                    customWidths: true,
+                    col1Width: finalWidths[0],
+                    col2Width: finalWidths[1],
+                    col3Width: finalWidths[2],
+                })
+            } else if (isFour) {
+                onUpdateProps({
+                    customWidths: true,
+                    col1Width: finalWidths[0],
+                    col2Width: finalWidths[1],
+                    col3Width: finalWidths[2],
+                    col4Width: finalWidths[3],
+                })
+            }
+        } else if (finalHeight != null) {
+            if (isTwo) {
+                onUpdateProps({ leftMinHeight: finalHeight, rightMinHeight: finalHeight })
+            } else if (isThree) {
+                onUpdateProps({ col1MinHeight: finalHeight, col2MinHeight: finalHeight, col3MinHeight: finalHeight, minHeight: finalHeight })
+            } else if (isFour) {
+                onUpdateProps({ col1MinHeight: finalHeight, col2MinHeight: finalHeight, col3MinHeight: finalHeight, col4MinHeight: finalHeight, minHeight: finalHeight })
+            }
+        }
+    }, [isTwo, isThree, isFour, onUpdateProps])
+
+    // ── Start Column Drag ──
     const handleColMouseDown = (dividerIndex: number, e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
@@ -91,92 +157,112 @@ export default function ColumnResizer({ block, onUpdateProps, containerRef }: Co
         })
     }
 
-    // ── Handle Mouse Down for Row Bottom ──
+    // ── Start Row Drag ──
     const handleRowMouseDown = (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
         const host = getHostElement()
         const currentRectHeight = host ? host.getBoundingClientRect().height : (currentHeight || 120)
+        const initialH = currentHeight > 0 ? currentHeight : Math.round(currentRectHeight)
         setDragging({
             type: 'row',
             startY: e.clientY,
-            initialHeight: currentHeight > 0 ? currentHeight : Math.round(currentRectHeight),
+            initialHeight: initialH,
         })
+        setLiveHeight(initialH)
     }
 
-    // ── Mouse Move during drag ──
+    // ── Handle Real-Time Live Mouse Move with Direct DOM Updates (Zero Flash) ──
     const handleGlobalMouseMove = useCallback((e: MouseEvent | React.MouseEvent) => {
         if (!dragging) return
 
-        // Critical: If the user released the mouse button anywhere, stop immediately!
         if (e.buttons === 0) {
             stopDrag()
             return
         }
 
-        if (rafRef.current) return // throttle to 60fps/120fps display refresh
+        if (rafRef.current) return
 
         rafRef.current = requestAnimationFrame(() => {
             rafRef.current = null
+            const current = dragRef.current
+            if (!current) return
+
             const host = getHostElement()
             if (!host) return
 
-            if (dragging.type === 'col' && dragging.dividerIndex != null && dragging.initialWidths) {
+            if (current.type === 'col' && current.dividerIndex != null && current.initialWidths) {
                 const rect = host.getBoundingClientRect()
                 if (rect.width <= 0) return
 
-                const deltaX = e.clientX - (dragging.startX ?? e.clientX)
+                const deltaX = e.clientX - (current.startX ?? e.clientX)
                 const deltaPercent = Math.round((deltaX / rect.width) * 100)
 
-                const i = dragging.dividerIndex
-                const newWidths = [...dragging.initialWidths]
-                const minColWidth = 12
+                const i = current.dividerIndex
+                const minColWidth = 10
 
-                const leftOriginal = dragging.initialWidths[i]
-                const rightOriginal = dragging.initialWidths[i + 1]
+                const leftOriginal = current.initialWidths[i]
+                const rightOriginal = current.initialWidths[i + 1]
                 const combined = leftOriginal + rightOriginal
 
                 let proposedLeft = leftOriginal + deltaPercent
                 proposedLeft = Math.max(minColWidth, Math.min(combined - minColWidth, proposedLeft))
                 const proposedRight = combined - proposedLeft
 
+                const newWidths = [...current.initialWidths]
                 newWidths[i] = proposedLeft
                 newWidths[i + 1] = proposedRight
 
-                if (isTwo) {
-                    onUpdateProps({ leftWidth: proposedLeft })
-                } else if (isThree) {
-                    onUpdateProps({
-                        customWidths: true,
-                        col1Width: newWidths[0],
-                        col2Width: newWidths[1],
-                        col3Width: newWidths[2],
-                    })
-                } else if (isFour) {
-                    onUpdateProps({
-                        customWidths: true,
-                        col1Width: newWidths[0],
-                        col2Width: newWidths[1],
-                        col3Width: newWidths[2],
-                        col4Width: newWidths[3],
+                // 1. Update local state so divider lines glide at 120fps
+                setLiveWidths(newWidths)
+
+                // 2. Direct DOM update inside the iframe in 0.1ms without triggering full page re-render!
+                const iframe = host.querySelector('iframe') as HTMLIFrameElement | null
+                const doc = iframe?.contentDocument || iframe?.contentWindow?.document
+                if (doc) {
+                    const rows = doc.querySelectorAll('tr')
+                    rows.forEach(row => {
+                        const tds = Array.from(row.querySelectorAll(':scope > td[width]'))
+                            .filter(td => !td.getAttribute('width')?.includes('px'))
+                        if (tds.length === newWidths.length) {
+                            tds.forEach((td, idx) => {
+                                ; (td as HTMLElement).style.width = `${newWidths[idx]}%`
+                                td.setAttribute('width', `${newWidths[idx]}%`)
+                            })
+                        }
                     })
                 }
-            } else if (dragging.type === 'row' && dragging.startY != null && dragging.initialHeight != null) {
-                const deltaY = e.clientY - dragging.startY
-                const newH = Math.max(40, Math.round(dragging.initialHeight + deltaY))
+            } else if (current.type === 'row' && current.startY != null && current.initialHeight != null) {
+                const deltaY = e.clientY - current.startY
+                const newH = Math.max(40, Math.round(current.initialHeight + deltaY))
 
-                if (isTwo) {
-                    onUpdateProps({ leftMinHeight: newH, rightMinHeight: newH })
-                } else if (isThree) {
-                    onUpdateProps({ col1MinHeight: newH, col2MinHeight: newH, col3MinHeight: newH, minHeight: newH })
-                } else if (isFour) {
-                    onUpdateProps({ col1MinHeight: newH, col2MinHeight: newH, col3MinHeight: newH, col4MinHeight: newH, minHeight: newH })
+                // 1. Update local height state so the line tracks the mouse live downwards
+                setLiveHeight(newH)
+
+                // 2. Direct DOM height updates on iframe and containers live!
+                const iframe = host.querySelector('iframe') as HTMLIFrameElement | null
+                if (iframe) {
+                    iframe.style.height = `${newH}px`
+                    let parent = iframe.parentElement
+                    while (parent && parent !== host) {
+                        if (parent.style.height) {
+                            parent.style.height = `${newH}px`
+                        }
+                        parent = parent.parentElement
+                    }
+                }
+                const doc = iframe?.contentDocument || iframe?.contentWindow?.document
+                if (doc) {
+                    const tds = doc.querySelectorAll('td[valign], td[width]')
+                    tds.forEach(td => {
+                        ; (td as HTMLElement).style.height = `${newH}px`
+                    })
                 }
             }
         })
-    }, [dragging, isTwo, isThree, isFour, onUpdateProps, stopDrag])
+    }, [dragging, stopDrag])
 
-    // Window level listeners as safety fallback
+    // Global event listeners
     useEffect(() => {
         if (!dragging) return
 
@@ -203,20 +289,9 @@ export default function ColumnResizer({ block, onUpdateProps, containerRef }: Co
         }
     }, [dragging, handleGlobalMouseMove, stopDrag])
 
-    // Calculate divider positions as cumulative percentages
-    const dividerPositions = React.useMemo(() => {
-        let cumulative = 0
-        const positions: number[] = []
-        for (let i = 0; i < widths.length - 1; i++) {
-            cumulative += widths[i]
-            positions.push(cumulative)
-        }
-        return positions
-    }, [widths])
-
     return (
         <>
-            {/* ── Fullscreen Overlay during drag: Prevents iframes from swallowing mouseup! ── */}
+            {/* ── Fullscreen Overlay during drag: Captures all mouse events smoothly ── */}
             {dragging && (
                 <div
                     onMouseMove={e => handleGlobalMouseMove(e)}
@@ -247,7 +322,7 @@ export default function ColumnResizer({ block, onUpdateProps, containerRef }: Co
                     zIndex: 30,
                 }}
             >
-                {/* ── Vertical Column Dividers (Excel-Style col-resize) ── */}
+                {/* ── Vertical Column Dividers (Clean Purple Line, Zero Shadow Blur) ── */}
                 {dividerPositions.map((posPercent, idx) => {
                     const isHovered = hoveredDivider === idx
                     const isDragActive = dragging?.type === 'col' && dragging.dividerIndex === idx
@@ -259,7 +334,7 @@ export default function ColumnResizer({ block, onUpdateProps, containerRef }: Co
                             onMouseEnter={() => !dragging && setHoveredDivider(idx)}
                             onMouseLeave={() => !dragging && setHoveredDivider(null)}
                             onMouseDown={e => handleColMouseDown(idx, e)}
-                            title={`Drag to resize Column ${idx + 1} and Column ${idx + 2}`}
+                            title="Drag to resize column"
                             style={{
                                 position: 'absolute',
                                 top: 0,
@@ -275,21 +350,20 @@ export default function ColumnResizer({ block, onUpdateProps, containerRef }: Co
                                 zIndex: 32,
                             }}
                         >
-                            {/* Pro Line: Lights up purple only when hovering or dragging */}
+                            {/* Crisp Purple Line */}
                             <div
                                 style={{
-                                    width: isHighlighted ? 3 : 1,
+                                    width: isHighlighted ? 2.5 : 1,
                                     height: '100%',
-                                    backgroundColor: isHighlighted ? '#7530fb' : 'rgba(117, 48, 251, 0.12)',
-                                    transition: isDragActive ? 'none' : 'background-color 0.12s, width 0.12s',
-                                    boxShadow: isHighlighted ? '0 0 10px rgba(117, 48, 251, 0.7)' : 'none',
+                                    backgroundColor: isHighlighted ? '#7530fb' : 'rgba(117, 48, 251, 0.20)',
+                                    transition: isDragActive ? 'none' : 'background-color 0.12s',
                                 }}
                             />
                         </div>
                     )
                 })}
 
-                {/* ── Bottom Edge Resizer (Excel-Style row-resize) ── */}
+                {/* ── Bottom Edge Resizer (Follows mouse downwards live) ── */}
                 <div
                     onMouseEnter={() => !dragging && setHoveredRow(true)}
                     onMouseLeave={() => !dragging && setHoveredRow(false)}
@@ -297,26 +371,26 @@ export default function ColumnResizer({ block, onUpdateProps, containerRef }: Co
                     title="Drag to resize row height"
                     style={{
                         position: 'absolute',
-                        bottom: -5,
+                        top: dragging?.type === 'row' && liveHeight ? `${liveHeight}px` : undefined,
+                        bottom: dragging?.type === 'row' ? undefined : -5,
                         left: 0,
                         right: 0,
-                        height: 12,
+                        height: 14,
+                        transform: dragging?.type === 'row' ? 'translateY(-50%)' : undefined,
                         cursor: 'row-resize',
                         pointerEvents: 'auto',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        zIndex: 32,
+                        zIndex: 35,
                     }}
                 >
-                    {/* Pro Bottom Line */}
                     <div
                         style={{
-                            height: (hoveredRow || dragging?.type === 'row') ? 3 : 1,
+                            height: (hoveredRow || dragging?.type === 'row') ? 2.5 : 1,
                             width: '100%',
-                            backgroundColor: (hoveredRow || dragging?.type === 'row') ? '#7530fb' : 'rgba(117, 48, 251, 0.12)',
-                            transition: dragging?.type === 'row' ? 'none' : 'background-color 0.12s, height 0.12s',
-                            boxShadow: (hoveredRow || dragging?.type === 'row') ? '0 0 10px rgba(117, 48, 251, 0.7)' : 'none',
+                            backgroundColor: (hoveredRow || dragging?.type === 'row') ? '#7530fb' : 'rgba(117, 48, 251, 0.20)',
+                            transition: dragging?.type === 'row' ? 'none' : 'background-color 0.12s',
                         }}
                     />
                 </div>

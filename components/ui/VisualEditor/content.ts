@@ -33,6 +33,8 @@ export const customerReviewsBlock = {
                 rating: 5,
                 date: 'Verified eBay Purchase',
                 link: '',
+                spend: '',
+                reviewCount: '',
             },
             {
                 text: 'Great quality for the price. Seller answered my question within the hour. Highly recommend.',
@@ -40,6 +42,8 @@ export const customerReviewsBlock = {
                 rating: 5,
                 date: 'Verified eBay Purchase',
                 link: '',
+                spend: '',
+                reviewCount: '',
             },
             {
                 text: 'Item was in perfect condition. Fast dispatch, well packaged. A+ seller — saved to favourites.',
@@ -47,6 +51,8 @@ export const customerReviewsBlock = {
                 rating: 5,
                 date: 'Verified eBay Purchase',
                 link: '',
+                spend: '',
+                reviewCount: '',
             },
         ],
         textColor: '#111827',
@@ -54,16 +60,45 @@ export const customerReviewsBlock = {
         starColor: '#f59e0b',
         accentColor: '#7530fb',
         borderColor: '#e5e7eb',
-        // Review Dashboard (rev-magazine-editorial) props
+        // ── Section headings (editable per variant) ───────────────────────────
+        sectionHeading: 'What Our Buyers Say',
+        listHeading: 'Customer Reviews',
+        ratingLabel: 'Buyer Rating',
+        // ── BoldQuoteStrip stats ──────────────────────────────────────────────
+        boldScore: '5.0',
+        feedbackPct: '99.8',
+        // ── Section visibility toggles (true = visible) ───────────────────────
+        showFeaturedReview: true,
+        showRatingBars: true,
+        showStatTiles: true,
+        showViewFullReview: true,
+        showVerifiedBadge: true,
+        showFeedbackBadge: true,
+        showScoreboard: true,
+        showDsrRatings: true,
+        showStatPanel: true,
+        showAnalyticsHeader: true,
+        // ── Avatar Cards — DSR rating labels ──────────────────────────────────
+        dsrLabel1: 'Item as Described',
+        dsrLabel2: 'Dispatch Speed',
+        dsrLabel3: 'Communication',
+        // ── Review Dashboard (rev-magazine-editorial) props ───────────────────
         overallRating: '4.0',
         totalRatings: '38,000',
         helpfulVotes: '24',
         viewFullReviewUrl: '',
-        // Dark Luxury / Analytics Dashboard (rev-dark-luxury) props
+        // ── Dark Luxury / Analytics Dashboard (rev-dark-luxury) props ─────────
         sectionTitle: 'Reviews',
         dateRange: 'January 2023 – December 2023',
         totalReviews: '2.8K',
         reviewGrowth: '+21%',
+        // ── Rating Breakdown Grid ─────────────────────────────────────────────
+        sectionDesc: 'Every review below comes from a verified eBay purchase — honest feedback from real buyers.',
+        readReviewsUrl: '',
+        // ── Score Showcase (trustpilot-style) ────────────────────────────────
+        badgeName: '★ Verified Reviews',
+        trustScore: '4.9',
+        trustLabel: 'Excellent',
         // Shared: rating breakdown counts [5★ → 1★]
         ratingCounts: [14000, 8000, 4000, 800, 3000],
     } as unknown as BlockProps,
