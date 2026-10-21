@@ -243,7 +243,7 @@ export interface CommonProps {
     fontFamily: string
 }
 
-const DEFAULT_COMMON: CommonProps = {
+export const DEFAULT_COMMON: CommonProps = {
     // Background
     bgColor: '#ffffff',
     bgGradient: false,
@@ -1278,7 +1278,6 @@ import { getUrgencyBarVariant } from './variants/urgency_bar.variants'
 import { getRectangleVariant } from './variants/rectangle.variants'
 import { getTrustBadgeVariant } from './variants/trust_badge.variants'
 import { getTestimonialsVariant } from './variants/testimonials.variants'
-import { getReviewsBlockVariant } from './variants/reviews_block.variants'
 import { getQuoteBlockVariant } from './variants/quote_block.variants'
 import { getInfoBoxVariant } from './variants/info_box.variants'
 import { getShippingInfoVariant } from './variants/shipping_info.variants'
@@ -1289,6 +1288,7 @@ import { getBulletListVariant } from './variants/bullet_list.variants'
 import { getDividerVariant } from './variants/divider.variants'
 import { getNumberedListVariant } from './variants/numbered_list.variants'
 import { getWarningBoxVariant } from './variants/warning_box.variants'
+import { CONTENT_BLOCKS } from './content'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED SLOT PLACEHOLDERS
@@ -1325,7 +1325,7 @@ export interface BlockDefinition {
 // HTML WRAPPER HELPER
 // Wraps block HTML in a table row with data attributes for parsing
 // ─────────────────────────────────────────────────────────────────────────────
-function wrapBlock(type: BlockType, id: string, innerHtml: string, props?: BlockProps): string {
+export function wrapBlock(type: BlockType, id: string, innerHtml: string, props?: BlockProps): string {
     const linkUrl = (props as any)?.linkUrl
     const wrapped = linkUrl
         ? `<a href="${linkUrl}" style="display:block;text-decoration:none;color:inherit;">${innerHtml}</a>`
@@ -4113,36 +4113,8 @@ ${thumbCells}
             },
         },
 
-        {
-            type: 'customer_reviews' as BlockType,
-            label: 'Customer Reviews',
-            category: 'Content' as BlockCategory,
-            icon: 'star',
-            description: 'Social proof buyer testimonials — 8 professional layouts',
-            defaultProps: {
-                ...DEFAULT_COMMON,
-                variant: 'rev-star-cards',
-                paddingTop: 20,
-                paddingBottom: 20,
-                paddingLeft: 16,
-                paddingRight: 16,
-                reviews: [
-                    { text: 'Exactly as described. Arrived two days early and packaging was excellent. Will definitely order again.', author: 'Sarah M.', rating: 5, date: 'Verified eBay Purchase' },
-                    { text: 'Great quality for the price. Seller answered my question within the hour. Highly recommend.', author: 'James T.', rating: 5, date: 'Verified eBay Purchase' },
-                    { text: 'Item was in perfect condition. Fast dispatch, well packaged. A+ seller — saved to favourites.', author: 'Linda R.', rating: 5, date: 'Verified eBay Purchase' },
-                ],
-                textColor: '#111827',
-                authorColor: '#6b7280',
-                starColor: '#f59e0b',
-                accentColor: '#7530fb',
-                borderColor: '#e5e7eb',
-            } as unknown as BlockProps,
-            toHtml(props, id) {
-                const p = props as any
-                const variantId = p.variant ?? 'rev-star-cards'
-                return wrapBlock('customer_reviews' as BlockType, id, getReviewsBlockVariant(variantId).toHtml(p, id), p)
-            },
-        },
+        // ── Content blocks (defined in content.ts) ──────────────────────────────
+        ...CONTENT_BLOCKS,
 
         // ── Variation Builder ───────────────────────────────────────────────────
         {
