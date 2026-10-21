@@ -227,6 +227,10 @@ function VisualEditorInner() {
     const [showUpgradeModal, setShowUpgradeModal] = useState(false)
     const blocksRef = useRef<Block[]>([]) // live blocks for Pro-style detection
 
+    // Pre-parsed blocks loaded from DB (blocks_json column) — used as initialBlocks
+    // so VisualEditor doesn't have to re-parse HTML, preserving exact block structure
+    const [initialBlocks, setInitialBlocks] = useState<Block[] | undefined>(undefined)
+
     // Code Editor modal (full-screen iframe over the Visual Editor)
     const [showCodeEditorModal, setShowCodeEditorModal] = useState(false)
 
@@ -276,13 +280,18 @@ function VisualEditorInner() {
                 try {
                     const { data } = await rawDb
                         .from('listing_templates')
-                        .select('id, name, category, description_html, slots, description, is_system, thumbnail_url, use_count, tags, sort_order, is_featured, is_new_badge')
+                        .select('id, name, category, description_html, blocks_json, slots, description, is_system, thumbnail_url, use_count, tags, sort_order, is_featured, is_new_badge')
                         .eq('id', templateId)
                         .single()
                     if (data) {
                         setName(data.name || initialName)
                         setCategory(data.category || 'general')
                         setHtml(data.description_html || BLANK_HTML)
+                        // If blocks_json is saved, use it to seed the editor directly
+                        // so the original block structure is preserved (not re-parsed from HTML)
+                        if (Array.isArray(data.blocks_json) && data.blocks_json.length > 0) {
+                            setInitialBlocks(data.blocks_json as Block[])
+                        }
                         setSavedId(data.id)
                         setSlots(Array.isArray(data.slots) ? data.slots : [])
                         if (isAdmin) {
@@ -335,6 +344,7 @@ function VisualEditorInner() {
 
             const isEbayCompliant = auditHtml(html).count === 0
 
+            const blocksJson = blocksRef.current.length > 0 ? blocksRef.current : undefined
             if (savedId) {
                 // Update existing
                 await (supabase as any)
@@ -343,6 +353,7 @@ function VisualEditorInner() {
                         name,
                         category,
                         description_html: html,
+                        blocks_json: blocksJson ?? null,
                         is_ebay_compliant: isEbayCompliant,
                         slots,
                         ...(isAdmin ? { description, tags, sort_order: sortOrder, is_featured: isFeatured, is_new_badge: isNewBadge } : {}),
@@ -358,6 +369,7 @@ function VisualEditorInner() {
                         name,
                         category,
                         description_html: html,
+                        blocks_json: blocksJson ?? null,
                         is_ebay_compliant: isEbayCompliant,
                         slots,
                         description: isAdmin ? description : 'Visual Builder template',
@@ -397,6 +409,7 @@ function VisualEditorInner() {
 
             const isEbayCompliant = auditHtml(html).count === 0
 
+            const blocksJson = blocksRef.current.length > 0 ? blocksRef.current : undefined
             if (savedId) {
                 await (supabase as any)
                     .from('listing_templates')
@@ -404,6 +417,7 @@ function VisualEditorInner() {
                         name,
                         category,
                         description_html: html,
+                        blocks_json: blocksJson ?? null,
                         is_ebay_compliant: isEbayCompliant,
                         slots,
                         ...(isAdmin ? { description, tags, sort_order: sortOrder, is_featured: isFeatured, is_new_badge: isNewBadge } : {}),
@@ -420,6 +434,7 @@ function VisualEditorInner() {
                         name,
                         category,
                         description_html: html,
+                        blocks_json: blocksJson ?? null,
                         is_ebay_compliant: isEbayCompliant,
                         slots,
                         description: isAdmin ? description : 'Visual Builder template',
@@ -710,6 +725,7 @@ function VisualEditorInner() {
                     onPublish={handlePublish}
                     designStudioPlan={designStudioPlan}
                     onUpgradeClick={() => setShowUpgradeModal(true)}
+                    initialBlocks={initialBlocks}
                     onBlocksChange={(b) => { blocksRef.current = b }}
                     publishStatus={publishStatus}
                     onBack={() => router.push(isAdmin ? '/dashboard/admin' : '/dashboard/design')}

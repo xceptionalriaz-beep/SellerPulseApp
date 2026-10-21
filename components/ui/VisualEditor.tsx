@@ -166,6 +166,12 @@ interface VisualEditorProps {
     onUpgradeClick?: () => void
     /** Called whenever blocks change — lets parent detect Pro style usage for gating */
     onBlocksChange?: (blocks: Block[]) => void
+    /**
+     * Pre-parsed blocks to load directly (skips HTML parsing).
+     * Pass when loading a saved template that has blocks_json stored,
+     * so the original block structure is faithfully restored.
+     */
+    initialBlocks?: Block[]
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -188,6 +194,7 @@ export default function VisualEditor({
     designStudioPlan = 'free',
     onUpgradeClick,
     onBlocksChange,
+    initialBlocks,
 }: VisualEditorProps) {
     // ── Core block state ──────────────────────────────────────────────────────
     const [blocks, setBlocks] = useState<Block[]>([])
@@ -341,9 +348,17 @@ export default function VisualEditor({
         if (!hasInitialised.current) {
             hasInitialised.current = true
             lastSeenValue.current = value
-            const result = parseHtml(value)
-            setParseResult(result)
-            setBlocks(result.blocks)
+            if (initialBlocks && initialBlocks.length > 0) {
+                // Use pre-parsed blocks directly — no HTML round-trip needed
+                setBlocks(initialBlocks)
+            } else {
+                const result = parseHtml(value)
+                setParseResult(result)
+                setBlocks(result.blocks)
+                if (result.warnings.length > 0 || result.strategy === 'heuristic') {
+                    setShowWarning(true)
+                }
+            }
             setCurrentHtml(value)
             setCurrentTemplateId(null)
             setIsDirty(false)
@@ -353,9 +368,6 @@ export default function VisualEditor({
             setRedoStack([])
             setLockedIds(new Set())
             setHiddenIds(new Set())
-            if (result.warnings.length > 0 || result.strategy === 'heuristic') {
-                setShowWarning(true)
-            }
             return
         }
         // Subsequent re-initialisations only when the value really changed
