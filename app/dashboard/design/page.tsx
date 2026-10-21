@@ -1004,7 +1004,7 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy
 
                 {/* Badges */}
                 {badge && (
-                    <div className="absolute top-2.5 left-2.5" style={{ zIndex: 2 }}>
+                    <div className="absolute top-2.5" style={{ zIndex: 2, ...(template.is_pro ? { right: '10px' } : { left: '10px' }) }}>
                         {template.is_pro
                             ? <ProBadge size="xs" />
                             : (
