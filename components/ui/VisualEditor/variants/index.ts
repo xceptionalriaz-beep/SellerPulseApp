@@ -52,6 +52,7 @@ export { rectangleVariants, getRectangleVariant } from './rectangle.variants'
 export { trustBadgeVariants, getTrustBadgeVariant } from './trust_badge.variants'
 export { featureVariants, featuresVariants, getFeatureVariant, getFeaturesVariant } from './features.variants'
 export { testimonialsVariants, testimonialVariants, getTestimonialsVariant, getTestimonialVariant, TESTIMONIALS_THUMBNAILS } from './testimonials.variants'
+export { reviewsBlockVariants, getReviewsBlockVariant, REVIEWS_BLOCK_THUMBNAILS, REVIEWS_FREE_VARIANTS } from './reviews_block.variants'
 export { infoBoxVariants, getInfoBoxVariant, INFOBOX_THUMBNAILS, infoboxVariants } from './info_box.variants'
 export { shippingInfoVariants, shippingVariants, getShippingInfoVariant } from './shipping_info.variants'
 export { storeHeaderVariants, storeheaderVariants, getStoreHeaderVariant } from './store_header.variants'
@@ -115,6 +116,7 @@ import { rectangleVariants } from './rectangle.variants'
 import { trustBadgeVariants } from './trust_badge.variants'
 import { featureVariants } from './features.variants'
 import { testimonialsVariants } from './testimonials.variants'
+import { reviewsBlockVariants } from './reviews_block.variants'
 import { infoBoxVariants } from './info_box.variants'
 import { shippingInfoVariants } from './shipping_info.variants'
 import { storeHeaderVariants } from './store_header.variants'
@@ -209,8 +211,8 @@ const VARIANT_REGISTRY: Record<string, BlockVariant[]> = {
     'testimonial_block': testimonialsVariants,
     'testimonials': testimonialsVariants,
     'testimonial': testimonialsVariants,
-    'customer_reviews': testimonialsVariants,
-    'reviews': testimonialsVariants,
+    'customer_reviews': reviewsBlockVariants,
+    'reviews': reviewsBlockVariants,
     'info_box': infoBoxVariants,
     'infobox': infoBoxVariants,
     'info': infoBoxVariants,
