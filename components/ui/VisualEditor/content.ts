@@ -7,8 +7,8 @@
 //   blocks.ts   →  imports block definitions FROM content.ts
 // ─────────────────────────────────────────────────────────────────────────────
 
-import type { BlockType, BlockCategory, BlockProps, CommonProps } from './blocks'
-import { wrapBlock, DEFAULT_COMMON } from './blocks'
+import type { BlockType, BlockCategory, BlockProps } from './blocks'
+import { DEFAULT_COMMON, wrapBlock } from './defaults'
 import { getReviewsBlockVariant } from './variants/reviews_block.variants'
 
 // ── Customer Reviews ─────────────────────────────────────────────────────────
