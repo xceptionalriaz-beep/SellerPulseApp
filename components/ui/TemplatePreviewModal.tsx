@@ -377,10 +377,7 @@ export default function TemplatePreviewModal({
                         {/* Actions */}
                         <div className="p-4 flex flex-col gap-2">
                             {onEdit && (
-                                <button onClick={() => {
-                                    if (current.is_pro) { setShowUpgradeModal(true); return }
-                                    onClose(); onEdit(current)
-                                }}
+                                <button onClick={() => { onClose(); onEdit(current) }}
                                     className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold transition-all hover:opacity-90"
                                     style={{ backgroundColor: C.primary, color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
                                     <Pencil size={14} /> Edit in Visual Builder
