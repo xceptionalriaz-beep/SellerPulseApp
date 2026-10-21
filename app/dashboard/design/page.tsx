@@ -415,7 +415,8 @@ function DesignStudioInner() {
     // Templates saved by the Visual Builder carry "Visual Builder" in their
     // description. Route everything else to the HTML editor.
     function getEditorRoute(t: ListingTemplate) {
-        const isVisual = (t.description || '').toLowerCase().includes('visual builder')
+        // System templates are Visual Builder templates; own templates signal via description
+        const isVisual = t.is_system || (t.description || '').toLowerCase().includes('visual builder')
         return `/dashboard/design/${isVisual ? 'visual-editor' : 'html-editor'}?name=${encodeURIComponent(t.name)}&id=${t.id}`
     }
 
