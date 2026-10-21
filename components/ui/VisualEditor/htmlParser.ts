@@ -196,29 +196,45 @@ function defaultPropsFor(type: BlockType): BlockProps {
  *     (since we don't serialise props as JSON — we serialise as HTML)
  */
 function parseByComments(html: string): { blocks: Block[]; warnings: string[] } {
-    const blocks: Block[] = []
     const warnings: string[] = []
+    // Collect blocks with their start index so we can sort by document order
+    const found: Array<{ index: number; id: string; type: BlockType; innerHtml: string }> = []
 
-    // Match all <!-- BLOCK:type:id --> ... <!-- /BLOCK:type:id --> regions
+    // Format 1: <!-- BLOCK:type:id --> ... <!-- /BLOCK:type:id -->
     const BLOCK_RE = /<!--\s*BLOCK:([a-z_]+):([a-z0-9]+)\s*-->([\s\S]*?)<!--\s*\/BLOCK:\1:\2\s*-->/g
 
     let match: RegExpExecArray | null
     while ((match = BLOCK_RE.exec(html)) !== null) {
         const [, rawType, id, innerHtml] = match
-        const type = rawType as BlockType
-
-        // Verify this is a known block type
-        const def = getDefinition(type)
+        const def = getDefinition(rawType as BlockType)
         if (!def) {
-            warnings.push(`Unknown block type "${type}" — skipped.`)
+            warnings.push(`Unknown block type "${rawType}" — skipped.`)
             continue
         }
-
-        // Extract props from the inner HTML
-        const props = extractPropsFromHtml(type, innerHtml.trim())
-
-        blocks.push({ id, type, props })
+        found.push({ index: match.index, id, type: rawType as BlockType, innerHtml })
     }
+
+    // Format 2: <!--[riazify:type:id]--> ... <!--[/riazify:type:id]-->
+    const RIAZIFY_RE = /<!--\[riazify:([a-z_]+):([a-z0-9]+)\]-->([\s\S]*?)<!--\[\/riazify:\1:\2\]-->/g
+
+    while ((match = RIAZIFY_RE.exec(html)) !== null) {
+        const [, rawType, id, innerHtml] = match
+        const def = getDefinition(rawType as BlockType)
+        if (!def) {
+            warnings.push(`Unknown block type "${rawType}" (riazify format) — skipped.`)
+            continue
+        }
+        found.push({ index: match.index, id, type: rawType as BlockType, innerHtml })
+    }
+
+    // Sort by position in the document so blocks render in the correct order
+    found.sort((a, b) => a.index - b.index)
+
+    const blocks: Block[] = found.map(({ id, type, innerHtml }) => ({
+        id,
+        type,
+        props: extractPropsFromHtml(type, innerHtml.trim()),
+    }))
 
     return { blocks, warnings }
 }
