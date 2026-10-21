@@ -756,7 +756,7 @@ export default function TemplatesTab() {
                                 style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 8, border: `1px solid ${C.border}`, cursor: 'pointer', backgroundColor: C.surface, textAlign: 'left', width: '100%' }}
                                 onMouseEnter={e => { e.currentTarget.style.borderColor = C.primary; e.currentTarget.style.backgroundColor = '#f5f0ff' }}
                                 onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.backgroundColor = C.surface }}>
-                                <div style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                <div style={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                                 </div>
                                 <div>
@@ -769,7 +769,7 @@ export default function TemplatesTab() {
                                 style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 8, border: `1px solid ${C.border}`, cursor: 'pointer', backgroundColor: C.surface, textAlign: 'left', width: '100%' }}
                                 onMouseEnter={e => { e.currentTarget.style.borderColor = '#f59e0b'; e.currentTarget.style.backgroundColor = '#fffbeb' }}
                                 onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.backgroundColor = C.surface }}>
-                                <div style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                <div style={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                     <ProBadge size="xs" />
                                 </div>
                                 <div>
