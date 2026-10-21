@@ -39,6 +39,7 @@ import { getVariants } from '@/components/ui/VisualEditor/variants/index'
 import { ProExportGate } from '@/components/ui/VisualEditor/ProExportGate'
 import { ProUpgradeModal } from '@/components/ui/VisualEditor/ProUpgradeModal'
 import type { Block } from '@/components/ui/VisualEditor/blocks'
+import HtmlEditorPanel from '@/components/ui/HtmlEditorPanel'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -235,25 +236,6 @@ function VisualEditorInner() {
         blockId: string; blockType: string; variantId: string; variantLabel: string
     }>>([])
     const proGateRef = useRef<HTMLDivElement>(null)
-
-    // ── Listen for messages from the Code Editor iframe ──────────────────────
-    useEffect(() => {
-        function handleMessage(e: MessageEvent) {
-            if (e.origin !== window.location.origin) return
-            if (e.data?.type === 'html-editor-apply') {
-                // User clicked "Apply & Return" in the code editor — update the Visual Editor HTML
-                if (e.data.html) setHtml(e.data.html)
-                if (e.data.name) setName(e.data.name)
-                dirtyRef.current = true
-                setShowCodeEditorModal(false)
-            } else if (e.data?.type === 'html-editor-discard') {
-                // User clicked back arrow without applying — just close the modal
-                setShowCodeEditorModal(false)
-            }
-        }
-        window.addEventListener('message', handleMessage)
-        return () => window.removeEventListener('message', handleMessage)
-    }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     // ── Close action menu on outside click ───────────────────────────────────
     useEffect(() => {
@@ -670,15 +652,9 @@ function VisualEditorInner() {
     }
 
     // ── Open in Code Editor ───────────────────────────────────────────────────
-    // Opens the HTML Template Editor Studio as a full-screen modal overlay
-    // so the user never leaves the Visual Editor page.
+    // Opens the HTML Template Editor Studio as a full-screen overlay directly
+    // in the React tree — no iframe, no navigation, no sessionStorage needed.
     const handleOpenInCodeEditor = () => {
-        try {
-            sessionStorage.setItem('riazify_visual_export_html', html)
-            sessionStorage.setItem('riazify_visual_export_name', name)
-        } catch {
-            // sessionStorage unavailable — name passed via URL as fallback
-        }
         setShowCodeEditorModal(true)
     }
 
@@ -1481,20 +1457,19 @@ function VisualEditorInner() {
                 />
             )}
 
-            {/* ── Code Editor Modal ── Full-screen iframe overlay ────────── */}
+            {/* ── Code Editor Modal ── Direct component overlay (no iframe, no navigation) */}
             {showCodeEditorModal && (
-                <div style={{
-                    position: 'fixed', inset: 0, zIndex: 9999,
-                    backgroundColor: '#0f0e1a',
-                    display: 'flex', flexDirection: 'column',
-                }}>
-                    <iframe
-                        src={`/dashboard/design/html-editor?source=visual&modal=true&name=${encodeURIComponent(name)}`}
-                        style={{ width: '100%', flex: 1, border: 'none', display: 'block' }}
-                        title="HTML Template Editor Studio"
-                        allow="clipboard-write"
-                    />
-                </div>
+                <HtmlEditorPanel
+                    initialHtml={html}
+                    initialName={name}
+                    onApply={(updatedHtml, updatedName) => {
+                        setHtml(updatedHtml)
+                        setName(updatedName)
+                        dirtyRef.current = true
+                        setShowCodeEditorModal(false)
+                    }}
+                    onDiscard={() => setShowCodeEditorModal(false)}
+                />
             )}
         </div>
     )
