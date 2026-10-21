@@ -21,7 +21,7 @@
 //   6. rev-dark-luxury           — Charcoal bg, gold stars, premium brand aesthetic
 //   7. rev-trust-score-banner    — Big 4.9★ hero rating left, reviews stacked right
 //   8. rev-minimal-serif-grid    — 2-column, Apple-clean, hairline dividers only
-//   9. rev-trustpilot-showcase   — Score badge + headline + 3 titled green-star cards
+//   9. rev-trustpilot-showcase   — Store score badge + headline + 3 titled green-star cards
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface BlockVariant {
@@ -729,12 +729,12 @@ export const REVIEWS_BLOCK_THUMBNAILS: Record<string, string> = {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 9. TRUSTPILOT SHOWCASE  [PRO]
-// Aggregate score header (logo · star bar · score · "Excellent") + bold
+// 9. SCORE SHOWCASE  [PRO]
+// Aggregate score header (store badge · green star bar · score · label) + bold
 // section headline + 3 titled review cards with green stars.
-// The closest thing to a live Trustpilot widget you can put in an eBay listing.
+// Seller puts their own store name in the badge — no third-party branding.
 // ─────────────────────────────────────────────────────────────────────────────
-function trustpilotShowcase(p: any, id: string): string {
+function scoreShowcase(p: any, id: string): string {
   const bg       = resolveBg(p, '#ffffff')
   const accent   = resolveAccent(p)
   const starCol  = resolveStarColor(p)
@@ -750,12 +750,13 @@ function trustpilotShowcase(p: any, id: string): string {
     'Amazing from start to finish',
   ]
 
+  const badgeName  = p.badgeName    ?? p.storeName ?? '★ Verified Reviews'
   const scoreNum   = p.trustScore   ?? '4.9'
   const scoreLabel = p.trustLabel   ?? 'Excellent'
   const scoreCount = p.reviewCount  ?? '2,847'
-  const headline   = p.sectionTitle ?? 'People Love What We Do and How We Do It'
+  const headline   = p.sectionTitle ?? 'What Our Buyers Say About Us'
 
-  // Green Trustpilot-style star bar (5 filled green stars)
+  // Green star bar (5 filled green stars)
   const greenStar = (s: number) =>
     `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="#00b67a" style="display:inline-block;vertical-align:middle;margin:0 1px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`
   const greenStars = (n: number, size: number) =>
@@ -769,11 +770,11 @@ function trustpilotShowcase(p: any, id: string): string {
       <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;display:inline-table;">
         <tr>
           <td style="padding-right:16px;vertical-align:middle;">
-            <!-- Trustpilot-style logo badge -->
+            <!-- Store badge — seller sets their own name -->
             <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background:#00b67a;border-radius:4px;">
               <tr>
                 <td style="padding:6px 10px;">
-                  <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:#ffffff;letter-spacing:0.5px;white-space:nowrap;">&#9733; Trustpilot</p>
+                  <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:#ffffff;letter-spacing:0.5px;white-space:nowrap;">${badgeName}</p>
                 </td>
               </tr>
             </table>
@@ -912,10 +913,10 @@ export const reviewsBlockVariants: BlockVariant[] = [
   },
   {
     id: 'rev-trustpilot-showcase',
-    label: 'Trustpilot Showcase',
-    description: 'PRO — Aggregate score badge + headline + 3 titled review cards with green stars. Highest-trust layout.',
+    label: 'Score Showcase',
+    description: 'PRO — Store badge + score + headline + 3 titled review cards with green stars. Highest-trust layout.',
     thumbnail: REVIEWS_BLOCK_THUMBNAILS['rev-trustpilot-showcase'],
-    toHtml(props, id) { return trustpilotShowcase(props, id) },
+    toHtml(props, id) { return scoreShowcase(props, id) },
   },
 ]
 

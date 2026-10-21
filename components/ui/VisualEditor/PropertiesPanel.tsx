@@ -7524,10 +7524,11 @@ function BlockAttributeProps({ block, props, updateProps, phButton, tokenButton,
             return (
                 <>
                     {isTrustpilot && (
-                        <Section title="Trustpilot Showcase">
-                            <TextInput label="Section headline" value={(props as any).sectionTitle ?? 'People Love What We Do and How We Do It'} onChange={v => updateProps({ sectionTitle: v } as any)} />
+                        <Section title="Score Showcase">
+                            <TextInput label="Badge name (e.g. your store name)" value={(props as any).badgeName ?? '★ Verified Reviews'} onChange={v => updateProps({ badgeName: v } as any)} />
+                            <TextInput label="Section headline" value={(props as any).sectionTitle ?? 'What Our Buyers Say About Us'} onChange={v => updateProps({ sectionTitle: v } as any)} />
                             <TextInput label="Score (e.g. 4.9)" value={(props as any).trustScore ?? '4.9'} onChange={v => updateProps({ trustScore: v } as any)} />
-                            <TextInput label="Label (e.g. Excellent)" value={(props as any).trustLabel ?? 'Excellent'} onChange={v => updateProps({ trustLabel: v } as any)} />
+                            <TextInput label="Score label (e.g. Excellent)" value={(props as any).trustLabel ?? 'Excellent'} onChange={v => updateProps({ trustLabel: v } as any)} />
                             <TextInput label="Review count (e.g. 2,847)" value={(props as any).reviewCount ?? '2,847'} onChange={v => updateProps({ reviewCount: v } as any)} />
                         </Section>
                     )}
