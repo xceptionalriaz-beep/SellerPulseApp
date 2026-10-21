@@ -26,6 +26,7 @@ import {
     Tag, FileText, Hash, Zap,
 } from 'lucide-react'
 import { ProBadge } from '@/components/ui/VisualEditor/ProBadge'
+import { ProUpgradeModal } from '@/components/ui/VisualEditor/ProUpgradeModal'
 
 // ── Design tokens ──────────────────────────────────────────────────────────
 const C = {
@@ -148,6 +149,7 @@ export default function TemplatePreviewModal({
 }: Props) {
     const [device, setDevice] = useState<DeviceId>('desktop')
     const [current, setCurrent] = useState<PreviewTemplate | null>(template)
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
     // Sync with parent template prop
     useEffect(() => { setCurrent(template) }, [template])
@@ -382,7 +384,10 @@ export default function TemplatePreviewModal({
                                 </button>
                             )}
                             {onCopy && (
-                                <button onClick={() => onCopy(current)}
+                                <button onClick={() => {
+                                    if (current.is_pro) { setShowUpgradeModal(true); return }
+                                    onCopy(current)
+                                }}
                                     className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-semibold transition-all hover:opacity-80"
                                     style={{
                                         backgroundColor: isCopied ? C.successBg : C.surface,
@@ -433,6 +438,14 @@ export default function TemplatePreviewModal({
                     to   { opacity: 1; transform: scale(1)    translateY(0);   }
                 }
             `}</style>
+
+            {/* Pro upgrade gate */}
+            {showUpgradeModal && (
+                <ProUpgradeModal
+                    onClose={() => setShowUpgradeModal(false)}
+                    onUpgrade={() => setShowUpgradeModal(false)}
+                />
+            )}
         </div>
     )
 }
