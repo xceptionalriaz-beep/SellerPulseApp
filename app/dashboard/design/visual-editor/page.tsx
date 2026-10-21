@@ -226,12 +226,34 @@ function VisualEditorInner() {
     const [showUpgradeModal, setShowUpgradeModal] = useState(false)
     const blocksRef = useRef<Block[]>([]) // live blocks for Pro-style detection
 
+    // Code Editor modal (full-screen iframe over the Visual Editor)
+    const [showCodeEditorModal, setShowCodeEditorModal] = useState(false)
+
     // Pro export gate popup
     const [showProExportGate, setShowProExportGate] = useState(false)
     const [proGateBlocks, setProGateBlocks] = useState<Array<{
         blockId: string; blockType: string; variantId: string; variantLabel: string
     }>>([])
     const proGateRef = useRef<HTMLDivElement>(null)
+
+    // ── Listen for messages from the Code Editor iframe ──────────────────────
+    useEffect(() => {
+        function handleMessage(e: MessageEvent) {
+            if (e.origin !== window.location.origin) return
+            if (e.data?.type === 'html-editor-apply') {
+                // User clicked "Apply & Return" in the code editor — update the Visual Editor HTML
+                if (e.data.html) setHtml(e.data.html)
+                if (e.data.name) setName(e.data.name)
+                dirtyRef.current = true
+                setShowCodeEditorModal(false)
+            } else if (e.data?.type === 'html-editor-discard') {
+                // User clicked back arrow without applying — just close the modal
+                setShowCodeEditorModal(false)
+            }
+        }
+        window.addEventListener('message', handleMessage)
+        return () => window.removeEventListener('message', handleMessage)
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     // ── Close action menu on outside click ───────────────────────────────────
     useEffect(() => {
@@ -648,18 +670,16 @@ function VisualEditorInner() {
     }
 
     // ── Open in Code Editor ───────────────────────────────────────────────────
-    // Passes the current compiled HTML to the html-editor page via sessionStorage
-    // so the code editor opens with the visual template ready to fine-tune.
+    // Opens the HTML Template Editor Studio as a full-screen modal overlay
+    // so the user never leaves the Visual Editor page.
     const handleOpenInCodeEditor = () => {
         try {
             sessionStorage.setItem('riazify_visual_export_html', html)
             sessionStorage.setItem('riazify_visual_export_name', name)
         } catch {
-            // sessionStorage unavailable — pass via URL (truncated, best effort)
+            // sessionStorage unavailable — name passed via URL as fallback
         }
-        router.push(
-            `/dashboard/design/html-editor?source=visual&name=${encodeURIComponent(name)}`
-        )
+        setShowCodeEditorModal(true)
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -1459,6 +1479,22 @@ function VisualEditorInner() {
                         // router.push('/dashboard/upgrade?plan=design-studio-pro')
                     }}
                 />
+            )}
+
+            {/* ── Code Editor Modal ── Full-screen iframe overlay ────────── */}
+            {showCodeEditorModal && (
+                <div style={{
+                    position: 'fixed', inset: 0, zIndex: 9999,
+                    backgroundColor: '#0f0e1a',
+                    display: 'flex', flexDirection: 'column',
+                }}>
+                    <iframe
+                        src={`/dashboard/design/html-editor?source=visual&modal=true&name=${encodeURIComponent(name)}`}
+                        style={{ width: '100%', flex: 1, border: 'none', display: 'block' }}
+                        title="HTML Template Editor Studio"
+                        allow="clipboard-write"
+                    />
+                </div>
             )}
         </div>
     )

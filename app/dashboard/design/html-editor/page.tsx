@@ -2,7 +2,7 @@
 // app/dashboard/design/html-editor/page.tsx
 // Riazify — HTML Template Editor Studio
 
-import { useState, useRef, Suspense } from 'react'
+import { useState, useRef, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 // next/link removed — using router.push instead
 import {
@@ -141,6 +141,10 @@ function HtmlEditorInner() {
     const router = useRouter()
     const searchParams = useSearchParams()
 
+    // When opened as a modal (via ?modal=true from the Visual Editor),
+    // "Save & Close" posts a message to the parent instead of navigating.
+    const isModal = searchParams.get('modal') === 'true'
+
     const [html, setHtml] = useState(DEFAULT_HTML)
     const [name, setName] = useState(searchParams.get('name') || 'Untitled Template')
     const [device, setDevice] = useState<DeviceId>('desktop')
@@ -159,6 +163,25 @@ function HtmlEditorInner() {
     const [testLoading, setTestLoading] = useState(false)
     const [previewHtml, setPreviewHtml] = useState('')
     const [showVersionHistory, setShowVersionHistory] = useState(false)
+
+    // Load HTML from sessionStorage when opened from Visual Editor
+    useEffect(() => {
+        if (searchParams.get('source') !== 'visual') return
+        try {
+            const stored = sessionStorage.getItem('riazify_visual_export_html')
+            if (stored) {
+                setHtml(stored)
+                sessionStorage.removeItem('riazify_visual_export_html')
+            }
+            const storedName = sessionStorage.getItem('riazify_visual_export_name')
+            if (storedName) {
+                setName(storedName)
+                sessionStorage.removeItem('riazify_visual_export_name')
+            }
+        } catch {
+            // sessionStorage unavailable — use URL name param (already set above)
+        }
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     // Insert image tag at saved cursor
     function insertImage(_url: string, htmlTag: string) {
@@ -309,11 +332,26 @@ function HtmlEditorInner() {
     }
 
     async function saveAndClose() {
+        if (isModal) {
+            // Running inside the Visual Editor modal — send HTML back to parent
+            // instead of navigating away from the page.
+            window.parent.postMessage(
+                { type: 'html-editor-apply', html, name },
+                window.location.origin
+            )
+            return
+        }
         await saveDraft()
         if (isAdmin) {
             router.push('/dashboard/admin?settings=26')
         } else {
             router.push('/dashboard/design?tab=my-templates')
+        }
+    }
+
+    function discardAndClose() {
+        if (isModal) {
+            window.parent.postMessage({ type: 'html-editor-discard' }, window.location.origin)
         }
     }
 
@@ -375,13 +413,23 @@ function HtmlEditorInner() {
                 style={{ height: 52, backgroundColor: C.surface, borderBottom: `1px solid ${C.border}`, gap: 12 }}>
 
                 <div className="flex items-center gap-3 min-w-0">
-                    <button
-                        onClick={() => router.push(isAdmin ? '/dashboard/admin?settings=26' : '/dashboard/design?tab=templates')}
-                        className="flex items-center gap-1 text-[12px] font-semibold shrink-0 hover:opacity-70 transition-all"
-                        style={{ color: C.primary, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
-                        <ChevronLeft size={14} />
-                        {isAdmin ? 'Admin Templates' : 'Template Library'}
-                    </button>
+                    {isModal ? (
+                        <button
+                            onClick={discardAndClose}
+                            className="flex items-center gap-1 text-[12px] font-semibold shrink-0 hover:opacity-70 transition-all"
+                            style={{ color: C.primary, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                            <ChevronLeft size={14} />
+                            Visual Editor
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => router.push(isAdmin ? '/dashboard/admin?settings=26' : '/dashboard/design?tab=templates')}
+                            className="flex items-center gap-1 text-[12px] font-semibold shrink-0 hover:opacity-70 transition-all"
+                            style={{ color: C.primary, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                            <ChevronLeft size={14} />
+                            {isAdmin ? 'Admin Templates' : 'Template Library'}
+                        </button>
+                    )}
                     <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
                     <h1 className="text-[15px] font-bold truncate"
                         style={{ color: C.primary, fontFamily: 'Syne, sans-serif' }}>
@@ -400,16 +448,18 @@ function HtmlEditorInner() {
                         style={{ backgroundColor: C.bg, color: C.secondary, border: `1px solid ${C.border}`, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
                         <Download size={13} /> Download HTML
                     </button>
-                    <button onClick={saveDraft}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all hover:opacity-80"
-                        style={{ backgroundColor: C.dark, color: '#ffffff', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
-                        <Save size={13} />
-                        {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Draft'}
-                    </button>
+                    {!isModal && (
+                        <button onClick={saveDraft}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all hover:opacity-80"
+                            style={{ backgroundColor: C.dark, color: '#ffffff', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                            <Save size={13} />
+                            {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Draft'}
+                        </button>
+                    )}
                     <button onClick={saveAndClose}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all hover:opacity-90"
                         style={{ backgroundColor: C.primary, color: '#ffffff', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
-                        <X size={13} /> Save & Close
+                        <X size={13} /> {isModal ? 'Apply & Return' : 'Save & Close'}
                     </button>
                 </div>
             </div>
