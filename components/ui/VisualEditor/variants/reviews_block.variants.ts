@@ -1,26 +1,25 @@
 // components/ui/VisualEditor/variants/reviews_block.variants.ts
 // ─────────────────────────────────────────────────────────────────────────────
-// Customer Reviews Block — 8 Professional eBay Listing Variants
+// Customer Reviews Block — 9 Professional eBay Listing Variants
 //
 // Design rules:
-//   • Every variant has a completely different LAYOUT CONCEPT — not just colours
+//   • Every variant has a STRUCTURALLY DIFFERENT layout — not colour variations
 //   • Table-based HTML only — 100% eBay-compliant, zero JavaScript, zero <div>
-//   • PRO variants are visibly more impressive — sellers see the value instantly
-//   • Clean backgrounds — no noise, no gradients that feel cheap
+//   • PRO variants show eBay-specific elements: DSR ratings, feedback %, badges
 //   • Stars always rendered as SVG (crisp at any size, not emoji)
-//   • Answers always visible — eBay does not allow JavaScript
+//   • No third-party branding — all badge/label text is seller-controlled
 //
 // 9 Variants:
 //   FREE:
 //   1. rev-star-cards            — 3-up card grid, yellow stars, buyer quote
-//   2. rev-bold-quote-strip      — Full-width accent strip, large quote mark
-//   3. rev-verified-buyer-rows   — Horizontal row per review, green verified badge
+//   2. rev-bold-quote-strip      — Dark panel + trust bar (feedback %) + 3 serif quotes
+//   3. rev-verified-buyer-rows   — Horizontal rows, green verified badge, initials avatar
 //   PRO:
-//   4. rev-magazine-editorial    — Huge italic serif quote, editorial magazine feel
-//   5. rev-avatar-rating-cards   — Initial circle avatar, Trustpilot-style layout
-//   6. rev-dark-luxury           — Charcoal bg, gold stars, premium brand aesthetic
+//   4. rev-magazine-editorial    — Broadsheet masthead + 3 numbered editorial columns + footer
+//   5. rev-avatar-rating-cards   — eBay scoreboard metrics + 3 cards with DSR ratings
+//   6. rev-dark-luxury           — Gold award panel + average score + 3 dark testimony panels
 //   7. rev-trust-score-banner    — Big 4.9★ hero rating left, reviews stacked right
-//   8. rev-minimal-serif-grid    — 2-column, Apple-clean, hairline dividers only
+//   8. rev-minimal-serif-grid    — Hero review + 2 numbered support reviews, pure typography
 //   9. rev-trustpilot-showcase   — Store score badge + headline + 3 titled green-star cards
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -180,40 +179,36 @@ function starCards(p: any, id: string): string {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 2. BOLD QUOTE STRIP  [FREE]
-// Full-width accent background. Huge decorative " mark. White text.
-// One review per row, stacked. Stops the eye. Works for any seller.
+// Dark panel with seller trust bar at top: star score + Positive Feedback %.
+// Three buyer quotes in serif italic, stacked with oversized " marks.
+// Stops the eye — social proof communicated instantly.
 // ─────────────────────────────────────────────────────────────────────────────
 function boldQuoteStrip(p: any, id: string): string {
-  const sectionBg = p.questionBg ?? '#1e1535'
-  const starCol = resolveStarColor(p)
-  const accent = resolveAccent(p)
-  const reviews = resolveReviews(p)
+  const sectionBg  = p.questionBg ?? '#1e1535'
+  const starCol    = resolveStarColor(p)
+  const accent     = resolveAccent(p)
+  const feedbackPct = p.feedbackPct ?? '99.8'
+  const reviews    = resolveReviews(p)
 
   const rows = reviews.map((r, i) => {
-    const quote = r.text ?? r.quote ?? ''
+    const quote  = r.text ?? r.quote ?? ''
     const author = r.author ?? r.name ?? 'Verified Buyer'
-    const date = r.date ?? ''
+    const date   = r.date ?? 'Verified eBay Purchase'
     return `
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;${i > 0 ? `border-top:1px solid rgba(255,255,255,0.1);padding-top:20px;margin-top:20px;` : ''}">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;${i > 0 ? 'padding-top:18px;border-top:1px solid rgba(255,255,255,0.08);' : ''}${i < reviews.length - 1 ? 'padding-bottom:18px;' : ''}">
       <tr>
-        <td>
-          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+        <td width="28" valign="top" style="width:28px;padding-right:12px;padding-top:4px;">
+          <p style="margin:0;font-family:Georgia,serif;font-size:44px;line-height:0.75;color:${accent};opacity:0.8;">&ldquo;</p>
+        </td>
+        <td valign="top">
+          <p style="margin:0 0 10px;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-style:italic;color:#f0f0f0;line-height:1.7;">${quote}</p>
+          <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
             <tr>
-              <td width="36" style="width:36px;vertical-align:top;padding-top:2px;">
-                <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:52px;line-height:0.8;color:${accent};opacity:0.6;">&ldquo;</p>
+              <td style="padding-right:10px;vertical-align:middle;">
+                <p style="margin:0;">${stars(r.rating ?? 5, starCol, 11)}</p>
               </td>
-              <td style="vertical-align:top;padding-left:10px;">
-                <p style="margin:0 0 10px;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#ffffff;line-height:1.65;font-style:italic;">${quote}</p>
-                <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
-                  <tr>
-                    <td style="vertical-align:middle;padding-right:10px;">
-                      <p style="margin:0;">${stars(r.rating ?? 5, starCol, 12)}</p>
-                    </td>
-                    <td style="vertical-align:middle;">
-                      <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:#ffffff;">&#8212; ${author}${date ? `<span style="font-weight:400;color:rgba(255,255,255,0.55);margin-left:6px;">${date}</span>` : ''}</p>
-                    </td>
-                  </tr>
-                </table>
+              <td style="vertical-align:middle;">
+                <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:#ffffff;">&#8212; ${author}&nbsp;<span style="font-weight:400;color:rgba(255,255,255,0.45);">&middot; ${date}</span></p>
               </td>
             </tr>
           </table>
@@ -222,22 +217,44 @@ function boldQuoteStrip(p: any, id: string): string {
     </table>`
   }).join('')
 
-  const inner = `
+  return outerWrap(id, `
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${sectionBg};border-left:4px solid ${accent};">
   <tr>
-    <td style="${pad(p, 22, 24, 22, 24)}box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:16px;">
+    <td>
+      <!-- Trust bar -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:rgba(255,255,255,0.05);border-bottom:1px solid rgba(255,255,255,0.08);">
         <tr>
-          <td>
-            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:${accent};letter-spacing:0.12em;text-transform:uppercase;">Customer Reviews</p>
+          <td style="padding:11px 24px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+              <tr>
+                <td style="vertical-align:middle;">
+                  <p style="margin:0;">${stars(5, starCol, 13)}<span style="font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:#ffffff;vertical-align:middle;margin-left:8px;">5.0 / 5.0</span></p>
+                </td>
+                <td align="right" style="vertical-align:middle;">
+                  <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:rgba(22,163,74,0.2);border:1px solid rgba(22,163,74,0.45);border-radius:4px;">
+                    <tr>
+                      <td style="padding:4px 10px;">
+                        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:#4ade80;letter-spacing:0.03em;">&#10003; ${feedbackPct}% Positive Feedback</p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
       </table>
-      ${rows}
+      <!-- Quotes -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+        <tr>
+          <td style="${pad(p, 20, 24, 20, 24)}box-sizing:border-box;">
+            ${rows}
+          </td>
+        </tr>
+      </table>
     </td>
   </tr>
-</table>`
-  return outerWrap(id, inner)
+</table>`)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -306,168 +323,272 @@ function verifiedBuyerRows(p: any, id: string): string {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 4. MAGAZINE EDITORIAL  [PRO]
-// Huge italic serif quote fills the full width. Thin rule. Name in small caps.
-// Inspired by WSJ, Monocle, editorial luxury print. Nothing else looks like this.
+// Broadsheet newspaper layout. Bold uppercase masthead with "CUSTOMER FEEDBACK"
+// + "VERIFIED PURCHASES" badge on right. Thick top rule. Below: 3 editorial
+// columns separated by hairlines, each numbered (01 / 02 / 03) with italic
+// serif quote, author in small caps, and a green "POSITIVE FEEDBACK" badge.
+// Footer: total feedback count attribution line.
 // ─────────────────────────────────────────────────────────────────────────────
 function magazineEditorial(p: any, id: string): string {
-  const bg = resolveBg(p)
-  const textCol = resolveTextColor(p)
-  const subCol = resolveSubColor(p)
-  const starCol = resolveStarColor(p)
-  const accent = resolveAccent(p)
-  const borderCol = resolveBorder(p)
-  const reviews = resolveReviews(p)
+  const bg         = resolveBg(p)
+  const textCol    = resolveTextColor(p)
+  const subCol     = resolveSubColor(p)
+  const starCol    = resolveStarColor(p)
+  const accent     = resolveAccent(p)
+  const borderCol  = resolveBorder(p)
+  const reviews    = resolveReviews(p)
+  const totalCount = p.reviewCount ?? '2,400'
 
-  const items = reviews.map((r, i) => {
-    const quote = r.text ?? r.quote ?? ''
+  const nums = ['01', '02', '03']
+  const cols = reviews.slice(0, 3).map((r, i) => {
+    const quote  = r.text ?? r.quote ?? ''
     const author = r.author ?? r.name ?? 'Verified Buyer'
-    const date = r.date ?? ''
+    const date   = r.date ?? 'Verified eBay Purchase'
+    const isLast = i === 2
     return `
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;${i > 0 ? `border-top:1px solid ${borderCol};padding-top:22px;` : ''}${i < reviews.length - 1 ? 'padding-bottom:22px;' : ''}">
-      <tr><td>
-        <p style="margin:0 0 12px;font-family:Georgia,'Times New Roman',serif;font-size:17px;font-style:italic;color:${textCol};line-height:1.6;letter-spacing:0.01em;">&ldquo;${quote}&rdquo;</p>
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
-          <tr>
-            <td width="28" style="width:28px;vertical-align:middle;">
-              <p style="margin:0;">${stars(r.rating ?? 5, starCol, 11)}</p>
-            </td>
-            <td style="vertical-align:middle;padding-left:8px;">
-              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:${subCol};letter-spacing:0.08em;text-transform:uppercase;">${author}${date ? ` &nbsp;&#8901;&nbsp; <span style="font-weight:400;">${date}</span>` : ''}</p>
-            </td>
-          </tr>
-        </table>
-      </td></tr>
-    </table>`
-  }).join('')
-
-  const inner = `
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${bg};">
-  <tr>
-    <td style="${pad(p, 24, 28, 24, 28)}box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:20px;">
+    <td width="33%" valign="top" style="width:33.33%;padding:0 ${isLast ? '0' : '20px'} 0 ${i === 0 ? '0' : '20px'};vertical-align:top;${i < 2 ? `border-right:1px solid ${borderCol};` : ''}box-sizing:border-box;">
+      <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:900;color:${borderCol};line-height:1;">${nums[i]}</p>
+      <p style="margin:0 0 14px;font-family:Georgia,'Times New Roman',serif;font-size:13px;font-style:italic;color:${textCol};line-height:1.75;">&ldquo;${quote}&rdquo;</p>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border-top:1px solid ${borderCol};">
         <tr>
-          <td width="3" style="width:3px;background-color:${accent};font-size:0;">&nbsp;</td>
-          <td style="padding-left:12px;">
-            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:${accent};letter-spacing:0.12em;text-transform:uppercase;">Customer Reviews</p>
+          <td style="padding-top:10px;">
+            <p style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:${textCol};letter-spacing:0.06em;text-transform:uppercase;">${author}</p>
+            <p style="margin:0 0 6px;">${stars(r.rating ?? 5, starCol, 10)}</p>
+            <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:#f0fdf4;border:1px solid #bbf7d0;border-radius:3px;">
+              <tr>
+                <td style="padding:3px 8px;">
+                  <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:9px;font-weight:700;color:#16a34a;letter-spacing:0.04em;">&#10003; POSITIVE FEEDBACK</p>
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
       </table>
-      ${items}
+    </td>`
+  }).join('')
+
+  return outerWrap(id, `
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${bg};">
+  <tr>
+    <td style="${pad(p, 24, 28, 28, 28)}box-sizing:border-box;">
+      <!-- Masthead -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border-top:3px solid ${textCol};margin-bottom:20px;">
+        <tr>
+          <td style="padding-top:10px;vertical-align:middle;">
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:900;color:${textCol};letter-spacing:0.14em;text-transform:uppercase;">Customer Feedback</p>
+          </td>
+          <td align="right" style="vertical-align:middle;padding-top:10px;">
+            <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${accent};border-radius:3px;">
+              <tr>
+                <td style="padding:4px 10px;">
+                  <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:9px;font-weight:700;color:#ffffff;letter-spacing:0.08em;">VERIFIED PURCHASES</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" style="padding-top:10px;border-bottom:1px solid ${borderCol};font-size:0;">&nbsp;</td>
+        </tr>
+      </table>
+      <!-- 3-column editorial grid -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;table-layout:fixed;">
+        <tr>${cols}</tr>
+      </table>
+      <!-- Footer -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border-top:1px solid ${borderCol};margin-top:20px;">
+        <tr>
+          <td style="padding-top:12px;">
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};">All reviews from verified eBay purchases &nbsp;&middot;&nbsp; <span style="font-weight:700;color:${textCol};">${totalCount}+ positive feedbacks</span></p>
+          </td>
+        </tr>
+      </table>
     </td>
   </tr>
-</table>`
-  return outerWrap(id, inner)
+</table>`)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 5. AVATAR RATING CARDS  [PRO]
-// Initials circle avatar (accent colour). Name + stars as card header.
-// Quote text in card body. Trustpilot/Google Review aesthetic.
-// Modern, trustworthy, instantly familiar to buyers.
+// eBay Seller Scoreboard: dashboard metrics row at top (Feedback Score,
+// Positive %, Items Sold, Seller Status). Below: 3 cards each with a green
+// "POSITIVE FEEDBACK" badge, initials avatar, review text, and DSR mini-ratings
+// (Item as Described · Dispatch Speed · Communication) with star rows.
 // ─────────────────────────────────────────────────────────────────────────────
 function avatarRatingCards(p: any, id: string): string {
-  const bg = resolveBg(p)
-  const textCol = resolveTextColor(p)
-  const subCol = resolveSubColor(p)
-  const starCol = resolveStarColor(p)
-  const accent = resolveAccent(p)
-  const borderCol = resolveBorder(p)
-  const reviews = resolveReviews(p)
+  const bg            = resolveBg(p)
+  const textCol       = resolveTextColor(p)
+  const subCol        = resolveSubColor(p)
+  const starCol       = resolveStarColor(p)
+  const accent        = resolveAccent(p)
+  const borderCol     = resolveBorder(p)
+  const reviews       = resolveReviews(p)
+  const feedbackScore = p.feedbackScore ?? '4,832'
+  const feedbackPct   = p.feedbackPct   ?? '99.8'
+  const itemsSold     = p.itemsSold     ?? '12,400+'
+  const sellerStatus  = p.sellerStatus  ?? 'Top Rated'
 
-  const cards = reviews.map((r, i) => {
-    const quote = r.text ?? r.quote ?? ''
+  const metrics = [
+    { label: 'Feedback Score', value: feedbackScore, col: textCol },
+    { label: 'Positive Feedback', value: `${feedbackPct}%`, col: '#16a34a' },
+    { label: 'Items Sold', value: itemsSold, col: accent },
+    { label: 'Seller Status', value: sellerStatus, col: '#d97706' },
+  ]
+
+  const metricTiles = metrics.map((m, i) => `
+    <td width="25%" style="padding:14px 10px;text-align:center;${i < 3 ? `border-right:1px solid ${borderCol};` : ''}vertical-align:middle;box-sizing:border-box;">
+      <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:900;color:${m.col};line-height:1;">${m.value}</p>
+      <p style="margin:4px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:9px;font-weight:700;color:${subCol};letter-spacing:0.05em;text-transform:uppercase;">${m.label}</p>
+    </td>`).join('')
+
+  const dsrRow = (label: string) =>
+    `<tr><td style="padding:2px 0;"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;"><tr><td><p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:9px;color:${subCol};">${label}</p></td><td align="right">${stars(5, starCol, 9)}</td></tr></table></td></tr>`
+
+  const cards = reviews.slice(0, 3).map((r, i) => {
+    const quote  = r.text ?? r.quote ?? ''
     const author = r.author ?? r.name ?? 'Verified Buyer'
-    const date = r.date ?? 'Verified Purchase'
-    const ini = initials(author)
+    const date   = r.date ?? 'Verified eBay Purchase'
+    const ini    = initials(author)
     return `
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:#ffffff;border:1px solid ${borderCol};border-radius:8px;margin-bottom:${i === reviews.length - 1 ? 0 : 10}px;">
-      <tr>
-        <td style="padding:14px 16px 10px;border-bottom:1px solid ${borderCol};">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
-            <tr>
-              <td width="40" style="width:40px;vertical-align:middle;padding-right:12px;">
-                <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
-                  <tr>
-                    <td style="width:38px;height:38px;background-color:${accent};border-radius:50%;text-align:center;line-height:38px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:#ffffff;">${ini}</td>
-                  </tr>
-                </table>
-              </td>
-              <td style="vertical-align:middle;">
-                <p style="margin:0 0 2px;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:${textCol};">${author}</p>
-                <p style="margin:0 0 3px;">${stars(r.rating ?? 5, starCol, 12)}</p>
-                <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};">${date}</p>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-      <tr>
-        <td style="padding:12px 16px 14px;">
-          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${textCol};line-height:1.65;">&ldquo;${quote}&rdquo;</p>
-        </td>
-      </tr>
-    </table>`
-  }).join('')
-
-  const inner = `
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${bg};">
-  <tr>
-    <td style="${pad(p)}box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:14px;">
+    <td width="33%" valign="top" style="width:33.33%;padding:0 ${i < 2 ? '6px' : '0'} 0 ${i > 0 ? '6px' : '0'};vertical-align:top;box-sizing:border-box;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:#ffffff;border:1px solid ${borderCol};border-radius:8px;">
         <tr>
-          <td>
-            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:${accent};letter-spacing:0.1em;text-transform:uppercase;">Verified Buyer Reviews</p>
+          <td style="background-color:#f0fdf4;border-bottom:1px solid #bbf7d0;padding:6px 12px;border-radius:8px 8px 0 0;">
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:9px;font-weight:700;color:#16a34a;letter-spacing:0.06em;">&#10003; POSITIVE FEEDBACK</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:12px 12px 8px;">
+            <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+              <tr>
+                <td width="32" style="width:32px;vertical-align:middle;padding-right:10px;">
+                  <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+                    <tr>
+                      <td style="width:30px;height:30px;background-color:${accent};border-radius:50%;text-align:center;line-height:30px;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:#ffffff;">${ini}</td>
+                    </tr>
+                  </table>
+                </td>
+                <td style="vertical-align:middle;">
+                  <p style="margin:0 0 2px;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:${textCol};">${author}</p>
+                  <p style="margin:0;">${stars(r.rating ?? 5, starCol, 10)}</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 12px 10px;">
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:${textCol};line-height:1.65;">&ldquo;${quote}&rdquo;</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:8px 12px 12px;border-top:1px solid ${borderCol};">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+              ${dsrRow('Item as Described')}
+              ${dsrRow('Dispatch Speed')}
+              ${dsrRow('Communication')}
+            </table>
+            <p style="margin:6px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:9px;color:${subCol};">${date}</p>
           </td>
         </tr>
       </table>
-      ${cards}
+    </td>`
+  }).join('')
+
+  return outerWrap(id, `
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${bg};">
+  <tr>
+    <td style="${pad(p, 20, 20, 20, 20)}box-sizing:border-box;">
+      <!-- Seller metrics dashboard -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid ${borderCol};border-radius:8px;background-color:#f9fafb;margin-bottom:16px;">
+        <tr>${metricTiles}</tr>
+      </table>
+      <!-- Review cards with DSR ratings -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;table-layout:fixed;">
+        <tr>${cards}</tr>
+      </table>
     </td>
   </tr>
-</table>`
-  return outerWrap(id, inner)
+</table>`)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 6. DARK LUXURY  [PRO]
-// Deep charcoal background. Gold stars. White quotes. Thin gold divider lines.
-// For watches, jewellery, premium fashion, collectibles, high-end electronics.
+// Theatrical prestige layout. Centered gold award panel at top: "PREMIUM SELLER"
+// badge, 5 gold stars, average rating score. Below: 3 dark testimony panels
+// each with a gold top-border, italic white quote, gold author line, and a
+// green "Verified Purchase" confirmation. For watches, jewellery, collectibles.
 // ─────────────────────────────────────────────────────────────────────────────
 function darkLuxury(p: any, id: string): string {
-  const sectionBg = p.questionBg ?? '#111827'
-  const accent = resolveAccent(p)
-  const starCol = resolveStarColor(p)
-  const reviews = resolveReviews(p)
+  const sectionBg = p.questionBg ?? '#0d1117'
+  const reviews   = resolveReviews(p)
+  const gold      = '#c9a84c'
 
-  const items = reviews.map((r, i) => {
-    const quote = r.text ?? r.quote ?? ''
+  const goldStar = (s: number) =>
+    `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="${gold}" style="display:inline-block;vertical-align:middle;margin:0 1px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`
+  const goldStars = (n: number, size: number) =>
+    Array.from({ length: n }, () => goldStar(size)).join('')
+
+  const avg    = reviews.reduce((s, r) => s + (r.rating ?? 5), 0) / reviews.length
+  const avgStr = avg.toFixed(1)
+
+  const panels = reviews.slice(0, 3).map((r, i) => {
+    const quote  = r.text ?? r.quote ?? ''
     const author = r.author ?? r.name ?? 'Verified Buyer'
-    const date = r.date ?? ''
+    const date   = r.date ?? 'Verified eBay Purchase'
     return `
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;${i > 0 ? `border-top:1px solid rgba(212,175,55,0.2);padding-top:18px;` : ''}${i < reviews.length - 1 ? 'padding-bottom:18px;' : ''}">
-      <tr><td>
-        <p style="margin:0 0 8px;">${stars(r.rating ?? 5, starCol, 13)}</p>
-        <p style="margin:0 0 10px;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-style:italic;color:#e5e7eb;line-height:1.65;">&ldquo;${quote}&rdquo;</p>
-        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:#d4af37;letter-spacing:0.04em;">&#8212; ${author}${date ? `<span style="font-weight:400;color:rgba(255,255,255,0.4);margin-left:6px;">${date}</span>` : ''}</p>
-      </td></tr>
-    </table>`
-  }).join('')
-
-  const inner = `
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${sectionBg};border-top:2px solid #d4af37;">
-  <tr>
-    <td style="${pad(p, 22, 24, 22, 24)}box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:18px;">
+    <td width="33%" valign="top" style="width:33.33%;padding:0 ${i < 2 ? '8px' : '0'} 0 ${i > 0 ? '8px' : '0'};vertical-align:top;box-sizing:border-box;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.18);border-top:3px solid ${gold};border-radius:4px;">
         <tr>
-          <td>
-            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:#d4af37;letter-spacing:0.14em;text-transform:uppercase;">Customer Reviews</p>
+          <td style="padding:16px 16px 8px;">
+            <p style="margin:0 0 10px;">${goldStars(r.rating ?? 5, 12)}</p>
+            <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:13px;font-style:italic;color:rgba(255,255,255,0.82);line-height:1.75;">&ldquo;${quote}&rdquo;</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:10px 16px 12px;border-top:1px solid rgba(201,168,76,0.14);">
+            <p style="margin:0 0 5px;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:${gold};">&#8212; ${author}</p>
+            <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:rgba(22,163,74,0.15);border:1px solid rgba(22,163,74,0.35);border-radius:3px;">
+              <tr>
+                <td style="padding:3px 8px;">
+                  <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:9px;color:#4ade80;font-weight:700;letter-spacing:0.04em;">&#10003; ${date}</p>
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
       </table>
-      ${items}
+    </td>`
+  }).join('')
+
+  return outerWrap(id, `
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${sectionBg};">
+  <tr>
+    <td style="${pad(p, 28, 28, 28, 28)}box-sizing:border-box;">
+      <!-- Award header -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:24px;">
+        <tr>
+          <td align="center">
+            <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid rgba(201,168,76,0.35);border-radius:4px;">
+              <tr>
+                <td style="padding:18px 40px;text-align:center;">
+                  <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:9px;font-weight:700;color:${gold};letter-spacing:0.22em;text-transform:uppercase;">Premium Seller</p>
+                  <p style="margin:0 0 8px;">${goldStars(5, 18)}</p>
+                  <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:36px;font-weight:900;color:#ffffff;line-height:1;">${avgStr}</p>
+                  <p style="margin:5px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:rgba(255,255,255,0.45);">Rated Excellent by Verified Buyers</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+      <!-- Testimony panels -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;table-layout:fixed;">
+        <tr>${panels}</tr>
+      </table>
     </td>
   </tr>
-</table>`
-  return outerWrap(id, inner)
+</table>`)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -530,57 +651,82 @@ function trustScoreBanner(p: any, id: string): string {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 8. MINIMAL SERIF GRID  [PRO]
-// 2-column layout. Italic serif quote fills each column cell.
-// Zero borders, zero backgrounds — just type, hairlines, and whitespace.
-// Apple, Aesop, Glossier-level restraint. For premium and lifestyle brands.
+// Typographic manifesto — asymmetric hierarchy:
+// HERO: First review at full width, 17px italic serif, large 72px open-quote,
+//       author with 2px rule below quote text, right-aligned stars.
+// SUPPORT: Remaining 2 reviews side-by-side, numbered 02/03, 13px italic,
+//          thin rule separator, small-caps author + "Verified eBay Purchase".
+// Zero backgrounds, zero card boxes — pure typography and space.
 // ─────────────────────────────────────────────────────────────────────────────
 function minimalSerifGrid(p: any, id: string): string {
-  const bg = resolveBg(p)
-  const textCol = resolveTextColor(p)
-  const subCol = resolveSubColor(p)
-  const starCol = resolveStarColor(p)
-  const accent = resolveAccent(p)
+  const bg        = resolveBg(p)
+  const textCol   = resolveTextColor(p)
+  const subCol    = resolveSubColor(p)
+  const starCol   = resolveStarColor(p)
+  const accent    = resolveAccent(p)
   const borderCol = resolveBorder(p)
-  const reviews = resolveReviews(p)
+  const reviews   = resolveReviews(p)
 
-  // Pair reviews into rows of 2
-  const rows: ReviewItem[][] = []
-  for (let i = 0; i < reviews.length; i += 2) rows.push(reviews.slice(i, i + 2))
+  const hero   = reviews[0] ?? DEFAULT_REVIEWS[0]
+  const others = reviews.slice(1, 3)
 
-  const rowsHtml = rows.map((row, ri) => {
-    const cells = row.map((r, ci) => {
-      const quote = r.text ?? r.quote ?? ''
-      const author = r.author ?? r.name ?? 'Verified Buyer'
-      const date = r.date ?? ''
-      return `
-      <td width="50%" valign="top" style="width:50%;padding:${ri > 0 ? '20px' : '0'} ${ci === 0 ? '20px 0 0' : '0 0 0 20px'};vertical-align:top;${ci === 0 ? `border-right:1px solid ${borderCol};` : ''}box-sizing:border-box;">
-        <p style="margin:0 0 10px;font-family:Georgia,'Times New Roman',serif;font-size:14px;font-style:italic;color:${textCol};line-height:1.7;">&ldquo;${quote}&rdquo;</p>
-        <p style="margin:0 0 4px;">${stars(r.rating ?? 5, starCol, 11)}</p>
-        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};letter-spacing:0.06em;text-transform:uppercase;">${author}${date ? ` &nbsp;&#8901;&nbsp; ${date}` : ''}</p>
-      </td>`
-    }).join('')
-    // fill if odd
-    let fill = ''
-    if (row.length < 2) fill = `<td width="50%" style="width:50%;padding-left:20px;border-left:1px solid ${borderCol};"></td>`
-    return `<tr style="${ri > 0 ? `border-top:1px solid ${borderCol};` : ''}">${cells}${fill}</tr>`
+  const heroQuote  = hero.text ?? hero.quote ?? ''
+  const heroAuthor = hero.author ?? hero.name ?? 'Verified Buyer'
+  const heroDate   = hero.date ?? 'Verified eBay Purchase'
+
+  const supportCols = others.map((r, i) => {
+    const quote  = r.text ?? r.quote ?? ''
+    const author = r.author ?? r.name ?? 'Verified Buyer'
+    const date   = r.date ?? 'Verified eBay Purchase'
+    return `
+    <td width="50%" valign="top" style="width:50%;${i === 0 ? `padding-right:24px;border-right:1px solid ${borderCol};` : 'padding-left:24px;'}vertical-align:top;box-sizing:border-box;">
+      <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:${subCol};letter-spacing:0.06em;">0${i + 2}</p>
+      <p style="margin:0 0 12px;font-family:Georgia,'Times New Roman',serif;font-size:13px;font-style:italic;color:${textCol};line-height:1.75;">&ldquo;${quote}&rdquo;</p>
+      <p style="margin:0 0 5px;">${stars(r.rating ?? 5, starCol, 11)}</p>
+      <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};letter-spacing:0.04em;text-transform:uppercase;">${author} &middot; ${date}</p>
+    </td>`
   }).join('')
 
-  const inner = `
+  return outerWrap(id, `
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${bg};">
   <tr>
-    <td style="${pad(p, 24, 24, 24, 24)}box-sizing:border-box;">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:20px;">
+    <td style="${pad(p, 28, 32, 28, 32)}box-sizing:border-box;">
+      <!-- Hero review: full-width with large open-quote -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:28px;">
         <tr>
-          <td style="border-bottom:2px solid ${textCol};padding-bottom:12px;">
-            <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:16px;color:${textCol};letter-spacing:0.02em;">Customer Reviews</p>
+          <td width="52" valign="top" style="width:52px;vertical-align:top;padding-top:0;">
+            <p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:72px;line-height:0.62;color:${accent};opacity:0.35;">&ldquo;</p>
+          </td>
+          <td valign="top" style="vertical-align:top;padding-left:8px;">
+            <p style="margin:0 0 20px;font-family:Georgia,'Times New Roman',serif;font-size:17px;font-style:italic;color:${textCol};line-height:1.75;">${heroQuote}&rdquo;</p>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border-top:2px solid ${textCol};">
+              <tr>
+                <td style="padding-top:12px;vertical-align:middle;">
+                  <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:${textCol};letter-spacing:0.05em;text-transform:uppercase;">${heroAuthor}</p>
+                  <p style="margin:2px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};">${heroDate}</p>
+                </td>
+                <td align="right" style="padding-top:12px;vertical-align:middle;">
+                  <p style="margin:0;">${stars(hero.rating ?? 5, starCol, 13)}</p>
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
       </table>
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;table-layout:fixed;">${rowsHtml}</table>
+      <!-- Supporting reviews: 2-column, numbered -->
+      ${others.length > 0 ? `
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border-top:1px solid ${borderCol};">
+        <tr>
+          <td style="padding-top:22px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;table-layout:fixed;">
+              <tr>${supportCols}</tr>
+            </table>
+          </td>
+        </tr>
+      </table>` : ''}
     </td>
   </tr>
-</table>`
-  return outerWrap(id, inner)
+</table>`)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -608,11 +754,20 @@ export const REVIEWS_BLOCK_THUMBNAILS: Record<string, string> = {
   'rev-bold-quote-strip': `<svg viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="52" fill="#1e1535"/>
     <rect x="0" y="0" width="3" height="52" fill="#7530fb"/>
-    <text x="9" y="22" font-family="Georgia,serif" font-size="22" fill="#7530fb" opacity="0.5">&ldquo;</text>
-    <line x1="22" y1="14" x2="70" y2="14" stroke="rgba(255,255,255,0.7)" stroke-width="1"/>
-    <line x1="22" y1="20" x2="74" y2="20" stroke="rgba(255,255,255,0.4)" stroke-width="0.8"/>
-    <line x1="22" y1="26" x2="60" y2="26" stroke="rgba(255,255,255,0.4)" stroke-width="0.8"/>
-    <line x1="22" y1="32" x2="44" y2="32" stroke="#f59e0b" stroke-width="1"/>
+    <!-- trust bar -->
+    <rect x="0" y="0" width="80" height="10" fill="rgba(255,255,255,0.05)"/>
+    <line x1="4" y1="5" x2="32" y2="5" stroke="#f59e0b" stroke-width="1.5"/>
+    <rect x="50" y="2" width="26" height="7" rx="2" fill="rgba(22,163,74,0.3)" stroke="rgba(22,163,74,0.6)" stroke-width="0.6"/>
+    <line x1="53" y1="5.5" x2="73" y2="5.5" stroke="#4ade80" stroke-width="0.8"/>
+    <!-- quotes -->
+    <text x="5" y="21" font-family="Georgia,serif" font-size="14" fill="#7530fb" opacity="0.8">&ldquo;</text>
+    <line x1="16" y1="17" x2="72" y2="17" stroke="rgba(255,255,255,0.75)" stroke-width="0.9"/>
+    <line x1="16" y1="22" x2="68" y2="22" stroke="rgba(255,255,255,0.45)" stroke-width="0.8"/>
+    <line x1="16" y1="27" x2="55" y2="27" stroke="#f59e0b" stroke-width="0.9"/>
+    <line x1="4" y1="32" x2="76" y2="32" stroke="rgba(255,255,255,0.06)" stroke-width="0.7"/>
+    <line x1="16" y1="37" x2="70" y2="37" stroke="rgba(255,255,255,0.75)" stroke-width="0.9"/>
+    <line x1="16" y1="42" x2="60" y2="42" stroke="rgba(255,255,255,0.45)" stroke-width="0.8"/>
+    <line x1="16" y1="47" x2="50" y2="47" stroke="#f59e0b" stroke-width="0.9"/>
   </svg>`,
 
   'rev-verified-buyer-rows': `<svg viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
@@ -630,42 +785,92 @@ export const REVIEWS_BLOCK_THUMBNAILS: Record<string, string> = {
 
   'rev-magazine-editorial': `<svg viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="52" fill="#fff"/>
-    <rect x="6" y="6" width="3" height="10" fill="#7530fb"/>
-    <line x1="13" y1="10" x2="36" y2="10" stroke="#7530fb" stroke-width="0.7"/>
-    <line x1="6" y1="20" x2="74" y2="20" stroke="#e5e7eb" stroke-width="1.2"/>
-    <line x1="6" y1="27" x2="72" y2="27" stroke="#111827" stroke-width="1.3"/>
-    <line x1="6" y1="32" x2="68" y2="32" stroke="#111827" stroke-width="1.3"/>
-    <line x1="6" y1="37" x2="58" y2="37" stroke="#6b7280" stroke-width="0.8"/>
-    <line x1="6" y1="42" x2="38" y2="42" stroke="#f59e0b" stroke-width="0.9"/>
-    <line x1="6" y1="47" x2="52" y2="47" stroke="#6b7280" stroke-width="0.7"/>
+    <!-- masthead thick rule -->
+    <rect x="5" y="5" width="70" height="2.5" fill="#111827"/>
+    <!-- masthead text + badge -->
+    <line x1="5" y1="13" x2="42" y2="13" stroke="#111827" stroke-width="1.1"/>
+    <rect x="54" y="9" width="20" height="7" rx="2" fill="#7530fb"/>
+    <!-- divider -->
+    <line x1="5" y1="19" x2="75" y2="19" stroke="#e5e7eb" stroke-width="0.8"/>
+    <!-- 3 editorial columns with vertical dividers -->
+    <line x1="31" y1="22" x2="31" y2="50" stroke="#e5e7eb" stroke-width="0.7"/>
+    <line x1="56" y1="22" x2="56" y2="50" stroke="#e5e7eb" stroke-width="0.7"/>
+    <!-- col 1 -->
+    <line x1="7" y1="24" x2="12" y2="24" stroke="#d1d5db" stroke-width="1.5"/>
+    <line x1="7" y1="29" x2="27" y2="29" stroke="#111827" stroke-width="0.9"/>
+    <line x1="7" y1="33" x2="25" y2="33" stroke="#6b7280" stroke-width="0.7"/>
+    <rect x="7" y="42" width="18" height="5" rx="1.5" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="0.5"/>
+    <!-- col 2 -->
+    <line x1="34" y1="24" x2="39" y2="24" stroke="#d1d5db" stroke-width="1.5"/>
+    <line x1="34" y1="29" x2="52" y2="29" stroke="#111827" stroke-width="0.9"/>
+    <line x1="34" y1="33" x2="50" y2="33" stroke="#6b7280" stroke-width="0.7"/>
+    <rect x="34" y="42" width="18" height="5" rx="1.5" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="0.5"/>
+    <!-- col 3 -->
+    <line x1="59" y1="24" x2="64" y2="24" stroke="#d1d5db" stroke-width="1.5"/>
+    <line x1="59" y1="29" x2="76" y2="29" stroke="#111827" stroke-width="0.9"/>
+    <line x1="59" y1="33" x2="74" y2="33" stroke="#6b7280" stroke-width="0.7"/>
+    <rect x="59" y="42" width="18" height="5" rx="1.5" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="0.5"/>
   </svg>`,
 
   'rev-avatar-rating-cards': `<svg viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="52" fill="#f9fafb"/>
-    <rect x="6" y="5" width="68" height="20" rx="4" fill="#fff" stroke="#e5e7eb" stroke-width="0.8"/>
-    <circle cx="16" cy="15" r="6" fill="#7530fb"/>
-    <line x1="26" y1="11" x2="46" y2="11" stroke="#111827" stroke-width="1.2"/>
-    <line x1="26" y1="15" x2="42" y2="15" stroke="#f59e0b" stroke-width="1"/>
-    <line x1="26" y1="19" x2="38" y2="19" stroke="#6b7280" stroke-width="0.7"/>
-    <line x1="10" y1="25" x2="70" y2="25" stroke="#e5e7eb" stroke-width="0.8"/>
-    <rect x="6" y="29" width="68" height="18" rx="4" fill="#fff" stroke="#e5e7eb" stroke-width="0.8"/>
-    <circle cx="16" cy="38" r="6" fill="#7530fb"/>
-    <line x1="26" y1="34" x2="44" y2="34" stroke="#111827" stroke-width="1.2"/>
-    <line x1="26" y1="38" x2="40" y2="38" stroke="#f59e0b" stroke-width="1"/>
-    <line x1="26" y1="42" x2="62" y2="42" stroke="#6b7280" stroke-width="0.7"/>
+    <!-- metrics dashboard row -->
+    <rect x="5" y="4" width="70" height="14" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width="0.7"/>
+    <line x1="22" y1="6" x2="22" y2="16" stroke="#e5e7eb" stroke-width="0.6"/>
+    <line x1="40" y1="6" x2="40" y2="16" stroke="#e5e7eb" stroke-width="0.6"/>
+    <line x1="58" y1="6" x2="58" y2="16" stroke="#e5e7eb" stroke-width="0.6"/>
+    <line x1="8" y1="10" x2="19" y2="10" stroke="#111827" stroke-width="1.4"/>
+    <line x1="8" y1="14" x2="16" y2="14" stroke="#6b7280" stroke-width="0.6"/>
+    <line x1="25" y1="10" x2="36" y2="10" stroke="#16a34a" stroke-width="1.4"/>
+    <line x1="25" y1="14" x2="33" y2="14" stroke="#6b7280" stroke-width="0.6"/>
+    <line x1="43" y1="10" x2="54" y2="10" stroke="#7530fb" stroke-width="1.4"/>
+    <line x1="43" y1="14" x2="51" y2="14" stroke="#6b7280" stroke-width="0.6"/>
+    <line x1="61" y1="10" x2="72" y2="10" stroke="#d97706" stroke-width="1.4"/>
+    <line x1="61" y1="14" x2="69" y2="14" stroke="#6b7280" stroke-width="0.6"/>
+    <!-- 3 DSR cards -->
+    <rect x="5" y="21" width="21" height="28" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width="0.7"/>
+    <rect x="5" y="21" width="21" height="5" rx="3" fill="#f0fdf4"/>
+    <circle cx="13" cy="33" r="4" fill="#7530fb"/>
+    <line x1="19" y1="31" x2="25" y2="31" stroke="#111827" stroke-width="0.7"/>
+    <line x1="8" y1="41" x2="24" y2="41" stroke="#e5e7eb" stroke-width="0.5"/>
+    <line x1="8" y1="44" x2="22" y2="44" stroke="#6b7280" stroke-width="0.5"/>
+    <rect x="30" y="21" width="21" height="28" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width="0.7"/>
+    <rect x="30" y="21" width="21" height="5" rx="3" fill="#f0fdf4"/>
+    <circle cx="38" cy="33" r="4" fill="#7530fb"/>
+    <line x1="44" y1="31" x2="49" y2="31" stroke="#111827" stroke-width="0.7"/>
+    <line x1="33" y1="41" x2="49" y2="41" stroke="#e5e7eb" stroke-width="0.5"/>
+    <line x1="33" y1="44" x2="47" y2="44" stroke="#6b7280" stroke-width="0.5"/>
+    <rect x="55" y="21" width="21" height="28" rx="3" fill="#fff" stroke="#e5e7eb" stroke-width="0.7"/>
+    <rect x="55" y="21" width="21" height="5" rx="3" fill="#f0fdf4"/>
+    <circle cx="63" cy="33" r="4" fill="#7530fb"/>
+    <line x1="69" y1="31" x2="74" y2="31" stroke="#111827" stroke-width="0.7"/>
+    <line x1="58" y1="41" x2="74" y2="41" stroke="#e5e7eb" stroke-width="0.5"/>
+    <line x1="58" y1="44" x2="72" y2="44" stroke="#6b7280" stroke-width="0.5"/>
   </svg>`,
 
   'rev-dark-luxury': `<svg viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
-    <rect width="80" height="52" fill="#111827"/>
-    <rect x="0" y="0" width="80" height="2" fill="#d4af37"/>
-    <line x1="6" y1="10" x2="30" y2="10" stroke="#d4af37" stroke-width="0.7"/>
-    <line x1="6" y1="16" x2="72" y2="16" stroke="rgba(255,255,255,0.7)" stroke-width="1"/>
-    <line x1="6" y1="21" x2="65" y2="21" stroke="rgba(255,255,255,0.4)" stroke-width="0.8"/>
-    <line x1="6" y1="26" x2="48" y2="26" stroke="#d4af37" stroke-width="0.8"/>
-    <line x1="6" y1="31" x2="74" y2="31" stroke="rgba(212,175,55,0.25)" stroke-width="0.8"/>
-    <line x1="6" y1="37" x2="70" y2="37" stroke="rgba(255,255,255,0.7)" stroke-width="1"/>
-    <line x1="6" y1="42" x2="58" y2="42" stroke="rgba(255,255,255,0.4)" stroke-width="0.8"/>
-    <line x1="6" y1="47" x2="44" y2="47" stroke="#d4af37" stroke-width="0.8"/>
+    <rect width="80" height="52" fill="#0d1117"/>
+    <!-- centered award badge -->
+    <rect x="20" y="4" width="40" height="18" rx="2" fill="none" stroke="rgba(201,168,76,0.4)" stroke-width="0.8"/>
+    <line x1="28" y1="9" x2="52" y2="9" stroke="#c9a84c" stroke-width="0.7"/>
+    <line x1="30" y1="13" x2="50" y2="13" stroke="#c9a84c" stroke-width="1.5"/>
+    <line x1="32" y1="17" x2="48" y2="17" stroke="rgba(255,255,255,0.35)" stroke-width="0.7"/>
+    <!-- 3 dark panels with gold top border -->
+    <rect x="4" y="26" width="21" height="22" rx="2" fill="rgba(255,255,255,0.04)" stroke="rgba(201,168,76,0.2)" stroke-width="0.6"/>
+    <rect x="4" y="26" width="21" height="2" fill="#c9a84c"/>
+    <line x1="7" y1="32" x2="22" y2="32" stroke="rgba(255,255,255,0.6)" stroke-width="0.8"/>
+    <line x1="7" y1="36" x2="21" y2="36" stroke="rgba(255,255,255,0.4)" stroke-width="0.7"/>
+    <line x1="7" y1="40" x2="18" y2="40" stroke="#c9a84c" stroke-width="0.8"/>
+    <rect x="29" y="26" width="21" height="22" rx="2" fill="rgba(255,255,255,0.04)" stroke="rgba(201,168,76,0.2)" stroke-width="0.6"/>
+    <rect x="29" y="26" width="21" height="2" fill="#c9a84c"/>
+    <line x1="32" y1="32" x2="47" y2="32" stroke="rgba(255,255,255,0.6)" stroke-width="0.8"/>
+    <line x1="32" y1="36" x2="46" y2="36" stroke="rgba(255,255,255,0.4)" stroke-width="0.7"/>
+    <line x1="32" y1="40" x2="43" y2="40" stroke="#c9a84c" stroke-width="0.8"/>
+    <rect x="54" y="26" width="21" height="22" rx="2" fill="rgba(255,255,255,0.04)" stroke="rgba(201,168,76,0.2)" stroke-width="0.6"/>
+    <rect x="54" y="26" width="21" height="2" fill="#c9a84c"/>
+    <line x1="57" y1="32" x2="72" y2="32" stroke="rgba(255,255,255,0.6)" stroke-width="0.8"/>
+    <line x1="57" y1="36" x2="71" y2="36" stroke="rgba(255,255,255,0.4)" stroke-width="0.7"/>
+    <line x1="57" y1="40" x2="68" y2="40" stroke="#c9a84c" stroke-width="0.8"/>
   </svg>`,
 
   'rev-trust-score-banner': `<svg viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
@@ -686,18 +891,25 @@ export const REVIEWS_BLOCK_THUMBNAILS: Record<string, string> = {
 
   'rev-minimal-serif-grid': `<svg viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="52" fill="#fff"/>
-    <line x1="6" y1="11" x2="74" y2="11" stroke="#111827" stroke-width="1.5"/>
-    <line x1="40" y1="16" x2="40" y2="48" stroke="#e5e7eb" stroke-width="0.8"/>
-    <line x1="8" y1="18" x2="36" y2="18" stroke="#111827" stroke-width="1"/>
-    <line x1="8" y1="23" x2="34" y2="23" stroke="#6b7280" stroke-width="0.8"/>
-    <line x1="8" y1="28" x2="30" y2="28" stroke="#6b7280" stroke-width="0.8"/>
-    <line x1="8" y1="33" x2="26" y2="33" stroke="#f59e0b" stroke-width="0.9"/>
-    <line x1="8" y1="37" x2="30" y2="37" stroke="#6b7280" stroke-width="0.7"/>
-    <line x1="44" y1="18" x2="72" y2="18" stroke="#111827" stroke-width="1"/>
-    <line x1="44" y1="23" x2="70" y2="23" stroke="#6b7280" stroke-width="0.8"/>
-    <line x1="44" y1="28" x2="66" y2="28" stroke="#6b7280" stroke-width="0.8"/>
-    <line x1="44" y1="33" x2="62" y2="33" stroke="#f59e0b" stroke-width="0.9"/>
-    <line x1="44" y1="37" x2="68" y2="37" stroke="#6b7280" stroke-width="0.7"/>
+    <!-- hero: large open-quote + serif text -->
+    <text x="5" y="18" font-family="Georgia,serif" font-size="18" fill="#7530fb" opacity="0.3">&ldquo;</text>
+    <line x1="16" y1="12" x2="74" y2="12" stroke="#111827" stroke-width="1.1"/>
+    <line x1="16" y1="17" x2="72" y2="17" stroke="#111827" stroke-width="1.1"/>
+    <line x1="16" y1="22" x2="60" y2="22" stroke="#6b7280" stroke-width="0.8"/>
+    <!-- hero author rule + name -->
+    <line x1="16" y1="27" x2="74" y2="27" stroke="#111827" stroke-width="1.4"/>
+    <line x1="16" y1="31" x2="38" y2="31" stroke="#111827" stroke-width="0.9"/>
+    <line x1="50" y1="30" x2="66" y2="30" stroke="#f59e0b" stroke-width="0.9"/>
+    <!-- horizontal separator -->
+    <line x1="6" y1="36" x2="74" y2="36" stroke="#e5e7eb" stroke-width="0.8"/>
+    <!-- 2 support cols -->
+    <line x1="40" y1="38" x2="40" y2="52" stroke="#e5e7eb" stroke-width="0.7"/>
+    <line x1="7" y1="39" x2="10" y2="39" stroke="#d1d5db" stroke-width="1.2"/>
+    <line x1="7" y1="43" x2="36" y2="43" stroke="#6b7280" stroke-width="0.7"/>
+    <line x1="7" y1="47" x2="34" y2="47" stroke="#6b7280" stroke-width="0.7"/>
+    <line x1="43" y1="39" x2="46" y2="39" stroke="#d1d5db" stroke-width="1.2"/>
+    <line x1="43" y1="43" x2="72" y2="43" stroke="#6b7280" stroke-width="0.7"/>
+    <line x1="43" y1="47" x2="68" y2="47" stroke="#6b7280" stroke-width="0.7"/>
   </svg>`,
 
   'rev-trustpilot-showcase': `<svg viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
@@ -865,7 +1077,7 @@ export const reviewsBlockVariants: BlockVariant[] = [
   {
     id: 'rev-bold-quote-strip',
     label: 'Bold Quote Strip',
-    description: 'Full-width dark background with large quote marks and white text. Stops the eye.',
+    description: 'Dark panel with trust bar (5-star rating + Positive Feedback %) and 3 serif buyer quotes. Stops the eye.',
     thumbnail: REVIEWS_BLOCK_THUMBNAILS['rev-bold-quote-strip'],
     toHtml(props, id) { return boldQuoteStrip(props, id) },
   },
@@ -879,21 +1091,21 @@ export const reviewsBlockVariants: BlockVariant[] = [
   {
     id: 'rev-magazine-editorial',
     label: 'Magazine Editorial',
-    description: 'PRO — Huge italic serif quotes fill the full width. Editorial magazine style.',
+    description: 'PRO — Broadsheet newspaper masthead + 3 numbered editorial columns with "POSITIVE FEEDBACK" badges and feedback count footer.',
     thumbnail: REVIEWS_BLOCK_THUMBNAILS['rev-magazine-editorial'],
     toHtml(props, id) { return magazineEditorial(props, id) },
   },
   {
     id: 'rev-avatar-rating-cards',
     label: 'Avatar Rating Cards',
-    description: 'PRO — Initials circle avatar with name, stars and quote. Trustpilot / Google Reviews feel.',
+    description: 'PRO — eBay Seller Scoreboard: metrics dashboard (Feedback Score, Positive %, Items Sold, Status) + 3 cards with DSR ratings.',
     thumbnail: REVIEWS_BLOCK_THUMBNAILS['rev-avatar-rating-cards'],
     toHtml(props, id) { return avatarRatingCards(props, id) },
   },
   {
     id: 'rev-dark-luxury',
     label: 'Dark Luxury',
-    description: 'PRO — Deep charcoal background, gold stars and divider lines. Premium brand aesthetic.',
+    description: 'PRO — Theatrical dark layout: centered gold award panel + average score + 3 dark testimony panels with gold top borders.',
     thumbnail: REVIEWS_BLOCK_THUMBNAILS['rev-dark-luxury'],
     toHtml(props, id) { return darkLuxury(props, id) },
   },
@@ -907,7 +1119,7 @@ export const reviewsBlockVariants: BlockVariant[] = [
   {
     id: 'rev-minimal-serif-grid',
     label: 'Minimal Serif Grid',
-    description: 'PRO — 2-column italic serif layout. No borders, just hairlines and whitespace. Apple-level restraint.',
+    description: 'PRO — Typographic hierarchy: hero review at 17px italic serif with large open-quote, then 2 numbered support reviews side-by-side.',
     thumbnail: REVIEWS_BLOCK_THUMBNAILS['rev-minimal-serif-grid'],
     toHtml(props, id) { return minimalSerifGrid(props, id) },
   },
