@@ -32,18 +32,21 @@ export const customerReviewsBlock = {
                 author: 'Sarah M.',
                 rating: 5,
                 date: 'Verified eBay Purchase',
+                link: '',
             },
             {
                 text: 'Great quality for the price. Seller answered my question within the hour. Highly recommend.',
                 author: 'James T.',
                 rating: 5,
                 date: 'Verified eBay Purchase',
+                link: '',
             },
             {
                 text: 'Item was in perfect condition. Fast dispatch, well packaged. A+ seller — saved to favourites.',
                 author: 'Linda R.',
                 rating: 5,
                 date: 'Verified eBay Purchase',
+                link: '',
             },
         ],
         textColor: '#111827',
@@ -51,6 +54,18 @@ export const customerReviewsBlock = {
         starColor: '#f59e0b',
         accentColor: '#7530fb',
         borderColor: '#e5e7eb',
+        // Review Dashboard (rev-magazine-editorial) props
+        overallRating: '4.0',
+        totalRatings: '38,000',
+        helpfulVotes: '24',
+        viewFullReviewUrl: '',
+        // Dark Luxury / Analytics Dashboard (rev-dark-luxury) props
+        sectionTitle: 'Reviews',
+        dateRange: 'January 2023 – December 2023',
+        totalReviews: '2.8K',
+        reviewGrowth: '+21%',
+        // Shared: rating breakdown counts [5★ → 1★]
+        ratingCounts: [14000, 8000, 4000, 800, 3000],
     } as unknown as BlockProps,
     toHtml(props: BlockProps, id: string) {
         const p = props as any

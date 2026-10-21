@@ -40,6 +40,7 @@ export interface ReviewItem {
   rating?: number
   date?: string
   location?: string
+  link?: string  // eBay feedback/review URL — buyer name becomes a clickable link
 }
 
 // ── Default Reviews ───────────────────────────────────────────────────────────
@@ -147,7 +148,10 @@ function starCards(p: any, id: string): string {
           </tr>
           <tr>
             <td style="padding:0 14px 14px;">
-              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:${accent};">&#8212; ${author}</p>
+              ${r.link
+                ? `<a href="${r.link}" style="display:inline;margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:${accent};text-decoration:none;">&#8212; ${author}</a>`
+                : `<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:${accent};">&#8212; ${author}</p>`
+              }
               <p style="margin:2px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};">${date}</p>
             </td>
           </tr>
@@ -209,7 +213,10 @@ function boldQuoteStrip(p: any, id: string): string {
                 <p style="margin:0;">${stars(r.rating ?? 5, starCol, 11)}</p>
               </td>
               <td style="vertical-align:middle;">
-                <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:#ffffff;">&#8212; ${author}&nbsp;<span style="font-weight:400;color:rgba(255,255,255,0.45);">&middot; ${date}</span></p>
+                ${r.link
+                  ? `<a href="${r.link}" style="display:inline;margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:#ffffff;text-decoration:none;">&#8212; ${author}</a><span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:400;color:rgba(255,255,255,0.45);">&nbsp;&middot; ${date}</span>`
+                  : `<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:#ffffff;">&#8212; ${author}&nbsp;<span style="font-weight:400;color:rgba(255,255,255,0.45);">&middot; ${date}</span></p>`
+                }
               </td>
             </tr>
           </table>
@@ -296,7 +303,10 @@ function verifiedBuyerRows(p: any, id: string): string {
             <td style="vertical-align:top;">
               <p style="margin:0 0 3px;">${stars(r.rating ?? 5, starCol, 13)}</p>
               <p style="margin:0 0 5px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${textCol};line-height:1.6;">&ldquo;${quote}&rdquo;</p>
-              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:${textCol};">${author}${date ? `<span style="font-weight:400;color:${subCol};margin-left:6px;">&#8901; ${date}</span>` : ''}</p>
+              ${r.link
+                ? `<a href="${r.link}" style="display:inline;margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:${textCol};text-decoration:none;">${author}</a>${date ? `<span style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:400;color:${subCol};margin-left:6px;">&#8901; ${date}</span>` : ''}`
+                : `<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:${textCol};">${author}${date ? `<span style="font-weight:400;color:${subCol};margin-left:6px;">&#8901; ${date}</span>` : ''}</p>`
+              }
             </td>
           </tr>
         </table>
@@ -341,9 +351,10 @@ function magazineEditorial(p: any, id: string): string {
   const borderCol = resolveBorder(p)
   const reviews   = resolveReviews(p)
 
-  const overallRating = p.overallRating ?? '4.0'
-  const totalRatings  = p.totalRatings  ?? '38,000'
-  const helpfulVotes  = p.helpfulVotes  ?? '24'
+  const overallRating    = p.overallRating    ?? '4.0'
+  const totalRatings     = p.totalRatings     ?? '38,000'
+  const helpfulVotes     = p.helpfulVotes     ?? '24'
+  const viewFullReviewUrl = p.viewFullReviewUrl ?? ''
 
   // Rating breakdown counts [5★ … 1★]
   const ratingCounts: number[] = p.ratingCounts ?? [14000, 8000, 4000, 800, 3000]
@@ -401,6 +412,10 @@ function magazineEditorial(p: any, id: string): string {
     const selStyle = i === 0
       ? `border-left:3px solid ${accent};padding-left:11px;`
       : `padding-left:14px;`
+    // Buyer name links to their eBay review if link is provided
+    const nameHtml = r.link
+      ? `<a href="${r.link}" style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:${accent};text-decoration:none;line-height:1.2;">${name}</a>`
+      : `<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:${textCol};line-height:1.2;">${name}</p>`
 
     return `
     <tr>
@@ -420,7 +435,7 @@ function magazineEditorial(p: any, id: string): string {
               <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:3px;">
                 <tr>
                   <td valign="middle">
-                    <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:${textCol};line-height:1.2;">${name}</p>
+                    ${nameHtml}
                   </td>
                   <td align="right" valign="middle" style="padding-left:6px;white-space:nowrap;">
                     <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${accent};border-radius:4px;">
@@ -489,7 +504,10 @@ function magazineEditorial(p: any, id: string): string {
                         <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:4px;">
                           <tr>
                             <td style="padding-right:6px;">
-                              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:${textCol};">${featName}</p>
+                              ${feat?.link
+                                ? `<a href="${feat.link}" style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:${accent};text-decoration:none;">${featName}</a>`
+                                : `<p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:${textCol};">${featName}</p>`
+                              }
                             </td>
                             <td>
                               <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${accent};border-radius:5px;">
@@ -533,8 +551,20 @@ function magazineEditorial(p: any, id: string): string {
                     </tr>
                   </table>
 
-                  <!-- Decorative buttons (no href / onclick — 100% eBay safe) -->
-                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:7px;">
+                  <!-- View Full Review button — links to eBay review URL if seller added one -->
+                  ${viewFullReviewUrl
+                    ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:7px;">
+                    <tr><td>
+                      <a href="${viewFullReviewUrl}" style="display:block;text-decoration:none;">
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${accent};border-radius:7px;">
+                          <tr><td align="center" style="padding:9px 14px;text-align:center;">
+                            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:#ffffff;">View Full Review</p>
+                          </td></tr>
+                        </table>
+                      </a>
+                    </td></tr>
+                  </table>`
+                    : `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:7px;">
                     <tr><td>
                       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${accent};border-radius:7px;">
                         <tr><td align="center" style="padding:9px 14px;text-align:center;">
@@ -542,16 +572,8 @@ function magazineEditorial(p: any, id: string): string {
                         </td></tr>
                       </table>
                     </td></tr>
-                  </table>
-                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
-                    <tr><td>
-                      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid ${borderCol};border-radius:7px;">
-                        <tr><td align="center" style="padding:8px 14px;text-align:center;">
-                          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:${textCol};">Contact Customer</p>
-                        </td></tr>
-                      </table>
-                    </td></tr>
-                  </table>
+                  </table>`
+                  }
 
                 </td>
               </tr>
@@ -771,8 +793,11 @@ function darkLuxury(p: any, id: string): string {
         </td>
         <!-- Review body — takes remaining width, wraps naturally on mobile -->
         <td valign="top" style="vertical-align:top;padding-left:14px;">
-          <!-- Name bold -->
-          <p style="margin:0 0 3px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${textCol};line-height:1.3;">${name}</p>
+          <!-- Name bold — links to eBay review if seller added a URL -->
+          ${r.link
+            ? `<a href="${r.link}" style="display:inline;margin:0 0 3px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${accent};text-decoration:none;line-height:1.3;">${name}</a>`
+            : `<p style="margin:0 0 3px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${textCol};line-height:1.3;">${name}</p>`
+          }
           <!-- Spend + Review count on one line, separated by bullet -->
           <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:${subCol};">Total Spend: ${spend}&nbsp;&nbsp;·&nbsp;&nbsp;Total Review: ${revCount}</p>
           <!-- Stars + date on same line (stars left, date right) using a simple inline layout -->
