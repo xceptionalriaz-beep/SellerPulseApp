@@ -2100,7 +2100,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
     {
         type: 'features',
         label: 'Features Bar',
-        category: 'Media',
+        category: 'Content',
         icon: 'grid-2x2',
         description: 'Icon-based feature highlights — 10 layout styles',
         defaultProps: {
@@ -2183,7 +2183,7 @@ ${thumbCells}
     {
         type: 'trust_badges',
         label: 'Trust Badges Row',
-        category: 'eBay Specific',
+        category: 'Content',
         icon: 'shield-check',
         description: 'eBay trust badges — authentic, shipping, returns, seller rating',
         defaultProps: {
@@ -2213,7 +2213,7 @@ ${thumbCells}
     {
         type: 'shipping_info',
         label: 'Shipping Info Bar',
-        category: 'eBay Specific',
+        category: 'Content',
         icon: 'truck',
         description: 'Fast dispatch and delivery guarantees — 10 layout styles',
         defaultProps: {
@@ -2241,7 +2241,7 @@ ${thumbCells}
     {
         type: 'returns_policy',
         label: 'Returns Policy',
-        category: 'eBay Specific',
+        category: 'Content',
         icon: 'rotate-ccw',
         description: 'White card with Lucide rotate-ccw icon + blue accent stripe',
         defaultProps: {
@@ -2293,7 +2293,7 @@ ${thumbCells}
     {
         type: 'seller_info',
         label: 'Seller Info',
-        category: 'eBay Specific',
+        category: 'Content',
         icon: 'user',
         description: 'Seller name, tagline and feedback score',
         defaultProps: {
@@ -2317,7 +2317,7 @@ ${thumbCells}
     {
         type: 'cta_banner',
         label: 'CTA Banner',
-        category: 'eBay Specific',
+        category: 'Content',
         icon: 'bell',
         description: 'Call-to-action banner — end of listing',
         defaultProps: {
@@ -2350,7 +2350,7 @@ ${thumbCells}
     {
         type: 'policy_tabs',
         label: 'Policy Tabs',
-        category: 'Conversion',
+        category: 'Content',
         icon: 'panel-top',
         description: 'Shipping / Returns / Payment / Warranty tabs',
         defaultProps: {
@@ -2383,7 +2383,7 @@ ${thumbCells}
     {
         type: 'nav_bar',
         label: 'Navigation Bar',
-        category: 'Conversion',
+        category: 'Content',
         icon: 'navigation',
         description: 'Store category links row',
         defaultProps: {
@@ -2417,7 +2417,7 @@ ${thumbCells}
     {
         type: 'urgency_bar',
         label: 'Urgency Stock Bar',
-        category: 'Conversion',
+        category: 'Content',
         icon: 'flame',
         description: 'Low stock / urgency callout banner — 10 layout styles',
         defaultProps: {
@@ -2502,7 +2502,7 @@ ${thumbCells}
     {
         type: 'button_block',
         label: 'Button',
-        category: 'Conversion',
+        category: 'Content',
         icon: 'mouse-pointer-click',
         description: 'CTA button — Buy Now, Ask Question, Visit Store',
         defaultProps: {
@@ -2558,7 +2558,7 @@ ${thumbCells}
     {
         type: 'hero_header',
         label: 'Hero Header',
-        category: 'Conversion',
+        category: 'Content',
         icon: 'layout-panel-top',
         description: 'Store logo, name and tagline banner',
         defaultProps: {
@@ -2596,7 +2596,7 @@ ${thumbCells}
     {
         type: 'raw_html',
         label: 'Raw HTML',
-        category: 'Conversion',
+        category: 'Content',
         icon: 'code-2',
         description: 'Paste custom HTML code directly',
         defaultProps: {
@@ -3335,7 +3335,7 @@ ${thumbCells}
         {
             type: 'payment_methods' as BlockType,
             label: 'Payment Methods',
-            category: 'eBay Specific' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'credit-card',
             description: 'PayPal, Visa, Mastercard accepted icons',
             defaultProps: { ...DEFAULT_COMMON, bgColor: '#f8f7ff' } as unknown as BlockProps,
@@ -3351,7 +3351,7 @@ ${thumbCells}
         {
             type: 'dispatch_timer' as BlockType,
             label: 'Dispatch Timer',
-            category: 'eBay Specific' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'clock',
             description: 'Order today for same day dispatch notice',
             defaultProps: { ...DEFAULT_COMMON, bgColor: '#f0fdf4' } as unknown as BlockProps,
@@ -3365,7 +3365,7 @@ ${thumbCells}
         {
             type: 'bundle_deal' as BlockType,
             label: 'Bundle Deal',
-            category: 'eBay Specific' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'gift',
             description: 'Buy more save more offer block',
             defaultProps: {
@@ -3403,7 +3403,7 @@ ${thumbCells}
         {
             type: 'feedback_score' as BlockType,
             label: 'Feedback Score',
-            category: 'eBay Specific' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'star',
             description: 'Seller rating display and verified reputation — 10 layout styles',
             defaultProps: {
@@ -3430,7 +3430,7 @@ ${thumbCells}
         {
             type: 'vat_notice' as BlockType,
             label: 'VAT Notice',
-            category: 'eBay Specific' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'file',
             description: 'VAT registered seller invoice notice — 10 layout styles',
             defaultProps: {
@@ -3460,7 +3460,7 @@ ${thumbCells}
         {
             type: 'international_shipping' as BlockType,
             label: 'International Shipping',
-            category: 'eBay Specific' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'globe',
             description: 'Customs and import duty warning notice — 10 layout styles',
             defaultProps: {
@@ -3489,7 +3489,7 @@ ${thumbCells}
         {
             type: 'authenticity_guarantee' as BlockType,
             label: 'Authenticity Guarantee',
-            category: 'eBay Specific' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'shield',
             description: 'Genuine product certificate and verified authenticity banner — 10 layout styles',
             defaultProps: {
@@ -3520,7 +3520,7 @@ ${thumbCells}
         {
             type: 'condition_badge' as BlockType,
             label: 'Condition Badge',
-            category: 'eBay Specific' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'tag',
             description: 'Item condition and inspection verification badge — 10 layout styles',
             defaultProps: {
@@ -3547,7 +3547,7 @@ ${thumbCells}
         {
             type: 'item_specifics' as BlockType,
             label: 'Item Specifics',
-            category: 'eBay Specific' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'list',
             description: 'Item specifics and technical specification table — 10 layout styles',
             defaultProps: {
@@ -3584,7 +3584,7 @@ ${thumbCells}
         {
             type: 'money_back' as BlockType,
             label: 'Money Back Guarantee',
-            category: 'Conversion' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'shield',
             description: '30-day money back guarantee badge block — 10 layout styles',
             defaultProps: {
@@ -3650,7 +3650,7 @@ ${thumbCells}
         {
             type: 'why_buy_from_us' as BlockType,
             label: 'Why Buy From Us',
-            category: 'Conversion' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'star',
             description: 'Highlight your unique selling points — 10 layout styles',
             defaultProps: {
@@ -3697,7 +3697,7 @@ ${thumbCells}
         {
             type: 'satisfaction_guarantee' as BlockType,
             label: 'Satisfaction Guarantee',
-            category: 'Conversion' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'star',
             description: 'Buyer trust and satisfaction pledge banner — 10 layout styles',
             defaultProps: {
@@ -3724,7 +3724,7 @@ ${thumbCells}
         {
             type: 'limited_time_offer' as BlockType,
             label: 'Limited Time Offer',
-            category: 'Conversion' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'clock',
             description: 'Urgent promotional and flash sale banner — 10 layout styles',
             defaultProps: {
@@ -3755,7 +3755,7 @@ ${thumbCells}
         {
             type: 'store_header' as BlockType,
             label: 'Store Header',
-            category: 'Header & Footer' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'store',
             description: 'Logo, store name and tagline banner — 10 layout styles',
             defaultProps: {
@@ -3778,7 +3778,7 @@ ${thumbCells}
         {
             type: 'seasonal_banner' as BlockType,
             label: 'Seasonal Banner',
-            category: 'Header & Footer' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'star',
             description: 'Seasonal sale themed header banner — 10 layout styles',
             defaultProps: {
@@ -3823,7 +3823,7 @@ ${thumbCells}
         {
             type: 'store_footer' as BlockType,
             label: 'Store Footer',
-            category: 'Header & Footer' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'layout',
             description: 'Footer block with links and copyright',
             defaultProps: {
@@ -3872,7 +3872,7 @@ ${thumbCells}
         {
             type: 'breadcrumb_bar' as BlockType,
             label: 'Breadcrumb Bar',
-            category: 'Header & Footer' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'chevron-right',
             description: 'Store > Category > Item navigation bar — 10 layout styles',
             defaultProps: {
@@ -3904,7 +3904,7 @@ ${thumbCells}
         {
             type: 'page_title' as BlockType,
             label: 'Page Title',
-            category: 'Typography' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'type',
             description: 'Large H1 with decorative underline',
             defaultProps: {
@@ -3936,7 +3936,7 @@ ${thumbCells}
         {
             type: 'section_label' as BlockType,
             label: 'Section Label',
-            category: 'Typography' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'type',
             description: 'Small uppercase category label with accent — 10 layout styles',
             defaultProps: {
@@ -3963,7 +3963,7 @@ ${thumbCells}
         {
             type: 'pull_quote' as BlockType,
             label: 'Pull Quote',
-            category: 'Typography' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'quote',
             description: 'Highlighted quotation, merchant statement or customer voice — 10 layout styles',
             defaultProps: {
@@ -3991,7 +3991,7 @@ ${thumbCells}
         {
             type: 'highlight_text' as BlockType,
             label: 'Highlight Text',
-            category: 'Typography' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'type',
             description: 'Coloured background text callout — 10 layout styles',
             defaultProps: {
@@ -4016,7 +4016,7 @@ ${thumbCells}
         {
             type: 'price_tag' as BlockType,
             label: 'Price Tag',
-            category: 'Typography' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'tag',
             description: 'Decorative was/now price display — 10 layout styles',
             defaultProps: {
@@ -4115,7 +4115,7 @@ ${thumbCells}
         {
             type: 'variation_builder' as BlockType,
             label: 'Variation Builder',
-            category: 'eBay Specific' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'grid',
             description: 'Visual grid showing available Size/Colour combinations',
             defaultProps: {
@@ -4190,7 +4190,7 @@ ${thumbCells}
         {
             type: 'shipping_rate_table' as BlockType,
             label: 'Shipping Rate Table',
-            category: 'eBay Specific' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'truck',
             description: 'Shipping costs by destination and service with delivery times',
             defaultProps: {
@@ -4263,7 +4263,7 @@ ${thumbCells}
         {
             type: 'size_guide' as BlockType,
             label: 'Size Guide',
-            category: 'eBay Specific' as BlockCategory,
+            category: 'Content' as BlockCategory,
             icon: 'ruler',
             description: 'Clothing size chart with UK/US/EU columns and measurements',
             defaultProps: {
@@ -4338,7 +4338,7 @@ ${thumbCells}
         {
             type: 'competitor_comparison' as BlockType,
             label: 'Competitor Comparison',
-            category: 'Conversion',
+            category: 'Content',
             icon: 'table-2',
             description: '"Why buy from us vs others" conversion table',
             defaultProps: {
