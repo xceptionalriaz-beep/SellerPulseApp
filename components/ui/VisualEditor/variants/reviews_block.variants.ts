@@ -15,7 +15,7 @@
 //   2. rev-bold-quote-strip      — Dark panel + trust bar (feedback %) + 3 serif quotes
 //   3. rev-verified-buyer-rows   — Horizontal rows, green verified badge, initials avatar
 //   PRO:
-//   4. rev-magazine-editorial    — Broadsheet masthead + 3 numbered editorial columns + footer
+//   4. rev-magazine-editorial    — Rating stats card + featured review detail + stacked review list
 //   5. rev-avatar-rating-cards   — eBay scoreboard metrics + 3 cards with DSR ratings
 //   6. rev-dark-luxury           — Analytics stats (Total Reviews, Avg Rating, bar chart) + stacked reviewer rows
 //   7. rev-trust-score-banner    — Big 4.9★ hero rating left, reviews stacked right
@@ -323,87 +323,256 @@ function verifiedBuyerRows(p: any, id: string): string {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 4. MAGAZINE EDITORIAL  [PRO]
-// Broadsheet newspaper layout. Bold uppercase masthead with "CUSTOMER FEEDBACK"
-// + "VERIFIED PURCHASES" badge on right. Thick top rule. Below: 3 editorial
-// columns separated by hairlines, each numbered (01 / 02 / 03) with italic
-// serif quote, author in small caps, and a green "POSITIVE FEEDBACK" badge.
-// Footer: total feedback count attribution line.
+// 4. REVIEW DASHBOARD  [PRO]  (replaces Magazine Editorial)
+// Left panel: overall rating number + star row + total count + coloured 5-bar
+// breakdown (5★→1★). Right panel: featured review card — initials avatar,
+// name, date, stars, full review text, Rating Score + Helpful Votes stat tiles,
+// two decorative buttons (no href, 100% eBay safe).
+// Below: stacked review list rows — avatar, name, star badge, date, excerpt.
+// First row has accent left-border to indicate it matches the featured panel.
+// Layout uses percentage widths — readable at 360 px mobile up to 900 px desktop.
 // ─────────────────────────────────────────────────────────────────────────────
 function magazineEditorial(p: any, id: string): string {
-  const bg         = resolveBg(p)
-  const textCol    = resolveTextColor(p)
-  const subCol     = resolveSubColor(p)
-  const starCol    = resolveStarColor(p)
-  const accent     = resolveAccent(p)
-  const borderCol  = resolveBorder(p)
-  const reviews    = resolveReviews(p)
-  const totalCount = p.reviewCount ?? '2,400'
+  const bg        = resolveBg(p, '#ffffff')
+  const textCol   = resolveTextColor(p)
+  const subCol    = resolveSubColor(p)
+  const starCol   = resolveStarColor(p)
+  const accent    = resolveAccent(p)
+  const borderCol = resolveBorder(p)
+  const reviews   = resolveReviews(p)
 
-  const nums = ['01', '02', '03']
-  const cols = reviews.slice(0, 3).map((r, i) => {
-    const quote  = r.text ?? r.quote ?? ''
-    const author = r.author ?? r.name ?? 'Verified Buyer'
-    const date   = r.date ?? 'Verified eBay Purchase'
-    const isLast = i === 2
+  const overallRating = p.overallRating ?? '4.0'
+  const totalRatings  = p.totalRatings  ?? '38,000'
+  const helpfulVotes  = p.helpfulVotes  ?? '24'
+
+  // Rating breakdown counts [5★ … 1★]
+  const ratingCounts: number[] = p.ratingCounts ?? [14000, 8000, 4000, 800, 3000]
+  const maxCount = Math.max(...ratingCounts, 1)
+  const fmtK     = (n: number) => n >= 1000 ? Math.round(n / 1000) + 'k' : String(n)
+  const barCols  = ['#22c55e', '#3b82f6', '#eab308', '#f97316', '#ef4444']
+
+  // Coloured rating bars — bars use 100% cell width so they scale on mobile
+  const ratingBars = [5, 4, 3, 2, 1].map((star, i) => {
+    const count = ratingCounts[i] ?? 0
+    const pct   = Math.max(Math.round((count / maxCount) * 100), 3)
     return `
-    <td width="33%" valign="top" style="width:33.33%;padding:0 ${isLast ? '0' : '20px'} 0 ${i === 0 ? '0' : '20px'};vertical-align:top;${i < 2 ? `border-right:1px solid ${borderCol};` : ''}box-sizing:border-box;">
-      <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:900;color:${borderCol};line-height:1;">${nums[i]}</p>
-      <p style="margin:0 0 14px;font-family:Georgia,'Times New Roman',serif;font-size:13px;font-style:italic;color:${textCol};line-height:1.75;">&ldquo;${quote}&rdquo;</p>
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border-top:1px solid ${borderCol};">
-        <tr>
-          <td style="padding-top:10px;">
-            <p style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:${textCol};letter-spacing:0.06em;text-transform:uppercase;">${author}</p>
-            <p style="margin:0 0 6px;">${stars(r.rating ?? 5, starCol, 10)}</p>
-            <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:#f0fdf4;border:1px solid #bbf7d0;border-radius:3px;">
-              <tr>
-                <td style="padding:3px 8px;">
-                  <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:9px;font-weight:700;color:#16a34a;letter-spacing:0.04em;">&#10003; POSITIVE FEEDBACK</p>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-    </td>`
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:5px;">
+      <tr>
+        <td width="22" style="width:22px;white-space:nowrap;vertical-align:middle;padding-right:4px;">
+          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:9px;color:${subCol};line-height:1;">${star}&#9733;</p>
+        </td>
+        <td style="vertical-align:middle;padding-right:5px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:100%;background-color:${borderCol};border-radius:99px;height:5px;">
+            <tr>
+              <td width="${pct}%" style="width:${pct}%;background-color:${barCols[i]};border-radius:99px;height:5px;font-size:0;line-height:0;">&nbsp;</td>
+              <td style="height:5px;font-size:0;">&nbsp;</td>
+            </tr>
+          </table>
+        </td>
+        <td width="22" style="width:22px;white-space:nowrap;text-align:right;vertical-align:middle;">
+          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:9px;color:${subCol};line-height:1;">${fmtK(count)}</p>
+        </td>
+      </tr>
+    </table>`
+  }).join('')
+
+  // Featured review — always the first in the list
+  const feat     = reviews[0]
+  const featName = feat?.author ?? feat?.name ?? 'James Carter'
+  const featText = feat?.text   ?? feat?.quote ?? 'Outstanding product quality and seamless integration. The documentation is comprehensive and easy to follow. Customer service responded within minutes.'
+  const featDate = feat?.date   ?? 'January 20, 2026'
+  const featRat  = feat?.rating ?? 5
+  const featIni  = initials(featName)
+
+  // Avatar palette
+  const avatarPal = [accent, '#16a34a', '#0ea5e9', '#f59e0b', '#8b5cf6', '#ef4444']
+
+  // Review list rows — card-per-row so they wrap on any screen width
+  const listRows = reviews.slice(0, 5).map((r: ReviewItem, i: number) => {
+    const name    = r.author ?? r.name ?? 'Verified Buyer'
+    const date    = r.date   ?? 'Jan 2026'
+    const rating  = r.rating ?? 5
+    const excerpt = ((r.text ?? r.quote ?? '')).slice(0, 100)
+                   + ((r.text ?? r.quote ?? '').length > 100 ? '…' : '')
+    const ini     = initials(name)
+    const avatBg  = avatarPal[i % avatarPal.length]
+    const borderT = i > 0 ? `border-top:1px solid ${borderCol};` : ''
+    // First row gets an accent left-border to show it's the featured one
+    const selStyle = i === 0
+      ? `border-left:3px solid ${accent};padding-left:11px;`
+      : `padding-left:14px;`
+
+    return `
+    <tr>
+      <td style="${borderT}${selStyle}padding-top:12px;padding-right:14px;padding-bottom:12px;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+          <tr>
+            <!-- Avatar circle (36 px, never shrinks) -->
+            <td width="36" valign="top" style="width:36px;min-width:36px;padding-right:10px;vertical-align:top;">
+              <table width="36" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:36px;height:36px;background-color:${avatBg};border-radius:50%;">
+                <tr><td align="center" style="text-align:center;vertical-align:middle;width:36px;height:36px;">
+                  <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:#ffffff;line-height:36px;">${ini}</p>
+                </td></tr>
+              </table>
+            </td>
+            <!-- Name + rating + date + excerpt — wraps naturally on small screens -->
+            <td valign="top" style="vertical-align:top;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:3px;">
+                <tr>
+                  <td valign="middle">
+                    <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;color:${textCol};line-height:1.2;">${name}</p>
+                  </td>
+                  <td align="right" valign="middle" style="padding-left:6px;white-space:nowrap;">
+                    <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${accent};border-radius:4px;">
+                      <tr><td style="padding:2px 7px;">
+                        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:#ffffff;">&#9733; ${rating.toFixed(1)}</p>
+                      </td></tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};">${date}</p>
+              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:${subCol};line-height:1.6;word-break:break-word;">${excerpt}</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>`
   }).join('')
 
   return outerWrap(id, `
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${bg};">
   <tr>
-    <td style="${pad(p, 24, 28, 28, 28)}box-sizing:border-box;">
-      <!-- Masthead -->
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border-top:3px solid ${textCol};margin-bottom:20px;">
+    <td style="${pad(p, 20, 16, 16, 16)}box-sizing:border-box;">
+
+      <!-- ── TOP: Rating stats (left) + Featured review (right) ───────────── -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:16px;">
         <tr>
-          <td style="padding-top:10px;vertical-align:middle;">
-            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:900;color:${textCol};letter-spacing:0.14em;text-transform:uppercase;">Customer Feedback</p>
-          </td>
-          <td align="right" style="vertical-align:middle;padding-top:10px;">
-            <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${accent};border-radius:3px;">
+
+          <!-- LEFT: Overall rating + bar chart ─────────────────────────────── -->
+          <td width="36%" valign="top" style="width:36%;vertical-align:top;padding-right:10px;box-sizing:border-box;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:#f9fafb;border:1px solid ${borderCol};border-radius:10px;">
               <tr>
-                <td style="padding:4px 10px;">
-                  <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:9px;font-weight:700;color:#ffffff;letter-spacing:0.08em;">VERIFIED PURCHASES</p>
+                <td style="padding:16px 14px;">
+                  <!-- Big rating number -->
+                  <p style="margin:0 0 3px;font-family:Arial,Helvetica,sans-serif;font-size:36px;font-weight:900;color:${textCol};line-height:1;">${overallRating}</p>
+                  <!-- Stars -->
+                  <p style="margin:0 0 3px;">${stars(Math.round(parseFloat(overallRating)), starCol, 14)}</p>
+                  <!-- Total count -->
+                  <p style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};">${totalRatings} ratings</p>
+                  <!-- Coloured bars — fill 100% of left column width -->
+                  ${ratingBars}
                 </td>
               </tr>
             </table>
           </td>
-        </tr>
-        <tr>
-          <td colspan="2" style="padding-top:10px;border-bottom:1px solid ${borderCol};font-size:0;">&nbsp;</td>
+
+          <!-- RIGHT: Featured review detail card ──────────────────────────── -->
+          <td valign="top" style="vertical-align:top;box-sizing:border-box;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:#f9fafb;border:1px solid ${borderCol};border-radius:10px;">
+              <tr>
+                <td style="padding:16px 14px;">
+
+                  <!-- Avatar row: circle + rating badge + name + date -->
+                  <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:10px;width:100%;">
+                    <tr>
+                      <!-- Initials circle (52 px) -->
+                      <td width="52" valign="middle" style="width:52px;min-width:52px;padding-right:10px;vertical-align:middle;">
+                        <table width="52" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:52px;height:52px;background-color:${accent};border-radius:50%;border:3px solid ${borderCol};">
+                          <tr><td align="center" style="text-align:center;vertical-align:middle;width:52px;height:52px;">
+                            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:18px;font-weight:700;color:#ffffff;line-height:52px;">${featIni}</p>
+                          </td></tr>
+                        </table>
+                      </td>
+                      <!-- Name, rating badge, date -->
+                      <td valign="middle" style="vertical-align:middle;">
+                        <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:4px;">
+                          <tr>
+                            <td style="padding-right:6px;">
+                              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:${textCol};">${featName}</p>
+                            </td>
+                            <td>
+                              <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${accent};border-radius:5px;">
+                                <tr><td style="padding:2px 8px;">
+                                  <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:#ffffff;">&#9733; ${featRat.toFixed(1)}</p>
+                                </td></tr>
+                              </table>
+                            </td>
+                          </tr>
+                        </table>
+                        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};">&#128197; ${featDate}</p>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <!-- Stars -->
+                  <p style="margin:0 0 8px;">${stars(featRat, starCol, 13)}</p>
+
+                  <!-- Full review text (wraps on mobile) -->
+                  <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:${subCol};line-height:1.75;word-break:break-word;">${featText}</p>
+
+                  <!-- Stat tiles: Rating Score + Helpful Votes -->
+                  <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:10px;">
+                    <tr>
+                      <td style="padding-right:8px;">
+                        <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:#ede9fe;border-radius:8px;">
+                          <tr><td style="padding:8px 14px;text-align:center;">
+                            <p style="margin:0 0 2px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:900;color:${accent};line-height:1;">${featRat.toFixed(1)}</p>
+                            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:9px;color:${subCol};white-space:nowrap;">Rating Score</p>
+                          </td></tr>
+                        </table>
+                      </td>
+                      <td>
+                        <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:#f3f4f6;border-radius:8px;">
+                          <tr><td style="padding:8px 14px;text-align:center;">
+                            <p style="margin:0 0 2px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:900;color:${textCol};line-height:1;">${helpfulVotes}</p>
+                            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:9px;color:${subCol};white-space:nowrap;">Helpful Votes</p>
+                          </td></tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <!-- Decorative buttons (no href / onclick — 100% eBay safe) -->
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:7px;">
+                    <tr><td>
+                      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;background-color:${accent};border-radius:7px;">
+                        <tr><td align="center" style="padding:9px 14px;text-align:center;">
+                          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;color:#ffffff;">View Full Review</p>
+                        </td></tr>
+                      </table>
+                    </td></tr>
+                  </table>
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+                    <tr><td>
+                      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid ${borderCol};border-radius:7px;">
+                        <tr><td align="center" style="padding:8px 14px;text-align:center;">
+                          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:${textCol};">Contact Customer</p>
+                        </td></tr>
+                      </table>
+                    </td></tr>
+                  </table>
+
+                </td>
+              </tr>
+            </table>
+          </td>
+
         </tr>
       </table>
-      <!-- 3-column editorial grid -->
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;table-layout:fixed;">
-        <tr>${cols}</tr>
-      </table>
-      <!-- Footer -->
-      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border-top:1px solid ${borderCol};margin-top:20px;">
+
+      <!-- ── BOTTOM: Review list ─────────────────────────────────────────── -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid ${borderCol};border-radius:10px;">
+        <!-- List header -->
         <tr>
-          <td style="padding-top:12px;">
-            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;color:${subCol};">All reviews from verified eBay purchases &nbsp;&middot;&nbsp; <span style="font-weight:700;color:${textCol};">${totalCount}+ positive feedbacks</span></p>
+          <td style="padding:10px 14px;background-color:#f3f4f6;border-bottom:1px solid ${borderCol};border-radius:10px 10px 0 0;">
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700;color:${subCol};text-transform:uppercase;letter-spacing:0.07em;">Customer Reviews</p>
           </td>
         </tr>
+        <!-- Review rows (accent border on first = matches featured panel) -->
+        ${listRows}
       </table>
+
     </td>
   </tr>
 </table>`)
@@ -1044,33 +1213,55 @@ export const REVIEWS_BLOCK_THUMBNAILS: Record<string, string> = {
     <line x1="21" y1="43" x2="56" y2="43" stroke="#6b7280" stroke-width="0.8"/>
   </svg>`,
 
-  'rev-magazine-editorial': `<svg viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
-    <rect width="80" height="52" fill="#fff"/>
-    <!-- masthead thick rule -->
-    <rect x="5" y="5" width="70" height="2.5" fill="#111827"/>
-    <!-- masthead text + badge -->
-    <line x1="5" y1="13" x2="42" y2="13" stroke="#111827" stroke-width="1.1"/>
-    <rect x="54" y="9" width="20" height="7" rx="2" fill="#7530fb"/>
-    <!-- divider -->
-    <line x1="5" y1="19" x2="75" y2="19" stroke="#e5e7eb" stroke-width="0.8"/>
-    <!-- 3 editorial columns with vertical dividers -->
-    <line x1="31" y1="22" x2="31" y2="50" stroke="#e5e7eb" stroke-width="0.7"/>
-    <line x1="56" y1="22" x2="56" y2="50" stroke="#e5e7eb" stroke-width="0.7"/>
-    <!-- col 1 -->
-    <line x1="7" y1="24" x2="12" y2="24" stroke="#d1d5db" stroke-width="1.5"/>
-    <line x1="7" y1="29" x2="27" y2="29" stroke="#111827" stroke-width="0.9"/>
-    <line x1="7" y1="33" x2="25" y2="33" stroke="#6b7280" stroke-width="0.7"/>
-    <rect x="7" y="42" width="18" height="5" rx="1.5" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="0.5"/>
-    <!-- col 2 -->
-    <line x1="34" y1="24" x2="39" y2="24" stroke="#d1d5db" stroke-width="1.5"/>
-    <line x1="34" y1="29" x2="52" y2="29" stroke="#111827" stroke-width="0.9"/>
-    <line x1="34" y1="33" x2="50" y2="33" stroke="#6b7280" stroke-width="0.7"/>
-    <rect x="34" y="42" width="18" height="5" rx="1.5" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="0.5"/>
-    <!-- col 3 -->
-    <line x1="59" y1="24" x2="64" y2="24" stroke="#d1d5db" stroke-width="1.5"/>
-    <line x1="59" y1="29" x2="76" y2="29" stroke="#111827" stroke-width="0.9"/>
-    <line x1="59" y1="33" x2="74" y2="33" stroke="#6b7280" stroke-width="0.7"/>
-    <rect x="59" y="42" width="18" height="5" rx="1.5" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="0.5"/>
+  'rev-magazine-editorial': `<svg viewBox="0 0 80 60" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+    <rect width="80" height="60" fill="#ffffff"/>
+    <!-- LEFT panel: rating stats card -->
+    <rect x="2" y="2" width="27" height="36" rx="2.5" fill="#f9fafb" stroke="#e5e7eb" stroke-width="0.5"/>
+    <!-- Big rating number -->
+    <line x1="5" y1="9" x2="18" y2="9" stroke="#111827" stroke-width="2.2"/>
+    <!-- Stars row -->
+    <line x1="5" y1="13" x2="22" y2="13" stroke="#f59e0b" stroke-width="1.2"/>
+    <!-- Count label -->
+    <line x1="5" y1="16.5" x2="19" y2="16.5" stroke="#9ca3af" stroke-width="0.6"/>
+    <!-- 5 coloured bars (5★→1★) -->
+    <rect x="5" y="20" width="18" height="1.5" rx="1" fill="#22c55e"/>
+    <rect x="5" y="23" width="13" height="1.5" rx="1" fill="#3b82f6"/>
+    <rect x="5" y="26" width="9"  height="1.5" rx="1" fill="#eab308"/>
+    <rect x="5" y="29" width="4"  height="1.5" rx="1" fill="#f97316"/>
+    <rect x="5" y="32" width="7"  height="1.5" rx="1" fill="#ef4444"/>
+    <!-- RIGHT panel: featured review card -->
+    <rect x="31" y="2" width="47" height="36" rx="2.5" fill="#f9fafb" stroke="#e5e7eb" stroke-width="0.5"/>
+    <!-- Avatar circle -->
+    <circle cx="40" cy="10" r="5" fill="#6366f1"/>
+    <line x1="34" y1="9" x2="34" y2="9" stroke="none"/>
+    <!-- Rating badge beside avatar -->
+    <rect x="47" y="7" width="11" height="5" rx="1.5" fill="#6366f1"/>
+    <!-- Name -->
+    <line x1="47" y1="14.5" x2="66" y2="14.5" stroke="#111827" stroke-width="1"/>
+    <!-- Date -->
+    <line x1="47" y1="17.5" x2="72" y2="17.5" stroke="#9ca3af" stroke-width="0.6"/>
+    <!-- Stars row -->
+    <line x1="34" y1="21" x2="56" y2="21" stroke="#f59e0b" stroke-width="1.2"/>
+    <!-- Review text lines -->
+    <line x1="34" y1="25" x2="75" y2="25" stroke="#9ca3af" stroke-width="0.6"/>
+    <line x1="34" y1="28" x2="75" y2="28" stroke="#9ca3af" stroke-width="0.6"/>
+    <!-- Stat tiles -->
+    <rect x="34" y="31" width="13" height="6" rx="1.5" fill="#ede9fe"/>
+    <rect x="49" y="31" width="13" height="6" rx="1.5" fill="#f3f4f6"/>
+    <!-- BOTTOM: review list -->
+    <rect x="2" y="41" width="76" height="17" rx="2.5" fill="none" stroke="#e5e7eb" stroke-width="0.5"/>
+    <!-- Header bar -->
+    <rect x="2" y="41" width="76" height="6" rx="2.5" fill="#f3f4f6"/>
+    <!-- Row 1 (highlighted — accent left border) -->
+    <rect x="2" y="47" width="3" height="5.5" fill="#6366f1"/>
+    <circle cx="10" cy="49.5" r="2.5" fill="#6366f1"/>
+    <line x1="15" y1="48.5" x2="32" y2="48.5" stroke="#111827" stroke-width="0.8"/>
+    <line x1="15" y1="51" x2="50" y2="51" stroke="#d1d5db" stroke-width="0.6"/>
+    <!-- Row 2 -->
+    <line x1="5" y1="53" x2="75" y2="53" stroke="#e5e7eb" stroke-width="0.5"/>
+    <circle cx="10" cy="55.5" r="2.5" fill="#22c55e"/>
+    <line x1="15" y1="54.5" x2="35" y2="54.5" stroke="#111827" stroke-width="0.8"/>
+    <line x1="15" y1="57" x2="52" y2="57" stroke="#d1d5db" stroke-width="0.6"/>
   </svg>`,
 
   'rev-avatar-rating-cards': `<svg viewBox="0 0 80 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
@@ -1422,8 +1613,8 @@ export const reviewsBlockVariants: BlockVariant[] = [
   },
   {
     id: 'rev-magazine-editorial',
-    label: 'Magazine Editorial',
-    description: 'PRO — Broadsheet newspaper masthead + 3 numbered editorial columns with "POSITIVE FEEDBACK" badges and feedback count footer.',
+    label: 'Review Dashboard',
+    description: 'PRO — Rating stats card (number, stars, coloured bar chart) + featured review detail panel + stacked review list with accent-highlighted top row.',
     thumbnail: REVIEWS_BLOCK_THUMBNAILS['rev-magazine-editorial'],
     toHtml(props, id) { return magazineEditorial(props, id) },
   },
