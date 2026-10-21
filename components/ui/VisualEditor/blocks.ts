@@ -60,6 +60,7 @@ export type BlockType =
     | 'data_table'
     | 'badge_row'
     | 'faq_block'
+    | 'customer_reviews'
     | 'testimonial_block'
     | 'testimonials'
     | 'compatibility_block'
@@ -1277,6 +1278,7 @@ import { getUrgencyBarVariant } from './variants/urgency_bar.variants'
 import { getRectangleVariant } from './variants/rectangle.variants'
 import { getTrustBadgeVariant } from './variants/trust_badge.variants'
 import { getTestimonialsVariant } from './variants/testimonials.variants'
+import { getReviewsBlockVariant } from './variants/reviews_block.variants'
 import { getQuoteBlockVariant } from './variants/quote_block.variants'
 import { getInfoBoxVariant } from './variants/info_box.variants'
 import { getShippingInfoVariant } from './variants/shipping_info.variants'
@@ -4108,6 +4110,37 @@ ${thumbCells}
                 const p = props as any
                 const variantId = p.variant ?? 'test-classic-grid'
                 return wrapBlock('testimonial_block' as BlockType, id, getTestimonialsVariant(variantId).toHtml(p, id), p)
+            },
+        },
+
+        {
+            type: 'customer_reviews' as BlockType,
+            label: 'Customer Reviews',
+            category: 'Content' as BlockCategory,
+            icon: 'star',
+            description: 'Social proof buyer testimonials — 8 professional layouts',
+            defaultProps: {
+                ...DEFAULT_COMMON,
+                variant: 'rev-star-cards',
+                paddingTop: 20,
+                paddingBottom: 20,
+                paddingLeft: 16,
+                paddingRight: 16,
+                reviews: [
+                    { text: 'Exactly as described. Arrived two days early and packaging was excellent. Will definitely order again.', author: 'Sarah M.', rating: 5, date: 'Verified eBay Purchase' },
+                    { text: 'Great quality for the price. Seller answered my question within the hour. Highly recommend.', author: 'James T.', rating: 5, date: 'Verified eBay Purchase' },
+                    { text: 'Item was in perfect condition. Fast dispatch, well packaged. A+ seller — saved to favourites.', author: 'Linda R.', rating: 5, date: 'Verified eBay Purchase' },
+                ],
+                textColor: '#111827',
+                authorColor: '#6b7280',
+                starColor: '#f59e0b',
+                accentColor: '#7530fb',
+                borderColor: '#e5e7eb',
+            } as unknown as BlockProps,
+            toHtml(props, id) {
+                const p = props as any
+                const variantId = p.variant ?? 'rev-star-cards'
+                return wrapBlock('customer_reviews' as BlockType, id, getReviewsBlockVariant(variantId).toHtml(p, id), p)
             },
         },
 
