@@ -60,6 +60,7 @@ export type BlockType =
     | 'data_table'
     | 'badge_row'
     | 'faq_block'
+    | 'customer_reviews'
     | 'testimonial_block'
     | 'testimonials'
     | 'compatibility_block'
@@ -242,38 +243,9 @@ export interface CommonProps {
     fontFamily: string
 }
 
-const DEFAULT_COMMON: CommonProps = {
-    // Background
-    bgColor: '#ffffff',
-    bgGradient: false,
-    bgGradientFrom: '#7530fb',
-    bgGradientTo: '#1e1535',
-    bgGradientDir: 135,
-
-    // Spacing
-    paddingTop: 16,
-    paddingBottom: 16,
-    paddingLeft: 24,
-    paddingRight: 24,
-
-    // Border
-    showBorder: false,
-    borderColor: '#ede9fe',
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderRadius: 0,
-
-    // Shadow
-    showShadow: false,
-    shadowColor: 'rgba(0,0,0,0.10)',
-    shadowX: 0,
-    shadowY: 4,
-    shadowBlur: 12,
-    shadowSpread: 0,
-
-    // Typography
-    fontFamily: 'Arial, Helvetica, sans-serif',
-}
+// DEFAULT_COMMON and wrapBlock live in defaults.ts to avoid circular deps
+// with content.ts. Re-exported here so the rest of blocks.ts is unchanged.
+export const DEFAULT_COMMON: CommonProps = _DEFAULT_COMMON as CommonProps
 
 // ─────────────────────────────────────────────────────────────────────────────
 // LAYOUT BLOCKS
@@ -1287,6 +1259,8 @@ import { getBulletListVariant } from './variants/bullet_list.variants'
 import { getDividerVariant } from './variants/divider.variants'
 import { getNumberedListVariant } from './variants/numbered_list.variants'
 import { getWarningBoxVariant } from './variants/warning_box.variants'
+import { CONTENT_BLOCKS } from './content'
+import { DEFAULT_COMMON as _DEFAULT_COMMON, wrapBlock as _wrapBlock } from './defaults'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED SLOT PLACEHOLDERS
@@ -1323,12 +1297,8 @@ export interface BlockDefinition {
 // HTML WRAPPER HELPER
 // Wraps block HTML in a table row with data attributes for parsing
 // ─────────────────────────────────────────────────────────────────────────────
-function wrapBlock(type: BlockType, id: string, innerHtml: string, props?: BlockProps): string {
-    const linkUrl = (props as any)?.linkUrl
-    const wrapped = linkUrl
-        ? `<a href="${linkUrl}" style="display:block;text-decoration:none;color:inherit;">${innerHtml}</a>`
-        : innerHtml
-    return `<!-- BLOCK:${type}:${id} -->\n${wrapped}\n<!-- /BLOCK:${type}:${id} -->`
+export function wrapBlock(type: BlockType, id: string, innerHtml: string, props?: BlockProps): string {
+    return _wrapBlock(type, id, innerHtml, props)
 }
 
 // Padding shorthand helper
@@ -4110,6 +4080,9 @@ ${thumbCells}
                 return wrapBlock('testimonial_block' as BlockType, id, getTestimonialsVariant(variantId).toHtml(p, id), p)
             },
         },
+
+        // ── Content blocks (defined in content.ts) ──────────────────────────────
+        ...CONTENT_BLOCKS,
 
         // ── Variation Builder ───────────────────────────────────────────────────
         {

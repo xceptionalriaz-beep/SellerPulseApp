@@ -1096,9 +1096,15 @@ export const DIVIDER_FREE_VARIANTS = new Set([
  *
  * Exported so Canvas.tsx and page.tsx can share the same logic.
  */
+export const CUSTOMER_REVIEWS_FREE_VARIANTS = new Set([
+    'rev-star-cards', 'rev-bold-quote-strip', 'rev-verified-buyer-rows',
+])
+
 export function getFreeVariantIds(blockType: string): Set<string> | undefined {
     // Divider has its own curated 5-free set
     if (blockType === 'divider' || blockType === 'separator') return DIVIDER_FREE_VARIANTS
+    // Customer reviews: 3 free, 5 PRO
+    if (blockType === 'customer_reviews' || blockType === 'reviews') return CUSTOMER_REVIEWS_FREE_VARIANTS
     // For all other blocks: if 10+ variants, first 2 are free
     const variants = getVariants(blockType)
     if (!variants || variants.length < 10) return undefined
@@ -1125,7 +1131,7 @@ function StylesTab({
             {hasVariants(block.type) && (
                 <VariantPicker
                     blockType={block.type}
-                    currentVariant={(props as any).variant ?? (props as any).layoutStyle ?? (block.type === 'features' || (block.type as string) === 'features_bar' ? 'feat-simple-centered' : block.type === 'trust_badge_block' || (block.type as string) === 'trust_badge' || (block.type as string) === 'trust_satisfaction' ? 'trust-banner-soft' : block.type === 'rectangle' || (block.type as string) === 'shape' ? 'rect-solid-fill' : block.type === 'urgency_bar' || (block.type as string) === 'urgency' ? 'urgency-classic-pulse' : block.type === 'why_buy_from_us' || (block.type as string) === 'why_buy' ? 'why-classic-centered' : block.type === 'quote_block' || (block.type as string) === 'quote' ? 'qb-classic-left-border' : block.type === 'faq_block' || (block.type as string) === 'faq' || (block.type as string) === 'faq_section' ? 'faq-classic-stacked' : block.type === 'bullet_list' ? 'bl-classic-check' : block.type === 'paragraph' ? 'para-classic-plain' : block.type === 'heading' ? 'hd-classic-accent-bar' : block.type === 'product_title' || (block.type as string) === 'title' ? 'pt-classic-baseline' : block.type === 'highlight_text' || (block.type as string) === 'highlight' ? 'ht-classic-neon-strip' : block.type === 'international_shipping' || (block.type as string) === 'international' ? 'is-classic-amber-notice' : block.type === 'breadcrumb_bar' || (block.type as string) === 'breadcrumb' ? 'bb-classic-inline' : block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : block.type === 'category_nav' ? 'cat-classic-dark' : (block.type as string) === 'free_shipping_banner' || (block.type as string) === 'free_shipping' ? 'ship-express-courier-strip' : block.type === 'item_specifics' || (block.type as string) === 'specifics_table' ? 'is-dual-column-zebra-card' : block.type === 'authenticity_guarantee' || (block.type as string) === 'authenticity' ? 'auth-ebay-blue-official-shield' : block.type === 'condition_details' || (block.type as string) === 'condition' ? 'cd-cosmetic-grade-split' : block.type === 'compatibility_table' || (block.type as string) === 'compatibility' ? 'compat-classic-zebra-table' : block.type === 'product_comparison' || (block.type as string) === 'comparison' ? 'comp-classic-header-table' : block.type === 'key_features_grid' ? 'feat-classic-cards-grid' : block.type === 'vat_notice' || (block.type as string) === 'vat' ? 'vat-classic-card' : block.type === 'feedback_score' || (block.type as string) === 'feedback' ? 'fb-classic-split-card' : block.type === 'pull_quote' || (block.type as string) === 'quote' ? 'pq-classic-serif-centered' : block.type === 'section_label' || (block.type as string) === 'label' ? 'sl-classic-pill-capsule' : block.type === 'testimonial_block' || (block.type as string) === 'testimonials' || (block.type as string) === 'testimonial' ? 'test-classic-grid' : block.type === 'info_box' || (block.type as string) === 'infobox' || (block.type as string) === 'info' ? 'info-classic-banner' : block.type === 'shipping_info' || (block.type as string) === 'shipping_info_bar' ? 'ship-classic-card' : block.type === 'store_header' || (block.type as string) === 'storeheader' ? 'sh-classic-banner' : block.type === 'divider' || (block.type as string) === 'separator' ? 'minimal_diamond' : block.type === 'numbered_list' || (block.type as string) === 'numberedlist' || (block.type as string) === 'steps' ? 'num-classic-badge' : 'default')}
+                    currentVariant={(props as any).variant ?? (props as any).layoutStyle ?? (block.type === 'features' || (block.type as string) === 'features_bar' ? 'feat-simple-centered' : block.type === 'trust_badge_block' || (block.type as string) === 'trust_badge' || (block.type as string) === 'trust_satisfaction' ? 'trust-banner-soft' : block.type === 'rectangle' || (block.type as string) === 'shape' ? 'rect-solid-fill' : block.type === 'urgency_bar' || (block.type as string) === 'urgency' ? 'urgency-classic-pulse' : block.type === 'why_buy_from_us' || (block.type as string) === 'why_buy' ? 'why-classic-centered' : block.type === 'quote_block' || (block.type as string) === 'quote' ? 'qb-classic-left-border' : block.type === 'faq_block' || (block.type as string) === 'faq' || (block.type as string) === 'faq_section' ? 'faq-classic-stacked' : block.type === 'bullet_list' ? 'bl-classic-check' : block.type === 'paragraph' ? 'para-classic-plain' : block.type === 'heading' ? 'hd-classic-accent-bar' : block.type === 'product_title' || (block.type as string) === 'title' ? 'pt-classic-baseline' : block.type === 'highlight_text' || (block.type as string) === 'highlight' ? 'ht-classic-neon-strip' : block.type === 'international_shipping' || (block.type as string) === 'international' ? 'is-classic-amber-notice' : block.type === 'breadcrumb_bar' || (block.type as string) === 'breadcrumb' ? 'bb-classic-inline' : block.type === 'hero_header' ? 'gradient' : block.type === 'product_description' ? 'plain' : block.type === 'product_variants' ? 'swatches-sizes' : block.type === 'whats_in_the_box' ? 'simple-list' : block.type === 'hero_product' ? 'hp-default' : block.type === 'cta_banner' ? 'ctab-trust-bar' : block.type === 'seller_info' ? 'authority-split' : block.type === 'logo_bar' ? 'flat-row' : block.type === 'bundle_deal' ? 'tri-tier-columns' : block.type === 'price_tag' ? 'classic-strike' : block.type === 'store_footer' ? 'classic-dark-band' : block.type === 'category_nav' ? 'cat-classic-dark' : (block.type as string) === 'free_shipping_banner' || (block.type as string) === 'free_shipping' ? 'ship-express-courier-strip' : block.type === 'item_specifics' || (block.type as string) === 'specifics_table' ? 'is-dual-column-zebra-card' : block.type === 'authenticity_guarantee' || (block.type as string) === 'authenticity' ? 'auth-ebay-blue-official-shield' : block.type === 'condition_details' || (block.type as string) === 'condition' ? 'cd-cosmetic-grade-split' : block.type === 'compatibility_table' || (block.type as string) === 'compatibility' ? 'compat-classic-zebra-table' : block.type === 'product_comparison' || (block.type as string) === 'comparison' ? 'comp-classic-header-table' : block.type === 'key_features_grid' ? 'feat-classic-cards-grid' : block.type === 'vat_notice' || (block.type as string) === 'vat' ? 'vat-classic-card' : block.type === 'feedback_score' || (block.type as string) === 'feedback' ? 'fb-classic-split-card' : block.type === 'pull_quote' || (block.type as string) === 'quote' ? 'pq-classic-serif-centered' : block.type === 'section_label' || (block.type as string) === 'label' ? 'sl-classic-pill-capsule' : block.type === 'testimonial_block' || (block.type as string) === 'testimonials' || (block.type as string) === 'testimonial' ? 'test-classic-grid' : (block.type as string) === 'customer_reviews' || (block.type as string) === 'reviews' ? 'rev-star-cards' : block.type === 'info_box' || (block.type as string) === 'infobox' || (block.type as string) === 'info' ? 'info-classic-banner' : block.type === 'shipping_info' || (block.type as string) === 'shipping_info_bar' ? 'ship-classic-card' : block.type === 'store_header' || (block.type as string) === 'storeheader' ? 'sh-classic-banner' : block.type === 'divider' || (block.type as string) === 'separator' ? 'minimal_diamond' : block.type === 'numbered_list' || (block.type as string) === 'numberedlist' || (block.type as string) === 'steps' ? 'num-classic-badge' : 'default')}
                     onChange={v => updateProps({ variant: v } as any)}
                     freeVariantIds={getFreeVariantIds(block.type)}
                     isPro={designStudioPlan === 'pro'}
@@ -4041,6 +4047,27 @@ function BlockStyleProps({ block, props, updateProps }: {
                         <NumberInput label="Padding bottom" value={(props as any).paddingBottom ?? 24} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v } as any)} />
                         <NumberInput label="Padding left" value={(props as any).paddingLeft ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingLeft: v } as any)} />
                         <NumberInput label="Padding right" value={(props as any).paddingRight ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingRight: v } as any)} />
+                    </Section>
+                </>
+            )
+
+        case 'customer_reviews' as BlockType:
+            return (
+                <>
+                    <Section title="Colours">
+                        <ColorRow label="Background" value={props.bgColor ?? '#ffffff'} onChange={v => updateProps({ bgColor: v })} />
+                        <ColorRow label="Review bg / dark bg" value={(props as any).questionBg ?? '#1e1535'} onChange={v => updateProps({ questionBg: v } as any)} />
+                        <ColorRow label="Star colour" value={(props as any).starColor ?? '#f59e0b'} onChange={v => updateProps({ starColor: v } as any)} />
+                        <ColorRow label="Text colour" value={(props as any).textColor ?? '#111827'} onChange={v => updateProps({ textColor: v } as any)} />
+                        <ColorRow label="Author / sub colour" value={(props as any).authorColor ?? '#6b7280'} onChange={v => updateProps({ authorColor: v } as any)} />
+                        <ColorRow label="Accent colour" value={(props as any).accentColor ?? '#7530fb'} onChange={v => updateProps({ accentColor: v } as any)} />
+                        <ColorRow label="Border colour" value={(props as any).borderColor ?? '#e5e7eb'} onChange={v => updateProps({ borderColor: v } as any)} />
+                    </Section>
+                    <Section title="Spacing">
+                        <NumberInput label="Padding top" value={(props as any).paddingTop ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingTop: v } as any)} />
+                        <NumberInput label="Padding bottom" value={(props as any).paddingBottom ?? 20} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingBottom: v } as any)} />
+                        <NumberInput label="Padding left" value={(props as any).paddingLeft ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingLeft: v } as any)} />
+                        <NumberInput label="Padding right" value={(props as any).paddingRight ?? 16} min={0} max={120} suffix="px" onChange={v => updateProps({ paddingRight: v } as any)} />
                     </Section>
                 </>
             )
@@ -7481,6 +7508,46 @@ function BlockAttributeProps({ block, props, updateProps, phButton, tokenButton,
                         ))}
                         {testimonials.length < 6 && (
                             <button style={{ background: 'var(--pp-accent, #7530fb)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 12, marginTop: 4, padding: '4px 12px' }} onClick={() => updateProps({ testimonials: [...testimonials, { text: 'Great product!', author: 'Happy Customer', rating: 5 }] })}>+ Add review</button>
+                        )}
+                    </Section>
+                </>
+            )
+        }
+
+        case 'customer_reviews' as BlockType: {
+            const reviews: { text: string; author: string; rating: number; date?: string }[] = (props as any).reviews ?? [
+                { text: 'Exactly as described. Arrived two days early and packaging was excellent.', author: 'Sarah M.', rating: 5, date: 'Verified eBay Purchase' },
+                { text: 'Great quality for the price. Seller answered my question within the hour.', author: 'James T.', rating: 5, date: 'Verified eBay Purchase' },
+            ]
+            return (
+                <>
+                    <Section title={`Reviews (${reviews.length})`}>
+                        {reviews.map((r, i) => (
+                            <div key={i} style={{ background: 'var(--pp-section-bg, rgba(255,255,255,0.04))', border: '1px solid var(--pp-border)', borderRadius: 6, marginBottom: 6, padding: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                                    <span style={{ color: 'var(--pp-text-muted)', fontSize: 11 }}>Review {i + 1}</span>
+                                    <button style={{ background: 'var(--pp-danger, #dc2626)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 11, padding: '1px 6px' }} onClick={() => updateProps({ reviews: reviews.filter((_, j) => j !== i) } as any)}>✕</button>
+                                </div>
+                                <textarea placeholder="Review text" rows={3} style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', marginBottom: 3, resize: 'vertical', boxSizing: 'border-box' }} value={r.text} onChange={e => { const next = [...reviews]; next[i] = { ...next[i], text: e.target.value }; updateProps({ reviews: next } as any) }} />
+                                <input placeholder="Buyer name" style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', marginBottom: 3, boxSizing: 'border-box' }} value={r.author} onChange={e => { const next = [...reviews]; next[i] = { ...next[i], author: e.target.value }; updateProps({ reviews: next } as any) }} />
+                                <input placeholder="Date / label (e.g. Verified eBay Purchase)" style={{ width: '100%', background: 'var(--pp-input-bg)', border: '1px solid var(--pp-border)', borderRadius: 4, color: 'var(--pp-text)', fontSize: 12, padding: '3px 6px', marginBottom: 3, boxSizing: 'border-box' }} value={r.date ?? ''} onChange={e => { const next = [...reviews]; next[i] = { ...next[i], date: e.target.value }; updateProps({ reviews: next } as any) }} />
+                                <SelectInput
+                                    label="Rating"
+                                    value={String(r.rating ?? 5)}
+                                    options={[
+                                        { v: '5', l: '★★★★★ 5 stars' },
+                                        { v: '4', l: '★★★★☆ 4 stars' },
+                                        { v: '3', l: '★★★☆☆ 3 stars' },
+                                    ]}
+                                    onChange={v => { const next = [...reviews]; next[i] = { ...next[i], rating: Number(v) }; updateProps({ reviews: next } as any) }}
+                                />
+                            </div>
+                        ))}
+                        {reviews.length < 6 && (
+                            <button
+                                style={{ background: 'var(--pp-accent, #7530fb)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 12, marginTop: 4, padding: '4px 12px' }}
+                                onClick={() => updateProps({ reviews: [...reviews, { text: 'Excellent seller, highly recommend!', author: 'Happy Buyer', rating: 5, date: 'Verified eBay Purchase' }] } as any)}
+                            >+ Add review</button>
                         )}
                     </Section>
                 </>
