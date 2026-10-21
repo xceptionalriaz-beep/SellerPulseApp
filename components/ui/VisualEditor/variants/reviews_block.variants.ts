@@ -911,6 +911,7 @@ function darkLuxury(p: any, id: string): string {
   <tr>
     <td style="${pad(p, 20, 16, 16, 16)}box-sizing:border-box;">
 
+<<<<<<< HEAD
       <!-- Responsive styles for Dark Luxury / Analytics -->
       <style>
         @media only screen and (max-width: 680px) {
@@ -954,6 +955,9 @@ function darkLuxury(p: any, id: string): string {
       </style>
 
       <!-- HEADER: title left, date badge right -->
+=======
+      <!-- HEADER: title left, date range right — both wrap gracefully -->
+>>>>>>> 7d29696841039b93957c3756da496f96ebf0ae7c
       ${p.showAnalyticsHeader !== false ? `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin-bottom:14px;">
         <tr>
           <td valign="middle" style="vertical-align:middle;">
