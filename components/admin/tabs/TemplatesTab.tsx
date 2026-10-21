@@ -742,36 +742,44 @@ export default function TemplatesTab() {
 
             {/* ── Publish tier-picker modal ────────────────────────────── */}
             {publishTarget && (
-                <div style={{ position: 'fixed', inset: 0, zIndex: 9999, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                <div style={{ position: 'fixed', inset: 0, zIndex: 9999, backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     onClick={() => setPublishTarget(null)}>
-                    <div style={{ backgroundColor: '#fff', borderRadius: 16, padding: 28, width: 380, boxShadow: '0 20px 60px rgba(0,0,0,0.25)', fontFamily: 'DM Sans, sans-serif' }}
+                    <div style={{ backgroundColor: '#fff', borderRadius: 12, padding: '24px 24px 20px', width: 340, boxShadow: '0 4px 20px rgba(0,0,0,0.12)', fontFamily: 'DM Sans, sans-serif' }}
                         onClick={e => e.stopPropagation()}>
-                        <h2 style={{ fontSize: 16, fontWeight: 800, color: C.text, marginBottom: 6 }}>Publish Template</h2>
-                        <p style={{ fontSize: 12, color: C.muted, marginBottom: 20 }}>
-                            Choose how to publish <strong>{publishTarget.name}</strong> in the gallery.
-                        </p>
-                        <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 4 }}>Publish Template</div>
+                        <div style={{ fontSize: 12, color: C.muted, marginBottom: 18 }}>
+                            Choose a tier for <strong style={{ color: C.text }}>{publishTarget.name}</strong>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
                             {/* Free */}
                             <button onClick={() => doPublish(publishTarget, true, false)}
-                                style={{ flex: 1, padding: '14px 12px', borderRadius: 12, border: `2px solid ${C.border}`, cursor: 'pointer', backgroundColor: '#f8fafc', textAlign: 'center', transition: 'all 0.15s' }}
-                                onMouseEnter={e => { e.currentTarget.style.borderColor = C.success; e.currentTarget.style.backgroundColor = '#f0fdf4' }}
-                                onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.backgroundColor = '#f8fafc' }}>
-                                <div style={{ fontSize: 22, marginBottom: 6 }}>🆓</div>
-                                <div style={{ fontSize: 13, fontWeight: 800, color: C.success, marginBottom: 3 }}>Free</div>
-                                <div style={{ fontSize: 11, color: C.muted }}>Visible to all users</div>
+                                style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 8, border: `1px solid ${C.border}`, cursor: 'pointer', backgroundColor: C.surface, textAlign: 'left', width: '100%' }}
+                                onMouseEnter={e => { e.currentTarget.style.borderColor = C.primary; e.currentTarget.style.backgroundColor = '#f5f0ff' }}
+                                onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.backgroundColor = C.surface }}>
+                                <div style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: '#f0fdf4', border: `1px solid #bbf7d0`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                </div>
+                                <div>
+                                    <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 1 }}>Free</div>
+                                    <div style={{ fontSize: 11, color: C.muted }}>Visible to all users</div>
+                                </div>
                             </button>
                             {/* Pro */}
                             <button onClick={() => doPublish(publishTarget, true, true)}
-                                style={{ flex: 1, padding: '14px 12px', borderRadius: 12, border: `2px solid #f59e0b`, cursor: 'pointer', background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)', textAlign: 'center', transition: 'all 0.15s' }}
-                                onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 16px rgba(245,158,11,0.3)' }}
-                                onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none' }}>
-                                <div style={{ fontSize: 22, marginBottom: 6 }}>⭐</div>
-                                <div style={{ fontSize: 13, fontWeight: 800, color: '#92400e', marginBottom: 3 }}>Pro</div>
-                                <div style={{ fontSize: 11, color: '#b45309' }}>Pro subscribers only</div>
+                                style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 8, border: `1px solid ${C.border}`, cursor: 'pointer', backgroundColor: C.surface, textAlign: 'left', width: '100%' }}
+                                onMouseEnter={e => { e.currentTarget.style.borderColor = '#f59e0b'; e.currentTarget.style.backgroundColor = '#fffbeb' }}
+                                onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.backgroundColor = C.surface }}>
+                                <div style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: '#fffbeb', border: `1px solid #fde68a`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                    <ProBadge size="xs" />
+                                </div>
+                                <div>
+                                    <div style={{ fontSize: 12, fontWeight: 700, color: C.text, marginBottom: 1 }}>Pro</div>
+                                    <div style={{ fontSize: 11, color: C.muted }}>Pro subscribers only</div>
+                                </div>
                             </button>
                         </div>
                         <button onClick={() => setPublishTarget(null)}
-                            style={{ width: '100%', padding: '9px 0', borderRadius: 8, border: `1px solid ${C.border}`, backgroundColor: 'transparent', color: C.muted, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                            style={{ width: '100%', padding: '8px 0', borderRadius: 8, border: `1px solid ${C.border}`, backgroundColor: 'transparent', color: C.muted, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
                             Cancel
                         </button>
                     </div>
