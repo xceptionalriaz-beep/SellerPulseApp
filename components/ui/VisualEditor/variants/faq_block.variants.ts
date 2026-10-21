@@ -1,6 +1,6 @@
 // components/ui/VisualEditor/variants/faq_block.variants.ts
 // ─────────────────────────────────────────────────────────────────────────────
-// FAQ Section — 10 High-Converting, Professional eBay Retail Variants
+// FAQ Section — 12 High-Converting, Professional eBay Retail Variants
 // Engineered for eBay listing templates to answer buyer doubts before they leave,
 // eliminate repetitive messages, set clear return/warranty expectations,
 // and guarantee 100% compliant, JS-free table rendering across all devices.
@@ -17,6 +17,8 @@
 // 8.  faq-luxury-serif-editorial  — Roman serif typography with gold hairlines for watches & luxury goods
 // 9.  faq-verified-trust-shield   — Verified buyer protection callouts with green reassurance badges
 // 10. faq-compact-mobile-accordion— Mobile-first compact row ribbon with minimal vertical footprint
+// 11. faq-clean-chevron-accordion — Classic ▶ chevron rows, white answer area, open-state styling
+// 12. faq-dark-toggle-accordion   — Dark header bars with ▼ chevron, high-contrast open answers
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface BlockVariant {
@@ -483,6 +485,113 @@ function compactMobileAccordion(p: any, id: string): string {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 11. CLEAN CHEVRON ACCORDION (Classic ▶ Open-State Accordion Rows)
+// ─────────────────────────────────────────────────────────────────────────────
+function cleanChevronAccordion(p: any, id: string): string {
+  const bgCol = resolveBg(p, '#ffffff')
+  const qCol = resolveQuestionCol(p, '#1e1535')
+  const aCol = resolveAnswerCol(p, '#4b5563')
+  const accent = resolveAccentCol(p, '#7530fb')
+  const qBg = p.questionBg ?? '#f8f7ff'
+  const borderCol = resolveBorderCol(p, '#e5e7eb')
+  const items = resolveItems(p)
+
+  const rows = items.map((item, idx) => {
+    const isLast = idx === items.length - 1
+    return `
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid ${borderCol};border-radius:6px;overflow:hidden;margin-bottom:${isLast ? 0 : 8}px;">
+      <tr>
+        <td style="background-color:${qBg};padding:11px 14px 11px 16px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+            <tr>
+              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:${qCol};line-height:1.3;">
+                ${item.question}
+              </td>
+              <td align="right" width="22" style="width:22px;padding-left:10px;">
+                <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+                  <tr>
+                    <td style="width:20px;height:20px;background-color:${accent};border-radius:50%;text-align:center;line-height:20px;font-size:11px;color:#ffffff;font-weight:900;">
+                      &#9660;
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td style="background-color:#ffffff;padding:10px 16px 14px 16px;border-top:1px solid ${borderCol};">
+          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${aCol};line-height:1.6;">
+            ${item.answer}
+          </p>
+        </td>
+      </tr>
+    </table>`
+  }).join('')
+
+  return `<!--[riazify:faq_block:${id}]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;">
+  <tr>
+    <td style="background-color:${bgCol};${pad(p, 16, 24, 16, 24)}box-sizing:border-box;">
+      ${rows}
+    </td>
+  </tr>
+</table>`
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 12. DARK TOGGLE ACCORDION (Dark Header Bar + ▼ Chevron, High Contrast)
+// ─────────────────────────────────────────────────────────────────────────────
+function darkToggleAccordion(p: any, id: string): string {
+  const bgCol = resolveBg(p, '#ffffff')
+  const aCol = resolveAnswerCol(p, '#374151')
+  const accent = resolveAccentCol(p, '#7530fb')
+  const headerBg = p.questionBg ?? '#1e1535'
+  const borderCol = resolveBorderCol(p, '#e5e7eb')
+  const items = resolveItems(p)
+
+  const rows = items.map((item, idx) => {
+    const isLast = idx === items.length - 1
+    return `
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;border:1px solid ${borderCol};border-radius:8px;overflow:hidden;margin-bottom:${isLast ? 0 : 10}px;">
+      <tr>
+        <td style="background-color:${headerBg};padding:13px 16px 13px 18px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+            <tr>
+              <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:#ffffff;line-height:1.3;letter-spacing:0.01em;">
+                &#9654;&nbsp;&nbsp;${item.question}
+              </td>
+              <td align="right" width="24" style="width:24px;padding-left:10px;">
+                <span style="display:inline-block;width:18px;height:18px;background-color:${accent};border-radius:3px;text-align:center;line-height:18px;font-size:10px;color:#ffffff;font-weight:900;font-family:Arial,sans-serif;">
+                  &#9660;
+                </span>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td style="background-color:#f9fafb;padding:12px 18px 16px 18px;border-top:2px solid ${accent};">
+          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:${aCol};line-height:1.65;">
+            ${item.answer}
+          </p>
+        </td>
+      </tr>
+    </table>`
+  }).join('')
+
+  return `<!--[riazify:faq_block:${id}]-->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="display:table !important;width:100% !important;min-width:100% !important;max-width:100% !important;box-sizing:border-box;margin:0;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;">
+  <tr>
+    <td style="background-color:${bgCol};${pad(p, 16, 24, 16, 24)}box-sizing:border-box;">
+      ${rows}
+    </td>
+  </tr>
+</table>`
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // SVG THUMBNAIL PREVIEWS (For Visual Editor Sidebar)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -591,6 +700,41 @@ export const FAQ_BLOCK_THUMBNAILS: Record<string, string> = {
     <line x1="18" y1="36" x2="60" y2="36" stroke="#334155" stroke-width="1"/>
   </svg>`,
 
+  // 11. Clean Chevron Accordion
+  'faq-clean-chevron-accordion': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+    <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+    <rect x="6" y="6" width="68" height="10" rx="3" fill="#f8f7ff" stroke="#e5e7eb" stroke-width="0.8"/>
+    <line x1="11" y1="11" x2="48" y2="11" stroke="#1e1535" stroke-width="1.5"/>
+    <circle cx="68" cy="11" r="4" fill="#7530fb"/>
+    <path d="M66 10l2 2 2-2" stroke="#ffffff" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    <rect x="6" y="18" width="68" height="7" rx="0" fill="#ffffff" stroke="#e5e7eb" stroke-width="0.8"/>
+    <line x1="11" y1="21.5" x2="62" y2="21.5" stroke="#4b5563" stroke-width="1"/>
+    <rect x="6" y="27" width="68" height="10" rx="3" fill="#f8f7ff" stroke="#e5e7eb" stroke-width="0.8"/>
+    <line x1="11" y1="32" x2="44" y2="32" stroke="#1e1535" stroke-width="1.5"/>
+    <circle cx="68" cy="32" r="4" fill="#7530fb"/>
+    <path d="M66 31l2 2 2-2" stroke="#ffffff" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    <rect x="6" y="39" width="68" height="5" rx="0" fill="#ffffff" stroke="#e5e7eb" stroke-width="0.8"/>
+    <line x1="11" y1="41.5" x2="58" y2="41.5" stroke="#4b5563" stroke-width="1"/>
+  </svg>`,
+
+  // 12. Dark Toggle Accordion
+  'faq-dark-toggle-accordion': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
+    <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+    <rect x="6" y="6" width="68" height="11" rx="3" fill="#1e1535"/>
+    <line x1="13" y1="11.5" x2="50" y2="11.5" stroke="#ffffff" stroke-width="1.5"/>
+    <rect x="65" y="8" width="6" height="6" rx="1.5" fill="#7530fb"/>
+    <path d="M67 10.5l1 1.5 1-1.5" stroke="#ffffff" stroke-width="1" fill="none" stroke-linecap="round"/>
+    <rect x="6" y="17" width="68" height="7" rx="0" fill="#f9fafb"/>
+    <rect x="6" y="17" width="68" height="1.5" fill="#7530fb"/>
+    <line x1="11" y1="21.5" x2="60" y2="21.5" stroke="#374151" stroke-width="1"/>
+    <rect x="6" y="27" width="68" height="11" rx="3" fill="#1e1535"/>
+    <line x1="13" y1="32.5" x2="46" y2="32.5" stroke="#ffffff" stroke-width="1.5"/>
+    <rect x="65" y="29" width="6" height="6" rx="1.5" fill="#7530fb"/>
+    <path d="M67 31.5l1 1.5 1-1.5" stroke="#ffffff" stroke-width="1" fill="none" stroke-linecap="round"/>
+    <rect x="6" y="39" width="68" height="5" rx="0" fill="#f9fafb"/>
+    <line x1="11" y1="41.5" x2="56" y2="41.5" stroke="#374151" stroke-width="1"/>
+  </svg>`,
+
   // 10. Compact Mobile Accordion
   'faq-compact-mobile-accordion': `<svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:36px;">
     <rect width="80" height="48" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
@@ -688,6 +832,20 @@ export const faqBlockVariants: BlockVariant[] = [
     description: 'Mobile-first compact row ribbon with minimal vertical footprint',
     thumbnail: FAQ_BLOCK_THUMBNAILS['faq-compact-mobile-accordion'],
     toHtml(props, id) { return compactMobileAccordion(props, id) },
+  },
+  {
+    id: 'faq-clean-chevron-accordion',
+    label: 'Clean Chevron Accordion',
+    description: 'Classic ▼ open-state accordion rows with purple chevron badge per question',
+    thumbnail: FAQ_BLOCK_THUMBNAILS['faq-clean-chevron-accordion'],
+    toHtml(props, id) { return cleanChevronAccordion(props, id) },
+  },
+  {
+    id: 'faq-dark-toggle-accordion',
+    label: 'Dark Toggle Accordion',
+    description: 'Dark header bars with ▼ chevron toggle and high-contrast answer area',
+    thumbnail: FAQ_BLOCK_THUMBNAILS['faq-dark-toggle-accordion'],
+    toHtml(props, id) { return darkToggleAccordion(props, id) },
   },
 ]
 
