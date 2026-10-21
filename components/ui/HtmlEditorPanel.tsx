@@ -7,13 +7,9 @@
 import { useState, useRef } from 'react'
 import {
     ChevronLeft, X,
-    Search, Plus, Image, Link2, ChevronDown,
     Monitor, Tablet, Smartphone,
-    Maximize2, CheckCircle2, Download, History,
+    Maximize2, CheckCircle2,
 } from 'lucide-react'
-import ImageAssets from '@/components/ui/ImageAssets'
-import ImportUrl from '@/components/ui/ImportUrl'
-import VersionHistoryPanel from '@/components/ui/VersionHistoryPanel'
 
 // ── Design tokens (same as html-editor/page.tsx) ──────────────────────────
 const C = {
@@ -114,108 +110,15 @@ export default function HtmlEditorPanel({
     const [name, setName]   = useState(initialName)
     const [device, setDevice] = useState<DeviceId>('desktop')
     const [ebayId, setEbayId] = useState('')
-    const [phOpen, setPhOpen] = useState(false)
-    const [findVal, setFindVal]       = useState('')
-    const [replaceVal, setReplaceVal] = useState('')
-    const [matchCount, setMatchCount]   = useState<number | null>(null)
-    const [replaceCount, setReplaceCount] = useState<number | null>(null)
-    const [caseSensitive, setCaseSensitive] = useState(true)
-    const [showAssets, setShowAssets]   = useState(false)
-    const [showImport, setShowImport]   = useState(false)
     const [fullscreen, setFullscreen]   = useState(false)
     const [testLoading, setTestLoading] = useState(false)
     const [previewHtml, setPreviewHtml] = useState('')
-    const [showVersionHistory, setShowVersionHistory] = useState(false)
 
     const textareaRef  = useRef<HTMLTextAreaElement>(null)
     const gutterRef    = useRef<HTMLDivElement>(null)
-    const savedCursor  = useRef<number>(0)
-    const [phSearch, setPhSearch]   = useState('')
-    const [customPh, setCustomPh]   = useState('')
 
     const lines     = html.split('\n')
     const lineCount = lines.length
-
-    // ── Insert helpers ────────────────────────────────────────────────────
-    function saveCursor() {
-        const el = textareaRef.current
-        if (el) savedCursor.current = el.selectionStart
-    }
-
-    function insertPlaceholder(val: string) {
-        const el = textareaRef.current
-        if (!el) return
-        const pos  = savedCursor.current
-        const next = html.slice(0, pos) + val + html.slice(pos)
-        setHtml(next)
-        setPhOpen(false)
-        setPhSearch('')
-        setTimeout(() => {
-            el.focus()
-            el.setSelectionRange(pos + val.length, pos + val.length)
-        }, 0)
-    }
-
-    function insertCustom() {
-        if (!customPh.trim()) return
-        const val = '{{' + customPh.trim().toUpperCase().replace(/\s+/g, '_') + '}}'
-        insertPlaceholder(val)
-        setCustomPh('')
-    }
-
-    function insertImage(_url: string, htmlTag: string) {
-        const el  = textareaRef.current
-        if (!el) return
-        const pos  = savedCursor.current
-        const next = html.slice(0, pos) + htmlTag + html.slice(pos)
-        setHtml(next)
-        setTimeout(() => {
-            el.focus()
-            el.setSelectionRange(pos + htmlTag.length, pos + htmlTag.length)
-        }, 0)
-    }
-
-    // ── Find / Replace ────────────────────────────────────────────────────
-    function countMatches(find: string, text: string, cs: boolean): number {
-        if (!find) return 0
-        const escaped = find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        return (text.match(new RegExp(escaped, cs ? 'g' : 'gi')) ?? []).length
-    }
-
-    function onFindChange(val: string) {
-        setFindVal(val)
-        setReplaceCount(null)
-        setMatchCount(val ? countMatches(val, html, caseSensitive) : null)
-    }
-
-    function applyReplace() {
-        if (!findVal) return
-        const escaped = findVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        const flags   = caseSensitive ? 'g' : 'gi'
-        const regex   = new RegExp(escaped, flags)
-        const count   = (html.match(regex) ?? []).length
-        if (count === 0) { setReplaceCount(0); return }
-        setHtml(prev => prev.replace(regex, replaceVal))
-        setReplaceCount(count)
-        setMatchCount(0)
-        setTimeout(() => {
-            setFindVal(''); setReplaceVal('')
-            setReplaceCount(null); setMatchCount(null)
-        }, 3000)
-    }
-
-    // ── Download ──────────────────────────────────────────────────────────
-    function downloadHtml() {
-        const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
-        const url  = URL.createObjectURL(blob)
-        const a    = document.createElement('a')
-        a.href     = url
-        a.download = `${name.replace(/[^a-z0-9]/gi, '-').toLowerCase() || 'template'}.html`
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        URL.revokeObjectURL(url)
-    }
 
     // ── eBay test preview ─────────────────────────────────────────────────
     async function testPreview() {
@@ -258,221 +161,19 @@ export default function HtmlEditorPanel({
             boxShadow: '-8px 0 32px rgba(0,0,0,0.4)',
         }}>
 
-            {/* ── Top bar ──────────────────────────────────────────────── */}
-            <div className="flex items-center justify-between px-4 shrink-0"
-                style={{ height: 52, backgroundColor: C.surface, borderBottom: `1px solid ${C.border}`, gap: 12 }}>
-
-                <div className="flex items-center gap-3 min-w-0">
-                    <button
-                        onClick={onDiscard}
-                        className="flex items-center gap-1 text-[12px] font-semibold shrink-0 hover:opacity-70 transition-all"
-                        style={{ color: C.primary, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
-                        <ChevronLeft size={14} />
-                        Visual Editor
-                    </button>
-                    <div style={{ width: 1, height: 20, backgroundColor: C.border }} />
-                    <h1 className="text-[15px] font-bold truncate"
-                        style={{ color: C.primary, fontFamily: 'Syne, sans-serif' }}>
-                        HTML Template Editor Studio
-                    </h1>
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                    <button onClick={() => setShowVersionHistory(v => !v)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all hover:opacity-80"
-                        style={{ backgroundColor: showVersionHistory ? C.primaryLight : C.bg, color: showVersionHistory ? C.primary : C.secondary, border: `1px solid ${showVersionHistory ? C.primary : C.border}`, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
-                        <History size={13} /> History
-                    </button>
-                    <button onClick={downloadHtml}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all hover:opacity-80"
-                        style={{ backgroundColor: C.bg, color: C.secondary, border: `1px solid ${C.border}`, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
-                        <Download size={13} /> Download HTML
-                    </button>
-                    <button onClick={() => onApply(html, name)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all hover:opacity-90"
-                        style={{ backgroundColor: C.primary, color: '#ffffff', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
-                        <X size={13} /> Apply & Return
-                    </button>
-                </div>
-            </div>
-
-            {/* ── Second bar ───────────────────────────────────────────── */}
-            <div className="flex items-center gap-2 px-4 shrink-0"
-                style={{ height: 52, backgroundColor: C.surface, borderBottom: `1px solid ${C.border}` }}>
-
-                {/* Template name */}
-                <input value={name} onChange={e => setName(e.target.value)}
-                    className="text-[13px] px-3 py-1.5 rounded-lg outline-none transition-all shrink-0"
-                    style={{ border: `1px solid ${C.borderInput}`, backgroundColor: C.bg, color: C.body, fontFamily: 'DM Sans, sans-serif', width: 180 }}
-                    onFocus={e => e.currentTarget.style.borderColor = C.primary}
-                    onBlur={e => e.currentTarget.style.borderColor = C.borderInput} />
-
-                <div style={{ width: 1, height: 20, backgroundColor: C.border, flexShrink: 0 }} />
-
-                {/* Find */}
-                <Search size={13} style={{ color: C.muted, flexShrink: 0 }} />
-                <div className="relative shrink-0">
-                    <input
-                        value={findVal}
-                        onChange={e => onFindChange(e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && applyReplace()}
-                        placeholder="Search code..."
-                        className="text-[12px] px-3 py-1.5 rounded-lg outline-none pr-12"
-                        style={{ border: `1px solid ${C.borderInput}`, backgroundColor: C.bg, color: C.body, fontFamily: 'DM Sans, sans-serif', width: 150 }}
-                        onFocus={e => e.currentTarget.style.borderColor = C.primary}
-                        onBlur={e => e.currentTarget.style.borderColor = C.borderInput}
-                    />
-                    {matchCount !== null && findVal && (
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                            style={{ backgroundColor: matchCount > 0 ? C.primaryLight : C.dangerBg, color: matchCount > 0 ? C.primary : C.danger, fontFamily: 'DM Sans, sans-serif' }}>
-                            {matchCount}
-                        </span>
-                    )}
-                </div>
-
-                {/* Replace */}
-                <input
-                    value={replaceVal}
-                    onChange={e => setReplaceVal(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && applyReplace()}
-                    placeholder="Replace with..."
-                    className="text-[12px] px-3 py-1.5 rounded-lg outline-none shrink-0"
-                    style={{ border: `1px solid ${C.borderInput}`, backgroundColor: C.bg, color: C.body, fontFamily: 'DM Sans, sans-serif', width: 140 }}
-                    onFocus={e => e.currentTarget.style.borderColor = C.primary}
-                    onBlur={e => e.currentTarget.style.borderColor = C.borderInput}
-                />
-
-                {/* Case sensitive */}
+            {/* ── Slim top bar — back + apply only ─────────────────────── */}
+            <div className="flex items-center justify-between px-3 shrink-0"
+                style={{ height: 40, backgroundColor: C.surface, borderBottom: `1px solid ${C.border}` }}>
                 <button
-                    onClick={() => { setCaseSensitive(v => !v); setMatchCount(findVal ? countMatches(findVal, html, !caseSensitive) : null) }}
-                    title="Case sensitive"
-                    className="px-2 py-1 rounded-lg text-[11px] font-bold transition-all hover:opacity-80 shrink-0"
-                    style={{ backgroundColor: caseSensitive ? C.primaryLight : C.bg, color: caseSensitive ? C.primary : C.muted, border: `1px solid ${caseSensitive ? C.primary : C.border}`, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
-                    Aa
+                    onClick={onDiscard}
+                    className="flex items-center gap-1 text-[12px] font-semibold hover:opacity-70 transition-all"
+                    style={{ color: C.primary, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                    <ChevronLeft size={14} /> Visual Editor
                 </button>
-
-                {/* Apply replace */}
-                <button onClick={applyReplace}
-                    className="px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all hover:opacity-80 shrink-0"
-                    style={{ backgroundColor: C.primary, color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
-                    Apply
-                </button>
-
-                {replaceCount !== null && (
-                    <span className="text-[11px] font-semibold shrink-0"
-                        style={{ color: replaceCount > 0 ? C.success : C.danger, fontFamily: 'DM Sans, sans-serif' }}>
-                        {replaceCount > 0 ? `✓ ${replaceCount} replaced` : '✗ No match'}
-                    </span>
-                )}
-
-                {(findVal || replaceVal) && (
-                    <button onClick={() => { setFindVal(''); setReplaceVal(''); setMatchCount(null); setReplaceCount(null) }}
-                        className="w-5 h-5 flex items-center justify-center rounded-full hover:opacity-70 transition-all shrink-0"
-                        style={{ backgroundColor: C.muted, border: 'none', cursor: 'pointer' }}>
-                        <X size={10} style={{ color: '#fff' }} />
-                    </button>
-                )}
-
-                <div style={{ flex: 1 }} />
-
-                {/* Placeholder dropdown */}
-                <div className="relative shrink-0">
-                    <button
-                        onClick={() => { saveCursor(); setPhOpen(v => !v) }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all hover:opacity-80"
-                        style={{ backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ${C.border}`, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
-                        <Plus size={13} /> Insert Dynamic Placeholder <ChevronDown size={12} />
-                    </button>
-                    {phOpen && (
-                        <div className="absolute top-full mt-1 right-0 rounded-xl shadow-xl z-30 flex flex-col"
-                            style={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, width: 320, maxHeight: 420 }}>
-                            <div className="px-3 pt-3 pb-2 shrink-0" style={{ borderBottom: `1px solid ${C.border}` }}>
-                                <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg"
-                                    style={{ backgroundColor: C.bg, border: `1px solid ${C.borderInput}` }}>
-                                    <Search size={12} style={{ color: C.muted, flexShrink: 0 }} />
-                                    <input
-                                        autoFocus
-                                        value={phSearch}
-                                        onChange={e => setPhSearch(e.target.value)}
-                                        placeholder="Search placeholders..."
-                                        className="flex-1 text-[12px] outline-none bg-transparent"
-                                        style={{ color: C.body, fontFamily: 'DM Sans, sans-serif' }}
-                                    />
-                                </div>
-                            </div>
-                            <div className="overflow-y-auto flex-1">
-                                {PLACEHOLDER_GROUPS.map(group => {
-                                    const filtered = group.items.filter(item =>
-                                        !phSearch ||
-                                        item.label.toLowerCase().includes(phSearch.toLowerCase()) ||
-                                        item.value.toLowerCase().includes(phSearch.toLowerCase())
-                                    )
-                                    if (filtered.length === 0) return null
-                                    return (
-                                        <div key={group.group}>
-                                            <div className="px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider"
-                                                style={{ backgroundColor: C.bg, color: C.muted, fontFamily: 'DM Sans, sans-serif', borderBottom: `1px solid ${C.border}` }}>
-                                                {group.group}
-                                            </div>
-                                            {filtered.map((ph, i) => (
-                                                <button key={ph.value}
-                                                    onMouseDown={e => { e.preventDefault(); insertPlaceholder(ph.value) }}
-                                                    className="w-full text-left px-4 py-2 transition-all hover:opacity-80"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', borderBottom: i < filtered.length - 1 ? `1px solid ${C.border}` : 'none', cursor: 'pointer' }}>
-                                                    <div className="flex items-center justify-between gap-2">
-                                                        <span className="text-[12px] font-bold" style={{ color: C.primary, fontFamily: 'DM Sans, sans-serif' }}>{ph.value}</span>
-                                                        <span className="text-[10px] truncate shrink-0" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>e.g. {ph.example}</span>
-                                                    </div>
-                                                    <div className="text-[11px] mt-0.5" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>{ph.label}</div>
-                                                </button>
-                                            ))}
-                                        </div>
-                                    )
-                                })}
-                                {phSearch && PLACEHOLDER_GROUPS.every(g =>
-                                    g.items.every(item =>
-                                        !item.label.toLowerCase().includes(phSearch.toLowerCase()) &&
-                                        !item.value.toLowerCase().includes(phSearch.toLowerCase())
-                                    )
-                                ) && (
-                                    <div className="px-4 py-6 text-center text-[12px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                                        No placeholders found for &ldquo;{phSearch}&rdquo;
-                                    </div>
-                                )}
-                            </div>
-                            <div className="px-3 py-2.5 shrink-0" style={{ borderTop: `1px solid ${C.border}` }}>
-                                <p className="text-[10px] font-semibold mb-1.5" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>CUSTOM PLACEHOLDER</p>
-                                <div className="flex gap-2">
-                                    <input
-                                        value={customPh}
-                                        onChange={e => setCustomPh(e.target.value)}
-                                        placeholder="e.g. WARRANTY_INFO"
-                                        onKeyDown={e => e.key === 'Enter' && insertCustom()}
-                                        className="flex-1 text-[11px] px-2.5 py-1.5 rounded-lg outline-none"
-                                        style={{ border: `1px solid ${C.borderInput}`, backgroundColor: C.bg, color: C.body, fontFamily: 'DM Sans, sans-serif' }}
-                                    />
-                                    <button onMouseDown={e => { e.preventDefault(); insertCustom() }}
-                                        className="px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all hover:opacity-80"
-                                        style={{ backgroundColor: C.primary, color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
-                                        Insert
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                <button
-                    onClick={() => { saveCursor(); setShowAssets(true) }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold hover:opacity-80 transition-all shrink-0"
-                    style={{ backgroundColor: C.surface, color: C.secondary, border: `1px solid ${C.border}`, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
-                    <Image size={13} /> Image Assets
-                </button>
-                <button
-                    onClick={() => setShowImport(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold hover:opacity-80 transition-all shrink-0"
-                    style={{ backgroundColor: C.surface, color: C.secondary, border: `1px solid ${C.border}`, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
-                    <Link2 size={13} /> Import URL
+                <button onClick={() => onApply(html, name)}
+                    className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-[12px] font-bold transition-all hover:opacity-90"
+                    style={{ backgroundColor: C.primary, color: '#ffffff', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                    <CheckCircle2 size={13} /> Apply &amp; Return
                 </button>
             </div>
 
@@ -512,29 +213,15 @@ export default function HtmlEditorPanel({
 
                         {/* Editor */}
                         <div className="flex-1 relative overflow-hidden" style={{ backgroundColor: C.editorBg }}>
-                            {findVal && (
-                                <pre aria-hidden id="hep-hl-overlay"
-                                    style={{ position: 'absolute', top: 0, left: 0, margin: 0, padding: '12px 16px', fontFamily: "'Fira Code','Cascadia Code',Consolas,monospace", fontSize: 12, lineHeight: `${LINE_H}px`, whiteSpace: 'pre', pointerEvents: 'none', color: '#e2e8f0', width: '100%', minHeight: '100%', overflow: 'hidden', zIndex: 1, boxSizing: 'border-box' }}
-                                    dangerouslySetInnerHTML={{
-                                        __html: html
-                                            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-                                            .replace(new RegExp(findVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), caseSensitive ? 'g' : 'gi'),
-                                                m => `<mark style="background:#f59e0b;color:#1e1535;border-radius:2px">${m}</mark>`)
-                                    }}
-                                />
-                            )}
                             <textarea
                                 ref={textareaRef}
                                 value={html}
                                 onChange={e => setHtml(e.target.value)}
                                 spellCheck={false}
-                                style={{ position: findVal ? 'absolute' : 'relative', top: 0, left: 0, flex: 1, width: '100%', height: '100%', margin: 0, padding: '12px 16px', fontFamily: "'Fira Code','Cascadia Code',Consolas,monospace", fontSize: 12, lineHeight: `${LINE_H}px`, backgroundColor: findVal ? 'transparent' : C.editorBg, color: findVal ? 'transparent' : '#e2e8f0', caretColor: '#fff', border: 'none', outline: 'none', resize: 'none', tabSize: 2, whiteSpace: 'pre', overflowY: 'auto', overflowX: 'auto', boxSizing: 'border-box', zIndex: 2 }}
+                                style={{ position: 'relative', top: 0, left: 0, flex: 1, width: '100%', height: '100%', margin: 0, padding: '12px 16px', fontFamily: "'Fira Code','Cascadia Code',Consolas,monospace", fontSize: 12, lineHeight: `${LINE_H}px`, backgroundColor: C.editorBg, color: '#e2e8f0', caretColor: '#fff', border: 'none', outline: 'none', resize: 'none', tabSize: 2, whiteSpace: 'pre', overflowY: 'auto', overflowX: 'auto', boxSizing: 'border-box', zIndex: 2 }}
                                 onScroll={e => {
                                     if (gutterRef.current) gutterRef.current.scrollTop = e.currentTarget.scrollTop
-                                    const pre = document.getElementById('hep-hl-overlay')
-                                    if (pre) { pre.scrollTop = e.currentTarget.scrollTop; pre.scrollLeft = e.currentTarget.scrollLeft }
                                 }}
-                                onBlur={e => { if (!phOpen) savedCursor.current = e.currentTarget.selectionStart }}
                                 onKeyDown={e => {
                                     if (e.key === 'Tab') {
                                         e.preventDefault()
@@ -618,8 +305,6 @@ export default function HtmlEditorPanel({
                 </span>
             </div>
 
-            {phOpen && <div className="fixed inset-0 z-[10000]" onClick={() => setPhOpen(false)} />}
-
             {/* Fullscreen preview */}
             {fullscreen && (
                 <div className="fixed inset-0 z-[10001] flex flex-col" style={{ backgroundColor: '#fff' }}>
@@ -651,24 +336,6 @@ export default function HtmlEditorPanel({
                 </div>
             )}
 
-            {/* Image Assets panel */}
-            <ImageAssets open={showAssets} onClose={() => setShowAssets(false)} onInsert={insertImage} mode="panel" />
-
-            {/* Import URL modal */}
-            <ImportUrl
-                open={showImport}
-                onClose={() => setShowImport(false)}
-                onImport={(importedHtml, importedName) => { setHtml(importedHtml); setName(importedName) }}
-            />
-
-            {/* Version History panel */}
-            {showVersionHistory && (
-                <VersionHistoryPanel
-                    templateId={null}
-                    onRestore={(restoredHtml) => { setHtml(restoredHtml); setShowVersionHistory(false) }}
-                    onClose={() => setShowVersionHistory(false)}
-                />
-            )}
         </div>
     )
 }
