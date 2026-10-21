@@ -58,6 +58,7 @@ interface ListingTemplate {
     description_html: string | null
     is_system: boolean | null
     is_shared: boolean | null
+    is_pro: boolean | null
     thumbnail_url: string | null
     use_count: number | null
     created_at: string | null
@@ -265,6 +266,8 @@ export default function TemplatesTab() {
     const [previewTemplate, setPreviewTemplate] = useState<ListingTemplate | null>(null)
     const [showAiModal, setShowAiModal] = useState(false)
     const [successId, setSuccessId] = useState<string | null>(null)
+    // Publish modal — choose Free or Pro before publishing
+    const [publishTarget, setPublishTarget] = useState<ListingTemplate | null>(null)
 
     // ── Load ───────────────────────────────────────────────────────────────
     const loadTemplates = useCallback(async () => {
@@ -272,7 +275,7 @@ export default function TemplatesTab() {
         try {
             const { data, error } = await supabase
                 .from('listing_templates')
-                .select('id, user_id, name, description, category, description_html, is_system, is_shared, thumbnail_url, use_count, created_at, updated_at')
+                .select('id, user_id, name, description, category, description_html, is_system, is_shared, is_pro, thumbnail_url, use_count, created_at, updated_at')
                 // Load all admin-owned templates: published (is_system=true) AND
                 // drafts (is_system=false, user_id=null) created from admin panel
                 .or('is_system.eq.true,user_id.is.null')
@@ -309,24 +312,32 @@ export default function TemplatesTab() {
     })
 
     // ── Publish / Unpublish ────────────────────────────────────────────────
-    async function togglePublish(t: ListingTemplate) {
-        const action = t.is_system ? 'unpublish' : 'publish'
-        if (!window.confirm(`Are you sure you want to ${action} this template? It will ${action === 'publish' ? 'move it to the public gallery' : 'remove it from the public gallery'}.`)) {
-            return
+    // Publish: open modal to choose Free / Pro tier first
+    // Unpublish: do it directly (no modal needed)
+    function handlePublishClick(t: ListingTemplate) {
+        if (t.is_system) {
+            // Already published — unpublish directly
+            doPublish(t, false, t.is_pro ?? false)
+        } else {
+            // Draft — open the tier-picker modal
+            setPublishTarget(t)
         }
+    }
+
+    async function doPublish(t: ListingTemplate, publish: boolean, isPro: boolean) {
+        setPublishTarget(null)
         setTogglingId(t.id)
         try {
-            const newValue = !t.is_system
             const { error } = await (supabase as any)
                 .from('listing_templates')
-                .update({ is_system: newValue, updated_at: new Date().toISOString() })
+                .update({ is_system: publish, is_pro: isPro, updated_at: new Date().toISOString() })
                 .eq('id', t.id)
             if (error) throw error
-            setTemplates(prev => prev.map(x => x.id === t.id ? { ...x, is_system: newValue } : x))
+            setTemplates(prev => prev.map(x => x.id === t.id ? { ...x, is_system: publish, is_pro: isPro } : x))
             setSuccessId(t.id)
             setTimeout(() => setSuccessId(null), 2000)
         } catch (err) {
-            console.error('[TemplatesTab] toggle error:', err)
+            console.error('[TemplatesTab] publish error:', err)
             toast.error('Failed to update template status')
         } finally {
             setTogglingId(null)
@@ -617,11 +628,18 @@ export default function TemplatesTab() {
                                             <div><CategoryBadge category={t.category} /></div>
 
                                             {/* Status */}
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                                <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: isPublished ? C.success : C.hint, flexShrink: 0 }} />
-                                                <span style={{ fontSize: 11, fontWeight: 700, color: isPublished ? C.success : C.muted }}>
-                                                    {isPublished ? 'Published' : 'Draft'}
-                                                </span>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                    <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: isPublished ? C.success : C.hint, flexShrink: 0 }} />
+                                                    <span style={{ fontSize: 11, fontWeight: 700, color: isPublished ? C.success : C.muted }}>
+                                                        {isPublished ? 'Published' : 'Draft'}
+                                                    </span>
+                                                </div>
+                                                {t.is_pro && (
+                                                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 9, fontWeight: 900, letterSpacing: '0.06em', backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fde68a', borderRadius: 4, padding: '1px 5px', width: 'fit-content', fontFamily: 'DM Sans, sans-serif' }}>
+                                                        ⭐ PRO
+                                                    </span>
+                                                )}
                                             </div>
 
                                             {/* Uses */}
@@ -669,9 +687,9 @@ export default function TemplatesTab() {
                                                     <Layers size={11} />
                                                 </button>
 
-                                                {/* Publish / Unpublish — Fix #3: inline styles for spinner */}
+                                                {/* Publish / Unpublish */}
                                                 <button
-                                                    onClick={() => togglePublish(t)}
+                                                    onClick={() => handlePublishClick(t)}
                                                     disabled={isToggling}
                                                     title={isPublished ? 'Unpublish' : 'Publish'}
                                                     style={{
@@ -724,6 +742,44 @@ export default function TemplatesTab() {
                     </p>
                 )}
             </div>
+
+            {/* ── Publish tier-picker modal ────────────────────────────── */}
+            {publishTarget && (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 9999, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    onClick={() => setPublishTarget(null)}>
+                    <div style={{ backgroundColor: '#fff', borderRadius: 16, padding: 28, width: 380, boxShadow: '0 20px 60px rgba(0,0,0,0.25)', fontFamily: 'DM Sans, sans-serif' }}
+                        onClick={e => e.stopPropagation()}>
+                        <h2 style={{ fontSize: 16, fontWeight: 800, color: C.text, marginBottom: 6 }}>Publish Template</h2>
+                        <p style={{ fontSize: 12, color: C.muted, marginBottom: 20 }}>
+                            Choose how to publish <strong>{publishTarget.name}</strong> in the gallery.
+                        </p>
+                        <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
+                            {/* Free */}
+                            <button onClick={() => doPublish(publishTarget, true, false)}
+                                style={{ flex: 1, padding: '14px 12px', borderRadius: 12, border: `2px solid ${C.border}`, cursor: 'pointer', backgroundColor: '#f8fafc', textAlign: 'center', transition: 'all 0.15s' }}
+                                onMouseEnter={e => { e.currentTarget.style.borderColor = C.success; e.currentTarget.style.backgroundColor = '#f0fdf4' }}
+                                onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.backgroundColor = '#f8fafc' }}>
+                                <div style={{ fontSize: 22, marginBottom: 6 }}>🆓</div>
+                                <div style={{ fontSize: 13, fontWeight: 800, color: C.success, marginBottom: 3 }}>Free</div>
+                                <div style={{ fontSize: 11, color: C.muted }}>Visible to all users</div>
+                            </button>
+                            {/* Pro */}
+                            <button onClick={() => doPublish(publishTarget, true, true)}
+                                style={{ flex: 1, padding: '14px 12px', borderRadius: 12, border: `2px solid #f59e0b`, cursor: 'pointer', background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)', textAlign: 'center', transition: 'all 0.15s' }}
+                                onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 16px rgba(245,158,11,0.3)' }}
+                                onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none' }}>
+                                <div style={{ fontSize: 22, marginBottom: 6 }}>⭐</div>
+                                <div style={{ fontSize: 13, fontWeight: 800, color: '#92400e', marginBottom: 3 }}>Pro</div>
+                                <div style={{ fontSize: 11, color: '#b45309' }}>Pro subscribers only</div>
+                            </button>
+                        </div>
+                        <button onClick={() => setPublishTarget(null)}
+                            style={{ width: '100%', padding: '9px 0', borderRadius: 8, border: `1px solid ${C.border}`, backgroundColor: 'transparent', color: C.muted, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* ── Modals ───────────────────────────────────────────────── */}
             {deleteTarget && (

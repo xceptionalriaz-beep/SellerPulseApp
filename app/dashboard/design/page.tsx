@@ -83,6 +83,7 @@ interface ListingTemplate {
     sort_order: number | null
     is_featured: boolean | null
     is_new_badge: boolean | null
+    is_pro: boolean | null
 }
 
 // ── Category definitions ─────────────────────────────────────────────────────
@@ -301,7 +302,7 @@ function DesignStudioInner() {
             // System templates
             const { data: sys } = await rawDb
                 .from('listing_templates')
-                .select('id, user_id, name, description, category, description_html, is_system, is_shared, thumbnail_url, use_count, created_at, updated_at, tags, sort_order, is_featured, is_new_badge')
+                .select('id, user_id, name, description, category, description_html, is_system, is_shared, thumbnail_url, use_count, created_at, updated_at, tags, sort_order, is_featured, is_new_badge, is_pro')
                 .eq('is_system', true)
                 .order('sort_order', { ascending: true })
 
@@ -960,6 +961,8 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy
 
     const badge = (() => {
         if (!template.is_system) return null
+        // PRO badge has highest priority
+        if (template.is_pro) return { label: 'PRO', bg: '#7530fb', text: '#fff' }
         // Admin-controlled badges take priority over auto-computed ones
         if (template.is_featured) return { label: 'FEATURED', bg: '#fef3c7', text: '#92400e' }
         if (template.is_new_badge) return { label: 'NEW', bg: '#16a34a', text: '#fff' }
