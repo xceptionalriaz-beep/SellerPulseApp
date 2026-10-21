@@ -39,6 +39,7 @@ import { getVariants } from '@/components/ui/VisualEditor/variants/index'
 import { ProExportGate } from '@/components/ui/VisualEditor/ProExportGate'
 import { ProUpgradeModal } from '@/components/ui/VisualEditor/ProUpgradeModal'
 import type { Block } from '@/components/ui/VisualEditor/blocks'
+import HtmlEditorPanel from '@/components/ui/HtmlEditorPanel'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -226,6 +227,10 @@ function VisualEditorInner() {
     const [showUpgradeModal, setShowUpgradeModal] = useState(false)
     const blocksRef = useRef<Block[]>([]) // live blocks for Pro-style detection
 
+    // Pre-parsed blocks loaded from DB (blocks_json column) — used as initialBlocks
+    // so VisualEditor doesn't have to re-parse HTML, preserving exact block structure
+    const [initialBlocks, setInitialBlocks] = useState<Block[] | undefined>(undefined)
+
     // Code Editor modal (full-screen iframe over the Visual Editor)
     const [showCodeEditorModal, setShowCodeEditorModal] = useState(false)
 
@@ -235,25 +240,6 @@ function VisualEditorInner() {
         blockId: string; blockType: string; variantId: string; variantLabel: string
     }>>([])
     const proGateRef = useRef<HTMLDivElement>(null)
-
-    // ── Listen for messages from the Code Editor iframe ──────────────────────
-    useEffect(() => {
-        function handleMessage(e: MessageEvent) {
-            if (e.origin !== window.location.origin) return
-            if (e.data?.type === 'html-editor-apply') {
-                // User clicked "Apply & Return" in the code editor — update the Visual Editor HTML
-                if (e.data.html) setHtml(e.data.html)
-                if (e.data.name) setName(e.data.name)
-                dirtyRef.current = true
-                setShowCodeEditorModal(false)
-            } else if (e.data?.type === 'html-editor-discard') {
-                // User clicked back arrow without applying — just close the modal
-                setShowCodeEditorModal(false)
-            }
-        }
-        window.addEventListener('message', handleMessage)
-        return () => window.removeEventListener('message', handleMessage)
-    }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     // ── Close action menu on outside click ───────────────────────────────────
     useEffect(() => {
@@ -294,13 +280,18 @@ function VisualEditorInner() {
                 try {
                     const { data } = await rawDb
                         .from('listing_templates')
-                        .select('id, name, category, description_html, slots, description, is_system, thumbnail_url, use_count, tags, sort_order, is_featured, is_new_badge')
+                        .select('id, name, category, description_html, blocks_json, slots, description, is_system, thumbnail_url, use_count, tags, sort_order, is_featured, is_new_badge')
                         .eq('id', templateId)
                         .single()
                     if (data) {
                         setName(data.name || initialName)
                         setCategory(data.category || 'general')
                         setHtml(data.description_html || BLANK_HTML)
+                        // If blocks_json is saved, use it to seed the editor directly
+                        // so the original block structure is preserved (not re-parsed from HTML)
+                        if (Array.isArray(data.blocks_json) && data.blocks_json.length > 0) {
+                            setInitialBlocks(data.blocks_json as Block[])
+                        }
                         setSavedId(data.id)
                         setSlots(Array.isArray(data.slots) ? data.slots : [])
                         if (isAdmin) {
@@ -353,6 +344,7 @@ function VisualEditorInner() {
 
             const isEbayCompliant = auditHtml(html).count === 0
 
+            const blocksJson = blocksRef.current.length > 0 ? blocksRef.current : undefined
             if (savedId) {
                 // Update existing
                 await (supabase as any)
@@ -361,6 +353,7 @@ function VisualEditorInner() {
                         name,
                         category,
                         description_html: html,
+                        blocks_json: blocksJson ?? null,
                         is_ebay_compliant: isEbayCompliant,
                         slots,
                         ...(isAdmin ? { description, tags, sort_order: sortOrder, is_featured: isFeatured, is_new_badge: isNewBadge } : {}),
@@ -376,6 +369,7 @@ function VisualEditorInner() {
                         name,
                         category,
                         description_html: html,
+                        blocks_json: blocksJson ?? null,
                         is_ebay_compliant: isEbayCompliant,
                         slots,
                         description: isAdmin ? description : 'Visual Builder template',
@@ -415,6 +409,7 @@ function VisualEditorInner() {
 
             const isEbayCompliant = auditHtml(html).count === 0
 
+            const blocksJson = blocksRef.current.length > 0 ? blocksRef.current : undefined
             if (savedId) {
                 await (supabase as any)
                     .from('listing_templates')
@@ -422,6 +417,7 @@ function VisualEditorInner() {
                         name,
                         category,
                         description_html: html,
+                        blocks_json: blocksJson ?? null,
                         is_ebay_compliant: isEbayCompliant,
                         slots,
                         ...(isAdmin ? { description, tags, sort_order: sortOrder, is_featured: isFeatured, is_new_badge: isNewBadge } : {}),
@@ -438,6 +434,7 @@ function VisualEditorInner() {
                         name,
                         category,
                         description_html: html,
+                        blocks_json: blocksJson ?? null,
                         is_ebay_compliant: isEbayCompliant,
                         slots,
                         description: isAdmin ? description : 'Visual Builder template',
@@ -670,15 +667,9 @@ function VisualEditorInner() {
     }
 
     // ── Open in Code Editor ───────────────────────────────────────────────────
-    // Opens the HTML Template Editor Studio as a full-screen modal overlay
-    // so the user never leaves the Visual Editor page.
+    // Opens the HTML Template Editor Studio as a full-screen overlay directly
+    // in the React tree — no iframe, no navigation, no sessionStorage needed.
     const handleOpenInCodeEditor = () => {
-        try {
-            sessionStorage.setItem('riazify_visual_export_html', html)
-            sessionStorage.setItem('riazify_visual_export_name', name)
-        } catch {
-            // sessionStorage unavailable — name passed via URL as fallback
-        }
         setShowCodeEditorModal(true)
     }
 
@@ -734,6 +725,7 @@ function VisualEditorInner() {
                     onPublish={handlePublish}
                     designStudioPlan={designStudioPlan}
                     onUpgradeClick={() => setShowUpgradeModal(true)}
+                    initialBlocks={initialBlocks}
                     onBlocksChange={(b) => { blocksRef.current = b }}
                     publishStatus={publishStatus}
                     onBack={() => router.push(isAdmin ? '/dashboard/admin' : '/dashboard/design')}
@@ -1481,20 +1473,19 @@ function VisualEditorInner() {
                 />
             )}
 
-            {/* ── Code Editor Modal ── Full-screen iframe overlay ────────── */}
+            {/* ── Code Editor Modal ── Direct component overlay (no iframe, no navigation) */}
             {showCodeEditorModal && (
-                <div style={{
-                    position: 'fixed', inset: 0, zIndex: 9999,
-                    backgroundColor: '#0f0e1a',
-                    display: 'flex', flexDirection: 'column',
-                }}>
-                    <iframe
-                        src={`/dashboard/design/html-editor?source=visual&modal=true&name=${encodeURIComponent(name)}`}
-                        style={{ width: '100%', flex: 1, border: 'none', display: 'block' }}
-                        title="HTML Template Editor Studio"
-                        allow="clipboard-write"
-                    />
-                </div>
+                <HtmlEditorPanel
+                    initialHtml={html}
+                    initialName={name}
+                    onApply={(updatedHtml, updatedName) => {
+                        setHtml(updatedHtml)
+                        setName(updatedName)
+                        dirtyRef.current = true
+                        setShowCodeEditorModal(false)
+                    }}
+                    onDiscard={() => setShowCodeEditorModal(false)}
+                />
             )}
         </div>
     )

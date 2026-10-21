@@ -32,6 +32,7 @@ import {
 } from 'lucide-react'
 import { hydrateTemplateContent } from '@/lib/template-utils'
 import { assembleDocument } from '@/components/ui/VisualEditor/blocks'
+import { ProBadge } from '@/components/ui/VisualEditor/ProBadge'
 import { sanitiseHtml } from '@/components/ui/EditorToolbar'
 import { AIButton, IconButton } from '@/components/ui/Buttons'
 import ProDropdown from '@/components/ui/ProDropdown'
@@ -83,6 +84,7 @@ interface ListingTemplate {
     sort_order: number | null
     is_featured: boolean | null
     is_new_badge: boolean | null
+    is_pro: boolean | null
 }
 
 // ── Category definitions ─────────────────────────────────────────────────────
@@ -301,7 +303,7 @@ function DesignStudioInner() {
             // System templates
             const { data: sys } = await rawDb
                 .from('listing_templates')
-                .select('id, user_id, name, description, category, description_html, is_system, is_shared, thumbnail_url, use_count, created_at, updated_at, tags, sort_order, is_featured, is_new_badge')
+                .select('id, user_id, name, description, category, description_html, is_system, is_shared, thumbnail_url, use_count, created_at, updated_at, tags, sort_order, is_featured, is_new_badge, is_pro')
                 .eq('is_system', true)
                 .order('sort_order', { ascending: true })
 
@@ -336,6 +338,7 @@ function DesignStudioInner() {
                         sort_order: null,
                         is_featured: null,
                         is_new_badge: null,
+                        is_pro: null,
                     }
                 })
             }
@@ -412,7 +415,8 @@ function DesignStudioInner() {
     // Templates saved by the Visual Builder carry "Visual Builder" in their
     // description. Route everything else to the HTML editor.
     function getEditorRoute(t: ListingTemplate) {
-        const isVisual = (t.description || '').toLowerCase().includes('visual builder')
+        // System templates are Visual Builder templates; own templates signal via description
+        const isVisual = t.is_system || (t.description || '').toLowerCase().includes('visual builder')
         return `/dashboard/design/${isVisual ? 'visual-editor' : 'html-editor'}?name=${encodeURIComponent(t.name)}&id=${t.id}`
     }
 
@@ -960,6 +964,8 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy
 
     const badge = (() => {
         if (!template.is_system) return null
+        // PRO badge has highest priority
+        if (template.is_pro) return { label: 'PRO', bg: '#7530fb', text: '#fff' }
         // Admin-controlled badges take priority over auto-computed ones
         if (template.is_featured) return { label: 'FEATURED', bg: '#fef3c7', text: '#92400e' }
         if (template.is_new_badge) return { label: 'NEW', bg: '#16a34a', text: '#fff' }
@@ -999,9 +1005,16 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy
 
                 {/* Badges */}
                 {badge && (
-                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[9px] font-black tracking-wide"
-                        style={{ backgroundColor: badge.bg, color: badge.text, fontFamily: 'DM Sans, sans-serif', zIndex: 2 }}>
-                        {badge.label}
+                    <div className="absolute top-2.5" style={{ zIndex: 2, ...(template.is_pro ? { right: '10px' } : { left: '10px' }) }}>
+                        {template.is_pro
+                            ? <ProBadge size="xs" />
+                            : (
+                                <div className="px-2 py-0.5 rounded-full text-[9px] font-black tracking-wide"
+                                    style={{ backgroundColor: badge.bg, color: badge.text, fontFamily: 'DM Sans, sans-serif' }}>
+                                    {badge.label}
+                                </div>
+                            )
+                        }
                     </div>
                 )}
                 {isOwn && (

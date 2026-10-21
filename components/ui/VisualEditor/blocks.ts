@@ -1290,12 +1290,11 @@ export function formatColContent(html: string, minH?: number): string {
                 else s = s.replace(/height:[^;]+;?/g, 'height:100%;')
                 if (!s.includes('flex:')) s += 'flex:1 1 auto;'
                 if (!s.includes('box-sizing:')) s += 'box-sizing:border-box;'
-                if (minH && minH > 0) {
-                    if (s.includes('min-height:')) {
-                        s = s.replace(/min-height:[^;]+;?/g, `min-height:${minH}px;`)
-                    } else {
-                        s += `min-height:${minH}px;`
-                    }
+                const h = minH && minH > 0 ? minH : 80
+                if (s.includes('min-height:')) {
+                    s = s.replace(/min-height:[^;]+;?/g, `min-height:${h}px;`)
+                } else {
+                    s += `min-height:${h}px;`
                 }
                 return `${prefix}${s}${suffix}`
             }
@@ -1474,12 +1473,12 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             const rowMinH = Number(pa.minHeight || 0)
             const leftH = Number(pa.leftMinHeight || rowMinH)
             const rightH = Number(pa.rightMinHeight || rowMinH)
-            const lMinH = leftH > 0 ? `min-height:${leftH}px;height:${leftH}px;` : ''
-            const rMinH = rightH > 0 ? `min-height:${rightH}px;height:${rightH}px;` : ''
+            const lMinH = leftH > 0 ? `min-height:${leftH}px;` : ''
+            const rMinH = rightH > 0 ? `min-height:${rightH}px;` : ''
             const tblH = Math.max(leftH, rightH, rowMinH)
-            const tblMinH = tblH > 0 ? `min-height:${tblH}px;height:${tblH}px;` : ''
-            const lWrapStyle = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;display:flex;flex-direction:column;height:100%;${lMinH}`
-            const rWrapStyle = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;display:flex;flex-direction:column;height:100%;${rMinH}`
+            const tblMinH = tblH > 0 ? `min-height:${tblH}px;` : ''
+            const lWrapStyle = `width:100%;max-width:100%;box-sizing:border-box;word-break:break-word;overflow-wrap:anywhere;display:flex;flex-direction:column;height:100%;${lMinH}`
+            const rWrapStyle = `width:100%;max-width:100%;box-sizing:border-box;word-break:break-word;overflow-wrap:anywhere;display:flex;flex-direction:column;height:100%;${rMinH}`
             // Divider
             const divider = pa.showDivider
                 ? `<td width="${pa.dividerWidth ?? 1}px" style="width:${pa.dividerWidth ?? 1}px;background-color:${pa.dividerColor ?? '#ede9fe'};font-size:1px;line-height:1px;">&nbsp;</td>`
@@ -1489,12 +1488,12 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             const contRadius = pa.containerBorderRadius ? `border-radius:${pa.containerBorderRadius}px;overflow:hidden;` : ''
             const contStyle = contBorder + contRadius
             const rowsHtml = rows.map((r: any, idx: number) => `
-        <tr>
-          <td width="${p.leftWidth}%" valign="${valign}" style="padding-right:${p.gap / 2}px;${lPad}${lRadius}${lBorder}${lMinH}background-color:${pa.leftBg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}height:100%;">
+        <tr style="height:100%;">
+          <td width="${p.leftWidth}%" valign="${valign}" style="padding-right:${p.gap / 2}px;${lPad}${lRadius}${lBorder}${lMinH}background-color:${pa.leftBg ?? 'transparent'};box-sizing:border-box;height:100%; ${idx > 0 ? 'padding-top:16px;' : ''}">
             <div style="${lWrapStyle}">${formatColContent(r.leftContent, leftH)}</div>
           </td>
           ${divider}
-          <td width="${rightWidth}%" valign="${valign}" style="padding-left:${p.gap / 2}px;${rPad}${rRadius}${rBorder}${rMinH}background-color:${pa.rightBg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}height:100%;">
+          <td width="${rightWidth}%" valign="${valign}" style="padding-left:${p.gap / 2}px;${rPad}${rRadius}${rBorder}${rMinH}background-color:${pa.rightBg ?? 'transparent'};box-sizing:border-box;height:100%; ${idx > 0 ? 'padding-top:16px;' : ''}">
             <div style="${rWrapStyle}">${formatColContent(r.rightContent, rightH)}</div>
           </td>
         </tr>
@@ -1504,7 +1503,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
                 `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;${tblMinH}">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}${tblMinH}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0"${stackClass} style="table-layout:fixed;width:100%;${tblMinH}${contStyle}">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"${stackClass} style="table-layout:fixed;width:100%;height:100%;${tblMinH}${contStyle}">
         ${rowsHtml}
       </table>
     </td>
@@ -1557,14 +1556,14 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             const h1 = Number(pa3.col1MinHeight || rowMinH3)
             const h2 = Number(pa3.col2MinHeight || rowMinH3)
             const h3 = Number(pa3.col3MinHeight || rowMinH3)
-            const mh1 = h1 > 0 ? `min-height:${h1}px;height:${h1}px;` : ''
-            const mh2 = h2 > 0 ? `min-height:${h2}px;height:${h2}px;` : ''
-            const mh3 = h3 > 0 ? `min-height:${h3}px;height:${h3}px;` : ''
+            const mh1 = h1 > 0 ? `min-height:${h1}px;` : ''
+            const mh2 = h2 > 0 ? `min-height:${h2}px;` : ''
+            const mh3 = h3 > 0 ? `min-height:${h3}px;` : ''
             const maxH3 = Math.max(h1, h2, h3, rowMinH3)
-            const tblMinH3 = maxH3 > 0 ? `min-height:${maxH3}px;height:${maxH3}px;` : ''
-            const wrap1 = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;display:flex;flex-direction:column;height:100%;${mh1}`
-            const wrap2 = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;display:flex;flex-direction:column;height:100%;${mh2}`
-            const wrap3 = `width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;display:flex;flex-direction:column;height:100%;${mh3}`
+            const tblMinH3 = maxH3 > 0 ? `min-height:${maxH3}px;` : ''
+            const wrap1 = `width:100%;max-width:100%;box-sizing:border-box;word-break:break-word;overflow-wrap:anywhere;display:flex;flex-direction:column;height:100%;${mh1}`
+            const wrap2 = `width:100%;max-width:100%;box-sizing:border-box;word-break:break-word;overflow-wrap:anywhere;display:flex;flex-direction:column;height:100%;${mh2}`
+            const wrap3 = `width:100%;max-width:100%;box-sizing:border-box;word-break:break-word;overflow-wrap:anywhere;display:flex;flex-direction:column;height:100%;${mh3}`
             // Divider
             const div3 = pa3.showDivider
                 ? `<td width="${pa3.dividerWidth ?? 1}px" style="width:${pa3.dividerWidth ?? 1}px;background-color:${pa3.dividerColor ?? '#ede9fe'};font-size:1px;">&nbsp;</td>`
@@ -1574,12 +1573,12 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
             const contRadius3 = pa3.containerBorderRadius ? `border-radius:${pa3.containerBorderRadius}px;overflow:hidden;` : ''
             const contStyle3 = contBorder3 + contRadius3
             const rowsHtml = rows.map((r: any, idx: number) => `
-        <tr>
-          <td width="${w1}%" valign="${valign3}" style="padding-right:${p.gap / 2}px;${cp1}${cr1}${cb1}${mh1}background-color:${pa3.col1Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}height:100%;"><div style="${wrap1}">${formatColContent(r.col1Content, h1)}</div></td>
+        <tr style="height:100%;">
+          <td width="${w1}%" valign="${valign3}" style="padding-right:${p.gap / 2}px;${cp1}${cr1}${cb1}${mh1}background-color:${pa3.col1Bg ?? 'transparent'};box-sizing:border-box;height:100%; ${idx > 0 ? 'padding-top:16px;' : ''}"><div style="${wrap1}">${formatColContent(r.col1Content, h1)}</div></td>
           ${div3}
-          <td width="${w2}%" valign="${valign3}" style="padding-left:${p.gap / 2}px;padding-right:${p.gap / 2}px;${cp2}${cr2}${cb2}${mh2}background-color:${pa3.col2Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}height:100%;"><div style="${wrap2}">${formatColContent(r.col2Content, h2)}</div></td>
+          <td width="${w2}%" valign="${valign3}" style="padding-left:${p.gap / 2}px;padding-right:${p.gap / 2}px;${cp2}${cr2}${cb2}${mh2}background-color:${pa3.col2Bg ?? 'transparent'};box-sizing:border-box;height:100%; ${idx > 0 ? 'padding-top:16px;' : ''}"><div style="${wrap2}">${formatColContent(r.col2Content, h2)}</div></td>
           ${div3}
-          <td width="${w3}%" valign="${valign3}" style="padding-left:${p.gap / 2}px;${cp3}${cr3}${cb3}${mh3}background-color:${pa3.col3Bg ?? 'transparent'}; ${idx > 0 ? 'padding-top:16px;' : ''}height:100%;"><div style="${wrap3}">${formatColContent(r.col3Content, h3)}</div></td>
+          <td width="${w3}%" valign="${valign3}" style="padding-left:${p.gap / 2}px;${cp3}${cr3}${cb3}${mh3}background-color:${pa3.col3Bg ?? 'transparent'};box-sizing:border-box;height:100%; ${idx > 0 ? 'padding-top:16px;' : ''}"><div style="${wrap3}">${formatColContent(r.col3Content, h3)}</div></td>
         </tr>
             `).join('')
             const stackClass3 = pa3.stackMobile === false ? '' : ' class="mobile-stack"'
@@ -1587,7 +1586,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
                 `<table width="100%" cellpadding="0" cellspacing="0" border="0" align="center" style="width:100%;${tblMinH3}">
   <tr>
     <td style="background-color:${p.bgColor};${pad(p)}${tblMinH3}">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0"${stackClass3} style="table-layout:fixed;width:100%;${tblMinH3}${contStyle3 ? contStyle3 : ''}">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0"${stackClass3} style="table-layout:fixed;width:100%;height:100%;${tblMinH3}${contStyle3 ? contStyle3 : ''}">
         ${rowsHtml}
       </table>
     </td>
