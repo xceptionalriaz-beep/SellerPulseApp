@@ -217,18 +217,26 @@ interface BlockLibraryProps {
     onDragStart: (type: BlockType) => void
     onDragEnd: () => void
     draggedType: BlockType | null
+    /** If provided, only show these categories (used by the Content tab) */
+    showCategories?: BlockCategory[]
 }
 
-export default function BlockLibrary({ onAddBlock, onDragStart, onDragEnd, draggedType }: BlockLibraryProps) {
+export default function BlockLibrary({ onAddBlock, onDragStart, onDragEnd, draggedType, showCategories }: BlockLibraryProps) {
     const [search, setSearch] = useState('')
     const [hoveredType, setHovered] = useState<BlockType | null>(null)
     const [collapsed, setCollapsed] = useState<Set<BlockCategory>>(new Set())
 
     const query = search.trim().toLowerCase()
-    const allDefs = BLOCK_DEFINITIONS
+    const allDefs = showCategories
+        ? BLOCK_DEFINITIONS.filter(d => showCategories.includes(d.category))
+        : BLOCK_DEFINITIONS
     const filteredDefs = query
         ? allDefs.filter(d => d.label.toLowerCase().includes(query) || d.category.toLowerCase().includes(query))
         : allDefs
+
+    const visibleCategories = showCategories
+        ? BLOCK_CATEGORIES.filter(c => showCategories.includes(c))
+        : BLOCK_CATEGORIES
 
     const handleDragStart = useCallback((e: React.DragEvent, type: BlockType) => {
         e.dataTransfer.setData('text/plain', type)
@@ -292,7 +300,7 @@ export default function BlockLibrary({ onAddBlock, onDragStart, onDragEnd, dragg
                         )}
                     </div>
                 ) : (
-                    BLOCK_CATEGORIES.map(cat => {
+                    visibleCategories.map(cat => {
                         const defs = BLOCK_DEFINITIONS.filter(d => d.category === cat)
                         if (defs.length === 0) return null
                         const isCollapsed = collapsed.has(cat)
