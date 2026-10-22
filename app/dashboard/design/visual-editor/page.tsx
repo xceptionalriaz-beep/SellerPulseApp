@@ -462,6 +462,11 @@ function VisualEditorInner() {
 
     // ── Save Template ─────────────────────────────────────────────────────────
     const handleSaveDraft = useCallback(async () => {
+        // Block save on a blank canvas
+        if (blocksRef.current.length === 0) {
+            showToast('Add at least one block to your canvas before saving.')
+            return
+        }
         // Always read from ref so we never get a stale closure value
         const trimmed = nameRef.current.trim()
         const isDefaultName = trimmed === 'New Visual Template' || trimmed === 'Name your design'
@@ -1349,7 +1354,14 @@ function VisualEditorInner() {
                                             </button>
                                             {!isAdmin && (
                                                 <button
-                                                    onClick={() => { setActionMenuOpen(false); tryGatedAction(() => exportFnRef.current?.()) }}
+                                                    onClick={() => {
+                                                        setActionMenuOpen(false)
+                                                        if (blocksRef.current.length === 0) {
+                                                            showToast('Your canvas is empty — add some blocks before exporting.')
+                                                            return
+                                                        }
+                                                        tryGatedAction(() => exportFnRef.current?.())
+                                                    }}
                                                     style={{
                                                         width: '100%', display: 'flex', alignItems: 'center', gap: 10,
                                                         padding: '9px 10px', border: 'none', borderRadius: 8,
