@@ -1,7 +1,7 @@
 'use client'
 // components/ui/AiTemplateGenerator.tsx
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
     X, Zap, RefreshCw, Save, Check,
     Loader2, ChevronLeft,
@@ -94,6 +94,7 @@ interface Props {
     onClose: () => void
     onImport: (html: string, name: string, category: string) => void
     isAdmin?: boolean
+    initialPrompt?: string
 }
 
 function wrapForPreview(html: string): string {
@@ -101,7 +102,7 @@ function wrapForPreview(html: string): string {
     return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#1f1d2e;background:#fff;}img{max-width:100%;height:auto;display:block;}table{border-collapse:collapse;}</style></head><body>${html}</body></html>`
 }
 
-export default function AiTemplateGenerator({ open, onClose, onImport, isAdmin = false }: Props) {
+export default function AiTemplateGenerator({ open, onClose, onImport, isAdmin = false, initialPrompt = '' }: Props) {
     const router = useRouter()
     const supabase = createClient()
 
@@ -111,8 +112,13 @@ export default function AiTemplateGenerator({ open, onClose, onImport, isAdmin =
     const [sections, setSections] = useState<Set<string>>(
         new Set(SECTIONS.filter(s => s.default).map(s => s.id))
     )
-    const [notes, setNotes] = useState('')
+    const [notes, setNotes] = useState(initialPrompt)
     const [html, setHtml] = useState('')
+
+    // Sync notes with initialPrompt when modal opens
+    useEffect(() => {
+        if (open && initialPrompt) setNotes(initialPrompt)
+    }, [open, initialPrompt])
     const [progress, setProgress] = useState(0)
     const [error, setError] = useState('')
     const [device, setDevice] = useState<DeviceId>('desktop')

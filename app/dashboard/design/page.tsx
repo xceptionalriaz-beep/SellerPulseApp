@@ -293,6 +293,10 @@ function DesignStudioInner() {
 
     // AI Generator modal
     const [showAiModal, setShowAiModal] = useState(false)
+    const [aiPrompt, setAiPrompt] = useState('')
+
+    // Delete confirmation
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
     // ── Load templates ─────────────────────────────────────────────────────
     const loadTemplates = useCallback(async () => {
@@ -356,6 +360,13 @@ function DesignStudioInner() {
 
     useEffect(() => { loadTemplates() }, [loadTemplates])
 
+    // Bug 6: Reset category filter + search when switching tabs
+    useEffect(() => {
+        setActiveCategory('all')
+        setSearch('')
+        setConfirmDeleteId(null)
+    }, [activeTab])
+
     // ── Filter + search ────────────────────────────────────────────────────
     // allVisible is tab-aware — template gallery = admin only, my templates = user only
     const allVisible = activeTab === 'my-templates' ? myTemplates : templates
@@ -381,14 +392,46 @@ function DesignStudioInner() {
         return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
     })
 
+    // Bug 3: My Templates — filtered and sorted (mirrors system template sort logic)
+    const sortedMyTemplates = myTemplates.filter(t => {
+        const matchCat = activeCategory === 'all' || matchesCategoryFilter(t.category, activeCategory)
+        const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase())
+        return matchCat && matchSearch
+    }).sort((a, b) => {
+        if (sort === 'newest') return new Date(b.updated_at || 0).getTime() - new Date(a.updated_at || 0).getTime()
+        return (b.use_count || 0) - (a.use_count || 0)
+    })
+
     // ── Copy HTML ──────────────────────────────────────────────────────────
+    // Bug 8: For visual_templates records, refetch fresh blocks_json so the copied HTML
+    // is not stale (description_html is computed once at page-load time).
     async function copyHtml(t: ListingTemplate) {
-        if (!t.description_html) return
-        await navigator.clipboard.writeText(t.description_html)
+        const isVisualTemplate = !t.is_system && t.description === 'Visual Builder template'
+        let html = t.description_html
+
+        if (isVisualTemplate) {
+            try {
+                const { data: vt } = await (supabase as any)
+                    .from('visual_templates')
+                    .select('blocks_json, canvas_settings_json')
+                    .eq('id', t.id)
+                    .single()
+                if (vt) {
+                    const blocks = Array.isArray(vt.blocks_json) ? vt.blocks_json : []
+                    html = blocks.length > 0 ? assembleDocument(blocks, vt.canvas_settings_json ?? undefined) : null
+                }
+            } catch {
+                // fall back to cached html
+            }
+        }
+
+        if (!html) return
+        await navigator.clipboard.writeText(html)
         setCopiedId(t.id)
         setTimeout(() => setCopiedId(null), 2000)
-        // bump use_count if it's a real DB template
-        if (t.id) {
+
+        // Bump use_count only for real listing_templates records (system/html-editor templates)
+        if (!isVisualTemplate && t.id) {
             await rawDb.from('listing_templates')
                 .update({ use_count: (t.use_count || 0) + 1 })
                 .eq('id', t.id)
@@ -400,10 +443,20 @@ function DesignStudioInner() {
 
 
     // ── Delete own template ────────────────────────────────────────────────
+    // Bug 4: Two-step confirmation — first click sets confirmDeleteId, second click deletes
     async function deleteTemplate(id: string) {
         // Guard: only delete own templates, never system ones
         const isSystem = [...templates].some(t => t.id === id)
         if (isSystem) return
+
+        // First click — ask for confirmation
+        if (confirmDeleteId !== id) {
+            setConfirmDeleteId(id)
+            return
+        }
+
+        // Second click (confirmed) — proceed with deletion
+        setConfirmDeleteId(null)
         setDeletingId(id)
         // Own templates live in visual_templates (saved by the Visual Builder)
         await (supabase as any).from('visual_templates').delete().eq('id', id)
@@ -540,6 +593,8 @@ function DesignStudioInner() {
                                 </p>
                                 <div className="flex gap-2">
                                     <input
+                                        value={aiPrompt}
+                                        onChange={e => setAiPrompt(e.target.value)}
                                         placeholder="e.g. Professional template for vintage electronics..."
                                         className="flex-1 text-[12px] px-3 py-1.5 rounded-lg outline-none transition-all"
                                         style={{
@@ -777,7 +832,7 @@ function DesignStudioInner() {
                             <p className="text-[13px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>Loading templates...</p>
                             <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
                         </div>
-                    ) : sortedTemplates.length === 0 ? (
+                    ) : (activeTab !== 'my-templates' && sortedTemplates.length === 0) ? (
                         <div className="flex flex-col items-center justify-center py-24 gap-3">
                             <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: C.primaryLight }}>
                                 <LayoutTemplate size={24} style={{ color: C.primary }} />
@@ -823,58 +878,49 @@ function DesignStudioInner() {
                             )}
 
                             {/* My Templates — no search results */}
-                            {activeTab === 'my-templates' && myTemplates.length > 0 && myTemplates.filter(t => {
-                                const matchCat = activeCategory === 'all' || t.category?.toLowerCase() === activeCategory
-                                const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase())
-                                return matchCat && matchSearch
-                            }).length === 0 && (
-                                    <div className="flex flex-col items-center justify-center py-16 text-center">
-                                        <Search size={24} style={{ color: C.border, marginBottom: 12 }} />
-                                        <p className="text-[14px] font-semibold mb-1" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
-                                            No templates match your search
-                                        </p>
-                                        <p className="text-[12px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                                            Try a different keyword or category
-                                        </p>
-                                    </div>
-                                )}
+                            {activeTab === 'my-templates' && myTemplates.length > 0 && sortedMyTemplates.length === 0 && (
+                                <div className="flex flex-col items-center justify-center py-16 text-center">
+                                    <Search size={24} style={{ color: C.border, marginBottom: 12 }} />
+                                    <p className="text-[14px] font-semibold mb-1" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
+                                        No templates match your search
+                                    </p>
+                                    <p className="text-[12px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                        Try a different keyword or category
+                                    </p>
+                                </div>
+                            )}
 
                             {/* My Templates — has results (only shown on my-templates tab) */}
-                            {activeTab === 'my-templates' && myTemplates.filter(t => {
-                                const matchCat = activeCategory === 'all' || t.category?.toLowerCase() === activeCategory
-                                const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase())
-                                return matchCat && matchSearch
-                            }).length > 0 && (
-                                    <div className="mb-8">
-                                        <h2 className="text-[14px] font-bold mb-3 flex items-center gap-2"
-                                            style={{ color: C.dark, fontFamily: 'Syne, sans-serif' }}>
-                                            <span style={{ color: C.primary }}>My Templates</span>
-                                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold"
-                                                style={{ backgroundColor: C.primaryLight, color: C.primary }}>
-                                                {myTemplates.length}
-                                            </span>
-                                        </h2>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
-                                            {myTemplates.filter(t => {
-                                                const matchCat = activeCategory === 'all' || t.category?.toLowerCase() === activeCategory
-                                                const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase())
-                                                return matchCat && matchSearch
-                                            }).map(t => (
-                                                <TemplateCard
-                                                    key={t.id}
-                                                    template={t}
-                                                    isOwn
-                                                    copiedId={copiedId}
-                                                    deletingId={deletingId}
-                                                    onPreview={() => setPreviewTemplate(t)}
-                                                    onCopy={() => copyHtml(t)}
-                                                    onDelete={() => deleteTemplate(t.id)}
-                                                    onEdit={() => handleEditTemplate(t)}
-                                                />
-                                            ))}
-                                        </div>
+                            {activeTab === 'my-templates' && sortedMyTemplates.length > 0 && (
+                                <div className="mb-8">
+                                    <h2 className="text-[14px] font-bold mb-3 flex items-center gap-2"
+                                        style={{ color: C.dark, fontFamily: 'Syne, sans-serif' }}>
+                                        <span style={{ color: C.primary }}>My Templates</span>
+                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                                            style={{ backgroundColor: C.primaryLight, color: C.primary }}>
+                                            {myTemplates.length}
+                                        </span>
+                                    </h2>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
+                                        {sortedMyTemplates.map(t => (
+                                            <TemplateCard
+                                                key={t.id}
+                                                template={t}
+                                                isOwn
+                                                copiedId={copiedId}
+                                                deletingId={deletingId}
+                                                confirmDeleteId={confirmDeleteId}
+                                                copyingTemplateId={copyingTemplateId}
+                                                onPreview={() => setPreviewTemplate(t)}
+                                                onCopy={() => copyHtml(t)}
+                                                onDelete={() => deleteTemplate(t.id)}
+                                                onCancelDelete={() => setConfirmDeleteId(null)}
+                                                onEdit={() => handleEditTemplate(t)}
+                                            />
+                                        ))}
                                     </div>
-                                )}
+                                </div>
+                            )}
 
                             {/* All / System templates */}
                             {activeTab !== 'my-templates' && (
@@ -947,9 +993,12 @@ function DesignStudioInner() {
                                                         isOwn={false}
                                                         copiedId={copiedId}
                                                         deletingId={deletingId}
+                                                        confirmDeleteId={confirmDeleteId}
+                                                        copyingTemplateId={copyingTemplateId}
                                                         onPreview={() => setPreviewTemplate(t)}
                                                         onCopy={() => copyHtml(t)}
                                                         onDelete={() => deleteTemplate(t.id)}
+                                                        onCancelDelete={() => setConfirmDeleteId(null)}
                                                         onEdit={() => handleEditTemplate(t)}
                                                     />
                                                 ))}
@@ -978,6 +1027,7 @@ function DesignStudioInner() {
             <AiTemplateGenerator
                 open={showAiModal}
                 onClose={() => setShowAiModal(false)}
+                initialPrompt={aiPrompt}
                 onImport={(html, name, cat) => {
                     // Store in sessionStorage so html-editor can pick it up
                     if (typeof window !== 'undefined') {
@@ -1003,16 +1053,21 @@ interface CardProps {
     isOwn: boolean
     copiedId: string | null
     deletingId: string | null
+    confirmDeleteId?: string | null
+    copyingTemplateId?: string | null
     onPreview: () => void
     onCopy: () => void
     onDelete: () => void
+    onCancelDelete?: () => void
     onEdit: () => void
 }
 
-function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy, onDelete, onEdit }: CardProps) {
+function TemplateCard({ template, isOwn, copiedId, deletingId, confirmDeleteId, copyingTemplateId, onPreview, onCopy, onDelete, onCancelDelete, onEdit }: CardProps) {
     const [hovered, setHovered] = useState(false)
     const copied = copiedId === template.id
     const deleting = deletingId === template.id
+    const confirmingDelete = confirmDeleteId === template.id
+    const copying = copyingTemplateId === template.id
     const isFeaturedCard = !!template.is_featured
 
     const badge = (() => {
@@ -1094,10 +1149,12 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy
                             <Eye size={13} /> Preview
                         </button>
                         <button
-                            onClick={e => { e.stopPropagation(); onEdit() }}
+                            onClick={e => { e.stopPropagation(); if (!copying) onEdit() }}
+                            disabled={copying}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold"
-                            style={{ backgroundColor: C.primary, color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', boxShadow: '0 2px 8px rgba(117,48,251,0.3)' }}>
-                            <Pencil size={13} /> Edit
+                            style={{ backgroundColor: C.primary, color: '#fff', border: 'none', cursor: copying ? 'not-allowed' : 'pointer', opacity: copying ? 0.7 : 1, fontFamily: 'DM Sans, sans-serif', boxShadow: '0 2px 8px rgba(117,48,251,0.3)' }}>
+                            {copying ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : <Pencil size={13} />}
+                            {copying ? 'Copying…' : 'Edit'}
                         </button>
                     </div>
                 </div>
@@ -1129,17 +1186,39 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, onPreview, onCopy
                     </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
-                    <IconButton onClick={onCopy}
-                        icon={copied ? <Check size={12} /> : <Copy size={12} />}
-                        tooltip={copied ? 'Copied!' : 'Copy HTML'}
-                        active={copied} variant={copied ? 'success' : 'default'} size={28} />
-                    <IconButton onClick={onEdit}
-                        icon={<Pencil size={12} />}
-                        tooltip="Edit template" size={28} />
-                    {isOwn && (
-                        <IconButton onClick={onDelete}
-                            icon={deleting ? <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <Trash2 size={12} />}
-                            tooltip="Delete" size={28} />
+                    {/* Bug 4: Inline delete confirmation */}
+                    {confirmingDelete ? (
+                        <>
+                            <span style={{ fontSize: 10, color: C.danger, fontFamily: 'DM Sans, sans-serif', fontWeight: 600, whiteSpace: 'nowrap' }}>Delete?</span>
+                            <button
+                                onClick={onDelete}
+                                title="Confirm delete"
+                                style={{ width: 28, height: 28, border: `1px solid ${C.danger}`, backgroundColor: C.dangerBg, borderRadius: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.danger, flexShrink: 0 }}>
+                                {deleting ? <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <Check size={12} />}
+                            </button>
+                            <button
+                                onClick={() => onCancelDelete?.()}
+                                title="Cancel"
+                                style={{ width: 28, height: 28, border: `1px solid ${C.border}`, backgroundColor: C.surface, borderRadius: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.secondary, flexShrink: 0 }}>
+                                <X size={12} />
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <IconButton onClick={onCopy}
+                                icon={copied ? <Check size={12} /> : <Copy size={12} />}
+                                tooltip={copied ? 'Copied!' : 'Copy HTML'}
+                                active={copied} variant={copied ? 'success' : 'default'} size={28} />
+                            {/* Bug 5: Spinner on Edit when copying system template */}
+                            <IconButton onClick={copying ? undefined : onEdit}
+                                icon={copying ? <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <Pencil size={12} />}
+                                tooltip={copying ? 'Copying template…' : 'Edit template'} size={28} />
+                            {isOwn && (
+                                <IconButton onClick={onDelete}
+                                    icon={<Trash2 size={12} />}
+                                    tooltip="Delete" size={28} />
+                            )}
+                        </>
                     )}
                 </div>
             </div>

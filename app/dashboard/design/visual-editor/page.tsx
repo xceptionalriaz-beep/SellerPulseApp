@@ -620,6 +620,22 @@ function VisualEditorInner() {
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) throw new Error('Not logged in')
 
+            // ── Bug 10: visual_templates path (user's own saved template) ────────────
+            // "Publishing" a vtSavedId template marks it as shared in visual_templates.
+            if (vtSavedId && !isAdmin) {
+                await (supabase as any)
+                    .from('visual_templates')
+                    .update({ is_shared: true, updated_at: new Date().toISOString() })
+                    .eq('id', vtSavedId)
+                setPublishStatus('published')
+                setTimeout(() => {
+                    setPublishStatus('idle')
+                    showToast('✓ Template published — visible to your team')
+                }, 1500)
+                return
+            }
+
+            // ── listing_templates path (admin publish / html-editor template) ────────
             const publishPayload = {
                 name,
                 category,
@@ -673,7 +689,7 @@ function VisualEditorInner() {
             console.error('[visual-editor] publish error:', err)
             setPublishStatus('idle')
         }
-    }, [savedId, name, category, html, slots, tags, sortOrder, isFeatured, isNewBadge, supabase, isAdmin, designStudioPlan, hasProStyles])
+    }, [vtSavedId, savedId, name, category, html, slots, tags, sortOrder, isFeatured, isNewBadge, supabase, isAdmin, designStudioPlan, hasProStyles, showToast])
 
     // ── Unpublish (admin only) ────────────────────────────────────────────────
     const handleUnpublish = useCallback(async () => {
@@ -823,7 +839,7 @@ function VisualEditorInner() {
                     publishStatus={publishStatus}
                     onBack={() => router.push(isAdmin ? '/dashboard/admin' : '/dashboard/design')}
                     nameValue={name}
-                    onNameChange={(n) => { setName(n); setNameError(false) }}
+                    onNameChange={(n) => { setName(n); setNameError(false); dirtyRef.current = true }}
                     nameError={nameError}
                     toolbarSlot={
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -858,25 +874,31 @@ function VisualEditorInner() {
                                     Used {useCount}×
                                 </div>
                             )}
-                            {/* History button — disabled until template has been saved at least once */}
+                            {/* History button — enabled once template has been saved at least once.
+                                Works for both listing_templates (savedId) and visual_templates (vtSavedId). */}
+                            {(() => {
+                                const historyEnabled = !!(savedId || vtSavedId)
+                                return (
                             <button
-                                onClick={() => savedId ? setShowVersionHistory(v => !v) : undefined}
-                                disabled={!savedId}
+                                onClick={() => historyEnabled ? setShowVersionHistory(v => !v) : undefined}
+                                disabled={!historyEnabled}
                                 style={{
                                     display: 'flex', alignItems: 'center', gap: 6,
                                     padding: '6px 12px',
                                     border: `1px solid ${showVersionHistory ? C.primary : C.border}`, borderRadius: 8,
                                     backgroundColor: showVersionHistory ? C.primaryLight : C.surface,
-                                    color: showVersionHistory ? C.primary : (savedId ? C.secondary : C.muted),
+                                    color: showVersionHistory ? C.primary : (historyEnabled ? C.secondary : C.muted),
                                     fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 600,
-                                    cursor: savedId ? 'pointer' : 'not-allowed', transition: 'all 0.15s',
-                                    opacity: savedId ? 1 : 0.5,
+                                    cursor: historyEnabled ? 'pointer' : 'not-allowed', transition: 'all 0.15s',
+                                    opacity: historyEnabled ? 1 : 0.5,
                                 }}
-                                title={savedId ? 'View version history' : 'Save the template first to enable version history'}
+                                title={historyEnabled ? 'View version history' : 'Save the template first to enable version history'}
                             >
                                 <History size={13} />
                                 History
                             </button>
+                                )
+                            })()}
                             <div style={{ position: 'relative' }} ref={actionMenuRef}>
                                 {/* Trigger button */}
                                 <button
