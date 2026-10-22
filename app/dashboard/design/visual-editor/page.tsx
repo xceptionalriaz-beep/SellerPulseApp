@@ -192,6 +192,13 @@ function VisualEditorInner() {
     const [saving, setSaving] = useState(false)
     const [saved, setSaved] = useState(false)
     const [autoSaveLabel, setAutoSaveLabel] = useState<'idle' | 'saving' | 'saved'>('idle')
+    const [toastMsg, setToastMsg] = useState<string | null>(null)
+    const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const showToast = (msg: string) => {
+        setToastMsg(msg)
+        if (toastTimer.current) clearTimeout(toastTimer.current)
+        toastTimer.current = setTimeout(() => setToastMsg(null), 3500)
+    }
     const [loading, setLoading] = useState(!!(templateId || vtId))
     const [editingName, setEditingName] = useState(false)
     const nameInputRef = useRef<HTMLInputElement>(null)
@@ -453,6 +460,13 @@ function VisualEditorInner() {
 
     // ── Save Template ─────────────────────────────────────────────────────────
     const handleSaveDraft = useCallback(async () => {
+        const trimmed = name.trim()
+        if (!trimmed || trimmed === 'New Visual Template' || trimmed === 'Name your design') {
+            showToast('Please give your template a name before saving.')
+            setEditingName(true)
+            setTimeout(() => nameInputRef.current?.focus(), 50)
+            return
+        }
         setSaving(true)
         setSaved(false)
         try {
@@ -1470,6 +1484,10 @@ function VisualEditorInner() {
                     from { transform: rotate(0deg); }
                     to   { transform: rotate(360deg); }
                 }
+                @keyframes fadeInUp {
+                    from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+                    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+                }
             `}</style>
 
             {/* Version History panel */}
@@ -1554,6 +1572,22 @@ function VisualEditorInner() {
                     }}
                     onDiscard={() => setShowCodeEditorModal(false)}
                 />
+            )}
+
+            {/* ── Toast notification ── */}
+            {toastMsg && (
+                <div style={{
+                    position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)',
+                    backgroundColor: '#1e1535', color: '#fff',
+                    padding: '10px 20px', borderRadius: 10,
+                    fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 600,
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
+                    zIndex: 9999, display: 'flex', alignItems: 'center', gap: 8,
+                    animation: 'fadeInUp 0.2s ease',
+                }}>
+                    <span style={{ fontSize: 15 }}>⚠️</span>
+                    {toastMsg}
+                </div>
             )}
         </div>
     )
