@@ -868,12 +868,8 @@ function VisualEditorInner() {
                                     onMouseEnter={e => { e.currentTarget.style.backgroundColor = published ? C.success : C.primaryHover }}
                                     onMouseLeave={e => { e.currentTarget.style.backgroundColor = published ? C.success : C.primary }}
                                 >
-                                    {published
-                                        ? <Check size={13} />
-                                        : isAdmin ? <Globe size={13} /> : <Bookmark size={13} fill="currentColor" />}
-                                    {published
-                                        ? (isAdmin ? 'Published!' : 'Saved!')
-                                        : isAdmin ? 'Publish' : 'Save'}
+                                    {published ? <Check size={13} /> : <Bookmark size={13} fill="currentColor" />}
+                                    {published ? 'Saved!' : 'Save'}
                                     <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ opacity: 0.8, marginLeft: 2 }}>
                                         <path d="M2 3.5L5 6.5L8 3.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                                     </svg>
