@@ -51,6 +51,7 @@ import {
     CtaBannerProps,
     SpecsTableProps,
     BulletListProps,
+    TwoColumnProps,
 } from './blocks'
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -352,11 +353,85 @@ function extractPropsFromHtml(type: BlockType, html: string): BlockProps {
         case 'banner': return extractBannerProps(html)
         case 'cta_banner': return extractCtaBannerProps(html)
         case 'product_description': return extractProductDescriptionProps(html)
+        case 'two_column': return extractTwoColumnProps(html)
         default:
-            // For layout blocks and gallery_row, return defaults
-            // (their inner content is complex multi-slot HTML)
+            // For remaining layout blocks, return defaults
             return defaultPropsFor(type)
     }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LAYOUT BLOCK EXTRACTORS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Extract content of the FIRST <div> starting at or after `startPos`,
+ * correctly handling arbitrarily nested inner divs.
+ */
+function extractFirstDivContent(html: string, startPos: number = 0): string {
+    const openAt = html.indexOf('<div', startPos)
+    if (openAt === -1) return ''
+
+    const openEnd = html.indexOf('>', openAt)
+    if (openEnd === -1) return ''
+
+    let depth = 1
+    let pos = openEnd + 1
+
+    while (depth > 0 && pos < html.length) {
+        const nextOpen = html.indexOf('<div', pos)
+        const nextClose = html.indexOf('</div>', pos)
+
+        if (nextClose === -1) break // malformed
+
+        if (nextOpen !== -1 && nextOpen < nextClose) {
+            depth++
+            pos = nextOpen + 4
+        } else {
+            depth--
+            if (depth === 0) return html.substring(openEnd + 1, nextClose)
+            pos = nextClose + 6
+        }
+    }
+    return ''
+}
+
+function extractTwoColumnProps(html: string): TwoColumnProps {
+    const base = defaultPropsFor('two_column') as TwoColumnProps
+
+    // Extract outer container bgColor from the first <td style="background-color:...">
+    const outerBgMatch = html.match(/<td[^>]+style="([^"]*background-color:[^"]*)"[^>]*>/)
+    if (outerBgMatch) {
+        const bg = extractStyle(outerBgMatch[1], 'background-color')
+        if (bg) base.bgColor = bg
+    }
+
+    // Find column <td width="X%"> elements — these are the two column cells
+    const colTdRe = /<td\s[^>]*width="(\d+)%"[^>]*>/g
+    const cols: Array<{ width: number; endPos: number }> = []
+    let m: RegExpExecArray | null
+    while ((m = colTdRe.exec(html)) !== null) {
+        cols.push({ width: parseInt(m[1]), endPos: m.index + m[0].length })
+        if (cols.length >= 2) break
+    }
+
+    if (cols.length >= 1) {
+        base.leftWidth = cols[0].width
+        const leftHtml = extractFirstDivContent(html, cols[0].endPos)
+        // Only use extracted content when it's real content (not just a placeholder)
+        if (leftHtml.trim() && !leftHtml.includes('data-canvas-dropzone')) {
+            base.leftContent = leftHtml
+        }
+    }
+
+    if (cols.length >= 2) {
+        const rightHtml = extractFirstDivContent(html, cols[1].endPos)
+        if (rightHtml.trim() && !rightHtml.includes('data-canvas-dropzone')) {
+            base.rightContent = rightHtml
+        }
+    }
+
+    return base
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
