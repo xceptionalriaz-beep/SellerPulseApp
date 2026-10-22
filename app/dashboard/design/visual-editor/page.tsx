@@ -868,8 +868,12 @@ function VisualEditorInner() {
                                     onMouseEnter={e => { e.currentTarget.style.backgroundColor = published ? C.success : C.primaryHover }}
                                     onMouseLeave={e => { e.currentTarget.style.backgroundColor = published ? C.success : C.primary }}
                                 >
-                                    {published ? <Check size={13} /> : <Globe size={13} />}
-                                    {published ? 'Published!' : 'Publish'}
+                                    {published
+                                        ? <Check size={13} />
+                                        : isAdmin ? <Globe size={13} /> : <Save size={13} />}
+                                    {published
+                                        ? (isAdmin ? 'Published!' : 'Saved!')
+                                        : isAdmin ? 'Publish' : 'Save'}
                                     <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ opacity: 0.8, marginLeft: 2 }}>
                                         <path d="M2 3.5L5 6.5L8 3.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                                     </svg>
@@ -1358,79 +1362,77 @@ function VisualEditorInner() {
                                                 </button>
                                             )}
                                         </div>
-                                        {/* Publish / Unpublish */}
-                                        <div style={{ padding: '8px', borderTop: `1px solid ${C.border}` }}>
-                                            <button
-                                                onClick={() => { handlePublish(); setActionMenuOpen(false) }}
-                                                disabled={publishing}
-                                                style={{
-                                                    width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                                                    padding: '10px 10px', border: 'none', borderRadius: 8,
-                                                    backgroundColor: published ? '#dcfce7' : C.primaryLight,
-                                                    color: published ? C.success : C.primary,
-                                                    fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 700,
-                                                    cursor: publishing ? 'default' : 'pointer', textAlign: 'left',
-                                                    transition: 'background 0.12s',
-                                                }}
-                                                onMouseEnter={e => { if (!publishing) e.currentTarget.style.opacity = '0.85' }}
-                                                onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
-                                            >
-                                                <span style={{
-                                                    width: 28, height: 28, borderRadius: 7,
-                                                    backgroundColor: published ? C.success : C.primary,
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                                                }}>
-                                                    {publishing
-                                                        ? <Loader2 size={13} style={{ color: '#fff', animation: 'spin 1s linear infinite' }} />
-                                                        : published
-                                                            ? <Check size={13} style={{ color: '#fff' }} />
-                                                            : <Globe size={13} style={{ color: '#fff' }} />}
-                                                </span>
-                                                <div>
-                                                    <p style={{ margin: 0, fontSize: 12 }}>
-                                                        {published
-                                                            ? 'Published!'
-                                                            : isAdmin ? 'Publish to Gallery' : 'Publish Template'}
-                                                    </p>
-                                                    <p style={{ margin: 0, fontSize: 10, color: C.muted }}>
-                                                        {isAdmin
-                                                            ? 'Adds to system gallery for all users'
-                                                            : 'Make visible to all users'}
-                                                    </p>
-                                                </div>
-                                            </button>
-                                            {/* Unpublish — admin only, shown when template is currently live */}
-                                            {isAdmin && isLive && !published && (
+                                        {/* Publish / Unpublish — admin only */}
+                                        {isAdmin && (
+                                            <div style={{ padding: '8px', borderTop: `1px solid ${C.border}` }}>
                                                 <button
-                                                    onClick={() => { handleUnpublish(); setActionMenuOpen(false) }}
+                                                    onClick={() => { handlePublish(); setActionMenuOpen(false) }}
+                                                    disabled={publishing}
                                                     style={{
-                                                        marginTop: 4,
                                                         width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                                                        padding: '9px 10px', border: 'none', borderRadius: 8,
-                                                        backgroundColor: 'transparent',
-                                                        color: C.danger,
-                                                        fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 600,
-                                                        cursor: 'pointer', textAlign: 'left', transition: 'background 0.12s',
+                                                        padding: '10px 10px', border: 'none', borderRadius: 8,
+                                                        backgroundColor: published ? '#dcfce7' : C.primaryLight,
+                                                        color: published ? C.success : C.primary,
+                                                        fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 700,
+                                                        cursor: publishing ? 'default' : 'pointer', textAlign: 'left',
+                                                        transition: 'background 0.12s',
                                                     }}
-                                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#fef2f2' }}
-                                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
+                                                    onMouseEnter={e => { if (!publishing) e.currentTarget.style.opacity = '0.85' }}
+                                                    onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
                                                 >
                                                     <span style={{
                                                         width: 28, height: 28, borderRadius: 7,
-                                                        backgroundColor: '#fee2e2', border: '1px solid #fecaca',
+                                                        backgroundColor: published ? C.success : C.primary,
                                                         display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                                                     }}>
-                                                        <EyeOff size={13} style={{ color: C.danger }} />
+                                                        {publishing
+                                                            ? <Loader2 size={13} style={{ color: '#fff', animation: 'spin 1s linear infinite' }} />
+                                                            : published
+                                                                ? <Check size={13} style={{ color: '#fff' }} />
+                                                                : <Globe size={13} style={{ color: '#fff' }} />}
                                                     </span>
                                                     <div>
-                                                        <p style={{ margin: 0, fontSize: 12 }}>Unpublish</p>
+                                                        <p style={{ margin: 0, fontSize: 12 }}>
+                                                            {published ? 'Published!' : 'Publish to Gallery'}
+                                                        </p>
                                                         <p style={{ margin: 0, fontSize: 10, color: C.muted }}>
-                                                            Remove from gallery (keep as draft)
+                                                            Adds to system gallery for all users
                                                         </p>
                                                     </div>
                                                 </button>
-                                            )}
-                                        </div>
+                                                {/* Unpublish — shown when template is currently live */}
+                                                {isLive && !published && (
+                                                    <button
+                                                        onClick={() => { handleUnpublish(); setActionMenuOpen(false) }}
+                                                        style={{
+                                                            marginTop: 4,
+                                                            width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                                                            padding: '9px 10px', border: 'none', borderRadius: 8,
+                                                            backgroundColor: 'transparent',
+                                                            color: C.danger,
+                                                            fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 600,
+                                                            cursor: 'pointer', textAlign: 'left', transition: 'background 0.12s',
+                                                        }}
+                                                        onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#fef2f2' }}
+                                                        onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
+                                                    >
+                                                        <span style={{
+                                                            width: 28, height: 28, borderRadius: 7,
+                                                            backgroundColor: '#fee2e2', border: '1px solid #fecaca',
+                                                            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                                                        }}>
+                                                            <EyeOff size={13} style={{ color: C.danger }} />
+                                                        </span>
+                                                        <div>
+                                                            <p style={{ margin: 0, fontSize: 12 }}>Unpublish</p>
+                                                            <p style={{ margin: 0, fontSize: 10, color: C.muted }}>
+                                                                Remove from gallery (keep as draft)
+                                                            </p>
+                                                        </div>
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
