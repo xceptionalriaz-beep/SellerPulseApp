@@ -39,6 +39,8 @@ import { AIButton, IconButton } from '@/components/ui/Buttons'
 import ProDropdown from '@/components/ui/ProDropdown'
 import type { DropdownOption } from '@/components/ui/ProDropdown'
 import TemplatePreviewModal from '@/components/ui/TemplatePreviewModal'
+import ListingPickerModal from '@/components/ui/VisualEditor/ListingPickerModal'
+import type { LinkedListing } from '@/components/ui/VisualEditor/ListingPickerModal'
 import BlockLibraryTab from './BlockLibraryTab'
 import StudioSettings from './StudioSettings'
 import AiTemplateGenerator from '@/components/ui/AiTemplateGenerator'
@@ -519,9 +521,16 @@ function DesignStudioInner() {
     }
 
     // ── Use Template / Apply to Listing ───────────────────────────────────
-    // Stores the template HTML in sessionStorage, then navigates to the listing
-    // generator where Step2Media picks it up and applies it automatically.
-    async function useTemplate(t: ListingTemplate) {
+    // Opens the listing picker modal — user selects a listing, then we write
+    // the template's HTML directly to listing_drafts.description_html.
+    function useTemplate(t: ListingTemplate) {
+        setUseTemplateTarget(t)
+    }
+
+    // Called when the user confirms a listing in the picker modal.
+    async function applyTemplateToListing(listing: LinkedListing) {
+        if (!useTemplateTarget) return
+        const t = useTemplateTarget
         const isVisual = !t.is_system && t.description === 'Visual Builder template'
         let html = t.description_html
         if (isVisual) {
@@ -538,11 +547,22 @@ function DesignStudioInner() {
             } catch { /* use cached */ }
         }
         if (!html) return
-        if (typeof window !== 'undefined') {
-            sessionStorage.setItem('pending_template_html', html)
-            sessionStorage.setItem('pending_template_name', t.name)
+
+        // Write template HTML directly to the selected listing
+        try {
+            await (supabase as any)
+                .from('listing_drafts')
+                .update({ description_html: html })
+                .eq('id', listing.id)
+        } catch (err) {
+            console.error('[design] applyTemplateToListing error:', err)
+            return
         }
-        router.push('/dashboard/listing-generator')
+
+        setUseTemplateTarget(null)
+        const listingName = listing.product_name || listing.title || 'listing'
+        setApplySuccess(`Template applied to "${listingName}"`)
+        setTimeout(() => setApplySuccess(null), 3500)
     }
 
     // ── Rename template ───────────────────────────────────────────────────
@@ -588,6 +608,10 @@ function DesignStudioInner() {
     // HTML editor templates: open in html-editor.
     const [copyingTemplateId, setCopyingTemplateId] = useState<string | null>(null)
     const [duplicatingId, setDuplicatingId] = useState<string | null>(null)
+
+    // Feature 13: Listing picker modal — "Use Template" opens this, user picks a listing
+    const [useTemplateTarget, setUseTemplateTarget] = useState<ListingTemplate | null>(null)
+    const [applySuccess, setApplySuccess] = useState<string | null>(null)
 
     async function handleEditTemplate(t: ListingTemplate) {
         const isVisual = t.is_system || (t.description || '').toLowerCase().includes('visual builder')
@@ -1176,6 +1200,38 @@ function DesignStudioInner() {
                     router.push(`/dashboard/design/html-editor?name=${encodeURIComponent(name)}&from=ai`)
                 }}
             />
+
+            {/* Feature 13: Listing Picker — "Use Template" opens this; onConfirm writes HTML to listing_drafts */}
+            {useTemplateTarget && (
+                <ListingPickerModal
+                    onClose={() => setUseTemplateTarget(null)}
+                    onConfirm={applyTemplateToListing}
+                    title="Apply Template"
+                    subtitle={`Choose a listing to apply "${useTemplateTarget.name}" to`}
+                    confirmLabel="Apply Template"
+                />
+            )}
+
+            {/* Feature 13: Success toast shown after template is applied */}
+            {applySuccess && (
+                <div style={{
+                    position: 'fixed', bottom: 28, left: '50%', transform: 'translateX(-50%)',
+                    zIndex: 10001,
+                    backgroundColor: C.success, color: '#fff',
+                    padding: '11px 22px', borderRadius: 12,
+                    fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 600,
+                    boxShadow: '0 6px 24px rgba(22, 163, 74, 0.35)',
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    pointerEvents: 'none',
+                    whiteSpace: 'nowrap',
+                }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    {applySuccess}
+                </div>
+            )}
 
             <style>{`
                 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }

@@ -47,6 +47,12 @@ interface ListingPickerModalProps {
     onClose: () => void
     /** Currently linked listing id (to pre-select it) */
     currentLinkedId?: string | null
+    /** Override modal header title (default: "Link to Listing") */
+    title?: string
+    /** Override modal header subtitle (default: "Select a listing — saving will push this template's HTML to it") */
+    subtitle?: string
+    /** Override confirm button label (default: "Confirm Link") */
+    confirmLabel?: string
 }
 
 // ── Status badge config ────────────────────────────────────────────────────────
@@ -67,6 +73,9 @@ export default function ListingPickerModal({
     onConfirm,
     onClose,
     currentLinkedId,
+    title = 'Link to Listing',
+    subtitle = "Select a listing — saving will push this template's HTML to it",
+    confirmLabel = 'Confirm Link',
 }: ListingPickerModalProps) {
     const [listings, setListings] = useState<LinkedListing[]>([])
     const [loading, setLoading] = useState(true)
@@ -162,13 +171,13 @@ export default function ListingPickerModal({
                             fontFamily: 'Syne, sans-serif', fontWeight: 800,
                             fontSize: 16, color: C.dark, letterSpacing: '-0.3px',
                         }}>
-                            Link to Listing
+                            {title}
                         </div>
                         <div style={{
                             fontFamily: 'DM Sans, sans-serif', fontSize: 12,
                             color: C.secondary, marginTop: 2,
                         }}>
-                            Select a listing — saving will push this template's HTML to it
+                            {subtitle}
                         </div>
                     </div>
                     <button
@@ -414,7 +423,7 @@ export default function ListingPickerModal({
                                 <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                                 <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                             </svg>
-                            Confirm Link
+                            {confirmLabel}
                         </button>
                     </div>
                 </div>
