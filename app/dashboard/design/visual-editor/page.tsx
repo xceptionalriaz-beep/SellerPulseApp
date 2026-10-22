@@ -202,6 +202,9 @@ function VisualEditorInner() {
     const [loading, setLoading] = useState(!!(templateId || vtId))
     const [editingName, setEditingName] = useState(false)
     const nameInputRef = useRef<HTMLInputElement>(null)
+    // nameRef always holds the latest name — avoids stale-closure issues in useCallback
+    const nameRef = useRef(name)
+    useEffect(() => { nameRef.current = name }, [name])
     const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
     const [actionMenuOpen, setActionMenuOpen] = useState(false)
     const actionMenuRef = useRef<HTMLDivElement>(null)
@@ -460,8 +463,9 @@ function VisualEditorInner() {
 
     // ── Save Template ─────────────────────────────────────────────────────────
     const handleSaveDraft = useCallback(async () => {
-        const trimmed = name.trim()
-        if (!trimmed || trimmed === 'New Visual Template' || trimmed === 'Name your design') {
+        // Always read from ref so we never get a stale closure value
+        const trimmed = nameRef.current.trim()
+        if (!trimmed) {
             showToast('Please give your template a name before saving.')
             setEditingName(true)
             setTimeout(() => nameInputRef.current?.focus(), 50)
