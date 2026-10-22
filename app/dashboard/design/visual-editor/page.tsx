@@ -490,6 +490,7 @@ function VisualEditorInner() {
                     .eq('id', vtSavedId)
                 setSaved(true)
                 setTimeout(() => setSaved(false), 2500)
+                showToast('✓ Template saved!')
                 return
             }
 
@@ -538,8 +539,10 @@ function VisualEditorInner() {
             }
             setSaved(true)
             setTimeout(() => setSaved(false), 2500)
+            showToast('✓ Template saved!')
         } catch (err) {
             console.error('[visual-editor] save draft error:', err)
+            showToast('⚠️ Save failed — please try again.')
         } finally {
             setSaving(false)
         }
@@ -1578,14 +1581,15 @@ function VisualEditorInner() {
             {toastMsg && (
                 <div style={{
                     position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)',
-                    backgroundColor: '#1e1535', color: '#fff',
+                    backgroundColor: toastMsg.startsWith('✓') ? C.success : '#1e1535',
+                    color: '#fff',
                     padding: '10px 20px', borderRadius: 10,
                     fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 600,
                     boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
                     zIndex: 9999, display: 'flex', alignItems: 'center', gap: 8,
                     animation: 'fadeInUp 0.2s ease',
+                    whiteSpace: 'nowrap',
                 }}>
-                    <span style={{ fontSize: 15 }}>⚠️</span>
                     {toastMsg}
                 </div>
             )}
