@@ -172,6 +172,15 @@ interface VisualEditorProps {
      * so the original block structure is faithfully restored.
      */
     initialBlocks?: Block[]
+    /**
+     * Controlled template name — parent syncs this whenever it loads from DB.
+     * VisualEditor will update its internal templateName state to match.
+     */
+    nameValue?: string
+    /** Called whenever the user changes the template name in the toolbar */
+    onNameChange?: (name: string) => void
+    /** When true, the name input renders with a red error border */
+    nameError?: boolean
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -195,6 +204,9 @@ export default function VisualEditor({
     onUpgradeClick,
     onBlocksChange,
     initialBlocks,
+    nameValue,
+    onNameChange,
+    nameError = false,
 }: VisualEditorProps) {
     // ── Core block state ──────────────────────────────────────────────────────
     const [blocks, setBlocks] = useState<Block[]>([])
@@ -279,7 +291,11 @@ export default function VisualEditor({
         text: string;
     } | null>(null);
     const [focusMode, setFocusMode] = useState(false)        // hides sidebar + panel
-    const [templateName, setTemplateName] = useState('')
+    const [templateName, setTemplateName] = useState(nameValue ?? '')
+    // Sync controlled name from parent (e.g. after DB load)
+    useEffect(() => {
+        if (nameValue !== undefined) setTemplateName(nameValue)
+    }, [nameValue])
     /**
      * Active template category — drives the category-matched sample data that
      * the canvas previews (product photos, brand, spec values, cross-sell).
@@ -1762,7 +1778,8 @@ export default function VisualEditor({
                 onZoomChange={setCanvasZoom}
                 deviceWidth={deviceWidth}
                 onDeviceChange={setDeviceWidth}
-                onTemplateNameChange={setTemplateName}
+                onTemplateNameChange={(n) => { setTemplateName(n); onNameChange?.(n) }}
+                nameError={nameError}
                 onSave={handleSave}
                 saveStatus={saveStatus}
                 onExport={handleExport}
@@ -2406,6 +2423,7 @@ interface EditorToolbarProps {
     onOpenListingPicker?: () => void
     onUnlinkListing?: () => void
     isAdmin?: boolean
+    nameError?: boolean
 }
 
 function EditorToolbar({
@@ -2417,6 +2435,7 @@ function EditorToolbar({
     onPublish, publishStatus = 'idle', toolbarSlot, onBack,
     linkedListing, onOpenListingPicker, onUnlinkListing,
     isAdmin = false,
+    nameError = false,
 }: EditorToolbarProps) {
     return (
         <div style={{
@@ -2475,15 +2494,20 @@ function EditorToolbar({
                             maxLength={50}
                             style={{
                                 fontFamily: 'Syne, sans-serif', fontSize: 13, fontWeight: 700,
-                                color: C.dark, background: 'transparent', border: 'none',
+                                color: C.dark, background: nameError ? '#fff5f5' : 'transparent',
+                                border: nameError ? `2px solid ${C.danger}` : 'none',
                                 outline: 'none', width: 240,
-                                borderBottom: `1px solid transparent`,
+                                borderBottom: nameError ? `2px solid ${C.danger}` : `1px solid transparent`,
                                 padding: '2px 4px', borderRadius: 4,
                                 cursor: 'text',
-                                transition: 'border-color 0.15s',
+                                transition: 'border-color 0.15s, background 0.15s',
                             }}
-                            onFocus={e => e.currentTarget.style.borderBottomColor = C.border}
-                            onBlur={e => e.currentTarget.style.borderBottomColor = 'transparent'}
+                            onFocus={e => {
+                                if (!nameError) e.currentTarget.style.borderBottomColor = C.border
+                            }}
+                            onBlur={e => {
+                                if (!nameError) e.currentTarget.style.borderBottomColor = 'transparent'
+                            }}
                             placeholder=""
                         />
                         {/* Animated placeholder — only shows when input is empty */}

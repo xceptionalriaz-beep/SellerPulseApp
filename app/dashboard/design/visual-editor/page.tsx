@@ -200,8 +200,7 @@ function VisualEditorInner() {
         toastTimer.current = setTimeout(() => setToastMsg(null), 3500)
     }
     const [loading, setLoading] = useState(!!(templateId || vtId))
-    const [editingName, setEditingName] = useState(false)
-    const nameInputRef = useRef<HTMLInputElement>(null)
+    const [nameError, setNameError] = useState(false)
     // nameRef always holds the latest name — avoids stale-closure issues in useCallback
     const nameRef = useRef(name)
     useEffect(() => { nameRef.current = name }, [name])
@@ -465,12 +464,16 @@ function VisualEditorInner() {
     const handleSaveDraft = useCallback(async () => {
         // Always read from ref so we never get a stale closure value
         const trimmed = nameRef.current.trim()
-        if (!trimmed) {
-            showToast('Please give your template a name before saving.')
-            setEditingName(true)
-            setTimeout(() => nameInputRef.current?.focus(), 50)
+        const isDefaultName = trimmed === 'New Visual Template' || trimmed === 'Name your design'
+        if (!trimmed || isDefaultName) {
+            const msg = isDefaultName
+                ? 'Please give your template a unique name before saving.'
+                : 'Please give your template a name before saving.'
+            showToast(msg)
+            setNameError(true)
             return
         }
+        setNameError(false)
         setSaving(true)
         setSaved(false)
         try {
@@ -746,17 +749,6 @@ function VisualEditorInner() {
         }
     }, [savedId, uploadThumbnailBlob])
 
-    // ── Name edit ─────────────────────────────────────────────────────────────
-    const startEditingName = () => {
-        setEditingName(true)
-        setTimeout(() => nameInputRef.current?.select(), 0)
-    }
-
-    const commitName = () => {
-        setEditingName(false)
-        if (!name.trim()) setName('New Visual Template')
-    }
-
     // ── Open in Code Editor ───────────────────────────────────────────────────
     // Opens the HTML Template Editor Studio as a full-screen overlay directly
     // in the React tree — no iframe, no navigation, no sessionStorage needed.
@@ -820,6 +812,9 @@ function VisualEditorInner() {
                     onBlocksChange={(b) => { blocksRef.current = b }}
                     publishStatus={publishStatus}
                     onBack={() => router.push(isAdmin ? '/dashboard/admin' : '/dashboard/design')}
+                    nameValue={name}
+                    onNameChange={(n) => { setName(n); setNameError(false) }}
+                    nameError={nameError}
                     toolbarSlot={
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             {/* Draft / Live status badge — admin only */}
