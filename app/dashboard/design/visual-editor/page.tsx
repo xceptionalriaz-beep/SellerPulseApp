@@ -1236,7 +1236,7 @@ function VisualEditorInner() {
                                                         ? <Loader2 size={13} style={{ color: C.muted, animation: 'spin 1s linear infinite' }} />
                                                         : saved
                                                             ? <Check size={13} style={{ color: C.success }} />
-                                                            : <Bookmark size={13} fill="currentColor" style={{ color: C.secondary }} />}
+                                                            : <Bookmark size={13} fill="currentColor" style={{ color: C.primary }} />}
                                                 </span>
                                                 <div>
                                                     <p style={{ margin: 0, fontWeight: 600, fontSize: 12 }}>
@@ -1324,7 +1324,7 @@ function VisualEditorInner() {
                                                     backgroundColor: C.bg, border: `1px solid ${C.border}`,
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                                                 }}>
-                                                    <Code2 size={13} style={{ color: C.secondary }} />
+                                                    <Code2 size={13} style={{ color: C.primary }} />
                                                 </span>
                                                 <div>
                                                     <p style={{ margin: 0, fontWeight: 600, fontSize: 12 }}>Code Editor</p>
@@ -1349,7 +1349,7 @@ function VisualEditorInner() {
                                                         backgroundColor: C.bg, border: `1px solid ${C.border}`,
                                                         display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                                                     }}>
-                                                        <Download size={13} style={{ color: C.secondary }} />
+                                                        <Download size={13} style={{ color: C.primary }} />
                                                     </span>
                                                     <div>
                                                         <p style={{ margin: 0, fontWeight: 600, fontSize: 12 }}>Export HTML</p>
