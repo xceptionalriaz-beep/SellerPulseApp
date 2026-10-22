@@ -24,7 +24,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { createClient as createRawClient } from '@supabase/supabase-js'
 import {
-    ChevronLeft, Save, Check, Loader2,
+    ChevronLeft, Save, Bookmark, Check, Loader2,
     Globe, LayoutTemplate, Code2, Download, History, EyeOff,
     Image, Upload, Tag, X, Eye, Copy,
 } from 'lucide-react'
@@ -870,7 +870,7 @@ function VisualEditorInner() {
                                 >
                                     {published
                                         ? <Check size={13} />
-                                        : isAdmin ? <Globe size={13} /> : <Save size={13} />}
+                                        : isAdmin ? <Globe size={13} /> : <Bookmark size={13} fill="currentColor" />}
                                     {published
                                         ? (isAdmin ? 'Published!' : 'Saved!')
                                         : isAdmin ? 'Publish' : 'Save'}
@@ -1240,7 +1240,7 @@ function VisualEditorInner() {
                                                         ? <Loader2 size={13} style={{ color: C.muted, animation: 'spin 1s linear infinite' }} />
                                                         : saved
                                                             ? <Check size={13} style={{ color: C.success }} />
-                                                            : <Save size={13} style={{ color: C.secondary }} />}
+                                                            : <Bookmark size={13} fill="currentColor" style={{ color: C.secondary }} />}
                                                 </span>
                                                 <div>
                                                     <p style={{ margin: 0, fontWeight: 600, fontSize: 12 }}>
