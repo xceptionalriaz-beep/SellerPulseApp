@@ -11,7 +11,7 @@
 //   ✓ Full-height VisualEditor component
 //   ✓ Template name inline editable in top bar
 //   ✓ Category selector
-//   ✓ Save Draft — saves/updates to listing_templates
+//   ✓ Save Template — saves/updates to listing_templates or visual_templates
 //   ✓ Publish — marks template as shared
 //   ✓ Auto-save indicator (Draft Auto-Saved)
 //   ✓ Device width preview (desktop / tablet / mobile) — handled inside VisualEditor
@@ -451,7 +451,7 @@ function VisualEditorInner() {
         }
     }, [vtSavedId, savedId, name, category, html, slots, tags, sortOrder, isFeatured, isNewBadge, supabase])
 
-    // ── Manual Save Draft ─────────────────────────────────────────────────────
+    // ── Save Template ─────────────────────────────────────────────────────────
     const handleSaveDraft = useCallback(async () => {
         setSaving(true)
         setSaved(false)
@@ -1244,10 +1244,10 @@ function VisualEditorInner() {
                                                 </span>
                                                 <div>
                                                     <p style={{ margin: 0, fontWeight: 600, fontSize: 12 }}>
-                                                        {saved ? 'Draft Saved!' : 'Save Draft'}
+                                                        {saved ? 'Saved!' : 'Save Template'}
                                                     </p>
                                                     <p style={{ margin: 0, fontSize: 10, color: C.muted }}>
-                                                        Save without publishing
+                                                        Save your changes
                                                     </p>
                                                 </div>
                                             </button>
