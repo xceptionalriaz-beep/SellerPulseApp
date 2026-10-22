@@ -1358,8 +1358,8 @@ function VisualEditorInner() {
                                                 </button>
                                             )}
                                         </div>
-                                        {/* Publish / Unpublish — admin only */}
-                                        {isAdmin && (
+                                        {/* Publish / Unpublish — admin only, and only when editing a system template (not a user copy via vt_id) */}
+                                        {isAdmin && !vtId && (
                                             <div style={{ padding: '8px', borderTop: `1px solid ${C.border}` }}>
                                                 <button
                                                     onClick={() => { handlePublish(); setActionMenuOpen(false) }}
