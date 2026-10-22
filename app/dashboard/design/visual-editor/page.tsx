@@ -479,6 +479,11 @@ function VisualEditorInner() {
             return
         }
         setNameError(false)
+        // Skip save if nothing has changed since last save/load
+        if (!dirtyRef.current) {
+            showToast('No changes to save — your template is already up to date.')
+            return
+        }
         setSaving(true)
         setSaved(false)
         try {
