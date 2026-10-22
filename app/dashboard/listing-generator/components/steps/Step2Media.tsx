@@ -191,20 +191,6 @@ export default function Step2Media({ draft, onChange, onNext, onPrev, onSave, at
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    // Feature 13: Pick up a template applied from the Design Studio gallery
-    useEffect(() => {
-        if (typeof window === 'undefined') return
-        try {
-            const pendingHtml = sessionStorage.getItem('pending_template_html')
-            if (pendingHtml) {
-                sessionStorage.removeItem('pending_template_html')
-                sessionStorage.removeItem('pending_template_name')
-                applyTemplate(pendingHtml)
-            }
-        } catch { /* sessionStorage unavailable */ }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
 
 
     useEffect(() => {
