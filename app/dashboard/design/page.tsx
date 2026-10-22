@@ -325,7 +325,7 @@ function DesignStudioInner() {
                         id: vt.id,
                         user_id: vt.user_id,
                         name: vt.name,
-                        description: 'Visual Builder template',   // signals getEditorRoute to use visual-editor
+                        description: 'Visual Builder template',   // used for preview display
                         category: vt.category || 'general',
                         description_html: html,                   // real rendered HTML for preview
                         is_system: false,
@@ -412,12 +412,65 @@ function DesignStudioInner() {
     }
 
     // ── Editor route helper ────────────────────────────────────────────────
-    // Templates saved by the Visual Builder carry "Visual Builder" in their
-    // description. Route everything else to the HTML editor.
-    function getEditorRoute(t: ListingTemplate) {
-        // System templates are Visual Builder templates; own templates signal via description
+    // ── Edit-template handler ──────────────────────────────────────────────────
+    // System templates: always create a fresh user copy in visual_templates, then
+    // open that copy so the original gallery template is never modified.
+    // User's own templates (visual_templates): open directly.
+    // HTML editor templates: open in html-editor.
+    const [copyingTemplateId, setCopyingTemplateId] = useState<string | null>(null)
+
+    async function handleEditTemplate(t: ListingTemplate) {
         const isVisual = t.is_system || (t.description || '').toLowerCase().includes('visual builder')
-        return `/dashboard/design/${isVisual ? 'visual-editor' : 'html-editor'}?name=${encodeURIComponent(t.name)}&id=${t.id}`
+
+        if (!isVisual) {
+            // HTML editor template — open directly
+            router.push(`/dashboard/design/html-editor?name=${encodeURIComponent(t.name)}&id=${t.id}`)
+            return
+        }
+
+        if (!t.is_system) {
+            // User's own visual_templates record — open directly via vt_id
+            router.push(`/dashboard/design/visual-editor?vt_id=${t.id}`)
+            return
+        }
+
+        // System template — create a fresh copy in visual_templates for this user
+        setCopyingTemplateId(t.id)
+        try {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) return
+
+            // Fetch full template data (blocks_json + html) from listing_templates
+            const { data: src } = await rawDb
+                .from('listing_templates')
+                .select('description_html, blocks_json, category')
+                .eq('id', t.id)
+                .single()
+
+            const { data: newVt, error } = await (supabase as any)
+                .from('visual_templates')
+                .insert({
+                    user_id: user.id,
+                    name: t.name,
+                    category: src?.category || t.category || 'general',
+                    blocks_json: src?.blocks_json ?? null,
+                    source_template_id: t.id,
+                    updated_at: new Date().toISOString(),
+                })
+                .select('id')
+                .single()
+
+            if (error || !newVt) {
+                console.error('[design] copy template error:', error)
+                return
+            }
+
+            router.push(`/dashboard/design/visual-editor?vt_id=${newVt.id}`)
+        } catch (err) {
+            console.error('[design] handleEditTemplate error:', err)
+        } finally {
+            setCopyingTemplateId(null)
+        }
     }
 
     // ── Render ─────────────────────────────────────────────────────────────
@@ -816,7 +869,7 @@ function DesignStudioInner() {
                                                     onPreview={() => setPreviewTemplate(t)}
                                                     onCopy={() => copyHtml(t)}
                                                     onDelete={() => deleteTemplate(t.id)}
-                                                    onEdit={() => router.push(getEditorRoute(t))}
+                                                    onEdit={() => handleEditTemplate(t)}
                                                 />
                                             ))}
                                         </div>
@@ -897,7 +950,7 @@ function DesignStudioInner() {
                                                         onPreview={() => setPreviewTemplate(t)}
                                                         onCopy={() => copyHtml(t)}
                                                         onDelete={() => deleteTemplate(t.id)}
-                                                        onEdit={() => router.push(getEditorRoute(t))}
+                                                        onEdit={() => handleEditTemplate(t)}
                                                     />
                                                 ))}
                                             </div>
@@ -916,7 +969,7 @@ function DesignStudioInner() {
                 template={previewTemplate}
                 templates={[...myTemplates, ...templates]}
                 onClose={() => setPreviewTemplate(null)}
-                onEdit={t => router.push(getEditorRoute(t as ListingTemplate))}
+                onEdit={t => handleEditTemplate(t as ListingTemplate)}
                 onCopy={t => copyHtml(t as ListingTemplate)}
                 copiedId={copiedId}
             />

@@ -176,8 +176,10 @@ function VisualEditorInner() {
     // A regular user who appends ?admin=true would still fail the DB write.
     const isAdmin = searchParams.get('admin') === 'true'
 
-    // templateId from query — if present, load existing template
+    // templateId from query — if present, load existing template from listing_templates
     const templateId = searchParams.get('id')
+    // vtId — if present, load/save to visual_templates (user copy of a system template)
+    const vtId = searchParams.get('vt_id')
     const initialName = searchParams.get('name') || 'New Visual Template'
 
     // ── State ─────────────────────────────────────────────────────────────────
@@ -185,10 +187,12 @@ function VisualEditorInner() {
     const [name, setName] = useState(initialName)
     const [category, setCategory] = useState('general')
     const [savedId, setSavedId] = useState<string | null>(templateId)
+    // Visual templates ID (user copy, saved to visual_templates table)
+    const [vtSavedId, setVtSavedId] = useState<string | null>(vtId)
     const [saving, setSaving] = useState(false)
     const [saved, setSaved] = useState(false)
     const [autoSaveLabel, setAutoSaveLabel] = useState<'idle' | 'saving' | 'saved'>('idle')
-    const [loading, setLoading] = useState(!!templateId)
+    const [loading, setLoading] = useState(!!(templateId || vtId))
     const [editingName, setEditingName] = useState(false)
     const nameInputRef = useRef<HTMLInputElement>(null)
     const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -272,7 +276,7 @@ function VisualEditorInner() {
     const dirtyRef = useRef(false)
     const baselineRef = useRef<{ html: string; name: string; category: string } | null>(null)
 
-    // ── Load existing template ────────────────────────────────────────────────
+    // ── Load existing template from listing_templates ─────────────────────────
     useEffect(() => {
         if (!templateId) return
             ; (async () => {
@@ -313,6 +317,34 @@ function VisualEditorInner() {
             })()
     }, [templateId]) // eslint-disable-line react-hooks/exhaustive-deps
 
+    // ── Load user copy from visual_templates (vt_id param) ───────────────────
+    useEffect(() => {
+        if (!vtId) return
+            ; (async () => {
+                setLoading(true)
+                try {
+                    const { data } = await (supabase as any)
+                        .from('visual_templates')
+                        .select('id, name, category, blocks_json, canvas_settings_json')
+                        .eq('id', vtId)
+                        .single()
+                    if (data) {
+                        setName(data.name || initialName)
+                        setCategory(data.category || 'general')
+                        // visual_templates uses blocks_json only (no description_html)
+                        if (Array.isArray(data.blocks_json) && data.blocks_json.length > 0) {
+                            setInitialBlocks(data.blocks_json as Block[])
+                        }
+                        setVtSavedId(data.id)
+                    }
+                } catch (err) {
+                    console.error('[visual-editor] vt load error:', err)
+                } finally {
+                    setLoading(false)
+                }
+            })()
+    }, [vtId]) // eslint-disable-line react-hooks/exhaustive-deps
+
     // ── Capture baseline once loading finishes ───────────────────────────────
     // Records the loaded state as the comparison point. dirty starts at false.
     useEffect(() => {
@@ -345,6 +377,26 @@ function VisualEditorInner() {
             const isEbayCompliant = auditHtml(html).count === 0
 
             const blocksJson = blocksRef.current.length > 0 ? blocksRef.current : undefined
+
+            // ── visual_templates path (user copy of system template) ──────────
+            if (vtSavedId) {
+                await (supabase as any)
+                    .from('visual_templates')
+                    .update({
+                        name,
+                        category,
+                        blocks_json: blocksJson ?? null,
+                        updated_at: new Date().toISOString(),
+                    })
+                    .eq('id', vtSavedId)
+                setAutoSaveLabel('saved')
+                setTimeout(() => setAutoSaveLabel('idle'), 2000)
+                dirtyRef.current = false
+                baselineRef.current = { html, name, category }
+                return
+            }
+
+            // ── listing_templates path (admin/own template) ───────────────────
             if (savedId) {
                 // Update existing
                 await (supabase as any)
@@ -397,7 +449,7 @@ function VisualEditorInner() {
             console.error('[visual-editor] auto-save error:', err)
             setAutoSaveLabel('idle')
         }
-    }, [savedId, name, category, html, slots, tags, sortOrder, isFeatured, isNewBadge, supabase])
+    }, [vtSavedId, savedId, name, category, html, slots, tags, sortOrder, isFeatured, isNewBadge, supabase])
 
     // ── Manual Save Draft ─────────────────────────────────────────────────────
     const handleSaveDraft = useCallback(async () => {
@@ -410,6 +462,24 @@ function VisualEditorInner() {
             const isEbayCompliant = auditHtml(html).count === 0
 
             const blocksJson = blocksRef.current.length > 0 ? blocksRef.current : undefined
+
+            // ── visual_templates path (user copy of system template) ──────────
+            if (vtSavedId) {
+                await (supabase as any)
+                    .from('visual_templates')
+                    .update({
+                        name,
+                        category,
+                        blocks_json: blocksJson ?? null,
+                        updated_at: new Date().toISOString(),
+                    })
+                    .eq('id', vtSavedId)
+                setSaved(true)
+                setTimeout(() => setSaved(false), 2500)
+                return
+            }
+
+            // ── listing_templates path (admin/own template) ───────────────────
             if (savedId) {
                 await (supabase as any)
                     .from('listing_templates')
@@ -459,7 +529,7 @@ function VisualEditorInner() {
         } finally {
             setSaving(false)
         }
-    }, [savedId, name, category, html, slots, tags, sortOrder, isFeatured, isNewBadge, supabase])
+    }, [vtSavedId, savedId, name, category, html, slots, tags, sortOrder, isFeatured, isNewBadge, supabase])
 
     // ── Publish ───────────────────────────────────────────────────────────────
     // Check if any block uses a Pro-only style (first 2 variants are free for
