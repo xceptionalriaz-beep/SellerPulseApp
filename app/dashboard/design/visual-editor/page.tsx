@@ -171,10 +171,10 @@ function VisualEditorInner() {
     const supabase = createClient()
     const router = useRouter()
     const searchParams = useSearchParams()
-    // isAdmin = true when opened from the admin panel (?admin=true).
+    // isAdmin = true only when editing an existing system template (?id= + ?admin=true).
+    // A blank/new canvas or a user copy (?vt_id=) always gets seller UI.
     // UI-only flag — the real security gate is Supabase RLS on listing_templates.
-    // A regular user who appends ?admin=true would still fail the DB write.
-    const isAdmin = searchParams.get('admin') === 'true'
+    const isAdmin = searchParams.get('admin') === 'true' && !!searchParams.get('id')
 
     // templateId from query — if present, load existing template from listing_templates
     const templateId = searchParams.get('id')
