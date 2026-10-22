@@ -29,6 +29,7 @@ import {
     LayoutGrid, Smartphone, Monitor, Shirt, Gem, Heart,
     Home, Sofa, Car, Wrench, Dumbbell, Gamepad2,
     Archive, BookOpen, PawPrint, Briefcase, Tag,
+    Files, ArrowRight, PenLine,
 } from 'lucide-react'
 import { hydrateTemplateContent } from '@/lib/template-utils'
 import { assembleDocument } from '@/components/ui/VisualEditor/blocks'
@@ -298,6 +299,10 @@ function DesignStudioInner() {
     // Delete confirmation
     const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
+    // Feature 14: Pagination for system templates (load-more style)
+    const PAGE_SIZE = 12
+    const [page, setPage] = useState(1)
+
     // ── Load templates ─────────────────────────────────────────────────────
     const loadTemplates = useCallback(async () => {
         setLoading(true)
@@ -365,7 +370,11 @@ function DesignStudioInner() {
         setActiveCategory('all')
         setSearch('')
         setConfirmDeleteId(null)
+        setPage(1)
     }, [activeTab])
+
+    // Feature 14: Reset to page 1 whenever filters change
+    useEffect(() => { setPage(1) }, [search, activeCategory, sort])
 
     // ── Filter + search ────────────────────────────────────────────────────
     // allVisible is tab-aware — template gallery = admin only, my templates = user only
@@ -401,6 +410,10 @@ function DesignStudioInner() {
         if (sort === 'newest') return new Date(b.updated_at || 0).getTime() - new Date(a.updated_at || 0).getTime()
         return (b.use_count || 0) - (a.use_count || 0)
     })
+
+    // Feature 14: Paginated system templates (load-more style)
+    const pagedSysTemplates = sortedTemplates.slice(0, page * PAGE_SIZE)
+    const hasMoreTemplates = pagedSysTemplates.length < sortedTemplates.length
 
     // ── Copy HTML ──────────────────────────────────────────────────────────
     // Bug 8: For visual_templates records, refetch fresh blocks_json so the copied HTML
@@ -438,9 +451,112 @@ function DesignStudioInner() {
         }
     }
 
-    // ── Duplicate template ─────────────────────────────────────────────────
-    // Function removed – duplicate feature not currently exposed in UI.
+    // ── Duplicate template ────────────────────────────────────────────────
+    // System templates: saved to My Templates (visual_templates); tab switches to show them.
+    // Own templates: creates a "Copy of …" variant in visual_templates.
+    async function duplicateTemplate(t: ListingTemplate) {
+        const isSystemTpl = !!t.is_system
+        const isVisual = !t.is_system && t.description === 'Visual Builder template'
+        setDuplicatingId(t.id)
+        try {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) return
 
+            if (isSystemTpl) {
+                const { data: src } = await rawDb
+                    .from('listing_templates')
+                    .select('blocks_json, category')
+                    .eq('id', t.id)
+                    .single()
+                await (supabase as any)
+                    .from('visual_templates')
+                    .insert({
+                        user_id: user.id,
+                        name: t.name,
+                        category: (src as any)?.category || t.category || 'general',
+                        blocks_json: (src as any)?.blocks_json ?? null,
+                        source_template_id: t.id,
+                        updated_at: new Date().toISOString(),
+                    })
+                router.push('/dashboard/design?tab=my-templates')
+            } else if (isVisual) {
+                const { data: src } = await (supabase as any)
+                    .from('visual_templates')
+                    .select('blocks_json, canvas_settings_json, category')
+                    .eq('id', t.id)
+                    .single()
+                const { data: newVt } = await (supabase as any)
+                    .from('visual_templates')
+                    .insert({
+                        user_id: user.id,
+                        name: `Copy of ${t.name}`,
+                        category: src?.category || t.category || 'general',
+                        blocks_json: src?.blocks_json ?? null,
+                        canvas_settings_json: src?.canvas_settings_json ?? null,
+                        updated_at: new Date().toISOString(),
+                    })
+                    .select('id, user_id, name, category, updated_at, blocks_json, canvas_settings_json')
+                    .single()
+                if (newVt) {
+                    const blocks = Array.isArray(newVt.blocks_json) ? newVt.blocks_json : []
+                    const html = blocks.length > 0 ? assembleDocument(blocks, newVt.canvas_settings_json ?? undefined) : null
+                    setMyTemplates((prev: ListingTemplate[]) => [{
+                        id: newVt.id, user_id: newVt.user_id, name: newVt.name,
+                        description: 'Visual Builder template',
+                        category: newVt.category || 'general',
+                        description_html: html,
+                        is_system: false, is_shared: false, thumbnail_url: null,
+                        use_count: 0, created_at: newVt.updated_at, updated_at: newVt.updated_at,
+                        tags: null, sort_order: null, is_featured: null, is_new_badge: null, is_pro: null,
+                    }, ...prev])
+                }
+            }
+        } catch (err) {
+            console.error('[design] duplicateTemplate error:', err)
+        } finally {
+            setDuplicatingId(null)
+        }
+    }
+
+    // ── Use Template / Apply to Listing ───────────────────────────────────
+    // Stores the template HTML in sessionStorage, then navigates to the listing
+    // generator where Step2Media picks it up and applies it automatically.
+    async function useTemplate(t: ListingTemplate) {
+        const isVisual = !t.is_system && t.description === 'Visual Builder template'
+        let html = t.description_html
+        if (isVisual) {
+            try {
+                const { data: vt } = await (supabase as any)
+                    .from('visual_templates')
+                    .select('blocks_json, canvas_settings_json')
+                    .eq('id', t.id)
+                    .single()
+                if (vt) {
+                    const blocks = Array.isArray(vt.blocks_json) ? vt.blocks_json : []
+                    html = blocks.length > 0 ? assembleDocument(blocks, vt.canvas_settings_json ?? undefined) : null
+                }
+            } catch { /* use cached */ }
+        }
+        if (!html) return
+        if (typeof window !== 'undefined') {
+            sessionStorage.setItem('pending_template_html', html)
+            sessionStorage.setItem('pending_template_name', t.name)
+        }
+        router.push('/dashboard/listing-generator')
+    }
+
+    // ── Rename template ───────────────────────────────────────────────────
+    async function renameTemplate(id: string, newName: string) {
+        const trimmed = newName.trim()
+        if (!trimmed) return
+        await (supabase as any)
+            .from('visual_templates')
+            .update({ name: trimmed, updated_at: new Date().toISOString() })
+            .eq('id', id)
+        setMyTemplates((prev: ListingTemplate[]) =>
+            prev.map((t: ListingTemplate) => t.id === id ? { ...t, name: trimmed } : t)
+        )
+    }
 
     // ── Delete own template ────────────────────────────────────────────────
     // Bug 4: Two-step confirmation — first click sets confirmDeleteId, second click deletes
@@ -471,6 +587,7 @@ function DesignStudioInner() {
     // User's own templates (visual_templates): open directly.
     // HTML editor templates: open in html-editor.
     const [copyingTemplateId, setCopyingTemplateId] = useState<string | null>(null)
+    const [duplicatingId, setDuplicatingId] = useState<string | null>(null)
 
     async function handleEditTemplate(t: ListingTemplate) {
         const isVisual = t.is_system || (t.description || '').toLowerCase().includes('visual builder')
@@ -911,11 +1028,15 @@ function DesignStudioInner() {
                                                 deletingId={deletingId}
                                                 confirmDeleteId={confirmDeleteId}
                                                 copyingTemplateId={copyingTemplateId}
+                                                duplicatingId={duplicatingId}
                                                 onPreview={() => setPreviewTemplate(t)}
                                                 onCopy={() => copyHtml(t)}
                                                 onDelete={() => deleteTemplate(t.id)}
                                                 onCancelDelete={() => setConfirmDeleteId(null)}
                                                 onEdit={() => handleEditTemplate(t)}
+                                                onDuplicate={() => duplicateTemplate(t)}
+                                                onUse={() => useTemplate(t)}
+                                                onRename={(id, name) => renameTemplate(id, name)}
                                             />
                                         ))}
                                     </div>
@@ -986,7 +1107,7 @@ function DesignStudioInner() {
                                                 </span>
                                             </h2>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
-                                                {sortedTemplates.map(t => (
+                                                {pagedSysTemplates.map(t => (
                                                     <TemplateCard
                                                         key={t.id}
                                                         template={t}
@@ -995,14 +1116,31 @@ function DesignStudioInner() {
                                                         deletingId={deletingId}
                                                         confirmDeleteId={confirmDeleteId}
                                                         copyingTemplateId={copyingTemplateId}
+                                                        duplicatingId={duplicatingId}
                                                         onPreview={() => setPreviewTemplate(t)}
                                                         onCopy={() => copyHtml(t)}
                                                         onDelete={() => deleteTemplate(t.id)}
                                                         onCancelDelete={() => setConfirmDeleteId(null)}
                                                         onEdit={() => handleEditTemplate(t)}
+                                                        onDuplicate={() => duplicateTemplate(t)}
+                                                        onUse={() => useTemplate(t)}
                                                     />
                                                 ))}
                                             </div>
+                                            {/* Feature 14: Load more */}
+                                            {hasMoreTemplates && (
+                                                <div className="flex flex-col items-center gap-2 mt-8">
+                                                    <p className="text-[12px]" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                                        Showing {pagedSysTemplates.length} of {sortedTemplates.length} templates
+                                                    </p>
+                                                    <button
+                                                        onClick={() => setPage(p => p + 1)}
+                                                        className="flex items-center gap-2 px-6 py-2 rounded-xl text-[13px] font-semibold transition-all hover:opacity-80"
+                                                        style={{ backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ${C.border}`, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                                                        Load More ({sortedTemplates.length - pagedSysTemplates.length} remaining)
+                                                    </button>
+                                                </div>
+                                            )}
                                         </>
                                     )}
                                 </div>
@@ -1055,20 +1193,34 @@ interface CardProps {
     deletingId: string | null
     confirmDeleteId?: string | null
     copyingTemplateId?: string | null
+    duplicatingId?: string | null
     onPreview: () => void
     onCopy: () => void
     onDelete: () => void
     onCancelDelete?: () => void
     onEdit: () => void
+    onDuplicate?: () => void
+    onUse?: () => void
+    onRename?: (id: string, newName: string) => void
 }
 
-function TemplateCard({ template, isOwn, copiedId, deletingId, confirmDeleteId, copyingTemplateId, onPreview, onCopy, onDelete, onCancelDelete, onEdit }: CardProps) {
+function TemplateCard({ template, isOwn, copiedId, deletingId, confirmDeleteId, copyingTemplateId, duplicatingId, onPreview, onCopy, onDelete, onCancelDelete, onEdit, onDuplicate, onUse, onRename }: CardProps) {
     const [hovered, setHovered] = useState(false)
+    // Feature 12: Inline rename state
+    const [renaming, setRenaming] = useState(false)
+    const [renameValue, setRenameValue] = useState(template.name)
     const copied = copiedId === template.id
     const deleting = deletingId === template.id
     const confirmingDelete = confirmDeleteId === template.id
     const copying = copyingTemplateId === template.id
+    const duplicating = duplicatingId === template.id
     const isFeaturedCard = !!template.is_featured
+
+    function commitRename() {
+        const trimmed = renameValue.trim()
+        if (trimmed && trimmed !== template.name) onRename?.(template.id, trimmed)
+        setRenaming(false)
+    }
 
     const badge = (() => {
         if (!template.is_system) return null
@@ -1132,7 +1284,7 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, confirmDeleteId, 
                     </div>
                 )}
 
-                {/* Hover actions — no dark overlay, just a soft bottom gradient + buttons */}
+                {/* Hover actions — soft bottom gradient + action buttons */}
                 <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-4"
                     style={{
                         background: 'linear-gradient(to bottom, transparent 0%, rgba(248,247,255,0.92) 60%, rgba(248,247,255,1) 100%)',
@@ -1141,21 +1293,44 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, confirmDeleteId, 
                         zIndex: 3,
                         paddingTop: 32,
                     }}>
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={e => { e.stopPropagation(); onPreview() }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold"
-                            style={{ backgroundColor: '#fff', color: C.dark, border: `1px solid ${C.border}`, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>
-                            <Eye size={13} /> Preview
-                        </button>
-                        <button
-                            onClick={e => { e.stopPropagation(); if (!copying) onEdit() }}
-                            disabled={copying}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold"
-                            style={{ backgroundColor: C.primary, color: '#fff', border: 'none', cursor: copying ? 'not-allowed' : 'pointer', opacity: copying ? 0.7 : 1, fontFamily: 'DM Sans, sans-serif', boxShadow: '0 2px 8px rgba(117,48,251,0.3)' }}>
-                            {copying ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : <Pencil size={13} />}
-                            {copying ? 'Copying…' : 'Edit'}
-                        </button>
+                    <div className="flex flex-col items-center gap-1.5">
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={e => { e.stopPropagation(); onPreview() }}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold"
+                                style={{ backgroundColor: '#fff', color: C.dark, border: `1px solid ${C.border}`, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>
+                                <Eye size={13} /> Preview
+                            </button>
+                            <button
+                                onClick={e => { e.stopPropagation(); if (!copying) onEdit() }}
+                                disabled={copying}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold"
+                                style={{ backgroundColor: C.primary, color: '#fff', border: 'none', cursor: copying ? 'not-allowed' : 'pointer', opacity: copying ? 0.7 : 1, fontFamily: 'DM Sans, sans-serif', boxShadow: '0 2px 8px rgba(117,48,251,0.3)' }}>
+                                {copying ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : <Pencil size={13} />}
+                                {copying ? 'Copying…' : 'Edit'}
+                            </button>
+                        </div>
+                        {/* Feature 13: Use Template + Feature 11: Duplicate */}
+                        <div className="flex items-center gap-2">
+                            {onUse && (
+                                <button
+                                    onClick={e => { e.stopPropagation(); onUse() }}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold"
+                                    style={{ backgroundColor: C.success, color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', boxShadow: '0 2px 8px rgba(22,163,74,0.3)' }}>
+                                    <ArrowRight size={13} /> Use Template
+                                </button>
+                            )}
+                            {onDuplicate && (
+                                <button
+                                    onClick={e => { e.stopPropagation(); if (!duplicating) onDuplicate() }}
+                                    disabled={duplicating}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold"
+                                    style={{ backgroundColor: '#fff', color: C.secondary, border: `1px solid ${C.border}`, cursor: duplicating ? 'not-allowed' : 'pointer', opacity: duplicating ? 0.7 : 1, fontFamily: 'DM Sans, sans-serif', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                                    {duplicating ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : <Files size={13} />}
+                                    {duplicating ? 'Saving…' : isOwn ? 'Duplicate' : 'Save Copy'}
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1164,9 +1339,39 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, confirmDeleteId, 
             <div className="px-3 py-2.5 flex items-center justify-between gap-2"
                 style={{ borderTop: `1px solid ${C.border}` }}>
                 <div className="min-w-0 flex-1">
-                    <p className="text-[12px] font-bold truncate" style={{ color: C.dark, fontFamily: 'DM Sans, sans-serif' }}>
-                        {template.name}
-                    </p>
+                    {/* Feature 12: Inline rename — click pencil icon to edit name */}
+                    {renaming ? (
+                        <input
+                            autoFocus
+                            value={renameValue}
+                            onChange={e => setRenameValue(e.target.value)}
+                            onBlur={commitRename}
+                            onKeyDown={e => {
+                                if (e.key === 'Enter') { e.preventDefault(); commitRename() }
+                                if (e.key === 'Escape') { setRenaming(false); setRenameValue(template.name) }
+                            }}
+                            className="w-full text-[12px] font-bold px-2 py-0.5 rounded-md outline-none"
+                            style={{
+                                border: `1px solid ${C.primary}`, color: C.dark,
+                                fontFamily: 'DM Sans, sans-serif', backgroundColor: C.primaryLight,
+                            }}
+                        />
+                    ) : (
+                        <div className="flex items-center gap-1 min-w-0">
+                            <p className="text-[12px] font-bold truncate" style={{ color: C.dark, fontFamily: 'DM Sans, sans-serif' }}>
+                                {template.name}
+                            </p>
+                            {/* Rename pencil — only for own templates, shown on hover */}
+                            {isOwn && hovered && (
+                                <button
+                                    onClick={e => { e.stopPropagation(); setRenameValue(template.name); setRenaming(true) }}
+                                    title="Rename"
+                                    style={{ border: 'none', background: 'none', cursor: 'pointer', padding: '1px 3px', borderRadius: 4, display: 'flex', flexShrink: 0 }}>
+                                    <PenLine size={11} style={{ color: C.muted }} />
+                                </button>
+                            )}
+                        </div>
+                    )}
                     <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                         <CategoryBadge category={template.category} />
                         {template.tags && template.tags.length > 0 && template.tags.slice(0, 3).map(tag => (
@@ -1209,6 +1414,14 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, confirmDeleteId, 
                                 icon={copied ? <Check size={12} /> : <Copy size={12} />}
                                 tooltip={copied ? 'Copied!' : 'Copy HTML'}
                                 active={copied} variant={copied ? 'success' : 'default'} size={28} />
+                            {/* Feature 11: Duplicate icon button */}
+                            {onDuplicate && (
+                                <IconButton
+                                    onClick={duplicating ? undefined : onDuplicate}
+                                    icon={duplicating ? <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <Files size={12} />}
+                                    tooltip={duplicating ? 'Duplicating…' : isOwn ? 'Duplicate' : 'Save copy to My Templates'}
+                                    size={28} />
+                            )}
                             {/* Bug 5: Spinner on Edit when copying system template */}
                             <IconButton onClick={copying ? undefined : onEdit}
                                 icon={copying ? <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <Pencil size={12} />}
