@@ -13,6 +13,7 @@
 
 import React from 'react'
 import { X, Check, Minus } from 'lucide-react'
+import { ProBadge } from './ProBadge'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -165,9 +166,10 @@ export function ProUpgradeModal({ onClose, onUpgrade, reason }: ProUpgradeModalP
                             fontSize: 12,
                             color: C.primary,
                             fontWeight: 600,
-                            display: 'flex', alignItems: 'center', gap: 6,
+                            display: 'flex', alignItems: 'center', gap: 8,
                         }}>
-                            <span>🔒</span> {reason}
+                            <ProBadge size="sm" />
+                            {reason}
                         </div>
                     )}
 
