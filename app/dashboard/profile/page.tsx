@@ -1,7 +1,8 @@
 ﻿'use client'
 // app/dashboard/profile/page.tsx
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Shield, User, Globe, CreditCard, Lock, DollarSign, Users } from 'lucide-react'
 import OverviewTab    from './tabs/OverviewTab'
 import EbayManagerTab from './tabs/EbayManagerTab'
@@ -26,7 +27,21 @@ const TABS = [
 ]
 
 export default function UserProfilePage() {
+  const searchParams = useSearchParams()
   const [selectedTab, setSelectedTab] = useState(0)
+
+  // Allow deep-linking to a tab via ?tab=<index> or ?tab=marketplace etc.
+  useEffect(() => {
+    const t = searchParams.get('tab')
+    if (!t) return
+    const byIndex = parseInt(t)
+    if (!isNaN(byIndex) && byIndex >= 0 && byIndex < TABS.length) {
+      setSelectedTab(byIndex)
+    } else {
+      const byLabel = TABS.findIndex(tab => tab.label.toLowerCase() === t.toLowerCase())
+      if (byLabel !== -1) setSelectedTab(byLabel)
+    }
+  }, [searchParams])
 
   function renderContent() {
     switch (selectedTab) {

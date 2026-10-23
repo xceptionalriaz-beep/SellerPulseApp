@@ -40,7 +40,7 @@ import {
   ShieldAlert, LogOut, Bell, Menu, X, MessageCircle, ChevronDown,
   Users, Key, Power, Zap, Trophy, BarChart2, Mail, CreditCard, FileText, DollarSign, BookOpen, Wrench, Image, Briefcase, Eye, Lock, ListChecks,
   Globe, History, RotateCcw, Sparkles, Palette,
-  LayoutTemplate, User, Settings2, ChevronRight, Star, Megaphone, Truck,
+  LayoutTemplate, User, Settings2, ChevronRight, Star, Megaphone, Truck, Plug,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { NotificationsPanelOverlay } from '@/components/NotificationsPanel'
@@ -73,6 +73,7 @@ const NAV_ITEMS = [
   { icon: Star,      label: 'Feedback',   href: '/dashboard/feedback'   },
   { icon: Megaphone, label: 'Promotions', href: '/dashboard/promotions' },
   { icon: Truck,     label: 'Shipping',   href: '/dashboard/shipping'   },
+  { icon: Plug,      label: 'Integrations', href: '/dashboard/integrations' },
 ]
 
 // -- Design Studio sub-sidebar tabs ----------------------------
