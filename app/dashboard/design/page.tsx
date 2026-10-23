@@ -462,11 +462,16 @@ function DesignStudioInner() {
         const nextShared = !t.is_shared
         const isVisual = !t.is_system && t.description === 'Visual Builder template'
         try {
+            // visual_templates uses RLS (auth.uid() = user_id) → must use authenticated supabase client
+            // listing_templates uses rawDb (service-like untyped client) — keep as-is
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const db = rawDb as any
+            const authDb = supabase as any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const anonDb = rawDb as any
+
             if (isVisual && nextShared) {
-                // Fetch blocks + settings so we can generate share_html for the public page
-                const { data: vt } = await db
+                // Fetch blocks + settings to generate share_html for the public page
+                const { data: vt } = await authDb
                     .from('visual_templates')
                     .select('blocks_json, canvas_settings_json')
                     .eq('id', t.id)
@@ -476,13 +481,20 @@ function DesignStudioInner() {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const settings = (vt?.canvas_settings_json ?? undefined) as any
                 const html = assembleDocument(blocks, settings)
-                await db
+                await authDb
                     .from('visual_templates')
                     .update({ is_shared: true, share_html: html })
                     .eq('id', t.id)
+            } else if (isVisual) {
+                // Turning off — just clear the flag
+                await authDb
+                    .from('visual_templates')
+                    .update({ is_shared: false })
+                    .eq('id', t.id)
             } else {
-                await db
-                    .from(isVisual ? 'visual_templates' : 'listing_templates')
+                // listing_templates — use rawDb as before
+                await anonDb
+                    .from('listing_templates')
                     .update({ is_shared: nextShared })
                     .eq('id', t.id)
             }
