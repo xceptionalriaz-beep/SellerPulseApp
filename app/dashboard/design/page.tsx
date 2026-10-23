@@ -18,7 +18,7 @@
 //   ✓ Fully mobile responsive
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState, useEffect, useCallback, Suspense } from 'react'
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { createClient as createRawClient } from '@supabase/supabase-js'
@@ -29,7 +29,7 @@ import {
     LayoutGrid, Smartphone, Monitor, Shirt, Gem, Heart,
     Home, Sofa, Car, Wrench, Dumbbell, Gamepad2,
     Archive, BookOpen, PawPrint, Briefcase, Tag,
-    Files, ArrowRight, PenLine,
+    Files, ArrowRight, PenLine, FileUp,
 } from 'lucide-react'
 import { hydrateTemplateContent } from '@/lib/template-utils'
 import { assembleDocument } from '@/components/ui/VisualEditor/blocks'
@@ -613,6 +613,30 @@ function DesignStudioInner() {
     const [useTemplateTarget, setUseTemplateTarget] = useState<ListingTemplate | null>(null)
     const [applySuccess, setApplySuccess] = useState<string | null>(null)
 
+    // HTML file import — hidden <input type="file"> triggered by the gallery card
+    const fileInputRef = useRef<HTMLInputElement>(null)
+    function handleFileImport(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0]
+        if (!file) return
+        const reader = new FileReader()
+        reader.onload = ev => {
+            const imported = ev.target?.result as string
+            if (!imported) return
+            // Derive a template name from the filename (strip extension, humanise)
+            const templateName = file.name
+                .replace(/\.html?$/i, '')
+                .replace(/[-_]/g, ' ')
+                .trim() || 'Imported Template'
+            if (typeof window !== 'undefined') {
+                sessionStorage.setItem('import_html', imported)
+                sessionStorage.setItem('import_filename', templateName)
+            }
+            router.push(`/dashboard/design/html-editor?name=${encodeURIComponent(templateName)}&from=import`)
+        }
+        reader.readAsText(file)
+        e.target.value = '' // allow re-importing the same file
+    }
+
     async function handleEditTemplate(t: ListingTemplate) {
         const isVisual = t.is_system || (t.description || '').toLowerCase().includes('visual builder')
 
@@ -780,6 +804,35 @@ function DesignStudioInner() {
                                 </button>
                             </div>
                         </div>
+
+                        {/* Import HTML File card */}
+                        <div className="flex items-start gap-3 p-4 rounded-xl cursor-pointer transition-all hover:shadow-md"
+                            style={{ border: `1px solid ${C.border}`, backgroundColor: C.surface }}
+                            onClick={() => fileInputRef.current?.click()}>
+                            <div className="flex items-center justify-center w-9 h-9 rounded-lg shrink-0"
+                                style={{ backgroundColor: '#fef3c7', border: '1px solid #fde68a' }}>
+                                <FileUp size={16} style={{ color: '#d97706' }} />
+                            </div>
+                            <div className="min-w-0">
+                                <p className="text-[14px] font-bold mb-0.5" style={{ color: C.dark, fontFamily: 'Syne, sans-serif' }}>Import HTML File</p>
+                                <p className="text-[12px] leading-relaxed" style={{ color: C.secondary, fontFamily: 'DM Sans, sans-serif' }}>
+                                    Upload an existing .html file and open it in the editor as a new template.
+                                </p>
+                                <button className="mt-2 text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-all hover:opacity-80"
+                                    style={{ border: `1px solid #d97706`, color: '#d97706', fontFamily: 'DM Sans, sans-serif', background: 'none' }}>
+                                    + Upload File
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Hidden file input — triggered by the card above */}
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept=".html,.htm"
+                            style={{ display: 'none' }}
+                            onChange={handleFileImport}
+                        />
 
                     </div>
                 </div>

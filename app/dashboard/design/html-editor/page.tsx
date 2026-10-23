@@ -10,7 +10,7 @@ import {
     ChevronLeft, Save, X,
     Search, Plus, Image, Link2, ChevronDown,
     Monitor, Tablet, Smartphone,
-    Maximize2, CheckCircle2, Download, History,
+    Maximize2, CheckCircle2, Download, History, Upload,
 } from 'lucide-react'
 import ImageAssets from '@/components/ui/ImageAssets'
 import ImportUrl from '@/components/ui/ImportUrl'
@@ -165,6 +165,26 @@ function HtmlEditorInner() {
     const [previewHtml, setPreviewHtml] = useState('')
     const [showVersionHistory, setShowVersionHistory] = useState(false)
 
+    // File import ref (Entry point B — inline import inside the editor)
+    const fileInputRef = useRef<HTMLInputElement>(null)
+    function handleFileImport(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0]
+        if (!file) return
+        const reader = new FileReader()
+        reader.onload = ev => {
+            const imported = ev.target?.result as string
+            if (!imported) return
+            setHtml(imported)
+            const templateName = file.name
+                .replace(/\.html?$/i, '')
+                .replace(/[-_]/g, ' ')
+                .trim()
+            if (templateName) setName(templateName)
+        }
+        reader.readAsText(file)
+        e.target.value = '' // allow re-importing the same file
+    }
+
     // Load HTML from sessionStorage when opened from Visual Editor
     useEffect(() => {
         if (searchParams.get('source') !== 'visual') return
@@ -181,6 +201,31 @@ function HtmlEditorInner() {
             }
         } catch {
             // sessionStorage unavailable — use URL name param (already set above)
+        }
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Load HTML from sessionStorage when opened from AI Generator or file import
+    useEffect(() => {
+        const from = searchParams.get('from')
+        if (!from) return
+        try {
+            if (from === 'ai') {
+                const storedHtml = sessionStorage.getItem('ai_template_html')
+                const storedName = sessionStorage.getItem('ai_template_name')
+                if (storedHtml) { setHtml(storedHtml); sessionStorage.removeItem('ai_template_html') }
+                if (storedName) {
+                    setName(storedName)
+                    sessionStorage.removeItem('ai_template_name')
+                    sessionStorage.removeItem('ai_template_category')
+                }
+            } else if (from === 'import') {
+                const storedHtml = sessionStorage.getItem('import_html')
+                const storedName = sessionStorage.getItem('import_filename')
+                if (storedHtml) { setHtml(storedHtml); sessionStorage.removeItem('import_html') }
+                if (storedName) { setName(storedName); sessionStorage.removeItem('import_filename') }
+            }
+        } catch {
+            // sessionStorage unavailable
         }
     }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -671,6 +716,19 @@ function HtmlEditorInner() {
                     style={{ backgroundColor: C.surface, color: C.secondary, border: `1px solid ${C.border}`, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
                     <Link2 size={13} /> Import URL
                 </button>
+                <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold hover:opacity-80 transition-all shrink-0"
+                    style={{ backgroundColor: C.surface, color: C.secondary, border: `1px solid ${C.border}`, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                    <Upload size={13} /> Import File
+                </button>
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".html,.htm"
+                    onChange={handleFileImport}
+                    style={{ display: 'none' }}
+                />
             </div>
 
             {/* ── Main split ────────────────────────────────────────────── */}
