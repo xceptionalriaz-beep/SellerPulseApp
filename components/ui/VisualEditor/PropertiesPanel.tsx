@@ -8285,17 +8285,48 @@ function AITab({
 
     // track which field is being edited inside the preview
     const [copyApplied, setCopyApplied] = useState(false)
+    // Policy Writer: which block field to apply the generated policy into
+    const [policyTargetField, setPolicyTargetField] = useState<string>('')
 
     // ── Extract text fields from the selected block's props ───────────────────
+    // Heuristic scan: any string prop that looks like user-editable text.
+    // Much broader than a hardcoded allowlist — handles heroText, ctaText,
+    // col1Text, buttonLabel, tagline, etc. that the old allowlist missed.
     const extractTextFields = (): Record<string, string> => {
         const props = block.props as unknown as Record<string, unknown>
-        const textKeys = ['text', 'heading', 'subheading', 'body', 'label', 'title', 'description', 'subtitle', 'content', 'caption']
+
+        // Keys that are definitely NOT user-editable text
+        const SKIP_KEYS = new Set([
+            'variant', 'align', 'valign', 'size', 'direction', 'position', 'layout',
+            'code', 'html', 'css', 'script',
+            'id', 'type', 'blockType',
+            // numeric/boolean fields stored as strings
+            'width', 'height', 'padding', 'margin', 'gap', 'columns', 'rows',
+            'fontSize', 'lineHeight', 'borderRadius', 'rating', 'reviewCount',
+            'maxItems', 'minItems', 'count', 'limit',
+        ])
+
         const found: Record<string, string> = {}
-        for (const key of textKeys) {
-            const val = props[key]
-            if (typeof val === 'string' && val.trim() && !val.startsWith('{{') /* skip bare tokens */) {
-                found[key] = val
-            }
+
+        for (const [key, val] of Object.entries(props)) {
+            if (SKIP_KEYS.has(key)) continue
+            if (typeof val !== 'string') continue
+            const trimmed = val.trim()
+            if (!trimmed || trimmed.length < 3) continue
+            // Skip bare token values like "{{BRAND}}" or "{{ITEM_PRICE}}"
+            if (/^\{\{[^}]+\}\}$/.test(trimmed)) continue
+            // Skip URLs
+            if (/^https?:\/\//.test(trimmed)) continue
+            // Skip hex colors
+            if (/^#[0-9a-fA-F]{3,8}$/.test(trimmed)) continue
+            // Skip keys whose names suggest URL / color / image / style props
+            const k = key.toLowerCase()
+            if (k.includes('url') || k.includes('href') || k.includes('src') ||
+                k.includes('color') || k.includes('colour') || k.includes('bg') ||
+                k.includes('icon') || k.includes('logo') || k.includes('image') ||
+                k.includes('photo') || k.includes('thumb')) continue
+
+            found[key] = val
         }
         return found
     }
@@ -8457,13 +8488,19 @@ function AITab({
         }
     }
 
+    // ── Image prop detection — used to hide Photo Studio on text-only blocks ──
+    const IMAGE_PROP_KEYS = ['src', 'mainImageSrc', 'imageUrl', 'heroImage', 'bgImage', 'logoUrl', 'image2Url']
+    const blockImageKey = IMAGE_PROP_KEYS.find(k => typeof (block.props as any)[k] === 'string') ?? null
+    const hasImageProps = blockImageKey !== null
+
     const applyPhotoResult = () => {
         if (!photoResult) return
-        const props = block.props as unknown as Record<string, unknown>
-        // Priority order for image props — pick the first one that exists on this block
-        const imageKeys = ['src', 'mainImageSrc', 'imageUrl', 'heroImage', 'bgImage', 'logoUrl', 'image2Url']
-        const targetKey = imageKeys.find(k => typeof props[k] === 'string') ?? 'src'
-        onChange({ ...block, props: { ...block.props, [targetKey]: photoResult.url } as BlockProps })
+        // Refuse to apply if no known image prop exists — prevents silent orphaned prop
+        if (!blockImageKey) {
+            setPhotoError('This block has no image field. Select an image block to use Photo Studio.')
+            return
+        }
+        onChange({ ...block, props: { ...block.props, [blockImageKey]: photoResult.url } as BlockProps })
         setPhotoApplied(true)
         setTimeout(() => { setPhotoResult(null); setPhotoApplied(false); setPhotoOpen(false) }, 1200)
     }
@@ -8471,9 +8508,15 @@ function AITab({
     const applyPolicyResult = () => {
         if (!policyResult) return
         const props = block.props as unknown as Record<string, unknown>
-        const targetKey = ['body', 'text', 'content', 'description'].find(k => typeof props[k] === 'string') ?? 'text'
+        // Use the user-selected field, or fall back to the first available text field
+        const availableFields = extractTextFields()
+        const fallback = Object.keys(availableFields)[0] ?? 'text'
+        const targetKey = (policyTargetField && typeof props[policyTargetField] === 'string')
+            ? policyTargetField
+            : fallback
         onChange({ ...block, props: { ...block.props, [targetKey]: policyResult } as BlockProps })
         setPolicyResult('')
+        setPolicyTargetField('')
     }
 
     const spinnerStyle: React.CSSProperties = {
@@ -8602,7 +8645,30 @@ function AITab({
 
                 {/* ── AI Photo Studio ── */}
                 <div style={{ marginBottom: 10 }}>
-                    <button
+                    {!hasImageProps && (
+                        <div style={{
+                            padding: '10px 12px', border: `1px solid ${C.border}`,
+                            borderRadius: 10, backgroundColor: C.surface, opacity: 0.7,
+                            display: 'flex', alignItems: 'center', gap: 10,
+                        }}>
+                            <div style={{
+                                width: 34, height: 34, borderRadius: 9,
+                                backgroundColor: C.bg, border: `1px solid ${C.border}`,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                            }}>
+                                <Wand2 size={16} style={{ color: C.muted }} />
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                                <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700, color: C.muted }}>
+                                    AI Photo Studio
+                                </p>
+                                <p style={{ margin: '2px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, lineHeight: 1.4 }}>
+                                    Select a block with an image field to use Photo Studio
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                    {hasImageProps && <button
                         onClick={() => { setPhotoOpen(o => !o); setPhotoError(null) }}
                         style={{
                             width: '100%', display: 'flex', alignItems: 'center', gap: 10,
@@ -8631,10 +8697,10 @@ function AITab({
                         <div style={{ fontSize: 10, color: '#d97706', fontWeight: 700, opacity: 0.7 }}>
                             {photoOpen ? '▲' : '▼'}
                         </div>
-                    </button>
+                    </button>}
 
-                    {/* Expandable panel */}
-                    {photoOpen && (
+                    {/* Expandable panel — only rendered when this block actually has an image field */}
+                    {hasImageProps && photoOpen && (
                         <div className="ai-result-fade" style={{
                             border: `1px solid #fde68a`, borderTop: 'none',
                             borderRadius: '0 0 10px 10px',
@@ -8818,42 +8884,72 @@ function AITab({
                                     <Zap size={10} /> AI Policy Draft{policyLoading ? ' — writing…' : ' — review before applying'}
                                 </p>
                             </div>
-                            <div style={{ backgroundColor: C.surface, padding: '10px 11px' }}>
+                            <div style={{ backgroundColor: C.surface, padding: '10px 11px', maxHeight: 160, overflowY: 'auto' }}>
                                 <p style={{
                                     margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11,
                                     color: C.body, lineHeight: 1.65, minHeight: 20,
+                                    whiteSpace: 'pre-wrap',
                                 }}>
                                     {policyResult}
                                     {policyLoading && <span style={{ display: 'inline-block', width: 2, height: 13, backgroundColor: C.success, marginLeft: 2, verticalAlign: 'middle', animation: 'spin 0.8s steps(1) infinite' }} />}
                                 </p>
                             </div>
-                            {!policyLoading && policyResult && (
-                                <div style={{ display: 'flex', gap: 0, borderTop: `1px solid ${C.border}` }}>
-                                    <button
-                                        onClick={applyPolicyResult}
-                                        style={{
-                                            flex: 1, padding: '8px 0',
-                                            fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700,
-                                            color: '#fff', backgroundColor: C.success,
-                                            border: 'none', cursor: 'pointer', borderBottomLeftRadius: 8,
-                                        }}
-                                    >
-                                        ✓ Apply to block
-                                    </button>
-                                    <div style={{ width: 1, backgroundColor: C.border }} />
-                                    <button
-                                        onClick={() => setPolicyResult('')}
-                                        style={{
-                                            flex: 1, padding: '8px 0',
-                                            fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 600,
-                                            color: C.secondary, backgroundColor: C.surface,
-                                            border: 'none', cursor: 'pointer', borderBottomRightRadius: 8,
-                                        }}
-                                    >
-                                        Discard
-                                    </button>
-                                </div>
-                            )}
+                            {!policyLoading && policyResult && (() => {
+                                const textFields = extractTextFields()
+                                const fieldKeys = Object.keys(textFields)
+                                return (
+                                    <>
+                                        {/* Field selector — only shown when block has multiple text fields */}
+                                        {fieldKeys.length > 1 && (
+                                            <div style={{ padding: '8px 11px', borderTop: `1px solid ${C.border}`, backgroundColor: C.bg }}>
+                                                <p style={{ margin: '0 0 4px', fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 700, color: C.secondary, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                                    Apply to field
+                                                </p>
+                                                <select
+                                                    value={policyTargetField || fieldKeys[0]}
+                                                    onChange={e => setPolicyTargetField(e.target.value)}
+                                                    style={{
+                                                        width: '100%', padding: '5px 8px',
+                                                        fontFamily: 'DM Sans, sans-serif', fontSize: 11,
+                                                        border: `1px solid ${C.border}`, borderRadius: 6,
+                                                        backgroundColor: C.surface, color: C.body,
+                                                        cursor: 'pointer',
+                                                    }}
+                                                >
+                                                    {fieldKeys.map(k => (
+                                                        <option key={k} value={k}>{k}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        )}
+                                        <div style={{ display: 'flex', gap: 0, borderTop: `1px solid ${C.border}` }}>
+                                            <button
+                                                onClick={applyPolicyResult}
+                                                style={{
+                                                    flex: 1, padding: '8px 0',
+                                                    fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700,
+                                                    color: '#fff', backgroundColor: C.success,
+                                                    border: 'none', cursor: 'pointer', borderBottomLeftRadius: 8,
+                                                }}
+                                            >
+                                                ✓ Apply to block
+                                            </button>
+                                            <div style={{ width: 1, backgroundColor: C.border }} />
+                                            <button
+                                                onClick={() => { setPolicyResult(''); setPolicyTargetField('') }}
+                                                style={{
+                                                    flex: 1, padding: '8px 0',
+                                                    fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 600,
+                                                    color: C.secondary, backgroundColor: C.surface,
+                                                    border: 'none', cursor: 'pointer', borderBottomRightRadius: 8,
+                                                }}
+                                            >
+                                                Discard
+                                            </button>
+                                        </div>
+                                    </>
+                                )
+                            })()}
                         </div>
                     )}
                 </div>
@@ -8903,21 +8999,37 @@ function AITab({
             )}
             {showBuyCredits && <BuyCreditsModal onClose={() => setShowBuyCredits(false)} />}
 
-            <Section title="eBay Compliance">
-                <div style={{
-                    padding: '10px 12px',
-                    backgroundColor: C.successLight,
-                    border: `1px solid #86efac50`,
-                    borderRadius: 8,
-                }}>
-                    <p style={{ margin: '0 0 4px', fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700, color: C.success, display: 'flex', alignItems: 'center', gap: 5 }}>
-                        <CheckCircle2 size={13} /> This block is eBay safe
-                    </p>
-                    <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.success + 'cc', lineHeight: 1.5 }}>
-                        No JavaScript · No external CSS · Table-based layout · HTTPS images only
-                    </p>
-                </div>
-            </Section>
+            {/* ── eBay Compliance — live per-block audit, not a static badge ── */}
+            {(() => {
+                const aiDef = getDefinition(block.type)
+                const aiProps = block.props as any
+                const aiHtml = aiDef ? aiDef.toHtml(aiProps, block.id) : ''
+                const aiAudit = auditHtml(aiHtml)
+                const isClean = aiAudit.count === 0
+                return (
+                    <Section title="eBay Compliance">
+                        <div style={{
+                            padding: '10px 12px',
+                            backgroundColor: isClean ? C.successLight : '#fef3c7',
+                            border: `1px solid ${isClean ? '#86efac50' : '#fde68a'}`,
+                            borderRadius: 8,
+                        }}>
+                            <p style={{ margin: '0 0 4px', fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700, color: isClean ? C.success : '#d97706', display: 'flex', alignItems: 'center', gap: 5 }}>
+                                {isClean
+                                    ? <><CheckCircle2 size={13} /> This block is eBay safe</>
+                                    : <><AlertTriangle size={13} /> {aiAudit.count} compliance issue{aiAudit.count > 1 ? 's' : ''}</>
+                                }
+                            </p>
+                            <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: isClean ? C.success + 'cc' : '#b45309', lineHeight: 1.5 }}>
+                                {isClean
+                                    ? 'No JavaScript · No external CSS · HTTPS images only'
+                                    : aiAudit.issues.join(' · ')
+                                }
+                            </p>
+                        </div>
+                    </Section>
+                )
+            })()}
         </div>
     )
 }
