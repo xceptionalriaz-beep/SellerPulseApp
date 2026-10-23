@@ -29,7 +29,7 @@ import {
     LayoutGrid, Smartphone, Monitor, Shirt, Gem, Heart,
     Home, Sofa, Car, Wrench, Dumbbell, Gamepad2,
     Archive, BookOpen, PawPrint, Briefcase, Tag,
-    Files, ArrowRight, PenLine, FileUp, Link2, ShieldCheck,
+    Files, ArrowRight, PenLine, FileUp, Link2, ShieldCheck, Download,
 } from 'lucide-react'
 import { hydrateTemplateContent } from '@/lib/template-utils'
 import { assembleDocument } from '@/components/ui/VisualEditor/blocks'
@@ -455,6 +455,37 @@ function DesignStudioInner() {
         }
     }
 
+    // ── Download template as .html ─────────────────────────────────────────
+    async function downloadTemplate(t: ListingTemplate) {
+        const isVisualTemplate = !t.is_system && t.description === 'Visual Builder template'
+        let html = t.description_html
+
+        if (isVisualTemplate) {
+            try {
+                const { data: vt } = await (supabase as any)
+                    .from('visual_templates')
+                    .select('blocks_json, canvas_settings_json')
+                    .eq('id', t.id)
+                    .single()
+                if (vt) {
+                    const blocks = Array.isArray(vt.blocks_json) ? vt.blocks_json : []
+                    html = blocks.length > 0 ? assembleDocument(blocks, vt.canvas_settings_json ?? undefined) : null
+                }
+            } catch {
+                // fall back to cached html
+            }
+        }
+
+        if (!html) return
+        const blob = new Blob([html], { type: 'text/html' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `${t.name.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.html`
+        a.click()
+        URL.revokeObjectURL(url)
+    }
+
     // ── Share modal toggle ─────────────────────────────────────────────────
     // Called from inside ShareModal — toggles is_shared and updates local state.
     async function toggleTemplateShared(t: ListingTemplate) {
@@ -767,13 +798,12 @@ function DesignStudioInner() {
                                 {activeTab === 'my-templates' ? 'Your saved custom templates — edit, copy or delete anytime.' : <span>Select a <span style={{ color: C.primary, fontWeight: 600 }}>high-converting</span>, mobile-responsive eBay template or start from scratch.</span>}
                             </p>
                         </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                            <button
-                                onClick={() => router.push('/dashboard/design/html-editor?name=New+Template')}
-                                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-bold transition-all hover:opacity-90"
-                                style={{ backgroundColor: C.primary, color: '#ffffff', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
-                                <Plus size={14} /> New Template
-                            </button>
+                        <div className="flex items-center gap-2 shrink-0" style={{ position: 'relative' }}>
+                            {/* Split button: main = Visual Builder, dropdown = HTML Editor */}
+                            <NewTemplateButton
+                                onVisual={() => router.push('/dashboard/design/visual-editor?name=New+Visual+Template')}
+                                onHtml={() => router.push('/dashboard/design/html-editor?name=New+Template')}
+                            />
                         </div>
                     </div>
 
@@ -1172,6 +1202,7 @@ function DesignStudioInner() {
                                                 onUse={() => useTemplate(t)}
                                                 onRename={(id, name) => renameTemplate(id, name)}
                                                 onShare={() => setShareModalTemplate(t)}
+                                                onDownload={() => downloadTemplate(t)}
                                             />
                                         ))}
                                     </div>
@@ -1259,6 +1290,7 @@ function DesignStudioInner() {
                                                         onEdit={() => handleEditTemplate(t)}
                                                         onDuplicate={() => duplicateTemplate(t)}
                                                         onUse={() => useTemplate(t)}
+                                                        onDownload={() => downloadTemplate(t)}
                                                     />
                                                 ))}
                                             </div>
@@ -1362,6 +1394,93 @@ function DesignStudioInner() {
     )
 }
 
+// ── New Template split button ──────────────────────────────────────────────
+function NewTemplateButton({ onVisual, onHtml }: { onVisual: () => void; onHtml: () => void }) {
+    const [open, setOpen] = useState(false)
+    const ref = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        function handleClick(e: MouseEvent) {
+            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+        }
+        if (open) document.addEventListener('mousedown', handleClick)
+        return () => document.removeEventListener('mousedown', handleClick)
+    }, [open])
+
+    return (
+        <div ref={ref} style={{ position: 'relative', display: 'inline-flex' }}>
+            {/* Main action */}
+            <button
+                onClick={onVisual}
+                className="flex items-center gap-1.5 text-[13px] font-bold transition-all hover:opacity-90"
+                style={{
+                    backgroundColor: C.primary, color: '#fff',
+                    border: 'none', cursor: 'pointer',
+                    fontFamily: 'DM Sans, sans-serif',
+                    padding: '8px 16px 8px 14px',
+                    borderRadius: '12px 0 0 12px',
+                    borderRight: '1px solid rgba(255,255,255,0.25)',
+                }}>
+                <Plus size={14} /> New Template
+            </button>
+            {/* Dropdown arrow */}
+            <button
+                onClick={() => setOpen(v => !v)}
+                className="flex items-center justify-center transition-all hover:opacity-90"
+                style={{
+                    backgroundColor: C.primary, color: '#fff',
+                    border: 'none', cursor: 'pointer',
+                    padding: '8px 10px',
+                    borderRadius: '0 12px 12px 0',
+                    width: 34,
+                }}>
+                <ChevronDown size={14} style={{ transition: 'transform 0.15s', transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+            </button>
+            {/* Dropdown menu */}
+            {open && (
+                <div style={{
+                    position: 'absolute', top: 'calc(100% + 6px)', right: 0,
+                    minWidth: 200, backgroundColor: C.surface,
+                    border: `1px solid ${C.border}`, borderRadius: 12,
+                    boxShadow: '0 8px 24px rgba(117,48,251,0.12)',
+                    zIndex: 50, overflow: 'hidden',
+                    fontFamily: 'DM Sans, sans-serif',
+                }}>
+                    <button
+                        onClick={() => { setOpen(false); onVisual() }}
+                        className="w-full flex items-center gap-3 text-left transition-colors"
+                        style={{ padding: '11px 16px', border: 'none', background: 'none', cursor: 'pointer', color: C.dark }}
+                        onMouseEnter={e => (e.currentTarget.style.backgroundColor = C.primaryLight)}
+                        onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}>
+                        <div style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: C.primaryLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <Layers size={14} style={{ color: C.primary }} />
+                        </div>
+                        <div>
+                            <p style={{ fontSize: 13, fontWeight: 700, margin: 0 }}>Visual Builder</p>
+                            <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>Drag-and-drop blocks</p>
+                        </div>
+                    </button>
+                    <div style={{ height: 1, backgroundColor: C.border, margin: '0 12px' }} />
+                    <button
+                        onClick={() => { setOpen(false); onHtml() }}
+                        className="w-full flex items-center gap-3 text-left transition-colors"
+                        style={{ padding: '11px 16px', border: 'none', background: 'none', cursor: 'pointer', color: C.dark }}
+                        onMouseEnter={e => (e.currentTarget.style.backgroundColor = C.primaryLight)}
+                        onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}>
+                        <div style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: C.primaryLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <Code2 size={14} style={{ color: C.primary }} />
+                        </div>
+                        <div>
+                            <p style={{ fontSize: 13, fontWeight: 700, margin: 0 }}>HTML Editor</p>
+                            <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>Write or paste HTML directly</p>
+                        </div>
+                    </button>
+                </div>
+            )}
+        </div>
+    )
+}
+
 // ── Template Card component ────────────────────────────────────────────────
 interface CardProps {
     template: ListingTemplate
@@ -1381,9 +1500,10 @@ interface CardProps {
     onUse?: () => void
     onRename?: (id: string, newName: string) => void
     onShare?: () => void
+    onDownload?: () => void
 }
 
-function TemplateCard({ template, isOwn, copiedId, deletingId, confirmDeleteId, copyingTemplateId, duplicatingId, sharingId, onPreview, onCopy, onDelete, onCancelDelete, onEdit, onDuplicate, onUse, onRename, onShare }: CardProps) {
+function TemplateCard({ template, isOwn, copiedId, deletingId, confirmDeleteId, copyingTemplateId, duplicatingId, sharingId, onPreview, onCopy, onDelete, onCancelDelete, onEdit, onDuplicate, onUse, onRename, onShare, onDownload }: CardProps) {
     const [hovered, setHovered] = useState(false)
     // Feature 12: Inline rename state
     const [renaming, setRenaming] = useState(false)
@@ -1612,6 +1732,13 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, confirmDeleteId, 
                                     icon={<Link2 size={12} />}
                                     tooltip={template.is_shared ? 'Sharing on — manage link' : 'Share template'}
                                     active={!!template.is_shared}
+                                    size={28} />
+                            )}
+                            {onDownload && (
+                                <IconButton
+                                    onClick={onDownload}
+                                    icon={<Download size={12} />}
+                                    tooltip="Download .html"
                                     size={28} />
                             )}
                             {isOwn && (
