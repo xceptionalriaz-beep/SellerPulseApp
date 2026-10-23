@@ -240,6 +240,13 @@ function VisualEditorInner() {
     // Design Studio Pro gating
     const [designStudioPlan] = useState<'free' | 'pro'>('free') // TODO: derive from user subscription
     const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+    const [upgradeReason, setUpgradeReason] = useState<string | undefined>(undefined)
+
+    /** Show the upgrade modal with an optional reason line. */
+    const showUpgrade = useCallback((reason?: string) => {
+        setUpgradeReason(reason)
+        setShowUpgradeModal(true)
+    }, [])
     const blocksRef = useRef<Block[]>([]) // live blocks for Pro-style detection
 
     // Pre-parsed blocks loaded from DB (blocks_json column) — used as initialBlocks
@@ -552,6 +559,20 @@ function VisualEditorInner() {
                 // Save version snapshot (non-blocking)
                 saveTemplateVersion(savedId, user.id, html, name)
             } else {
+                // Gate 4 — free users limited to 5 saved templates
+                if (designStudioPlan === 'free' && !isAdmin) {
+                    const { count } = await (supabase as any)
+                        .from('listing_templates')
+                        .select('id', { count: 'exact', head: true })
+                        .eq('user_id', user.id)
+                        .eq('is_system', false)
+                    if ((count ?? 0) >= 5) {
+                        showUpgrade("You've reached your 5-template limit. Upgrade for unlimited templates.")
+                        setSaving(false)
+                        return
+                    }
+                }
+
                 const { data, error } = await (supabase as any)
                     .from('listing_templates')
                     .insert({
@@ -904,7 +925,13 @@ function VisualEditorInner() {
                                 const historyEnabled = !!(savedId || vtSavedId)
                                 return (
                             <button
-                                onClick={() => historyEnabled ? setShowVersionHistory(v => !v) : showToast('Save the template first to unlock version history.')}
+                                onClick={() => {
+                                    if (designStudioPlan === 'free') {
+                                        showUpgrade('Version history is a Pro feature.')
+                                        return
+                                    }
+                                    historyEnabled ? setShowVersionHistory(v => !v) : showToast('Save the template first to unlock version history.')
+                                }}
                                 disabled={false}
                                 style={{
                                     display: 'flex', alignItems: 'center', gap: 6,
@@ -1380,7 +1407,14 @@ function VisualEditorInner() {
                                                 </button>
                                             )}
                                             <button
-                                                onClick={() => { setActionMenuOpen(false); tryGatedAction(() => handleOpenInCodeEditor()) }}
+                                                onClick={() => {
+                                    setActionMenuOpen(false)
+                                    if (designStudioPlan === 'free') {
+                                        showUpgrade('Code Editor is a Pro feature.')
+                                        return
+                                    }
+                                    handleOpenInCodeEditor()
+                                }}
                                                 style={{
                                                     width: '100%', display: 'flex', alignItems: 'center', gap: 10,
                                                     padding: '9px 10px', border: 'none', borderRadius: 8,
@@ -1407,6 +1441,10 @@ function VisualEditorInner() {
                                                 <button
                                                     onClick={() => {
                                                         setActionMenuOpen(false)
+                                                        if (designStudioPlan === 'free') {
+                                                            showUpgrade('Download HTML is a Pro feature.')
+                                                            return
+                                                        }
                                                         if (blocksRef.current.length === 0) {
                                                             showToast('Your canvas is empty — add some blocks before exporting.')
                                                             return
@@ -1615,9 +1653,11 @@ function VisualEditorInner() {
             {/* ── Pro Upgrade Modal ── */}
             {showUpgradeModal && (
                 <ProUpgradeModal
-                    onClose={() => setShowUpgradeModal(false)}
+                    reason={upgradeReason}
+                    onClose={() => { setShowUpgradeModal(false); setUpgradeReason(undefined) }}
                     onUpgrade={() => {
                         setShowUpgradeModal(false)
+                        setUpgradeReason(undefined)
                         // TODO: route to Stripe checkout
                         // router.push('/dashboard/upgrade?plan=design-studio-pro')
                     }}

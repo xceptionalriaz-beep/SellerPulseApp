@@ -96,10 +96,12 @@ function Cell({ value, highlight }: { value: string | boolean; highlight?: boole
 export interface ProUpgradeModalProps {
     onClose: () => void
     onUpgrade: () => void
+    /** Optional one-liner explaining why the gate fired, e.g. "Download HTML is a Pro feature." */
+    reason?: string
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
-export function ProUpgradeModal({ onClose, onUpgrade }: ProUpgradeModalProps) {
+export function ProUpgradeModal({ onClose, onUpgrade, reason }: ProUpgradeModalProps) {
     return (
         /* Backdrop */
         <div
@@ -152,6 +154,23 @@ export function ProUpgradeModal({ onClose, onUpgrade }: ProUpgradeModalProps) {
                     display: 'flex', flexDirection: 'column',
                     borderRight: `1px solid ${C.border}`,
                 }}>
+                    {/* Reason banner — shown only when a specific gate triggered the modal */}
+                    {reason && (
+                        <div style={{
+                            marginBottom: 16,
+                            padding: '8px 12px',
+                            borderRadius: 8,
+                            backgroundColor: C.primaryLight,
+                            border: `1px solid ${C.border}`,
+                            fontSize: 12,
+                            color: C.primary,
+                            fontWeight: 600,
+                            display: 'flex', alignItems: 'center', gap: 6,
+                        }}>
+                            <span>🔒</span> {reason}
+                        </div>
+                    )}
+
                     {/* Headline */}
                     <div style={{ marginBottom: 6 }}>
                         <p style={{ margin: 0, fontSize: 13, color: C.secondary, fontWeight: 500 }}>

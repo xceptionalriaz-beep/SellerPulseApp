@@ -44,6 +44,7 @@ import type { LinkedListing } from '@/components/ui/VisualEditor/ListingPickerMo
 import BlockLibraryTab from './BlockLibraryTab'
 import StudioSettings from './StudioSettings'
 import AiTemplateGenerator from '@/components/ui/AiTemplateGenerator'
+import { ProUpgradeModal } from '@/components/ui/VisualEditor/ProUpgradeModal'
 
 // ── Design tokens ──────────────────────────────────────────────────────────
 const C = {
@@ -296,6 +297,12 @@ function DesignStudioInner() {
     const [sharingId, setSharingId] = useState<string | null>(null)   // template being toggled inside modal
     const [shareModalTemplate, setShareModalTemplate] = useState<ListingTemplate | null>(null)
 
+    // ── Pro gating ──────────────────────────────────────────────────────────
+    const [designStudioPlan] = useState<'free' | 'pro'>('free') // TODO: derive from user subscription
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+    const [upgradeReason, setUpgradeReason] = useState<string | undefined>(undefined)
+    const showUpgrade = (reason?: string) => { setUpgradeReason(reason); setShowUpgradeModal(true) }
+
     // Preview modal
     const [previewTemplate, setPreviewTemplate] = useState<ListingTemplate | null>(null)
 
@@ -460,6 +467,11 @@ function DesignStudioInner() {
 
     // ── Download template as .html ─────────────────────────────────────────
     async function downloadTemplate(t: ListingTemplate) {
+        // Gate 1 — download is Pro only
+        if (designStudioPlan === 'free') {
+            showUpgrade('Download HTML is a Pro feature.')
+            return
+        }
         const isVisualTemplate = !t.is_system && t.description === 'Visual Builder template'
         let html = t.description_html
 
@@ -492,8 +504,18 @@ function DesignStudioInner() {
     // ── Share modal toggle ─────────────────────────────────────────────────
     // Called from inside ShareModal — toggles is_shared and updates local state.
     async function toggleTemplateShared(t: ListingTemplate) {
-        setSharingId(t.id)
         const nextShared = !t.is_shared
+
+        // Gate 5 — free plan limited to 1 shared template
+        if (nextShared && designStudioPlan === 'free') {
+            const alreadyShared = myTemplates.filter(mt => mt.is_shared && mt.id !== t.id).length
+            if (alreadyShared >= 1) {
+                showUpgrade('Free plan allows 1 shared template. Upgrade for unlimited sharing.')
+                return
+            }
+        }
+
+        setSharingId(t.id)
         const isVisual = !t.is_system && t.description === 'Visual Builder template'
         try {
             // visual_templates uses RLS (auth.uid() = user_id) → must use authenticated supabase client
@@ -1395,6 +1417,19 @@ function DesignStudioInner() {
                     sharingId={sharingId}
                     onToggle={() => toggleTemplateShared(shareModalTemplate)}
                     onClose={() => setShareModalTemplate(null)}
+                />
+            )}
+
+            {/* Pro Upgrade Modal */}
+            {showUpgradeModal && (
+                <ProUpgradeModal
+                    reason={upgradeReason}
+                    onClose={() => { setShowUpgradeModal(false); setUpgradeReason(undefined) }}
+                    onUpgrade={() => {
+                        setShowUpgradeModal(false)
+                        setUpgradeReason(undefined)
+                        // TODO: router.push('/dashboard/upgrade?plan=design-studio-pro')
+                    }}
                 />
             )}
 
