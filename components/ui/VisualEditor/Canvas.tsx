@@ -632,13 +632,36 @@ function EmptyState({
                         Drag blocks here to start building
                     </p>
                     <p style={{
-                        margin: 0,
+                        margin: '0 0 24px',
                         fontFamily: 'DM Sans, sans-serif', fontSize: 13,
                         color: C.secondary, textAlign: 'center',
                         maxWidth: 300, lineHeight: 1.7,
                     }}>
-                        Select blocks from the library on the left, or load a template from the Templates tab.
+                        Select blocks from the library on the left, or load a starter template from the Templates tab.
                     </p>
+                    {/* Quick-start tips */}
+                    <div style={{
+                        display: 'flex', gap: 10, flexWrap: 'wrap' as const,
+                        justifyContent: 'center', maxWidth: 340,
+                    }}>
+                        {[
+                            { icon: '📦', text: 'Product Block' },
+                            { icon: '📝', text: 'Text Block' },
+                            { icon: '🖼️', text: 'Image Block' },
+                        ].map(tip => (
+                            <div key={tip.text} style={{
+                                display: 'flex', alignItems: 'center', gap: 6,
+                                padding: '6px 12px', borderRadius: 20,
+                                backgroundColor: C.primaryLight,
+                                border: `1px solid ${C.border}`,
+                                fontFamily: 'DM Sans, sans-serif', fontSize: 11,
+                                color: C.primary, fontWeight: 600,
+                            }}>
+                                <span>{tip.icon}</span>
+                                <span>{tip.text}</span>
+                            </div>
+                        ))}
+                    </div>
                 </>
             )}
         </div>

@@ -479,8 +479,9 @@ function VisualEditorInner() {
         } catch (err) {
             console.error('[visual-editor] auto-save error:', err)
             setAutoSaveLabel('idle')
+            showToast('Auto-save failed — your changes may not be saved. Please save manually.')
         }
-    }, [vtSavedId, savedId, name, category, html, slots, tags, sortOrder, isFeatured, isNewBadge, supabase])
+    }, [vtSavedId, savedId, name, category, html, slots, tags, sortOrder, isFeatured, isNewBadge, supabase, showToast])
 
     // ── Save Template ─────────────────────────────────────────────────────────
     const handleSaveDraft = useCallback(async () => {
@@ -729,7 +730,7 @@ function VisualEditorInner() {
 
     // ── Duplicate template (admin only) ──────────────────────────────────────
     const handleDuplicate = useCallback(async () => {
-        if (!savedId) { alert('Save the template first before duplicating.'); return }
+        if (!savedId) { showToast('Save the template first before duplicating.'); return }
         setDuplicating(true)
         try {
             const { data, error } = await (supabase as any)
@@ -761,7 +762,7 @@ function VisualEditorInner() {
         } finally {
             setDuplicating(false)
         }
-    }, [savedId, name, category, html, slots, description, thumbnailUrl, tags, sortOrder, supabase, router])
+    }, [savedId, name, category, html, slots, description, thumbnailUrl, tags, sortOrder, supabase, router, showToast])
 
     // ── Thumbnail helpers (admin only) ────────────────────────────────────────
     const uploadThumbnailBlob = useCallback(async (blob: Blob, ext: 'png' | 'jpg' = 'png') => {
@@ -783,7 +784,7 @@ function VisualEditorInner() {
     }, [savedId, supabase])
 
     const handleUploadThumbnail = useCallback(async (file: File) => {
-        if (!savedId) { alert('Save the template first before uploading a thumbnail.'); return }
+        if (!savedId) { showToast('Save the template first before uploading a thumbnail.'); return }
         setThumbnailStatus('uploading')
         try {
             const ext = file.type === 'image/jpeg' ? 'jpg' : 'png'
@@ -795,7 +796,7 @@ function VisualEditorInner() {
             setThumbnailStatus('error')
             setTimeout(() => setThumbnailStatus('idle'), 3000)
         }
-    }, [savedId, uploadThumbnailBlob])
+    }, [savedId, uploadThumbnailBlob, showToast])
 
     // ── Open in Code Editor ───────────────────────────────────────────────────
     // Opens the HTML Template Editor Studio as a full-screen overlay directly
@@ -859,7 +860,7 @@ function VisualEditorInner() {
                     initialBlocks={initialBlocks}
                     onBlocksChange={(b) => { blocksRef.current = b }}
                     publishStatus={publishStatus}
-                    onBack={() => router.push(isAdmin ? '/dashboard/admin' : '/dashboard/design')}
+                    onBack={() => router.push('/dashboard/design')}
                     nameValue={name}
                     onNameChange={(n) => { setName(n); setNameError(false); dirtyRef.current = true }}
                     nameError={nameError}
@@ -903,8 +904,8 @@ function VisualEditorInner() {
                                 const historyEnabled = !!(savedId || vtSavedId)
                                 return (
                             <button
-                                onClick={() => historyEnabled ? setShowVersionHistory(v => !v) : undefined}
-                                disabled={!historyEnabled}
+                                onClick={() => historyEnabled ? setShowVersionHistory(v => !v) : showToast('Save the template first to unlock version history.')}
+                                disabled={false}
                                 style={{
                                     display: 'flex', alignItems: 'center', gap: 6,
                                     padding: '6px 12px',

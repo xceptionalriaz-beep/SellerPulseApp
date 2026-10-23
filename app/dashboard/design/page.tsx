@@ -199,7 +199,7 @@ function TemplateThumbnail({ html, hovered }: { html: string; hovered?: boolean 
                 sandbox="allow-same-origin"
                 style={{
                     position: 'absolute',
-                    top: hovered ? '-420px' : '0',
+                    top: hovered ? '-160px' : '0',
                     left: 0,
                     width: '222%',
                     height: '500%',
@@ -209,7 +209,7 @@ function TemplateThumbnail({ html, hovered }: { html: string; hovered?: boolean 
                     transform: 'scale(0.45)',
                     transformOrigin: 'top left',
                     overflow: 'hidden',
-                    transition: hovered ? 'top 4s ease-in-out' : 'top 0.6s ease',
+                    transition: hovered ? 'top 6s linear' : 'top 0.5s ease',
                 }}
                 title="Template Preview"
             />
@@ -247,13 +247,16 @@ function CategoryBadge({ category }: { category: string | null }) {
     }
     const cat = (category || 'general').toLowerCase()
     const style = map[cat] || map.general
+    // Prefer human label from CATEGORIES array; fall back to title-casing the slug
+    const label = CATEGORIES.find(c => c.id === cat)?.label
+        ?? cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
     return (
         <span style={{
             fontSize: 10, fontWeight: 700, padding: '2px 8px',
             borderRadius: 20, backgroundColor: style.bg, color: style.text,
-            fontFamily: 'DM Sans, sans-serif', textTransform: 'capitalize',
+            fontFamily: 'DM Sans, sans-serif',
         }}>
-            {cat}
+            {label}
         </span>
     )
 }
@@ -1142,10 +1145,10 @@ function DesignStudioInner() {
                                     </p>
                                     <div className="flex items-center gap-3">
                                         <button
-                                            onClick={() => router.push('/dashboard/design/html-editor?name=New+Template')}
+                                            onClick={() => router.push('/dashboard/design/visual-editor')}
                                             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-bold transition-all hover:opacity-90"
                                             style={{ backgroundColor: C.primary, color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
-                                            <Plus size={14} /> Create Blank
+                                            <Plus size={14} /> Visual Builder
                                         </button>
                                         <button
                                             onClick={() => setShowAiModal(true)}
@@ -1154,6 +1157,15 @@ function DesignStudioInner() {
                                             <Zap size={14} /> Generate with AI
                                         </button>
                                     </div>
+                                    <p className="text-[11px] mt-3" style={{ color: C.muted, fontFamily: 'DM Sans, sans-serif' }}>
+                                        Or{' '}
+                                        <button
+                                            onClick={() => router.push('/dashboard/design/html-editor?name=New+Template')}
+                                            style={{ color: C.primary, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', fontSize: 11, padding: 0, textDecoration: 'underline' }}>
+                                            open HTML editor
+                                        </button>
+                                        {' '}for advanced users
+                                    </p>
                                 </div>
                             )}
 
