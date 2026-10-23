@@ -110,7 +110,6 @@ export default async function SharedTemplatePage({ params }: Props) {
             <div style={{
                 fontFamily: "'DM Sans', sans-serif",
                 minHeight: '100vh',
-                background: T.bg,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -121,17 +120,8 @@ export default async function SharedTemplatePage({ params }: Props) {
                     width: '100%',
                     textAlign: 'center',
                     padding: '48px 40px',
-                    borderRadius: 24,
-                    border: `1px solid ${T.border}`,
-                    background: T.surface,
-                    boxShadow: '0 8px 40px rgba(117,48,251,0.08)',
                 }}>
-                    <div style={{
-                        width: 64, height: 64, borderRadius: 16,
-                        background: T.primaryLight, border: `1px solid ${T.border}`,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        margin: '0 auto 20px',
-                    }}>
+                    <div style={{ margin: '0 auto 20px', display: 'inline-flex' }}>
                         <LinkIcon size={28} color={T.primary} />
                     </div>
                     <h1 style={{
