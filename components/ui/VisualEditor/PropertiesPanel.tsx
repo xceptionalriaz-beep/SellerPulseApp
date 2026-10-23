@@ -18,7 +18,7 @@
 //   onDeselect      — called when user clicks × to deselect
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import type { TemplateSlot, TemplateSlotRole } from '@/app/dashboard/listing-generator/types/listing.types'
 import { ProBadge, ProLockOverlay } from './ProBadge'
 import { getVariants, hasVariants } from './variants/index'
@@ -83,6 +83,7 @@ import {
 import ProDropdown, { type DropdownOption } from '@/components/ui/ProDropdown'
 import { auditHtml } from './audit'
 import { VariantThumbnail } from './variantThumbnails'
+import { createClient } from '@/lib/supabase'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -8288,6 +8289,46 @@ function AITab({
     // Policy Writer: which block field to apply the generated policy into
     const [policyTargetField, setPolicyTargetField] = useState<string>('')
 
+    // ── Credit balance + per-tool costs ───────────────────────────────────────
+    const [creditBalance, setCreditBalance] = useState<number | null>(null)
+    const [toolCosts, setToolCosts] = useState<{ copy: number; photo: number; policy: number }>({ copy: 5, photo: 10, policy: 3 })
+
+    const refreshBalance = useCallback(async () => {
+        try {
+            const supabase = createClient()
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) return
+            const { data } = await (supabase.from as any)('user_ai_wallets').select('balance').eq('user_id', user.id).single() as { data: { balance: number } | null }
+            if (data) setCreditBalance(data.balance)
+        } catch { /* non-fatal */ }
+    }, [])
+
+    useEffect(() => {
+        const fetchCredits = async () => {
+            try {
+                const supabase = createClient()
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) return
+                const sb = supabase as any
+                const [walletRes, costsRes] = await Promise.all([
+                    sb.from('user_ai_wallets').select('balance').eq('user_id', user.id).single() as Promise<{ data: { balance: number } | null }>,
+                    sb.from('ai_action_costs').select('feature_key, credits_cost').in('feature_key', ['ai_copy_optimizer', 'ai_photo_studio', 'ai_policy_writer']) as Promise<{ data: Array<{ feature_key: string; credits_cost: number }> | null }>,
+                ])
+                if (walletRes.data) setCreditBalance(walletRes.data.balance)
+                if (costsRes.data) {
+                    const costs = { copy: 5, photo: 10, policy: 3 }
+                    for (const row of costsRes.data) {
+                        if (row.feature_key === 'ai_copy_optimizer') costs.copy = row.credits_cost
+                        if (row.feature_key === 'ai_photo_studio') costs.photo = row.credits_cost
+                        if (row.feature_key === 'ai_policy_writer') costs.policy = row.credits_cost
+                    }
+                    setToolCosts(costs)
+                }
+            } catch { /* non-fatal */ }
+        }
+        fetchCredits()
+    }, [])
+
     // ── Extract text fields from the selected block's props ───────────────────
     // Heuristic scan: any string prop that looks like user-editable text.
     // Much broader than a hardcoded allowlist — handles heroText, ctaText,
@@ -8371,6 +8412,7 @@ function AITab({
                 setCopyError(userMsg)
             } else {
                 setCopyResult(data.result as Record<string, string>)
+                refreshBalance()
             }
         } catch {
             setCopyError('Something went wrong. Please try again.')
@@ -8432,6 +8474,7 @@ function AITab({
                 accumulated += decoder.decode(value, { stream: true })
                 setPolicyResult(accumulated)
             }
+            refreshBalance()
         } catch {
             setPolicyError('Something went wrong. Please try again.')
         } finally {
@@ -8480,6 +8523,7 @@ function AITab({
             } else {
                 // Append cache-buster for preview so browser doesn't show old image
                 setPhotoResult({ url: data.url, revisedPrompt: data.revisedPrompt })
+                refreshBalance()
             }
         } catch {
             setPhotoError('Something went wrong. Please try again.')
@@ -8542,6 +8586,25 @@ function AITab({
 
             <Section title="AI Tools">
 
+                {/* ── Credit balance row ── */}
+                <div style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '7px 10px', marginBottom: 10,
+                    backgroundColor: '#f5f3ff', border: `1px solid ${C.primaryBorder}`,
+                    borderRadius: 8,
+                }}>
+                    <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.muted }}>
+                        Your AI credits
+                    </span>
+                    <span style={{
+                        fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700,
+                        color: creditBalance !== null && creditBalance < 5 ? C.danger : C.primary,
+                    }}>
+                        {creditBalance === null ? '—' : creditBalance.toLocaleString()}
+                        {creditBalance !== null && <span style={{ fontWeight: 400, fontSize: 10, color: C.muted, marginLeft: 3 }}>credits</span>}
+                    </span>
+                </div>
+
                 {/* ── AI Copy Optimizer ── */}
                 <div style={{ marginBottom: 10 }}>
                     <button
@@ -8575,6 +8638,14 @@ function AITab({
                                 Rewrite this block&apos;s text for higher eBay conversion
                             </p>
                         </div>
+                        <span style={{
+                            flexShrink: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 600,
+                            color: C.primary, backgroundColor: '#ede9fe',
+                            border: `1px solid ${C.primaryBorder}`, borderRadius: 20,
+                            padding: '2px 7px', whiteSpace: 'nowrap',
+                        }}>
+                            · {toolCosts.copy} credits
+                        </span>
                     </button>
 
                     {copyError && (
@@ -8694,6 +8765,14 @@ function AITab({
                                 Generate product images with AI
                             </p>
                         </div>
+                        <span style={{
+                            flexShrink: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 600,
+                            color: '#d97706', backgroundColor: '#fffbeb',
+                            border: '1px solid #fde68a', borderRadius: 20,
+                            padding: '2px 7px', whiteSpace: 'nowrap', marginRight: 4,
+                        }}>
+                            · {toolCosts.photo} credits
+                        </span>
                         <div style={{ fontSize: 10, color: '#d97706', fontWeight: 700, opacity: 0.7 }}>
                             {photoOpen ? '▲' : '▼'}
                         </div>
@@ -8774,7 +8853,7 @@ function AITab({
                             >
                                 {photoLoading
                                     ? <><span style={{ ...spinnerStyle, margin: 0, color: '#fff' }} /> Generating…</>
-                                    : <><Wand2 size={13} /> Generate Image</>
+                                    : <><Wand2 size={13} /> Generate Image <span style={{ fontWeight: 400, fontSize: 10, opacity: 0.85 }}>· {toolCosts.photo} credits</span></>
                                 }
                             </button>
 
@@ -8868,6 +8947,14 @@ function AITab({
                                 Auto-generate eBay-safe shipping &amp; returns copy
                             </p>
                         </div>
+                        <span style={{
+                            flexShrink: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 600,
+                            color: C.success, backgroundColor: '#dcfce7',
+                            border: '1px solid #86efac', borderRadius: 20,
+                            padding: '2px 7px', whiteSpace: 'nowrap',
+                        }}>
+                            · {toolCosts.policy} credits
+                        </span>
                     </button>
 
                     {policyError && (
