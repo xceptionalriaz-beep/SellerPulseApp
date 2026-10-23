@@ -182,14 +182,14 @@ export default async function SharedTemplatePage({ params }: Props) {
                 </Link>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <Link href="/login" style={{
+                    <Link href="/auth/login" style={{
                         fontSize: 13, fontWeight: 600, color: T.primary,
                         textDecoration: 'none', padding: '6px 14px',
                         border: `1.5px solid ${T.border}`, borderRadius: 8,
                     }}>
                         Sign in
                     </Link>
-                    <Link href="/signup" style={{
+                    <Link href="/auth/signup" style={{
                         fontSize: 13, fontWeight: 700, color: T.dark,
                         textDecoration: 'none', padding: '6px 16px',
                         background: T.accent, borderRadius: 8,
@@ -243,7 +243,7 @@ export default async function SharedTemplatePage({ params }: Props) {
 
                         {/* CTA block */}
                         <div style={{ flexShrink: 0 }}>
-                            <Link href="/signup" style={{
+                            <Link href="/auth/signup" style={{
                                 display: 'inline-flex', alignItems: 'center', gap: 8,
                                 background: T.primary, color: '#fff',
                                 padding: '13px 22px', borderRadius: 12,
@@ -376,7 +376,7 @@ export default async function SharedTemplatePage({ params }: Props) {
                             Join Riazify to access this and hundreds of eBay listing templates — free.
                         </p>
                     </div>
-                    <Link href="/signup" style={{
+                    <Link href="/auth/signup" style={{
                         display: 'inline-flex', alignItems: 'center', gap: 8,
                         background: T.accent, color: T.dark,
                         padding: '14px 28px', borderRadius: 12,
