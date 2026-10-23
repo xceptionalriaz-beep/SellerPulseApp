@@ -33,7 +33,7 @@ import {
 } from 'lucide-react'
 import { hydrateTemplateContent } from '@/lib/template-utils'
 import { assembleDocument } from '@/components/ui/VisualEditor/blocks'
-import { ProBadge } from '@/components/ui/VisualEditor/ProBadge'
+import { ProBadge, ProLockOverlay } from '@/components/ui/VisualEditor/ProBadge'
 import { sanitiseHtml } from '@/components/ui/EditorToolbar'
 import { AIButton, IconButton } from '@/components/ui/Buttons'
 import ProDropdown from '@/components/ui/ProDropdown'
@@ -429,6 +429,26 @@ function DesignStudioInner() {
     const pagedSysTemplates = sortedTemplates.slice(0, page * PAGE_SIZE)
     const hasMoreTemplates = pagedSysTemplates.length < sortedTemplates.length
 
+    // ── Gate 7: Riazify branded footer injected into free-user HTML ───────────
+    const RIAZIFY_FOOTER = `
+<!-- Powered by Riazify Design Studio — https://riazify.com -->
+<div style="margin-top:24px;padding:12px 16px;border-top:2px solid #ede9fe;background:#f8f7ff;border-radius:0 0 8px 8px;text-align:center;font-family:'DM Sans',Arial,sans-serif;font-size:11px;color:#7530fb;letter-spacing:0.02em;">
+  <span style="font-weight:700;">Designed with</span>
+  <a href="https://riazify.com" target="_blank" rel="noopener noreferrer"
+     style="color:#7530fb;font-weight:800;text-decoration:none;margin-left:4px;">Riazify Design Studio</a>
+  <span style="opacity:0.5;margin:0 6px;">·</span>
+  <span style="opacity:0.6;">Upgrade to Pro to remove this footer</span>
+</div>`
+
+    function injectRiazifyFooter(html: string): string {
+        if (!html) return html
+        // Insert before </body> if it exists, otherwise append
+        if (html.includes('</body>')) {
+            return html.replace('</body>', `${RIAZIFY_FOOTER}\n</body>`)
+        }
+        return html + RIAZIFY_FOOTER
+    }
+
     // ── Copy HTML ──────────────────────────────────────────────────────────
     // Bug 8: For visual_templates records, refetch fresh blocks_json so the copied HTML
     // is not stale (description_html is computed once at page-load time).
@@ -453,7 +473,9 @@ function DesignStudioInner() {
         }
 
         if (!html) return
-        await navigator.clipboard.writeText(html)
+        // Gate 7: append branded footer for free users
+        const htmlToWrite = designStudioPlan === 'free' ? injectRiazifyFooter(html) : html
+        await navigator.clipboard.writeText(htmlToWrite)
         setCopiedId(t.id)
         setTimeout(() => setCopiedId(null), 2000)
 
@@ -1312,6 +1334,7 @@ function DesignStudioInner() {
                                                         key={t.id}
                                                         template={t}
                                                         isOwn={false}
+                                                        isProLocked={!!t.is_pro && designStudioPlan === 'free'}
                                                         copiedId={copiedId}
                                                         deletingId={deletingId}
                                                         confirmDeleteId={confirmDeleteId}
@@ -1325,6 +1348,7 @@ function DesignStudioInner() {
                                                         onDuplicate={() => duplicateTemplate(t)}
                                                         onUse={() => useTemplate(t)}
                                                         onDownload={() => downloadTemplate(t)}
+                                                        onUpgrade={() => showUpgrade('This is a Pro template. Upgrade to use and edit it.')}
                                                     />
                                                 ))}
                                             </div>
@@ -1534,6 +1558,7 @@ function NewTemplateButton({ onVisual, onHtml }: { onVisual: () => void; onHtml:
 interface CardProps {
     template: ListingTemplate
     isOwn: boolean
+    isProLocked?: boolean
     copiedId: string | null
     deletingId: string | null
     confirmDeleteId?: string | null
@@ -1550,9 +1575,10 @@ interface CardProps {
     onRename?: (id: string, newName: string) => void
     onShare?: () => void
     onDownload?: () => void
+    onUpgrade?: () => void
 }
 
-function TemplateCard({ template, isOwn, copiedId, deletingId, confirmDeleteId, copyingTemplateId, duplicatingId, sharingId, onPreview, onCopy, onDelete, onCancelDelete, onEdit, onDuplicate, onUse, onRename, onShare, onDownload }: CardProps) {
+function TemplateCard({ template, isOwn, isProLocked, copiedId, deletingId, confirmDeleteId, copyingTemplateId, duplicatingId, sharingId, onPreview, onCopy, onDelete, onCancelDelete, onEdit, onDuplicate, onUse, onRename, onShare, onDownload, onUpgrade }: CardProps) {
     const [hovered, setHovered] = useState(false)
     // Feature 12: Inline rename state
     const [renaming, setRenaming] = useState(false)
@@ -1633,6 +1659,11 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, confirmDeleteId, 
                     </div>
                 )}
 
+                {/* Gate 6: Pro lock overlay for premium system templates */}
+                {isProLocked && (
+                    <ProLockOverlay onUpgrade={() => onUpgrade?.()} />
+                )}
+
                 {/* Hover actions — soft bottom gradient + action buttons */}
                 <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-4"
                     style={{
@@ -1651,22 +1682,23 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, confirmDeleteId, 
                                 <Eye size={13} /> Preview
                             </button>
                             <button
-                                onClick={e => { e.stopPropagation(); if (!copying) onEdit() }}
+                                onClick={e => { e.stopPropagation(); if (isProLocked) { onUpgrade?.(); return } if (!copying) onEdit() }}
                                 disabled={copying}
                                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold"
                                 style={{ backgroundColor: C.primary, color: '#fff', border: 'none', cursor: copying ? 'not-allowed' : 'pointer', opacity: copying ? 0.7 : 1, fontFamily: 'DM Sans, sans-serif', boxShadow: '0 2px 8px rgba(117,48,251,0.3)' }}>
-                                {copying ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : <Pencil size={13} />}
-                                {copying ? 'Copying…' : 'Edit'}
+                                {copying ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : isProLocked ? <ProBadge size="xs" /> : <Pencil size={13} />}
+                                {copying ? 'Copying…' : isProLocked ? 'Pro Only' : 'Edit'}
                             </button>
                         </div>
                         {/* Feature 13: Use Template + Feature 11: Duplicate */}
                         <div className="flex items-center gap-2">
                             {onUse && (
                                 <button
-                                    onClick={e => { e.stopPropagation(); onUse() }}
+                                    onClick={e => { e.stopPropagation(); if (isProLocked) { onUpgrade?.(); return } onUse() }}
                                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold"
-                                    style={{ backgroundColor: C.success, color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', boxShadow: '0 2px 8px rgba(22,163,74,0.3)' }}>
-                                    <ArrowRight size={13} /> Use Template
+                                    style={{ backgroundColor: isProLocked ? '#f59e0b' : C.success, color: '#fff', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', boxShadow: isProLocked ? '0 2px 8px rgba(245,158,11,0.3)' : '0 2px 8px rgba(22,163,74,0.3)' }}>
+                                    {isProLocked ? <ProBadge size="xs" style={{ background: 'rgba(255,255,255,0.25)', boxShadow: 'none' }} /> : <ArrowRight size={13} />}
+                                    {isProLocked ? 'Pro Only' : 'Use Template'}
                                 </button>
                             )}
                             {onDuplicate && (

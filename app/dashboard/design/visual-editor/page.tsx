@@ -1632,7 +1632,13 @@ function VisualEditorInner() {
                     onEdit={() => setShowPreview(false)}
                     onCopy={async (t: any) => {
                         try {
-                            await navigator.clipboard.writeText(t.description_html || html)
+                            let rawHtml: string = t.description_html || html || ''
+                            // Gate 7: inject Riazify branded footer for free users
+                            if (designStudioPlan === 'free' && rawHtml) {
+                                const footer = `\n<!-- Powered by Riazify Design Studio — https://riazify.com -->\n<div style="margin-top:24px;padding:12px 16px;border-top:2px solid #ede9fe;background:#f8f7ff;border-radius:0 0 8px 8px;text-align:center;font-family:'DM Sans',Arial,sans-serif;font-size:11px;color:#7530fb;letter-spacing:0.02em;"><span style="font-weight:700;">Designed with</span><a href="https://riazify.com" target="_blank" rel="noopener noreferrer" style="color:#7530fb;font-weight:800;text-decoration:none;margin-left:4px;">Riazify Design Studio</a><span style="opacity:0.5;margin:0 6px;">·</span><span style="opacity:0.6;">Upgrade to Pro to remove this footer</span></div>`
+                                rawHtml = rawHtml.includes('</body>') ? rawHtml.replace('</body>', `${footer}\n</body>`) : rawHtml + footer
+                            }
+                            await navigator.clipboard.writeText(rawHtml)
                             setPreviewCopied(true)
                             setTimeout(() => setPreviewCopied(false), 2000)
                         } catch { /* clipboard blocked */ }
