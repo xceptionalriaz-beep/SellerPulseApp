@@ -205,7 +205,7 @@ export default function IntegrationsPage() {
     {
       id: 'claude',
       name: 'Claude AI',
-      category: 'AI Assistant',
+      category: 'AI Assistant · MCP',
       description: 'Ask Claude questions about your store in plain English — listings, orders, analytics, all without opening a dashboard.',
       status: 'available',
       isNew: true,
@@ -275,6 +275,11 @@ export default function IntegrationsPage() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
               <span style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>Claude AI</span>
+              <span style={{
+                fontSize: 10, fontWeight: 700, letterSpacing: '0.05em',
+                color: '#6b7280', backgroundColor: '#f3f4f6',
+                padding: '2px 7px', borderRadius: 20, border: '1px solid #e5e7eb',
+              }}>MCP</span>
               <span style={{
                 fontSize: 10, fontWeight: 700, letterSpacing: '0.05em',
                 color: '#7530fb', backgroundColor: '#f3eeff',
