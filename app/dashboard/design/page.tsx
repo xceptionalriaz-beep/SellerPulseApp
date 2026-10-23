@@ -460,12 +460,32 @@ function DesignStudioInner() {
     async function toggleTemplateShared(t: ListingTemplate) {
         setSharingId(t.id)
         const nextShared = !t.is_shared
+        const isVisual = !t.is_system && t.description === 'Visual Builder template'
         try {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            await (rawDb as any)
-                .from('listing_templates')
-                .update({ is_shared: nextShared })
-                .eq('id', t.id)
+            const db = rawDb as any
+            if (isVisual && nextShared) {
+                // Fetch blocks + settings so we can generate share_html for the public page
+                const { data: vt } = await db
+                    .from('visual_templates')
+                    .select('blocks_json, canvas_settings_json')
+                    .eq('id', t.id)
+                    .single()
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const blocks = (vt?.blocks_json ?? []) as any[]
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const settings = (vt?.canvas_settings_json ?? undefined) as any
+                const html = assembleDocument(blocks, settings)
+                await db
+                    .from('visual_templates')
+                    .update({ is_shared: true, share_html: html })
+                    .eq('id', t.id)
+            } else {
+                await db
+                    .from(isVisual ? 'visual_templates' : 'listing_templates')
+                    .update({ is_shared: nextShared })
+                    .eq('id', t.id)
+            }
 
             const updated = { ...t, is_shared: nextShared }
             setMyTemplates(prev => prev.map(mt => mt.id === t.id ? updated : mt))

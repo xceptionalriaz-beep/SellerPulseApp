@@ -60,17 +60,52 @@ function formatDate(iso: string | null) {
 }
 
 export default async function SharedTemplatePage({ params }: Props) {
-    // Fetch template — only if is_shared = true
+    // Fetch template — try listing_templates first, then visual_templates
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    const db = supabase as any
+
+    let data: {
+        id: string; name: string; description: string | null;
+        category: string | null; description_html: string | null;
+        use_count: number | null; created_at: string | null;
+        is_system?: boolean | null;
+    } | null = null
+
+    // 1. listing_templates (HTML editor / system templates)
+    const { data: lt } = await db
         .from('listing_templates')
         .select('id, name, description, category, description_html, use_count, created_at, is_system')
         .eq('id', params.id)
         .eq('is_shared', true)
         .single()
 
+    if (lt) {
+        data = lt
+    } else {
+        // 2. visual_templates (Visual Builder templates) — use pre-assembled share_html
+        const { data: vt } = await db
+            .from('visual_templates')
+            .select('id, name, description, category, share_html, use_count, created_at')
+            .eq('id', params.id)
+            .eq('is_shared', true)
+            .single()
+
+        if (vt) {
+            data = {
+                id: vt.id,
+                name: vt.name,
+                description: vt.description ?? 'Visual Builder template',
+                category: vt.category,
+                description_html: vt.share_html ?? null,
+                use_count: vt.use_count,
+                created_at: vt.created_at,
+                is_system: false,
+            }
+        }
+    }
+
     // ── Not Found ────────────────────────────────────────────────────────────
-    if (error || !data) {
+    if (!data) {
         return (
             <div style={{
                 fontFamily: "'DM Sans', sans-serif",
@@ -301,7 +336,7 @@ export default async function SharedTemplatePage({ params }: Props) {
 
                         {/* iframe sandbox */}
                         <iframe
-                            srcDoc={template.description_html}
+                            srcDoc={template.description_html ?? undefined}
                             sandbox="allow-same-origin"
                             style={{
                                 width: '100%',
