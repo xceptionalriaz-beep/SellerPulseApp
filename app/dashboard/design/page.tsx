@@ -29,7 +29,7 @@ import {
     LayoutGrid, Smartphone, Monitor, Shirt, Gem, Heart,
     Home, Sofa, Car, Wrench, Dumbbell, Gamepad2,
     Archive, BookOpen, PawPrint, Briefcase, Tag,
-    Files, ArrowRight, PenLine, FileUp, Link2,
+    Files, ArrowRight, PenLine, FileUp, Link2, ShieldCheck,
 } from 'lucide-react'
 import { hydrateTemplateContent } from '@/lib/template-utils'
 import { assembleDocument } from '@/components/ui/VisualEditor/blocks'
@@ -290,8 +290,8 @@ function DesignStudioInner() {
     const [sort, setSort] = useState<'popular' | 'newest'>('popular')
     const [copiedId, setCopiedId] = useState<string | null>(null)
     const [deletingId, setDeletingId] = useState<string | null>(null)
-    const [sharingId, setSharingId] = useState<string | null>(null)   // template currently being toggled
-    const [sharedId, setSharedId] = useState<string | null>(null)     // template just shared (shows check)
+    const [sharingId, setSharingId] = useState<string | null>(null)   // template being toggled inside modal
+    const [shareModalTemplate, setShareModalTemplate] = useState<ListingTemplate | null>(null)
 
     // Preview modal
     const [previewTemplate, setPreviewTemplate] = useState<ListingTemplate | null>(null)
@@ -455,10 +455,9 @@ function DesignStudioInner() {
         }
     }
 
-    // ── Share template ────────────────────────────────────────────────────
-    // Toggles is_shared on own listing_templates rows.
-    // When turning on: copies the public URL to clipboard and flashes a check.
-    async function shareTemplate(t: ListingTemplate) {
+    // ── Share modal toggle ─────────────────────────────────────────────────
+    // Called from inside ShareModal — toggles is_shared and updates local state.
+    async function toggleTemplateShared(t: ListingTemplate) {
         setSharingId(t.id)
         const nextShared = !t.is_shared
         try {
@@ -468,19 +467,11 @@ function DesignStudioInner() {
                 .update({ is_shared: nextShared })
                 .eq('id', t.id)
 
-            // Update local state so the icon reflects the new value immediately
-            setMyTemplates(prev =>
-                prev.map(mt => mt.id === t.id ? { ...mt, is_shared: nextShared } : mt)
-            )
-
-            if (nextShared) {
-                const url = `${window.location.origin}/share/template/${t.id}`
-                try { await navigator.clipboard.writeText(url) } catch { /* ignore clipboard errors */ }
-                setSharedId(t.id)
-                setTimeout(() => setSharedId(null), 2500)
-            }
+            const updated = { ...t, is_shared: nextShared }
+            setMyTemplates(prev => prev.map(mt => mt.id === t.id ? updated : mt))
+            setShareModalTemplate(updated)
         } catch {
-            // silently ignore — user can retry
+            // silently ignore
         } finally {
             setSharingId(null)
         }
@@ -1140,7 +1131,6 @@ function DesignStudioInner() {
                                                 copyingTemplateId={copyingTemplateId}
                                                 duplicatingId={duplicatingId}
                                                 sharingId={sharingId}
-                                                sharedId={sharedId}
                                                 onPreview={() => setPreviewTemplate(t)}
                                                 onCopy={() => copyHtml(t)}
                                                 onDelete={() => deleteTemplate(t.id)}
@@ -1149,7 +1139,7 @@ function DesignStudioInner() {
                                                 onDuplicate={() => duplicateTemplate(t)}
                                                 onUse={() => useTemplate(t)}
                                                 onRename={(id, name) => renameTemplate(id, name)}
-                                                onShare={() => shareTemplate(t)}
+                                                onShare={() => setShareModalTemplate(t)}
                                             />
                                         ))}
                                     </div>
@@ -1322,6 +1312,16 @@ function DesignStudioInner() {
                 </div>
             )}
 
+            {/* Share Modal */}
+            {shareModalTemplate && (
+                <ShareModal
+                    template={shareModalTemplate}
+                    sharingId={sharingId}
+                    onToggle={() => toggleTemplateShared(shareModalTemplate)}
+                    onClose={() => setShareModalTemplate(null)}
+                />
+            )}
+
             <style>{`
                 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
                 ::-webkit-scrollbar { display: none; }
@@ -1340,7 +1340,6 @@ interface CardProps {
     copyingTemplateId?: string | null
     duplicatingId?: string | null
     sharingId?: string | null
-    sharedId?: string | null
     onPreview: () => void
     onCopy: () => void
     onDelete: () => void
@@ -1352,7 +1351,7 @@ interface CardProps {
     onShare?: () => void
 }
 
-function TemplateCard({ template, isOwn, copiedId, deletingId, confirmDeleteId, copyingTemplateId, duplicatingId, sharingId, sharedId, onPreview, onCopy, onDelete, onCancelDelete, onEdit, onDuplicate, onUse, onRename, onShare }: CardProps) {
+function TemplateCard({ template, isOwn, copiedId, deletingId, confirmDeleteId, copyingTemplateId, duplicatingId, sharingId, onPreview, onCopy, onDelete, onCancelDelete, onEdit, onDuplicate, onUse, onRename, onShare }: CardProps) {
     const [hovered, setHovered] = useState(false)
     // Feature 12: Inline rename state
     const [renaming, setRenaming] = useState(false)
@@ -1363,7 +1362,6 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, confirmDeleteId, 
     const copying = copyingTemplateId === template.id
     const duplicating = duplicatingId === template.id
     const sharing = sharingId === template.id
-    const justShared = sharedId === template.id
     const isFeaturedCard = !!template.is_featured
 
     function commitRename() {
@@ -1578,22 +1576,10 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, confirmDeleteId, 
                                 tooltip={copying ? 'Copying template…' : 'Edit template'} size={28} />
                             {isOwn && onShare && (
                                 <IconButton
-                                    onClick={sharing ? undefined : onShare}
-                                    icon={
-                                        sharing
-                                            ? <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} />
-                                            : justShared
-                                                ? <Check size={12} />
-                                                : <Link2 size={12} />
-                                    }
-                                    tooltip={
-                                        sharing ? 'Updating…'
-                                        : justShared ? 'Link copied!'
-                                        : template.is_shared ? 'Shared — click to unshare'
-                                        : 'Share template'
-                                    }
-                                    active={!!template.is_shared || justShared}
-                                    variant={justShared ? 'success' : 'default'}
+                                    onClick={onShare}
+                                    icon={<Link2 size={12} />}
+                                    tooltip={template.is_shared ? 'Sharing on — manage link' : 'Share template'}
+                                    active={!!template.is_shared}
                                     size={28} />
                             )}
                             {isOwn && (
@@ -1606,5 +1592,222 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, confirmDeleteId, 
                 </div>
             </div>
         </div>
+    )
+}
+
+// ── Share Modal component ─────────────────────────────────────────────────────
+interface ShareModalProps {
+    template: ListingTemplate
+    sharingId: string | null
+    onToggle: () => void
+    onClose: () => void
+}
+
+function ShareModal({ template, sharingId, onToggle, onClose }: ShareModalProps) {
+    const [copiedLink, setCopiedLink] = useState(false)
+    const isShared = !!template.is_shared
+    const isToggling = sharingId === template.id
+    const shareUrl = typeof window !== 'undefined'
+        ? `${window.location.origin}/share/template/${template.id}`
+        : `/share/template/${template.id}`
+
+    async function copyLink() {
+        try {
+            await navigator.clipboard.writeText(shareUrl)
+            setCopiedLink(true)
+            setTimeout(() => setCopiedLink(false), 2000)
+        } catch { /* ignore */ }
+    }
+
+    return (
+        <>
+            {/* Backdrop */}
+            <div
+                onClick={onClose}
+                style={{
+                    position: 'fixed', inset: 0, zIndex: 9998,
+                    background: 'rgba(30,21,53,0.45)',
+                    backdropFilter: 'blur(3px)',
+                }}
+            />
+
+            {/* Modal panel */}
+            <div style={{
+                position: 'fixed', top: '50%', left: '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 9999,
+                width: 'min(440px, calc(100vw - 32px))',
+                background: C.surface,
+                borderRadius: 20,
+                boxShadow: '0 20px 60px rgba(117,48,251,0.22)',
+                border: `1px solid ${C.border}`,
+                fontFamily: 'DM Sans, sans-serif',
+                overflow: 'hidden',
+            }}>
+                {/* Header */}
+                <div style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '18px 20px 14px',
+                    borderBottom: `1px solid ${C.border}`,
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{
+                            width: 34, height: 34, borderRadius: 10,
+                            background: C.primaryLight,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            border: `1px solid ${C.border}`,
+                        }}>
+                            <Link2 size={15} color={C.primary} />
+                        </div>
+                        <div>
+                            <p style={{ fontSize: 13, fontWeight: 800, color: C.dark, margin: 0, lineHeight: 1.2 }}>
+                                Share Template
+                            </p>
+                            <p style={{ fontSize: 11, color: C.muted, margin: 0, lineHeight: 1.2, marginTop: 2 }}>
+                                {template.name}
+                            </p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        style={{
+                            width: 28, height: 28, borderRadius: 7, border: `1px solid ${C.border}`,
+                            background: C.bg, cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            color: C.muted,
+                        }}>
+                        <X size={13} />
+                    </button>
+                </div>
+
+                {/* Body */}
+                <div style={{ padding: '20px 20px 24px' }}>
+
+                    {/* Toggle row */}
+                    <div style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '14px 16px',
+                        background: isShared ? C.primaryLight : C.bg,
+                        borderRadius: 12,
+                        border: `1px solid ${C.border}`,
+                        marginBottom: 16,
+                        transition: 'background 0.2s',
+                    }}>
+                        <div>
+                            <p style={{ fontSize: 13, fontWeight: 700, color: C.dark, margin: 0 }}>
+                                Public link
+                            </p>
+                            <p style={{ fontSize: 11, color: C.muted, margin: '2px 0 0', lineHeight: 1.4 }}>
+                                {isShared
+                                    ? 'Anyone with the link can view this template'
+                                    : 'Enable to generate a shareable link'}
+                            </p>
+                        </div>
+
+                        {/* Toggle switch */}
+                        <button
+                            onClick={isToggling ? undefined : onToggle}
+                            disabled={isToggling}
+                            title={isShared ? 'Turn off sharing' : 'Turn on sharing'}
+                            style={{
+                                width: 44, height: 24, borderRadius: 12,
+                                background: isShared ? C.primary : '#d1d5db',
+                                border: 'none', cursor: isToggling ? 'not-allowed' : 'pointer',
+                                position: 'relative', transition: 'background 0.2s',
+                                flexShrink: 0,
+                                opacity: isToggling ? 0.6 : 1,
+                            }}>
+                            {isToggling
+                                ? <Loader2 size={12} color="#fff"
+                                    style={{
+                                        position: 'absolute', top: '50%', left: '50%',
+                                        transform: 'translate(-50%,-50%)',
+                                        animation: 'spin 1s linear infinite',
+                                    }} />
+                                : <span style={{
+                                    position: 'absolute', top: 3,
+                                    left: isShared ? 23 : 3,
+                                    width: 18, height: 18, borderRadius: '50%',
+                                    background: '#fff',
+                                    transition: 'left 0.2s',
+                                    boxShadow: '0 1px 4px rgba(0,0,0,0.18)',
+                                }} />
+                            }
+                        </button>
+                    </div>
+
+                    {/* Link box — only shown when shared */}
+                    {isShared && (
+                        <div style={{ marginBottom: 16 }}>
+                            <p style={{ fontSize: 11, fontWeight: 700, color: C.secondary, marginBottom: 6, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                                Shareable link
+                            </p>
+                            <div style={{
+                                display: 'flex', alignItems: 'center', gap: 6,
+                                background: C.bg, borderRadius: 10,
+                                border: `1px solid ${C.border}`,
+                                padding: '8px 10px',
+                            }}>
+                                <input
+                                    readOnly
+                                    value={shareUrl}
+                                    onClick={e => (e.target as HTMLInputElement).select()}
+                                    style={{
+                                        flex: 1, border: 'none', background: 'transparent',
+                                        fontSize: 12, color: C.dark, fontFamily: 'DM Sans, sans-serif',
+                                        outline: 'none', minWidth: 0,
+                                    }}
+                                />
+                                {/* Copy button */}
+                                <button
+                                    onClick={copyLink}
+                                    title="Copy link"
+                                    style={{
+                                        flexShrink: 0, width: 30, height: 30, borderRadius: 7,
+                                        border: `1px solid ${copiedLink ? C.success : C.border}`,
+                                        background: copiedLink ? '#dcfce7' : C.surface,
+                                        cursor: 'pointer',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        transition: 'all 0.15s',
+                                        color: copiedLink ? C.success : C.secondary,
+                                    }}>
+                                    {copiedLink ? <Check size={12} /> : <Copy size={12} />}
+                                </button>
+                                {/* Open in new tab */}
+                                <a
+                                    href={shareUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    title="Open link"
+                                    style={{
+                                        flexShrink: 0, width: 30, height: 30, borderRadius: 7,
+                                        border: `1px solid ${C.border}`,
+                                        background: C.surface,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        color: C.secondary, textDecoration: 'none',
+                                    }}>
+                                    <ArrowRight size={12} />
+                                </a>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Info row */}
+                    <div style={{
+                        display: 'flex', alignItems: 'flex-start', gap: 8,
+                        padding: '10px 14px',
+                        background: C.bg, borderRadius: 10,
+                        border: `1px solid ${C.border}`,
+                    }}>
+                        <ShieldCheck size={14} color={C.muted} style={{ marginTop: 1, flexShrink: 0 }} />
+                        <p style={{ fontSize: 11, color: C.muted, margin: 0, lineHeight: 1.6 }}>
+                            {isShared
+                                ? 'Viewers can see your template but cannot edit it. Turn off the link at any time to revoke access.'
+                                : 'Your template is private. Enable the public link to share it with clients or colleagues.'}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </>
     )
 }
