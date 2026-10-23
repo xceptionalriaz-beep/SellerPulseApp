@@ -29,7 +29,7 @@ import {
     LayoutGrid, Smartphone, Monitor, Shirt, Gem, Heart,
     Home, Sofa, Car, Wrench, Dumbbell, Gamepad2,
     Archive, BookOpen, PawPrint, Briefcase, Tag,
-    Files, ArrowRight, PenLine, FileUp,
+    Files, ArrowRight, PenLine, FileUp, Link2,
 } from 'lucide-react'
 import { hydrateTemplateContent } from '@/lib/template-utils'
 import { assembleDocument } from '@/components/ui/VisualEditor/blocks'
@@ -290,6 +290,8 @@ function DesignStudioInner() {
     const [sort, setSort] = useState<'popular' | 'newest'>('popular')
     const [copiedId, setCopiedId] = useState<string | null>(null)
     const [deletingId, setDeletingId] = useState<string | null>(null)
+    const [sharingId, setSharingId] = useState<string | null>(null)   // template currently being toggled
+    const [sharedId, setSharedId] = useState<string | null>(null)     // template just shared (shows check)
 
     // Preview modal
     const [previewTemplate, setPreviewTemplate] = useState<ListingTemplate | null>(null)
@@ -450,6 +452,37 @@ function DesignStudioInner() {
             await rawDb.from('listing_templates')
                 .update({ use_count: (t.use_count || 0) + 1 })
                 .eq('id', t.id)
+        }
+    }
+
+    // ── Share template ────────────────────────────────────────────────────
+    // Toggles is_shared on own listing_templates rows.
+    // When turning on: copies the public URL to clipboard and flashes a check.
+    async function shareTemplate(t: ListingTemplate) {
+        setSharingId(t.id)
+        const nextShared = !t.is_shared
+        try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await (rawDb as any)
+                .from('listing_templates')
+                .update({ is_shared: nextShared })
+                .eq('id', t.id)
+
+            // Update local state so the icon reflects the new value immediately
+            setMyTemplates(prev =>
+                prev.map(mt => mt.id === t.id ? { ...mt, is_shared: nextShared } : mt)
+            )
+
+            if (nextShared) {
+                const url = `${window.location.origin}/share/template/${t.id}`
+                try { await navigator.clipboard.writeText(url) } catch { /* ignore clipboard errors */ }
+                setSharedId(t.id)
+                setTimeout(() => setSharedId(null), 2500)
+            }
+        } catch {
+            // silently ignore — user can retry
+        } finally {
+            setSharingId(null)
         }
     }
 
@@ -1106,6 +1139,8 @@ function DesignStudioInner() {
                                                 confirmDeleteId={confirmDeleteId}
                                                 copyingTemplateId={copyingTemplateId}
                                                 duplicatingId={duplicatingId}
+                                                sharingId={sharingId}
+                                                sharedId={sharedId}
                                                 onPreview={() => setPreviewTemplate(t)}
                                                 onCopy={() => copyHtml(t)}
                                                 onDelete={() => deleteTemplate(t.id)}
@@ -1114,6 +1149,7 @@ function DesignStudioInner() {
                                                 onDuplicate={() => duplicateTemplate(t)}
                                                 onUse={() => useTemplate(t)}
                                                 onRename={(id, name) => renameTemplate(id, name)}
+                                                onShare={() => shareTemplate(t)}
                                             />
                                         ))}
                                     </div>
@@ -1303,6 +1339,8 @@ interface CardProps {
     confirmDeleteId?: string | null
     copyingTemplateId?: string | null
     duplicatingId?: string | null
+    sharingId?: string | null
+    sharedId?: string | null
     onPreview: () => void
     onCopy: () => void
     onDelete: () => void
@@ -1311,9 +1349,10 @@ interface CardProps {
     onDuplicate?: () => void
     onUse?: () => void
     onRename?: (id: string, newName: string) => void
+    onShare?: () => void
 }
 
-function TemplateCard({ template, isOwn, copiedId, deletingId, confirmDeleteId, copyingTemplateId, duplicatingId, onPreview, onCopy, onDelete, onCancelDelete, onEdit, onDuplicate, onUse, onRename }: CardProps) {
+function TemplateCard({ template, isOwn, copiedId, deletingId, confirmDeleteId, copyingTemplateId, duplicatingId, sharingId, sharedId, onPreview, onCopy, onDelete, onCancelDelete, onEdit, onDuplicate, onUse, onRename, onShare }: CardProps) {
     const [hovered, setHovered] = useState(false)
     // Feature 12: Inline rename state
     const [renaming, setRenaming] = useState(false)
@@ -1323,6 +1362,8 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, confirmDeleteId, 
     const confirmingDelete = confirmDeleteId === template.id
     const copying = copyingTemplateId === template.id
     const duplicating = duplicatingId === template.id
+    const sharing = sharingId === template.id
+    const justShared = sharedId === template.id
     const isFeaturedCard = !!template.is_featured
 
     function commitRename() {
@@ -1535,6 +1576,26 @@ function TemplateCard({ template, isOwn, copiedId, deletingId, confirmDeleteId, 
                             <IconButton onClick={copying ? undefined : onEdit}
                                 icon={copying ? <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <Pencil size={12} />}
                                 tooltip={copying ? 'Copying template…' : 'Edit template'} size={28} />
+                            {isOwn && onShare && (
+                                <IconButton
+                                    onClick={sharing ? undefined : onShare}
+                                    icon={
+                                        sharing
+                                            ? <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} />
+                                            : justShared
+                                                ? <Check size={12} />
+                                                : <Link2 size={12} />
+                                    }
+                                    tooltip={
+                                        sharing ? 'Updating…'
+                                        : justShared ? 'Link copied!'
+                                        : template.is_shared ? 'Shared — click to unshare'
+                                        : 'Share template'
+                                    }
+                                    active={!!template.is_shared || justShared}
+                                    variant={justShared ? 'success' : 'default'}
+                                    size={28} />
+                            )}
                             {isOwn && (
                                 <IconButton onClick={onDelete}
                                     icon={<Trash2 size={12} />}
