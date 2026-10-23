@@ -181,6 +181,12 @@ interface VisualEditorProps {
     onNameChange?: (name: string) => void
     /** When true, the name input renders with a red error border */
     nameError?: boolean
+    /**
+     * Initial canvas settings for a brand-new blank template.
+     * Merged over DEFAULT_CANVAS_SETTINGS on mount.
+     * Ignored when loading an existing template (that restores its own settings).
+     */
+    initialCanvasSettings?: Partial<CanvasSettings>
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -207,6 +213,7 @@ export default function VisualEditor({
     nameValue,
     onNameChange,
     nameError = false,
+    initialCanvasSettings,
 }: VisualEditorProps) {
     // ── Core block state ──────────────────────────────────────────────────────
     const [blocks, setBlocks] = useState<Block[]>([])
@@ -270,7 +277,11 @@ export default function VisualEditor({
     // ── Canvas + preview state ────────────────────────────────────────────────
     const [deviceWidth, setDeviceWidth] = useState<'desktop' | 'tablet' | 'mobile'>('desktop')
     const [livePreview, setLivePreview] = useState(false)
-    const [canvasSettings, setCanvasSettings] = useState<CanvasSettings>(DEFAULT_CANVAS_SETTINGS)
+    const [canvasSettings, setCanvasSettings] = useState<CanvasSettings>(
+        initialCanvasSettings
+            ? { ...DEFAULT_CANVAS_SETTINGS, ...initialCanvasSettings }
+            : DEFAULT_CANVAS_SETTINGS
+    )
 
     const [canvasZoom, setCanvasZoom] = useState(100)          // % zoom level
     const [selectedSubSlot, setSelectedSubSlot] = useState<string | null>(null)

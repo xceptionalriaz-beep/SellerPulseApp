@@ -32,6 +32,8 @@ import VisualEditor from '@/components/ui/VisualEditor'
 import TemplatePreviewModal from '@/components/ui/TemplatePreviewModal'
 import ProDropdown, { DropdownOption } from '@/components/ui/ProDropdown'
 import { auditHtml } from '@/components/ui/VisualEditor/audit'
+import { fetchStudioSettings, mapStudioCategory } from '@/lib/studioSettings'
+import type { CanvasSettings } from '@/components/ui/VisualEditor/blocks'
 import type { TemplateSlot } from '@/app/dashboard/listing-generator/types/listing.types'
 import VersionHistoryPanel, { saveTemplateVersion } from '@/components/ui/VersionHistoryPanel'
 import { getFreeVariantIds } from '@/components/ui/VisualEditor/PropertiesPanel'
@@ -244,6 +246,9 @@ function VisualEditorInner() {
     // so VisualEditor doesn't have to re-parse HTML, preserving exact block structure
     const [initialBlocks, setInitialBlocks] = useState<Block[] | undefined>(undefined)
 
+    // Studio Settings — only for new blank templates (no templateId / vtId)
+    const [initialCanvasSettings, setInitialCanvasSettings] = useState<Partial<CanvasSettings> | undefined>(undefined)
+
     // Code Editor modal (full-screen iframe over the Visual Editor)
     const [showCodeEditorModal, setShowCodeEditorModal] = useState(false)
 
@@ -253,6 +258,23 @@ function VisualEditorInner() {
         blockId: string; blockType: string; variantId: string; variantLabel: string
     }>>([])
     const proGateRef = useRef<HTMLDivElement>(null)
+
+    // ── Apply Studio Settings for new blank templates ─────────────────────────
+    // Only runs when no existing template is being loaded (no templateId / vtId).
+    useEffect(() => {
+        if (templateId || vtId) return // loading an existing template — skip
+        fetchStudioSettings().then(s => {
+            setCategory(mapStudioCategory(s.defaultCategory))
+            setInitialCanvasSettings({
+                canvasBg: s.defaultBgColour,
+                bgColor: s.defaultBgColour,
+                fontStack: s.defaultFont,
+                maxWidth: parseInt(s.canvasWidth, 10) || 700,
+                primaryColor: s.primaryColour,
+                accentColor: s.secondaryColour,
+            })
+        })
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     // ── Close action menu on outside click ───────────────────────────────────
     useEffect(() => {
@@ -841,6 +863,7 @@ function VisualEditorInner() {
                     nameValue={name}
                     onNameChange={(n) => { setName(n); setNameError(false); dirtyRef.current = true }}
                     nameError={nameError}
+                    initialCanvasSettings={initialCanvasSettings}
                     toolbarSlot={
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             {/* Draft / Live status badge — admin only */}

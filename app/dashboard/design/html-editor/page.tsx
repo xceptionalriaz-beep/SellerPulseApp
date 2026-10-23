@@ -15,6 +15,7 @@ import {
 import ImageAssets from '@/components/ui/ImageAssets'
 import ImportUrl from '@/components/ui/ImportUrl'
 import VersionHistoryPanel, { saveTemplateVersion } from '@/components/ui/VersionHistoryPanel'
+import { fetchStudioSettings } from '@/lib/studioSettings'
 
 // ── Design tokens ──────────────────────────────────────────────────────────
 const C = {
@@ -227,6 +228,32 @@ function HtmlEditorInner() {
         } catch {
             // sessionStorage unavailable
         }
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Apply Studio Settings when opening a genuinely blank new template
+    // (not editing an existing one, not loaded from visual/ai/import)
+    useEffect(() => {
+        const hasId = !!searchParams.get('id')
+        const hasSource = !!searchParams.get('source') // source=visual
+        const hasFrom = !!searchParams.get('from')    // from=ai | from=import
+        if (hasId || hasSource || hasFrom) return     // not a blank new template
+        fetchStudioSettings().then(s => {
+            // Apply defaultDevice UI preference
+            if (s.defaultDevice === 'tablet' || s.defaultDevice === 'mobile') {
+                setDevice(s.defaultDevice as 'tablet' | 'mobile')
+            }
+            // Apply defaultBgColour + defaultFont to the blank HTML template
+            setHtml(prev => prev
+                .replace(
+                    /background:\s*#[0-9a-fA-F]{3,6}/,
+                    `background: ${s.defaultBgColour}`
+                )
+                .replace(
+                    /font-family:\s*[^;]+;/,
+                    `font-family: ${s.defaultFont};`
+                )
+            )
+        })
     }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     // Insert image tag at saved cursor
