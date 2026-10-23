@@ -525,17 +525,9 @@ function DesignStudioInner() {
 
     // ── Share modal toggle ─────────────────────────────────────────────────
     // Called from inside ShareModal — toggles is_shared and updates local state.
+    // Sharing is free and unlimited for all users — no Pro gate here.
     async function toggleTemplateShared(t: ListingTemplate) {
         const nextShared = !t.is_shared
-
-        // Gate 5 — free plan limited to 1 shared template
-        if (nextShared && designStudioPlan === 'free') {
-            const alreadyShared = myTemplates.filter(mt => mt.is_shared && mt.id !== t.id).length
-            if (alreadyShared >= 1) {
-                showUpgrade('Free plan allows 1 shared template. Upgrade for unlimited sharing.')
-                return
-            }
-        }
 
         setSharingId(t.id)
         const isVisual = !t.is_system && t.description === 'Visual Builder template'
@@ -597,6 +589,18 @@ function DesignStudioInner() {
         try {
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) return
+
+            // Gate 4 — free users limited to 5 saved templates (same check as visual editor handleSaveDraft)
+            if (designStudioPlan === 'free') {
+                const { count } = await (supabase as any)
+                    .from('visual_templates')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('user_id', user.id)
+                if ((count ?? 0) >= 5) {
+                    showUpgrade('Free plan allows up to 5 saved templates. Upgrade to Pro for unlimited templates.')
+                    return
+                }
+            }
 
             if (isSystemTpl) {
                 const { data: src } = await rawDb
@@ -1703,12 +1707,12 @@ function TemplateCard({ template, isOwn, isProLocked, copiedId, deletingId, conf
                             )}
                             {onDuplicate && (
                                 <button
-                                    onClick={e => { e.stopPropagation(); if (!duplicating) onDuplicate() }}
+                                    onClick={e => { e.stopPropagation(); if (isProLocked) { onUpgrade?.(); return } if (!duplicating) onDuplicate() }}
                                     disabled={duplicating}
                                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold"
-                                    style={{ backgroundColor: '#fff', color: C.secondary, border: `1px solid ${C.border}`, cursor: duplicating ? 'not-allowed' : 'pointer', opacity: duplicating ? 0.7 : 1, fontFamily: 'DM Sans, sans-serif', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-                                    {duplicating ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : <Files size={13} />}
-                                    {duplicating ? 'Saving…' : isOwn ? 'Duplicate' : 'Save Copy'}
+                                    style={{ backgroundColor: isProLocked ? '#fef3c7' : '#fff', color: isProLocked ? C.warning : C.secondary, border: `1px solid ${isProLocked ? '#fde68a' : C.border}`, cursor: duplicating ? 'not-allowed' : 'pointer', opacity: duplicating ? 0.7 : 1, fontFamily: 'DM Sans, sans-serif', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                                    {duplicating ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> : isProLocked ? <ProBadge size="xs" style={{ background: 'rgba(245,158,11,0.15)', boxShadow: 'none' }} /> : <Files size={13} />}
+                                    {duplicating ? 'Saving…' : isProLocked ? 'Pro Only' : isOwn ? 'Duplicate' : 'Save Copy'}
                                 </button>
                             )}
                         </div>
