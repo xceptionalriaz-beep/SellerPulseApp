@@ -329,7 +329,7 @@ function DesignStudioInner() {
             if (user) {
                 const { data: ownData } = await (supabase as any)
                     .from('visual_templates')
-                    .select('id, user_id, name, category, updated_at, blocks_json, canvas_settings_json')
+                    .select('id, user_id, name, description, category, thumbnail_url, use_count, is_shared, created_at, updated_at, blocks_json, canvas_settings_json')
                     .order('updated_at', { ascending: false })
                 // Map visual_templates shape → ListingTemplate shape
                 // assembleDocument converts blocks_json → full HTML so preview modal shows real content
@@ -341,14 +341,14 @@ function DesignStudioInner() {
                         id: vt.id,
                         user_id: vt.user_id,
                         name: vt.name,
-                        description: 'Visual Builder template',   // used for preview display
+                        description: vt.description || 'Visual Builder template',
                         category: vt.category || 'general',
                         description_html: html,                   // real rendered HTML for preview
                         is_system: false,
-                        is_shared: false,
-                        thumbnail_url: null,
-                        use_count: 0,
-                        created_at: vt.updated_at,
+                        is_shared: vt.is_shared ?? false,
+                        thumbnail_url: vt.thumbnail_url ?? null,
+                        use_count: vt.use_count ?? 0,
+                        created_at: vt.created_at,
                         updated_at: vt.updated_at,
                         tags: null,
                         sort_order: null,
@@ -1013,7 +1013,7 @@ function DesignStudioInner() {
                                     </div>
 
                                     {/* Category list (scrollable) */}
-                                    <div style={{ maxHeight: 280, overflowY: 'auto', padding: '6px 6px' }}>
+                                    <div className="cat-list-scroll" style={{ maxHeight: 280, overflowY: 'auto', padding: '6px 6px' }}>
                                         {CATEGORIES.filter(cat =>
                                             !catSearch || cat.label.toLowerCase().includes(catSearch.toLowerCase())
                                         ).map(cat => {
@@ -1400,7 +1400,9 @@ function DesignStudioInner() {
 
             <style>{`
                 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-                ::-webkit-scrollbar { display: none; }
+                /* Hide scrollbar only on the category dropdown list, not globally */
+                .cat-list-scroll::-webkit-scrollbar { display: none; }
+                .cat-list-scroll { scrollbar-width: none; }
             `}</style>
         </div>
     )
