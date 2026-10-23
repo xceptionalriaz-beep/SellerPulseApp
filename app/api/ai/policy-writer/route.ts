@@ -43,14 +43,16 @@ async function trackUsage(platform: string) {
 }
 
 function buildPrompt(category: string, context: string): string {
+    const blockContentSection = context
+        ? `\nBlock content from seller's listing (use this to tailor the policy to their product):\n${context}\n`
+        : ''
     return `You are a professional eBay seller assistant writing clear, trust-building shipping and returns policy copy.
 
-Product category: ${category || 'general'}
-${context ? `Additional context: ${context}` : ''}
-
+Product category: ${category || 'general'}${blockContentSection}
 Write a concise, eBay-compliant shipping & returns policy section. Requirements:
 - Plain text only — no HTML, no markdown, no bullet symbols
 - Professional and reassuring tone
+- If block content is provided above, reference or relate the policy to that specific product
 - Include: dispatch time (1-2 business days), estimated delivery (3-5 business days), returns window (30 days), condition for returns, and a brief quality promise
 - Around 80-100 words
 - Do not start with "I" or mention the seller's name

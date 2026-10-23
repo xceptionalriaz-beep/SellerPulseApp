@@ -8434,6 +8434,14 @@ function AITab({
         setPolicyResult('')
         setPolicyError(null)
 
+        // Build a short context string from the block's editable text fields
+        // so the policy is relevant to what the seller has already written.
+        const blockTextFields = extractTextFields()
+        const blockContext = Object.entries(blockTextFields)
+            .slice(0, 6) // cap at 6 fields to avoid bloating the prompt
+            .map(([k, v]) => `${k}: ${v}`)
+            .join('\n')
+
         try {
             const res = await fetch('/api/ai/policy-writer', {
                 method: 'POST',
@@ -8441,6 +8449,7 @@ function AITab({
                 body: JSON.stringify({
                     blockType: block.type,
                     category: templateCategory,
+                    context: blockContext,
                 }),
             })
             if (res.status === 401) {
@@ -8605,8 +8614,8 @@ function AITab({
                     </span>
                 </div>
 
-                {/* ── AI Copy Optimizer ── */}
-                <div style={{ marginBottom: 10 }}>
+                {/* ── AI Copy Optimizer — hidden when block has no editable text ── */}
+                {Object.keys(extractTextFields()).length > 0 && <div style={{ marginBottom: 10 }}>
                     <button
                         onClick={handleCopyOptimizer}
                         disabled={copyLoading}
@@ -8712,34 +8721,11 @@ function AITab({
                             </div>
                         </div>
                     )}
-                </div>
+                </div>}
 
-                {/* ── AI Photo Studio ── */}
-                <div style={{ marginBottom: 10 }}>
-                    {!hasImageProps && (
-                        <div style={{
-                            padding: '10px 12px', border: `1px solid ${C.border}`,
-                            borderRadius: 10, backgroundColor: C.surface, opacity: 0.7,
-                            display: 'flex', alignItems: 'center', gap: 10,
-                        }}>
-                            <div style={{
-                                width: 34, height: 34, borderRadius: 9,
-                                backgroundColor: C.bg, border: `1px solid ${C.border}`,
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                            }}>
-                                <Wand2 size={16} style={{ color: C.muted }} />
-                            </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                                <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700, color: C.muted }}>
-                                    AI Photo Studio
-                                </p>
-                                <p style={{ margin: '2px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, lineHeight: 1.4 }}>
-                                    Select a block with an image field to use Photo Studio
-                                </p>
-                            </div>
-                        </div>
-                    )}
-                    {hasImageProps && <button
+                {/* ── AI Photo Studio — hidden when block has no image field ── */}
+                {hasImageProps && <div style={{ marginBottom: 10 }}>
+                    <button
                         onClick={() => { setPhotoOpen(o => !o); setPhotoError(null) }}
                         style={{
                             width: '100%', display: 'flex', alignItems: 'center', gap: 10,
@@ -8776,10 +8762,10 @@ function AITab({
                         <div style={{ fontSize: 10, color: '#d97706', fontWeight: 700, opacity: 0.7 }}>
                             {photoOpen ? '▲' : '▼'}
                         </div>
-                    </button>}
+                    </button>
 
-                    {/* Expandable panel — only rendered when this block actually has an image field */}
-                    {hasImageProps && photoOpen && (
+                    {/* Expandable panel */}
+                    {photoOpen && (
                         <div className="ai-result-fade" style={{
                             border: `1px solid #fde68a`, borderTop: 'none',
                             borderRadius: '0 0 10px 10px',
@@ -8913,7 +8899,7 @@ function AITab({
                             )}
                         </div>
                     )}
-                </div>
+                </div>}
 
                 {/* ── AI Policy Writer ── */}
                 <div style={{ marginBottom: 8 }}>
