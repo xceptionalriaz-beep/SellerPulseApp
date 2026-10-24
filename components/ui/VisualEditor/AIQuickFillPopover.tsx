@@ -8,7 +8,9 @@ import type { Block, BlockProps } from '@/components/ui/VisualEditor/blocks'
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface AIQuickFillPopoverProps {
-    /** The block the user clicked the wand on */
+    /** 'single' = fill only the selectedBlock; 'all' = fill all blocks */
+    mode: 'single' | 'all'
+    /** The selected block (used in single mode; also first fallback in all mode) */
     block: Block
     /** All blocks on the canvas (for context + bulk fill) */
     allBlocks: Block[]
@@ -57,6 +59,7 @@ function applyFlatResult(
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function AIQuickFillPopover({
+    mode,
     block,
     allBlocks,
     templateCategory = 'general',
@@ -64,6 +67,9 @@ export function AIQuickFillPopover({
     onUpdateBlocks,
     onClose,
 }: AIQuickFillPopoverProps) {
+    const isSingle = mode === 'single'
+    const targetBlocks = isSingle ? [block] : allBlocks
+    const creditCost = isSingle ? 10 : 20
     const [description, setDescription] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -115,7 +121,7 @@ export function AIQuickFillPopover({
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     description: description.trim(),
-                    blocks: allBlocks,
+                    blocks: targetBlocks,
                     templateCategory,
                 }),
             })
@@ -125,7 +131,7 @@ export function AIQuickFillPopover({
 
             // Build per-block results
             const updates: Array<{ id: string; props: BlockProps; changeCount: number }> = []
-            for (const b of allBlocks) {
+            for (const b of targetBlocks) {
                 const blockResult = data.result?.[b.id] as Record<string, string> | undefined
                 if (!blockResult || Object.keys(blockResult).length === 0) continue
                 const origProps = b.props as unknown as Record<string, unknown>
@@ -142,7 +148,7 @@ export function AIQuickFillPopover({
         } finally {
             setLoading(false)
         }
-    }, [description, allBlocks, templateCategory])
+    }, [description, targetBlocks, templateCategory])
 
     const handleApplyAll = useCallback(() => {
         if (!result) return
@@ -192,9 +198,17 @@ export function AIQuickFillPopover({
                     }}>
                         <Wand2 size={12} color="#fff" strokeWidth={2.2} />
                     </div>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#1a1a2e', letterSpacing: '-0.01em' }}>
-                        AI Fill Template
-                    </span>
+                    <div>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: '#1a1a2e', letterSpacing: '-0.01em', display: 'block' }}>
+                            {isSingle
+                                ? block.type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+                                : 'AI Fill Template'
+                            }
+                        </span>
+                        {isSingle && (
+                            <span style={{ fontSize: 9, color: '#888', fontWeight: 500 }}>Fill this block only</span>
+                        )}
+                    </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{
@@ -205,7 +219,7 @@ export function AIQuickFillPopover({
                         padding: '2px 6px',
                         borderRadius: 20,
                     }}>
-                        20 credits
+                        {creditCost} credits
                     </span>
                     <button
                         onClick={onClose}
@@ -230,7 +244,10 @@ export function AIQuickFillPopover({
                 {!result ? (
                     <>
                         <p style={{ margin: '0 0 8px', fontSize: 11, color: '#555', lineHeight: 1.4 }}>
-                            Describe your product and AI will fill all blocks instantly.
+                            {isSingle
+                                ? 'Describe your product and AI will fill this block instantly.'
+                                : `Describe your product and AI will fill all ${allBlocks.length} blocks instantly.`
+                            }
                         </p>
                         <textarea
                             ref={textareaRef}
@@ -304,7 +321,7 @@ export function AIQuickFillPopover({
                                 ) : (
                                     <>
                                         <Sparkles size={12} />
-                                        Fill All
+                                        {isSingle ? 'Fill Block' : 'Fill All'}
                                     </>
                                 )}
                             </button>
@@ -425,7 +442,7 @@ export function AIQuickFillPopover({
                                         }}
                                     >
                                         <Check size={12} />
-                                        Apply All
+                                        {isSingle ? 'Apply' : 'Apply All'}
                                     </button>
                                 </div>
                             </>
@@ -446,17 +463,23 @@ export function AIQuickFillPopover({
 export interface AICanvasButtonProps {
     /** All blocks on canvas */
     allBlocks: Block[]
+    /** Currently selected block — drives single vs full-template mode */
+    selectedBlock?: Block | null
     templateCategory?: string
     onUpdateBlocks: (updates: Array<{ id: string; props: BlockProps }>) => void
 }
 
 export function AICanvasButton({
     allBlocks,
+    selectedBlock,
     templateCategory,
     onUpdateBlocks,
 }: AICanvasButtonProps) {
     const [open, setOpen] = useState(false)
     const [creditBalance, setCreditBalance] = useState<number | null>(null)
+
+    const mode: 'single' | 'all' = selectedBlock ? 'single' : 'all'
+    const creditCost = mode === 'single' ? 10 : 20
 
     // Fetch balance when popover opens
     useEffect(() => {
@@ -476,11 +499,16 @@ export function AICanvasButton({
         fetchBalance()
     }, [open])
 
-    // Only show when there are 2+ blocks
-    if (allBlocks.length < 2) return null
+    // Only show when there is at least 1 block
+    if (allBlocks.length < 1) return null
 
-    // Dummy block just to satisfy AIQuickFillPopover's `block` prop (not used in canvas mode)
-    const dummyBlock = allBlocks[0]
+    // Use selected block in single mode; fall back to first block for full mode
+    const activeBlock = selectedBlock ?? allBlocks[0]
+
+    // Tooltip changes based on mode
+    const tooltip = mode === 'single'
+        ? `AI Fill: ${activeBlock.type.replace(/_/g, ' ')}`
+        : 'AI Fill Template (all blocks)'
 
     return (
         <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
@@ -490,7 +518,7 @@ export function AICanvasButton({
                     e.stopPropagation()
                     setOpen(prev => !prev)
                 }}
-                title="AI Fill Template"
+                title={tooltip}
                 style={{
                     background: 'none',
                     border: 'none',
@@ -511,13 +539,14 @@ export function AICanvasButton({
             {/* Popover anchors bottom-right */}
             {open && (
                 <AIQuickFillPopover
-                    block={dummyBlock}
+                    mode={mode}
+                    block={activeBlock}
                     allBlocks={allBlocks}
                     templateCategory={templateCategory}
                     creditBalance={creditBalance}
                     onUpdateBlocks={(updates) => {
                         onUpdateBlocks(updates)
-                        setCreditBalance(prev => prev != null ? Math.max(0, prev - 20) : null)
+                        setCreditBalance(prev => prev != null ? Math.max(0, prev - creditCost) : null)
                     }}
                     onClose={() => setOpen(false)}
                 />

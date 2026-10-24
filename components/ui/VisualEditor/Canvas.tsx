@@ -478,6 +478,7 @@ export default function Canvas({
                     <div style={{ pointerEvents: 'all' }}>
                         <AICanvasButton
                             allBlocks={aiAllBlocks}
+                            selectedBlock={selectedId ? (aiAllBlocks.find(b => b.id === selectedId) ?? null) : null}
                             templateCategory={templateCategory}
                             onUpdateBlocks={onUpdateBlocks}
                         />
