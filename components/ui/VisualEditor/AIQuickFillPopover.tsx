@@ -185,58 +185,27 @@ export function AIQuickFillPopover({
                 borderBottom: '1px solid rgba(0,0,0,0.06)',
                 background: 'linear-gradient(135deg, rgba(99,102,241,0.06) 0%, rgba(139,92,246,0.06) 100%)',
             }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                    <div style={{
-                        width: 22,
-                        height: 22,
-                        borderRadius: 6,
-                        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                    }}>
-                        <Wand2 size={12} color="#fff" strokeWidth={2.2} />
-                    </div>
-                    <div>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: '#1a1a2e', letterSpacing: '-0.01em', display: 'block' }}>
-                            {isSingle
-                                ? block.type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
-                                : 'AI Fill Template'
-                            }
-                        </span>
-                        {isSingle && (
-                            <span style={{ fontSize: 9, color: '#888', fontWeight: 500 }}>Fill this block only</span>
-                        )}
-                    </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{
-                        fontSize: 10,
-                        fontWeight: 600,
-                        color: '#6366f1',
-                        background: 'rgba(99,102,241,0.1)',
-                        padding: '2px 6px',
-                        borderRadius: 20,
-                    }}>
-                        {creditCost} credits
+                <div>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#1a1a2e', letterSpacing: '-0.01em', display: 'block' }}>
+                        {isSingle
+                            ? block.type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+                            : 'AI Fill Template'
+                        }
                     </span>
-                    <button
-                        onClick={onClose}
-                        style={{
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            padding: 2,
-                            display: 'flex',
-                            alignItems: 'center',
-                            color: '#666',
-                            borderRadius: 4,
-                        }}
-                    >
-                        <X size={14} />
-                    </button>
+                    {isSingle && (
+                        <span style={{ fontSize: 9, color: '#888', fontWeight: 500 }}>Fill this block only</span>
+                    )}
                 </div>
+                <span style={{
+                    fontSize: 10,
+                    fontWeight: 600,
+                    color: '#6366f1',
+                    background: 'rgba(99,102,241,0.1)',
+                    padding: '2px 6px',
+                    borderRadius: 20,
+                }}>
+                    {creditCost} credits
+                </span>
             </div>
 
             {/* Body */}
