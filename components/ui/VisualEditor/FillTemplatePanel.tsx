@@ -16,7 +16,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useState, useCallback } from 'react'
-import type { Block, BlockProps } from '@/components/ui/VisualEditor/types'
+import type { Block, BlockProps } from '@/components/ui/VisualEditor/blocks'
 import { Wand2, ChevronDown, ChevronUp, Check, X, AlertTriangle, Loader2 } from 'lucide-react'
 
 // ── Colour tokens (mirror PropertiesPanel's C object) ─────────────────────────
