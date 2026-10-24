@@ -1,8 +1,9 @@
 'use client'
 
 import React, { useState, useRef, useEffect, useCallback } from 'react'
-import { Wand2, X, Loader2, Sparkles, Check } from 'lucide-react'
+import { Wand2, Loader2, Sparkles, Check } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
+import { getCreditCost, AI_ACTIONS, DEFAULT_CREDIT_COSTS } from '@/lib/ai/credit-actions'
 import type { Block, BlockProps } from '@/components/ui/VisualEditor/blocks'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -16,6 +17,8 @@ export interface AIQuickFillPopoverProps {
     allBlocks: Block[]
     templateCategory?: string
     creditBalance: number | null
+    /** Live credit cost passed from parent (parent fetches once on open) */
+    creditCost: number
     onUpdateBlocks: (updates: Array<{ id: string; props: BlockProps }>) => void
     onClose: () => void
 }
@@ -64,12 +67,12 @@ export function AIQuickFillPopover({
     allBlocks,
     templateCategory = 'general',
     creditBalance,
+    creditCost,
     onUpdateBlocks,
     onClose,
 }: AIQuickFillPopoverProps) {
     const isSingle = mode === 'single'
     const targetBlocks = isSingle ? [block] : allBlocks
-    const creditCost = isSingle ? 10 : 20
     const [description, setDescription] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -120,9 +123,10 @@ export function AIQuickFillPopover({
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    description: description.trim(),
+                    productDescription: description.trim(),
                     blocks: targetBlocks,
-                    templateCategory,
+                    category: templateCategory,
+                    mode,
                 }),
             })
 
@@ -446,14 +450,19 @@ export function AICanvasButton({
 }: AICanvasButtonProps) {
     const [open, setOpen] = useState(false)
     const [creditBalance, setCreditBalance] = useState<number | null>(null)
+    const [liveCost, setLiveCost] = useState<number | null>(null)
 
     const mode: 'single' | 'all' = selectedBlock ? 'single' : 'all'
-    const creditCost = mode === 'single' ? 10 : 20
+    // Fallback cost from defaults until live fetch completes
+    const defaultCost = mode === 'single'
+        ? DEFAULT_CREDIT_COSTS[AI_ACTIONS.FILL_TEMPLATE_SINGLE]
+        : DEFAULT_CREDIT_COSTS[AI_ACTIONS.FILL_TEMPLATE_FULL]
+    const creditCost = liveCost ?? defaultCost
 
-    // Fetch balance when popover opens
+    // Fetch balance + live credit cost when popover opens
     useEffect(() => {
         if (!open) return
-        const fetchBalance = async () => {
+        const fetchData = async () => {
             try {
                 const supabase = createClient()
                 const { data: { user } } = await supabase.auth.getUser()
@@ -464,9 +473,16 @@ export function AICanvasButton({
                     .single()
                 if (data?.balance != null) setCreditBalance(data.balance)
             } catch { /* ignore */ }
+
+            // Fetch live cost from ai_action_costs table
+            const actionKey = mode === 'single'
+                ? AI_ACTIONS.FILL_TEMPLATE_SINGLE
+                : AI_ACTIONS.FILL_TEMPLATE_FULL
+            const cost = await getCreditCost(actionKey)
+            setLiveCost(cost)
         }
-        fetchBalance()
-    }, [open])
+        fetchData()
+    }, [open, mode])
 
     // Only show when there is at least 1 block
     if (allBlocks.length < 1) return null
@@ -513,6 +529,7 @@ export function AICanvasButton({
                     allBlocks={allBlocks}
                     templateCategory={templateCategory}
                     creditBalance={creditBalance}
+                    creditCost={creditCost}
                     onUpdateBlocks={(updates) => {
                         onUpdateBlocks(updates)
                         setCreditBalance(prev => prev != null ? Math.max(0, prev - creditCost) : null)

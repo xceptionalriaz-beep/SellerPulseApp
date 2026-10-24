@@ -10,6 +10,7 @@
 //   productDescription — free-text product info from the seller
 //   blocks             — array of { id, type, props } for all template blocks
 //   category           — template category e.g. 'electronics' (optional)
+//   mode               — 'single' | 'all' (default 'all'); drives credit cost
 //
 // Response (200):
 //   {
@@ -22,6 +23,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getAuthUserId, deductCredits } from '@/lib/ai/credits'
+import { AI_ACTIONS } from '@/lib/ai/credit-actions'
 
 const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -208,12 +210,13 @@ export async function POST(req: NextRequest) {
         productDescription?: string
         blocks?: Array<{ id: string; type: string; props: Record<string, unknown> }>
         category?: string
+        mode?: 'single' | 'all'
     }
     try { body = await req.json() } catch {
         return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
     }
 
-    const { productDescription = '', blocks = [], category = 'general' } = body
+    const { productDescription = '', blocks = [], category = 'general', mode = 'all' } = body
 
     if (!productDescription.trim()) {
         return NextResponse.json({ error: 'Product description is required.' }, { status: 400 })
@@ -233,7 +236,10 @@ export async function POST(req: NextRequest) {
     if (!userId) {
         return NextResponse.json({ error: 'Please sign in to use AI features.' }, { status: 401 })
     }
-    const credit = await deductCredits(userId, 'ai_fill_template')
+    const featureKey = mode === 'single'
+        ? AI_ACTIONS.FILL_TEMPLATE_SINGLE
+        : AI_ACTIONS.FILL_TEMPLATE_FULL
+    const credit = await deductCredits(userId, featureKey)
     if (!credit.ok) return credit.response
 
     const prompt = buildPrompt(productDescription, category, blockFields)
