@@ -32,6 +32,7 @@ import {
 import {
     Block,
     BlockType,
+    BlockProps,
     createBlock,
     assembleDocument,
     assembleBodyOnly,
@@ -839,6 +840,14 @@ export default function VisualEditor({
         const next = blocks.map(b => b.id === updated.id ? updated : b)
         // No-op fast path — block id not in list (shouldn't happen, but defensive)
         if (next === blocks) return
+        commitBlocks(next, blocks)
+    }, [commitBlocks, blocks])
+
+    // ── Batch-update multiple blocks at once (used by AI Fill Template) ───────
+    const handleMultiBlockChange = useCallback((updates: Array<{ id: string; props: BlockProps }>) => {
+        if (updates.length === 0) return
+        const updateMap = new Map(updates.map(u => [u.id, u.props]))
+        const next = blocks.map(b => updateMap.has(b.id) ? { ...b, props: updateMap.get(b.id)! } : b)
         commitBlocks(next, blocks)
     }, [commitBlocks, blocks])
 
@@ -2187,6 +2196,8 @@ export default function VisualEditor({
                             onSlotChange={onSlotsChange ? handleSlotChange : undefined}
                             designStudioPlan={designStudioPlan}
                             onUpgradeClick={onUpgradeClick}
+                            allBlocks={blocks}
+                            onUpdateBlocks={handleMultiBlockChange}
                         />
                     )
                 )}
