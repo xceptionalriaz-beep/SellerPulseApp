@@ -116,8 +116,29 @@ function extractBlockFields(blocks: Array<{ id: string; type: string; props: Rec
 function buildPrompt(
     productDescription: string,
     category: string,
-    blockFields: Array<{ blockId: string; blockType: string; fields: Record<string, string> }>
+    blockFields: Array<{ blockId: string; blockType: string; fields: Record<string, string> }>,
+    options?: {
+        condition?: string
+        tone?: string
+        targetBuyer?: string
+        keyPoints?: string
+    }
 ): string {
+    const { condition, tone, targetBuyer, keyPoints } = options ?? {}
+
+    const toneGuide = {
+        professional: 'Professional and trustworthy — clear, factual, confidence-inspiring',
+        friendly:     'Friendly and conversational — warm, approachable, like a trusted seller',
+        bargain:      'Bargain-focused — value-driven, deal-oriented, price-conscious buyer appeal',
+    }[tone ?? 'professional'] ?? 'Professional and trustworthy'
+
+    const buyerGuide = {
+        general:    'General eBay buyers',
+        collector:  'Collectors — emphasise rarity, authenticity, condition details',
+        gift:       'Gift buyers — highlight presentation, gifting appeal, occasion suitability',
+        business:   'Business buyers — focus on bulk value, reliability, specs and practicality',
+    }[targetBuyer ?? 'general'] ?? 'General eBay buyers'
+
     const blockList = blockFields.map(b => {
         const fieldLines = Object.entries(b.fields)
             .map(([k, v]) => `    "${k}": ${JSON.stringify(v)}`)
@@ -125,19 +146,28 @@ function buildPrompt(
         return `  // Block: ${b.blockType} (id: ${b.blockId})\n  "${b.blockId}": {\n${fieldLines}\n  }`
     }).join(',\n\n')
 
+    const contextLines = [
+        `Product category: ${category || 'general'}`,
+        condition ? `Item condition: ${condition.charAt(0).toUpperCase() + condition.slice(1)}` : null,
+        `Writing tone: ${toneGuide}`,
+        `Target buyer: ${buyerGuide}`,
+        keyPoints?.trim() ? `Key selling points to highlight: ${keyPoints.trim()}` : null,
+    ].filter(Boolean).join('\n')
+
     return `You are an expert eBay listing copywriter. A seller has provided their product information and wants you to fill in all the text fields across their entire eBay listing template.
 
-Product category: ${category || 'general'}
+${contextLines}
 
 Seller's product description:
 """
 ${productDescription}
 """
 
-Below is the current template content as JSON, grouped by block ID. Rewrite every text field to be accurate, compelling and eBay-compliant based on the seller's product description.
+Below is the current template content as JSON, grouped by block ID. Rewrite every text field to be accurate, compelling and eBay-compliant based on the seller's product description and the context above.
 
 Rules:
 - Write buyer-focused, benefit-driven copy that accurately reflects the product
+- Match the tone and buyer audience specified above throughout every field
 - Keep each field concise — match the original length and purpose
 - eBay compliant: no HTML, no markdown, no all-caps spam
 - Preserve any template tokens like {{BRAND}}, {{PRODUCT_TITLE}}, {{PRICE}} EXACTLY as-is
@@ -211,12 +241,25 @@ export async function POST(req: NextRequest) {
         blocks?: Array<{ id: string; type: string; props: Record<string, unknown> }>
         category?: string
         mode?: 'single' | 'all'
+        condition?: string
+        tone?: string
+        targetBuyer?: string
+        keyPoints?: string
     }
     try { body = await req.json() } catch {
         return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
     }
 
-    const { productDescription = '', blocks = [], category = 'general', mode = 'all' } = body
+    const {
+        productDescription = '',
+        blocks = [],
+        category = 'general',
+        mode = 'all',
+        condition,
+        tone,
+        targetBuyer,
+        keyPoints,
+    } = body
 
     if (!productDescription.trim()) {
         return NextResponse.json({ error: 'Product description is required.' }, { status: 400 })
@@ -242,7 +285,7 @@ export async function POST(req: NextRequest) {
     const credit = await deductCredits(userId, featureKey)
     if (!credit.ok) return credit.response
 
-    const prompt = buildPrompt(productDescription, category, blockFields)
+    const prompt = buildPrompt(productDescription, category, blockFields, { condition, tone, targetBuyer, keyPoints })
 
     // ── Try Anthropic ─────────────────────────────────────────────────────────
     const anthropicKey = (await getAiKey('anthropic')) ?? process.env.ANTHROPIC_API_KEY ?? null
