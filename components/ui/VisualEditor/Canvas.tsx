@@ -1026,8 +1026,8 @@ function BlockCard({
                 )
             })()}
 
-            {/* ── AI Floating Wand Button — bottom-right when selected ── */}
-            {isSelected && aiAllBlocks && onUpdateBlocks && (
+            {/* ── AI Floating Wand Button — bottom-right when selected, only with 2+ blocks ── */}
+            {isSelected && aiAllBlocks && aiAllBlocks.length > 1 && onUpdateBlocks && (
                 <AIFloatingButton
                     block={block}
                     allBlocks={aiAllBlocks}
