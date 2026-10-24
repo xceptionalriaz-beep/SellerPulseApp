@@ -129,7 +129,7 @@ function applyFlatResult(
         }
     }
 
-    return result as BlockProps
+    return result as unknown as BlockProps
 }
 
 // ── BlockPreview: shows changes for one block ─────────────────────────────────
@@ -145,7 +145,7 @@ function BlockPreview({
     onApply: () => void
 }) {
     const [expanded, setExpanded] = useState(false)
-    const changes = countChanges(block.props as Record<string, unknown>, fields)
+    const changes = countChanges(block.props as unknown as Record<string, unknown>, fields)
     const label = blockLabel(block.type)
 
     return (
@@ -322,7 +322,7 @@ export function FillTemplatePanel({
         if (!result?.[blockId]) return
         const block = blocks.find(b => b.id === blockId)
         if (!block) return
-        const updatedProps = applyFlatResult(block.props as Record<string, unknown>, result[blockId])
+        const updatedProps = applyFlatResult(block.props as unknown as Record<string, unknown>, result[blockId])
         onApplyBlock(blockId, updatedProps)
         setAppliedIds(prev => new Set([...prev, blockId]))
     }, [result, blocks, onApplyBlock])
@@ -332,7 +332,7 @@ export function FillTemplatePanel({
         const updates = Object.entries(result).map(([blockId, fields]) => {
             const block = blocks.find(b => b.id === blockId)
             if (!block) return null
-            return { id: blockId, props: applyFlatResult(block.props as Record<string, unknown>, fields) }
+            return { id: blockId, props: applyFlatResult(block.props as unknown as Record<string, unknown>, fields) }
         }).filter(Boolean) as Array<{ id: string; props: BlockProps }>
 
         onApplyAll(updates)
