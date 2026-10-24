@@ -59,6 +59,56 @@ function applyFlatResult(
     return result as unknown as BlockProps
 }
 
+// ─── Chip selector helper ─────────────────────────────────────────────────────
+
+function ChipGroup<T extends string>({
+    label,
+    options,
+    value,
+    onChange,
+    disabled,
+}: {
+    label: string
+    options: { value: T; label: string }[]
+    value: T
+    onChange: (v: T) => void
+    disabled?: boolean
+}) {
+    return (
+        <div style={{ marginBottom: 10 }}>
+            <p style={{ margin: '0 0 5px', fontSize: 10, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                {label}
+            </p>
+            <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                {options.map(opt => {
+                    const active = value === opt.value
+                    return (
+                        <button
+                            key={opt.value}
+                            onClick={() => onChange(opt.value)}
+                            disabled={disabled}
+                            style={{
+                                padding: '4px 10px',
+                                borderRadius: 20,
+                                border: active ? '1.5px solid #6366f1' : '1.5px solid #e5e7eb',
+                                background: active ? 'rgba(99,102,241,0.1)' : '#f9fafb',
+                                color: active ? '#6366f1' : '#555',
+                                fontSize: 11,
+                                fontWeight: active ? 700 : 500,
+                                cursor: disabled ? 'default' : 'pointer',
+                                transition: 'all 0.12s',
+                                opacity: disabled ? 0.6 : 1,
+                            }}
+                        >
+                            {opt.label}
+                        </button>
+                    )
+                })}
+            </div>
+        </div>
+    )
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function AIQuickFillPopover({
@@ -73,24 +123,27 @@ export function AIQuickFillPopover({
 }: AIQuickFillPopoverProps) {
     const isSingle = mode === 'single'
     const targetBlocks = isSingle ? [block] : allBlocks
+
     const [description, setDescription] = useState('')
+    const [condition, setCondition]     = useState<'new' | 'used' | 'refurbished'>('new')
+    const [tone, setTone]               = useState<'professional' | 'friendly' | 'bargain'>('professional')
+    const [targetBuyer, setTargetBuyer] = useState<'general' | 'collector' | 'gift' | 'business'>('general')
+    const [keyPoints, setKeyPoints]     = useState('')
+
     const [loading, setLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
-    const [result, setResult] = useState<Array<{ id: string; props: BlockProps; changeCount: number }> | null>(null)
+    const [error, setError]     = useState<string | null>(null)
+    const [result, setResult]   = useState<Array<{ id: string; props: BlockProps; changeCount: number }> | null>(null)
     const [applied, setApplied] = useState(false)
-    const textareaRef = useRef<HTMLTextAreaElement>(null)
-    const popoverRef = useRef<HTMLDivElement>(null)
+
+    const textareaRef  = useRef<HTMLTextAreaElement>(null)
+    const popoverRef   = useRef<HTMLDivElement>(null)
 
     // Focus textarea on mount
-    useEffect(() => {
-        setTimeout(() => textareaRef.current?.focus(), 50)
-    }, [])
+    useEffect(() => { setTimeout(() => textareaRef.current?.focus(), 50) }, [])
 
     // Close on Escape
     useEffect(() => {
-        const onKey = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') onClose()
-        }
+        const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
         document.addEventListener('keydown', onKey)
         return () => document.removeEventListener('keydown', onKey)
     }, [onClose])
@@ -98,18 +151,10 @@ export function AIQuickFillPopover({
     // Close on outside click
     useEffect(() => {
         const onClickOutside = (e: MouseEvent) => {
-            if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
-                onClose()
-            }
+            if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) onClose()
         }
-        // Small delay to prevent immediate close from the wand button click
-        const timer = setTimeout(() => {
-            document.addEventListener('mousedown', onClickOutside)
-        }, 100)
-        return () => {
-            clearTimeout(timer)
-            document.removeEventListener('mousedown', onClickOutside)
-        }
+        const timer = setTimeout(() => document.addEventListener('mousedown', onClickOutside), 100)
+        return () => { clearTimeout(timer); document.removeEventListener('mousedown', onClickOutside) }
     }, [onClose])
 
     const handleFill = useCallback(async () => {
@@ -127,13 +172,19 @@ export function AIQuickFillPopover({
                     blocks: targetBlocks,
                     category: templateCategory,
                     mode,
+                    // extra context (full template mode only)
+                    ...(!isSingle && {
+                        condition,
+                        tone,
+                        targetBuyer,
+                        keyPoints: keyPoints.trim() || undefined,
+                    }),
                 }),
             })
 
             const data = await res.json()
             if (!res.ok) throw new Error(data.error ?? 'AI fill failed')
 
-            // Build per-block results
             const updates: Array<{ id: string; props: BlockProps; changeCount: number }> = []
             for (const b of targetBlocks) {
                 const blockResult = data.result?.[b.id] as Record<string, string> | undefined
@@ -141,9 +192,7 @@ export function AIQuickFillPopover({
                 const origProps = b.props as unknown as Record<string, unknown>
                 const updatedProps = applyFlatResult(origProps, blockResult)
                 const changeCount = countChanges(origProps, blockResult)
-                if (changeCount > 0) {
-                    updates.push({ id: b.id, props: updatedProps, changeCount })
-                }
+                if (changeCount > 0) updates.push({ id: b.id, props: updatedProps, changeCount })
             }
 
             setResult(updates)
@@ -152,7 +201,7 @@ export function AIQuickFillPopover({
         } finally {
             setLoading(false)
         }
-    }, [description, targetBlocks, templateCategory])
+    }, [description, targetBlocks, templateCategory, isSingle, condition, tone, targetBuyer, keyPoints])
 
     const handleApplyAll = useCallback(() => {
         if (!result) return
@@ -162,6 +211,7 @@ export function AIQuickFillPopover({
     }, [result, onUpdateBlocks, onClose])
 
     const totalChanges = result?.reduce((acc, r) => acc + r.changeCount, 0) ?? 0
+    const canFill = description.trim().length > 0 && !loading
 
     return (
         <div
@@ -171,7 +221,7 @@ export function AIQuickFillPopover({
                 position: 'absolute',
                 bottom: 'calc(100% + 8px)',
                 right: 0,
-                width: 300,
+                width: 320,
                 background: '#fff',
                 border: '1px solid rgba(99,102,241,0.25)',
                 borderRadius: 12,
@@ -193,109 +243,142 @@ export function AIQuickFillPopover({
                     <span style={{ fontSize: 12, fontWeight: 700, color: '#1a1a2e', letterSpacing: '-0.01em', display: 'block' }}>
                         {isSingle
                             ? block.type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
-                            : 'AI Fill Template'
+                            : '🪄 Fill Full Template'
                         }
                     </span>
-                    {isSingle && (
-                        <span style={{ fontSize: 9, color: '#888', fontWeight: 500 }}>Fill this block only</span>
-                    )}
+                    <span style={{ fontSize: 9, color: '#888', fontWeight: 500 }}>
+                        {isSingle ? 'Fill this block only' : `${allBlocks.length} blocks · AI-powered`}
+                    </span>
                 </div>
                 <span style={{
-                    fontSize: 10,
-                    fontWeight: 600,
-                    color: '#6366f1',
-                    background: 'rgba(99,102,241,0.1)',
-                    padding: '2px 6px',
-                    borderRadius: 20,
+                    fontSize: 10, fontWeight: 600, color: '#6366f1',
+                    background: 'rgba(99,102,241,0.1)', padding: '2px 7px', borderRadius: 20,
                 }}>
-                    {creditCost} credits
+                    {creditCost} cr
                 </span>
             </div>
 
             {/* Body */}
-            <div style={{ padding: 12 }}>
+            <div style={{ padding: 12, maxHeight: 480, overflowY: 'auto' }}>
                 {!result ? (
                     <>
-                        <p style={{ margin: '0 0 8px', fontSize: 11, color: '#555', lineHeight: 1.4 }}>
-                            {isSingle
-                                ? 'Describe your product and AI will fill this block instantly.'
-                                : `Describe your product and AI will fill all ${allBlocks.length} blocks instantly.`
-                            }
+                        {/* Product description */}
+                        <p style={{ margin: '0 0 6px', fontSize: 10, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            Describe your product
                         </p>
                         <textarea
                             ref={textareaRef}
                             value={description}
                             onChange={e => setDescription(e.target.value)}
-                            onKeyDown={e => {
-                                if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleFill()
-                            }}
-                            placeholder="e.g. Premium wireless headphones with 40h battery, noise cancellation, foldable design, in black..."
+                            onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleFill() }}
+                            placeholder={isSingle
+                                ? 'e.g. Premium wireless headphones, 40h battery, noise cancellation...'
+                                : 'e.g. iPhone 14 Pro 256GB Space Black, excellent condition, original box...'
+                            }
                             disabled={loading}
                             style={{
-                                width: '100%',
-                                minHeight: 72,
-                                padding: '8px 10px',
-                                border: '1.5px solid rgba(99,102,241,0.2)',
-                                borderRadius: 8,
-                                fontSize: 11.5,
-                                lineHeight: 1.5,
-                                resize: 'vertical',
-                                outline: 'none',
-                                fontFamily: 'inherit',
-                                color: '#1a1a2e',
-                                boxSizing: 'border-box',
-                                background: loading ? '#f9f9f9' : '#fff',
+                                width: '100%', minHeight: 68, padding: '8px 10px',
+                                border: '1.5px solid rgba(99,102,241,0.2)', borderRadius: 8,
+                                fontSize: 11.5, lineHeight: 1.5, resize: 'vertical', outline: 'none',
+                                fontFamily: 'inherit', color: '#1a1a2e', boxSizing: 'border-box',
+                                background: loading ? '#f9f9f9' : '#fff', marginBottom: 12,
                             }}
                         />
 
+                        {/* Full template extra fields */}
+                        {!isSingle && (
+                            <>
+                                <ChipGroup
+                                    label="Condition"
+                                    value={condition}
+                                    onChange={setCondition}
+                                    disabled={loading}
+                                    options={[
+                                        { value: 'new',         label: 'New' },
+                                        { value: 'used',        label: 'Used' },
+                                        { value: 'refurbished', label: 'Refurbished' },
+                                    ]}
+                                />
+                                <ChipGroup
+                                    label="Tone"
+                                    value={tone}
+                                    onChange={setTone}
+                                    disabled={loading}
+                                    options={[
+                                        { value: 'professional', label: 'Professional' },
+                                        { value: 'friendly',     label: 'Friendly' },
+                                        { value: 'bargain',      label: 'Bargain' },
+                                    ]}
+                                />
+                                <ChipGroup
+                                    label="Target Buyer"
+                                    value={targetBuyer}
+                                    onChange={setTargetBuyer}
+                                    disabled={loading}
+                                    options={[
+                                        { value: 'general',   label: 'General' },
+                                        { value: 'collector', label: 'Collector' },
+                                        { value: 'gift',      label: 'Gift' },
+                                        { value: 'business',  label: 'Business' },
+                                    ]}
+                                />
+
+                                {/* Key points — optional */}
+                                <div style={{ marginBottom: 10 }}>
+                                    <p style={{ margin: '0 0 5px', fontSize: 10, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                        Key Points <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span>
+                                    </p>
+                                    <textarea
+                                        value={keyPoints}
+                                        onChange={e => setKeyPoints(e.target.value)}
+                                        disabled={loading}
+                                        placeholder="e.g. Original box included, fast charger, minor scratch on back..."
+                                        style={{
+                                            width: '100%', minHeight: 52, padding: '7px 10px',
+                                            border: '1.5px solid #e5e7eb', borderRadius: 8,
+                                            fontSize: 11, lineHeight: 1.45, resize: 'vertical', outline: 'none',
+                                            fontFamily: 'inherit', color: '#1a1a2e', boxSizing: 'border-box',
+                                            background: loading ? '#f9f9f9' : '#fff',
+                                        }}
+                                    />
+                                </div>
+                            </>
+                        )}
+
                         {error && (
                             <div style={{
-                                marginTop: 6,
-                                padding: '6px 8px',
-                                background: 'rgba(239,68,68,0.08)',
-                                border: '1px solid rgba(239,68,68,0.2)',
-                                borderRadius: 6,
-                                fontSize: 11,
-                                color: '#dc2626',
+                                marginBottom: 8, padding: '6px 8px',
+                                background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
+                                borderRadius: 6, fontSize: 11, color: '#dc2626',
                             }}>
                                 {error}
                             </div>
                         )}
 
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ fontSize: 10, color: '#999' }}>
                                 {creditBalance != null ? `${creditBalance} credits left` : ''}
                             </span>
                             <button
                                 onClick={handleFill}
-                                disabled={loading || !description.trim()}
+                                disabled={!canFill}
                                 style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 6,
+                                    display: 'flex', alignItems: 'center', gap: 6,
                                     padding: '7px 14px',
-                                    background: loading || !description.trim()
-                                        ? '#e5e7eb'
-                                        : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                                    color: loading || !description.trim() ? '#9ca3af' : '#fff',
-                                    border: 'none',
-                                    borderRadius: 8,
-                                    fontSize: 12,
-                                    fontWeight: 600,
-                                    cursor: loading || !description.trim() ? 'not-allowed' : 'pointer',
+                                    background: canFill
+                                        ? 'linear-gradient(135deg, #6366f1, #8b5cf6)'
+                                        : '#e5e7eb',
+                                    color: canFill ? '#fff' : '#9ca3af',
+                                    border: 'none', borderRadius: 8,
+                                    fontSize: 12, fontWeight: 600,
+                                    cursor: canFill ? 'pointer' : 'not-allowed',
                                     transition: 'all 0.15s',
                                 }}
                             >
                                 {loading ? (
-                                    <>
-                                        <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} />
-                                        Filling...
-                                    </>
+                                    <><Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> Filling…</>
                                 ) : (
-                                    <>
-                                        <Sparkles size={12} />
-                                        {isSingle ? 'Fill Block' : 'Fill All'}
-                                    </>
+                                    <><Sparkles size={12} />{isSingle ? 'Fill Block' : 'Fill Template'}</>
                                 )}
                             </button>
                         </div>
@@ -304,21 +387,11 @@ export function AIQuickFillPopover({
                     /* Results view */
                     <>
                         {applied ? (
-                            <div style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                gap: 8,
-                                padding: '12px 0',
-                            }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '12px 0' }}>
                                 <div style={{
-                                    width: 36,
-                                    height: 36,
-                                    borderRadius: '50%',
+                                    width: 36, height: 36, borderRadius: '50%',
                                     background: 'rgba(34,197,94,0.1)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 }}>
                                     <Check size={18} color="#16a34a" strokeWidth={2.5} />
                                 </div>
@@ -327,50 +400,34 @@ export function AIQuickFillPopover({
                         ) : (
                             <>
                                 <div style={{
-                                    marginBottom: 8,
-                                    padding: '6px 8px',
-                                    background: 'rgba(34,197,94,0.06)',
-                                    border: '1px solid rgba(34,197,94,0.2)',
-                                    borderRadius: 6,
-                                    fontSize: 11,
-                                    color: '#15803d',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 5,
+                                    marginBottom: 8, padding: '6px 8px',
+                                    background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)',
+                                    borderRadius: 6, fontSize: 11, color: '#15803d',
+                                    display: 'flex', alignItems: 'center', gap: 5,
                                 }}>
                                     <Sparkles size={11} />
                                     <span>
-                                        Found <strong>{totalChanges}</strong> field
-                                        {totalChanges !== 1 ? 's' : ''} to update across{' '}
-                                        <strong>{result.length}</strong> block
-                                        {result.length !== 1 ? 's' : ''}
+                                        Found <strong>{totalChanges}</strong> field{totalChanges !== 1 ? 's' : ''} to update across{' '}
+                                        <strong>{result.length}</strong> block{result.length !== 1 ? 's' : ''}
                                     </span>
                                 </div>
 
-                                {/* Block list */}
                                 <div style={{ maxHeight: 160, overflowY: 'auto', marginBottom: 8 }}>
                                     {result.map(({ id, changeCount }) => {
                                         const b = allBlocks.find(bl => bl.id === id)
                                         return (
                                             <div key={id} style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'space-between',
-                                                padding: '5px 6px',
-                                                borderRadius: 5,
-                                                marginBottom: 2,
+                                                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                                padding: '5px 6px', borderRadius: 5, marginBottom: 2,
                                                 background: 'rgba(0,0,0,0.02)',
                                             }}>
                                                 <span style={{ fontSize: 11, color: '#444', fontWeight: 500, textTransform: 'capitalize' }}>
                                                     {b?.type?.replace(/_/g, ' ') ?? id}
                                                 </span>
                                                 <span style={{
-                                                    fontSize: 10,
-                                                    color: '#6366f1',
+                                                    fontSize: 10, color: '#6366f1',
                                                     background: 'rgba(99,102,241,0.08)',
-                                                    padding: '1px 6px',
-                                                    borderRadius: 10,
-                                                    fontWeight: 600,
+                                                    padding: '1px 6px', borderRadius: 10, fontWeight: 600,
                                                 }}>
                                                     {changeCount} change{changeCount !== 1 ? 's' : ''}
                                                 </span>
@@ -383,15 +440,10 @@ export function AIQuickFillPopover({
                                     <button
                                         onClick={() => { setResult(null); setError(null) }}
                                         style={{
-                                            flex: 1,
-                                            padding: '7px 0',
-                                            background: 'transparent',
-                                            border: '1.5px solid #e5e7eb',
-                                            borderRadius: 8,
-                                            fontSize: 12,
-                                            fontWeight: 600,
-                                            color: '#666',
-                                            cursor: 'pointer',
+                                            flex: 1, padding: '7px 0',
+                                            background: 'transparent', border: '1.5px solid #e5e7eb',
+                                            borderRadius: 8, fontSize: 12, fontWeight: 600,
+                                            color: '#666', cursor: 'pointer',
                                         }}
                                     >
                                         Retry
@@ -399,19 +451,11 @@ export function AIQuickFillPopover({
                                     <button
                                         onClick={handleApplyAll}
                                         style={{
-                                            flex: 2,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            gap: 6,
+                                            flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                                             padding: '7px 0',
                                             background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                                            color: '#fff',
-                                            border: 'none',
-                                            borderRadius: 8,
-                                            fontSize: 12,
-                                            fontWeight: 600,
-                                            cursor: 'pointer',
+                                            color: '#fff', border: 'none', borderRadius: 8,
+                                            fontSize: 12, fontWeight: 600, cursor: 'pointer',
                                         }}
                                     >
                                         <Check size={12} />
