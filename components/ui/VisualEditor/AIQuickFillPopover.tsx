@@ -378,7 +378,7 @@ export function AIQuickFillPopover({
                                 {loading ? (
                                     <><Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> Filling…</>
                                 ) : (
-                                    <><Sparkles size={12} />{isSingle ? 'Fill Block' : 'Fill Template'}</>
+                                    <><span style={{ fontSize: 13, animation: 'ai-sparkle 2s linear infinite', display: 'inline-block' }}>✦</span>{isSingle ? 'Fill Block' : 'Fill Template'}</>
                                 )}
                             </button>
                         </div>
