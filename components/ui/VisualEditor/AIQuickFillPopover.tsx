@@ -243,7 +243,7 @@ export function AIQuickFillPopover({
                     <span style={{ fontSize: 12, fontWeight: 700, color: '#1a1a2e', letterSpacing: '-0.01em', display: 'block' }}>
                         {isSingle
                             ? block.type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
-                            : '🪄 Fill Full Template'
+                            : 'Fill Full Template'
                         }
                     </span>
                     <span style={{ fontSize: 9, color: '#888', fontWeight: 500 }}>
