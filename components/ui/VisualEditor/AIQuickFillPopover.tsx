@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect, useCallback } from 'react'
-import { Wand2, Loader2, Sparkles, Check } from 'lucide-react'
+import { Loader2, Sparkles, Check } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { getCreditCost, AI_ACTIONS, DEFAULT_CREDIT_COSTS } from '@/lib/ai/credit-actions'
 import type { Block, BlockProps } from '@/components/ui/VisualEditor/blocks'
@@ -470,6 +470,13 @@ export function AIQuickFillPopover({
 
             <style>{`
                 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                @keyframes ai-sparkle {
+                    0%   { opacity: 1;   transform: scale(1)    rotate(0deg);   }
+                    25%  { opacity: 0.7; transform: scale(1.2)  rotate(90deg);  }
+                    50%  { opacity: 1;   transform: scale(1)    rotate(180deg); }
+                    75%  { opacity: 0.7; transform: scale(1.2)  rotate(270deg); }
+                    100% { opacity: 1;   transform: scale(1)    rotate(360deg); }
+                }
             `}</style>
         </div>
     )
@@ -556,13 +563,18 @@ export function AICanvasButton({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: open ? '#6366f1' : 'rgba(99,102,241,0.8)',
-                    filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.30))',
-                    transition: 'color 0.15s, transform 0.15s',
+                    transition: 'transform 0.15s',
                     transform: open ? 'scale(1.2)' : 'scale(1)',
                 }}
             >
-                <Wand2 size={20} strokeWidth={2} />
+                <span style={{
+                    fontSize: 20,
+                    color: open ? '#6366f1' : 'rgba(99,102,241,0.8)',
+                    filter: 'drop-shadow(0 1px 4px rgba(99,102,241,0.40))',
+                    animation: 'ai-sparkle 2s linear infinite',
+                    display: 'inline-block',
+                    lineHeight: 1,
+                }}>✦</span>
             </button>
 
             {/* Popover anchors bottom-right */}
