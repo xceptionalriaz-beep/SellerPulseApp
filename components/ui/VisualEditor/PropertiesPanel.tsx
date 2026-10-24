@@ -283,7 +283,6 @@ interface PropertiesPanelProps {
 
 import { ICON_LIBRARY, ICON_CATEGORIES, CATEGORY_LABELS, getIconSvg } from './IconLibrary'
 import { BuyCreditsModal } from '@/components/ui/BuyCreditsModal'
-import { FillTemplatePanel } from './FillTemplatePanel'
 
 function InlineIconPicker({ value, onChange }: { value: string; onChange: (id: string) => void }) {
     return (
@@ -8277,18 +8276,7 @@ function AITab({
     allBlocks?: Block[]
     onUpdateBlocks?: (updates: Array<{ id: string; props: BlockProps }>) => void
 }) {
-    const [copyLoading, setCopyLoading] = useState(false)
-    const [policyLoading, setPolicyLoading] = useState(false)
-    // copyResult holds the parsed { fieldName → optimizedText } map
-    const [copyResult, setCopyResult] = useState<Record<string, string> | null>(null)
-    // originalFields holds what was sent — so we can show a before/after diff
-    const [originalFields, setOriginalFields] = useState<Record<string, string>>({})
-    // policyResult streams in character by character
-    const [policyResult, setPolicyResult] = useState<string>('')
-    const [copyError, setCopyError] = useState<string | null>(null)
-    const [policyError, setPolicyError] = useState<string | null>(null)
-
-    // ── Credit state (shared across all 3 AI tools) ───────────────────────────
+    // ── Credit state (shared across AI tools) ────────────────────────────────
     const [creditError, setCreditError] = useState<{ balance: number; cost: number; tool: string } | null>(null)
     const [showBuyCredits, setShowBuyCredits] = useState(false)
 
@@ -8301,14 +8289,9 @@ function AITab({
     const [photoError, setPhotoError] = useState<string | null>(null)
     const [photoApplied, setPhotoApplied] = useState(false)
 
-    // track which field is being edited inside the preview
-    const [copyApplied, setCopyApplied] = useState(false)
-    // Policy Writer: which block field to apply the generated policy into
-    const [policyTargetField, setPolicyTargetField] = useState<string>('')
-
     // ── Credit balance + per-tool costs ───────────────────────────────────────
     const [creditBalance, setCreditBalance] = useState<number | null>(null)
-    const [toolCosts, setToolCosts] = useState<{ copy: number; photo: number; policy: number }>({ copy: 5, photo: 10, policy: 3 })
+    const [toolCosts, setToolCosts] = useState<{ photo: number }>({ photo: 10 })
 
     const refreshBalance = useCallback(async () => {
         try {
@@ -8329,15 +8312,13 @@ function AITab({
                 const sb = supabase as any
                 const [walletRes, costsRes] = await Promise.all([
                     sb.from('user_ai_wallets').select('balance').eq('user_id', user.id).single() as Promise<{ data: { balance: number } | null }>,
-                    sb.from('ai_action_costs').select('feature_key, credits_cost').in('feature_key', ['ai_copy_optimizer', 'ai_photo_studio', 'ai_policy_writer']) as Promise<{ data: Array<{ feature_key: string; credits_cost: number }> | null }>,
+                    sb.from('ai_action_costs').select('feature_key, credits_cost').eq('feature_key', 'ai_photo_studio') as Promise<{ data: Array<{ feature_key: string; credits_cost: number }> | null }>,
                 ])
                 if (walletRes.data) setCreditBalance(walletRes.data.balance)
                 if (costsRes.data) {
-                    const costs = { copy: 5, photo: 10, policy: 3 }
+                    const costs = { photo: 10 }
                     for (const row of costsRes.data) {
-                        if (row.feature_key === 'ai_copy_optimizer') costs.copy = row.credits_cost
                         if (row.feature_key === 'ai_photo_studio') costs.photo = row.credits_cost
-                        if (row.feature_key === 'ai_policy_writer') costs.policy = row.credits_cost
                     }
                     setToolCosts(costs)
                 }
@@ -8345,168 +8326,6 @@ function AITab({
         }
         fetchCredits()
     }, [])
-
-    // ── Extract text fields from the selected block's props ───────────────────
-    // Heuristic scan: any string prop that looks like user-editable text.
-    // Much broader than a hardcoded allowlist — handles heroText, ctaText,
-    // col1Text, buttonLabel, tagline, etc. that the old allowlist missed.
-    const extractTextFields = (): Record<string, string> => {
-        const props = block.props as unknown as Record<string, unknown>
-
-        // Keys that are definitely NOT user-editable text
-        const SKIP_KEYS = new Set([
-            'variant', 'align', 'valign', 'size', 'direction', 'position', 'layout',
-            'code', 'html', 'css', 'script',
-            'id', 'type', 'blockType',
-            // numeric/boolean fields stored as strings
-            'width', 'height', 'padding', 'margin', 'gap', 'columns', 'rows',
-            'fontSize', 'lineHeight', 'borderRadius', 'rating', 'reviewCount',
-            'maxItems', 'minItems', 'count', 'limit',
-        ])
-
-        const found: Record<string, string> = {}
-
-        for (const [key, val] of Object.entries(props)) {
-            if (SKIP_KEYS.has(key)) continue
-            if (typeof val !== 'string') continue
-            const trimmed = val.trim()
-            if (!trimmed || trimmed.length < 3) continue
-            // Skip bare token values like "{{BRAND}}" or "{{ITEM_PRICE}}"
-            if (/^\{\{[^}]+\}\}$/.test(trimmed)) continue
-            // Skip URLs
-            if (/^https?:\/\//.test(trimmed)) continue
-            // Skip hex colors
-            if (/^#[0-9a-fA-F]{3,8}$/.test(trimmed)) continue
-            // Skip keys whose names suggest URL / color / image / style props
-            const k = key.toLowerCase()
-            if (k.includes('url') || k.includes('href') || k.includes('src') ||
-                k.includes('color') || k.includes('colour') || k.includes('bg') ||
-                k.includes('icon') || k.includes('logo') || k.includes('image') ||
-                k.includes('photo') || k.includes('thumb')) continue
-
-            found[key] = val
-        }
-        return found
-    }
-
-    // ── AI Copy Optimizer ─────────────────────────────────────────────────────
-    const handleCopyOptimizer = async () => {
-        const fields = extractTextFields()
-        if (Object.keys(fields).length === 0) {
-            setCopyError('No editable text found on this block. Add some content first.')
-            return
-        }
-        setCopyLoading(true)
-        setCopyResult(null)
-        setCopyError(null)
-        setCopyApplied(false)
-        setOriginalFields(fields)
-
-        try {
-            const res = await fetch('/api/ai/copy-optimizer', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    fields,
-                    blockType: block.type,
-                    category: templateCategory,
-                }),
-            })
-            if (res.status === 401) {
-                setCopyError('Please sign in to use AI Copy Optimizer.')
-                return
-            }
-            if (res.status === 402) {
-                const data = await res.json().catch(() => ({}))
-                setCreditError({ balance: data.balance ?? 0, cost: data.cost ?? 5, tool: 'AI Copy Optimizer' })
-                return
-            }
-            const data = await res.json()
-            if (!res.ok || data.error) {
-                const userMsg = data.code === 'NO_AI_KEY'
-                    ? 'AI features are currently unavailable. Please try again later.'
-                    : 'Something went wrong. Please try again.'
-                setCopyError(userMsg)
-            } else {
-                setCopyResult(data.result as Record<string, string>)
-                refreshBalance()
-            }
-        } catch {
-            setCopyError('Something went wrong. Please try again.')
-        } finally {
-            setCopyLoading(false)
-        }
-    }
-
-    const applyCopyResult = () => {
-        if (!copyResult) return
-        onChange({ ...block, props: { ...block.props, ...copyResult } as BlockProps })
-        setCopyApplied(true)
-        setTimeout(() => { setCopyResult(null); setCopyApplied(false) }, 1200)
-    }
-
-    // ── AI Policy Writer (streaming) ──────────────────────────────────────────
-    const handlePolicyWriter = async () => {
-        setPolicyLoading(true)
-        setPolicyResult('')
-        setPolicyError(null)
-
-        // Build a short context string from the block's editable text fields
-        // so the policy is relevant to what the seller has already written.
-        const blockTextFields = extractTextFields()
-        const blockContext = Object.entries(blockTextFields)
-            .slice(0, 6) // cap at 6 fields to avoid bloating the prompt
-            .map(([k, v]) => `${k}: ${v}`)
-            .join('\n')
-
-        try {
-            const res = await fetch('/api/ai/policy-writer', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    blockType: block.type,
-                    category: templateCategory,
-                    context: blockContext,
-                }),
-            })
-            if (res.status === 401) {
-                setPolicyError('Please sign in to use AI Policy Writer.')
-                setPolicyLoading(false)
-                return
-            }
-            if (res.status === 402) {
-                const data = await res.json().catch(() => ({}))
-                setCreditError({ balance: data.balance ?? 0, cost: data.cost ?? 5, tool: 'AI Policy Writer' })
-                setPolicyLoading(false)
-                return
-            }
-            if (!res.ok) {
-                const data = await res.json().catch(() => ({}))
-                const userMsg = data.code === 'NO_AI_KEY'
-                    ? 'AI features are currently unavailable. Please try again later.'
-                    : 'Something went wrong. Please try again.'
-                setPolicyError(userMsg)
-                setPolicyLoading(false)
-                return
-            }
-            // Stream the response text
-            const reader = res.body?.getReader()
-            if (!reader) { setPolicyLoading(false); return }
-            const decoder = new TextDecoder()
-            let accumulated = ''
-            while (true) {
-                const { done, value } = await reader.read()
-                if (done) break
-                accumulated += decoder.decode(value, { stream: true })
-                setPolicyResult(accumulated)
-            }
-            refreshBalance()
-        } catch {
-            setPolicyError('Something went wrong. Please try again.')
-        } finally {
-            setPolicyLoading(false)
-        }
-    }
 
     // ── Photo Studio handlers ─────────────────────────────────────────────────
     const handlePhotoGenerate = async () => {
@@ -8575,20 +8394,6 @@ function AITab({
         setTimeout(() => { setPhotoResult(null); setPhotoApplied(false); setPhotoOpen(false) }, 1200)
     }
 
-    const applyPolicyResult = () => {
-        if (!policyResult) return
-        const props = block.props as unknown as Record<string, unknown>
-        // Use the user-selected field, or fall back to the first available text field
-        const availableFields = extractTextFields()
-        const fallback = Object.keys(availableFields)[0] ?? 'text'
-        const targetKey = (policyTargetField && typeof props[policyTargetField] === 'string')
-            ? policyTargetField
-            : fallback
-        onChange({ ...block, props: { ...block.props, [targetKey]: policyResult } as BlockProps })
-        setPolicyResult('')
-        setPolicyTargetField('')
-    }
-
     const spinnerStyle: React.CSSProperties = {
         display: 'inline-block',
         width: 12,
@@ -8630,115 +8435,6 @@ function AITab({
                         {creditBalance !== null && <span style={{ fontWeight: 400, fontSize: 10, color: C.muted, marginLeft: 3 }}>credits</span>}
                     </span>
                 </div>
-
-                {/* ── AI Copy Optimizer — hidden when block has no editable text ── */}
-                {Object.keys(extractTextFields()).length > 0 && <div style={{ marginBottom: 10 }}>
-                    <button
-                        onClick={handleCopyOptimizer}
-                        disabled={copyLoading}
-                        style={{
-                            width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                            padding: '10px 12px', border: `1px solid ${C.primaryBorder}`,
-                            borderRadius: 10, backgroundColor: C.primaryLight,
-                            cursor: copyLoading ? 'default' : 'pointer',
-                            textAlign: 'left', opacity: copyLoading ? 0.75 : 1,
-                            transition: 'opacity 0.15s',
-                        }}
-                    >
-                        <div style={{
-                            width: 34, height: 34, borderRadius: 9,
-                            backgroundColor: '#ede9fe',
-                            border: `1px solid ${C.primaryBorder}`,
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                        }}>
-                            {copyLoading
-                                ? <span style={{ ...spinnerStyle, margin: 0, color: C.primary }} />
-                                : <Sparkles size={16} style={{ color: C.primary }} />
-                            }
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                            <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700, color: C.primary }}>
-                                {copyLoading ? 'Optimizing copy…' : 'AI Copy Optimizer'}
-                            </p>
-                            <p style={{ margin: '2px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, lineHeight: 1.4 }}>
-                                Rewrite this block&apos;s text for higher eBay conversion
-                            </p>
-                        </div>
-                        <span style={{
-                            flexShrink: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 600,
-                            color: C.primary, backgroundColor: '#ede9fe',
-                            border: `1px solid ${C.primaryBorder}`, borderRadius: 20,
-                            padding: '2px 7px', whiteSpace: 'nowrap',
-                        }}>
-                            · {toolCosts.copy} credits
-                        </span>
-                    </button>
-
-                    {copyError && (
-                        <div style={{ margin: '6px 0 0', padding: '8px 10px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: 7 }}>
-                            <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.danger, lineHeight: 1.4 }}>{copyError}</p>
-                        </div>
-                    )}
-
-                    {/* Before / After diff preview */}
-                    {copyResult && (
-                        <div className="ai-result-fade" style={{ marginTop: 8, border: `1px solid ${C.primaryBorder}`, borderRadius: 9, overflow: 'hidden' }}>
-                            <div style={{ padding: '8px 11px', backgroundColor: '#ede9fe', borderBottom: `1px solid ${C.primaryBorder}` }}>
-                                <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 700, color: C.primary, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'flex', alignItems: 'center', gap: 5 }}>
-                                    <Sparkles size={10} /> AI Suggestion — review before applying
-                                </p>
-                            </div>
-                            <div style={{ backgroundColor: C.surface, padding: '8px 11px' }}>
-                                {Object.entries(copyResult).map(([key, newVal]) => (
-                                    <div key={key} style={{ marginBottom: 8 }}>
-                                        <p style={{ margin: '0 0 3px', fontFamily: 'DM Sans, sans-serif', fontSize: 9, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '0.07em' }}>{key}</p>
-                                        {/* Original */}
-                                        {originalFields[key] && originalFields[key] !== newVal && (
-                                            <p style={{
-                                                margin: '0 0 2px', fontFamily: 'DM Sans, sans-serif', fontSize: 11,
-                                                color: '#b91c1c', lineHeight: 1.45, textDecoration: 'line-through',
-                                                backgroundColor: '#fef2f2', padding: '3px 6px', borderRadius: 4,
-                                            }}>{originalFields[key]}</p>
-                                        )}
-                                        {/* Optimized */}
-                                        <p style={{
-                                            margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11,
-                                            color: '#15803d', lineHeight: 1.45, fontWeight: 500,
-                                            backgroundColor: '#f0fdf4', padding: '3px 6px', borderRadius: 4,
-                                        }}>{newVal}</p>
-                                    </div>
-                                ))}
-                            </div>
-                            <div style={{ display: 'flex', gap: 0, borderTop: `1px solid ${C.border}` }}>
-                                <button
-                                    onClick={applyCopyResult}
-                                    style={{
-                                        flex: 1, padding: '8px 0',
-                                        fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700,
-                                        color: copyApplied ? C.success : '#fff',
-                                        backgroundColor: copyApplied ? C.successLight : C.primary,
-                                        border: 'none', cursor: 'pointer',
-                                        borderBottomLeftRadius: 8, transition: 'background 0.2s',
-                                    }}
-                                >
-                                    {copyApplied ? '✓ Applied!' : '✓ Apply to block'}
-                                </button>
-                                <div style={{ width: 1, backgroundColor: C.border }} />
-                                <button
-                                    onClick={() => { setCopyResult(null); setOriginalFields({}) }}
-                                    style={{
-                                        flex: 1, padding: '8px 0',
-                                        fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 600,
-                                        color: C.secondary, backgroundColor: C.surface,
-                                        border: 'none', cursor: 'pointer', borderBottomRightRadius: 8,
-                                    }}
-                                >
-                                    Discard
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>}
 
                 {/* ── AI Photo Studio — hidden when block has no image field ── */}
                 {hasImageProps && <div style={{ marginBottom: 10 }}>
@@ -8918,131 +8614,6 @@ function AITab({
                     )}
                 </div>}
 
-                {/* ── AI Policy Writer ── */}
-                <div style={{ marginBottom: 8 }}>
-                    <button
-                        onClick={handlePolicyWriter}
-                        disabled={policyLoading}
-                        style={{
-                            width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                            padding: '10px 12px', border: `1px solid #86efac`,
-                            borderRadius: 10, backgroundColor: C.successLight,
-                            cursor: policyLoading ? 'default' : 'pointer',
-                            textAlign: 'left', opacity: policyLoading ? 0.75 : 1,
-                            transition: 'opacity 0.15s',
-                        }}
-                    >
-                        <div style={{
-                            width: 34, height: 34, borderRadius: 9,
-                            backgroundColor: '#dcfce7', border: `1px solid #86efac`,
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                        }}>
-                            {policyLoading
-                                ? <span style={{ ...spinnerStyle, margin: 0, color: C.success }} />
-                                : <Zap size={16} style={{ color: C.success }} />
-                            }
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                            <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700, color: C.success }}>
-                                {policyLoading ? 'Writing policy…' : 'AI Policy Writer'}
-                            </p>
-                            <p style={{ margin: '2px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, lineHeight: 1.4 }}>
-                                Auto-generate eBay-safe shipping &amp; returns copy
-                            </p>
-                        </div>
-                        <span style={{
-                            flexShrink: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 600,
-                            color: C.success, backgroundColor: '#dcfce7',
-                            border: '1px solid #86efac', borderRadius: 20,
-                            padding: '2px 7px', whiteSpace: 'nowrap',
-                        }}>
-                            · {toolCosts.policy} credits
-                        </span>
-                    </button>
-
-                    {policyError && (
-                        <div style={{ margin: '6px 0 0', padding: '8px 10px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: 7 }}>
-                            <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: C.danger, lineHeight: 1.4 }}>{policyError}</p>
-                        </div>
-                    )}
-
-                    {/* Streaming policy preview */}
-                    {(policyResult || policyLoading) && (
-                        <div className="ai-result-fade" style={{ marginTop: 8, border: `1px solid #86efac`, borderRadius: 9, overflow: 'hidden' }}>
-                            <div style={{ padding: '8px 11px', backgroundColor: '#dcfce7', borderBottom: `1px solid #86efac` }}>
-                                <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 700, color: C.success, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'flex', alignItems: 'center', gap: 5 }}>
-                                    <Zap size={10} /> AI Policy Draft{policyLoading ? ' — writing…' : ' — review before applying'}
-                                </p>
-                            </div>
-                            <div style={{ backgroundColor: C.surface, padding: '10px 11px', maxHeight: 160, overflowY: 'auto' }}>
-                                <p style={{
-                                    margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 11,
-                                    color: C.body, lineHeight: 1.65, minHeight: 20,
-                                    whiteSpace: 'pre-wrap',
-                                }}>
-                                    {policyResult}
-                                    {policyLoading && <span style={{ display: 'inline-block', width: 2, height: 13, backgroundColor: C.success, marginLeft: 2, verticalAlign: 'middle', animation: 'spin 0.8s steps(1) infinite' }} />}
-                                </p>
-                            </div>
-                            {!policyLoading && policyResult && (() => {
-                                const textFields = extractTextFields()
-                                const fieldKeys = Object.keys(textFields)
-                                return (
-                                    <>
-                                        {/* Field selector — only shown when block has multiple text fields */}
-                                        {fieldKeys.length > 1 && (
-                                            <div style={{ padding: '8px 11px', borderTop: `1px solid ${C.border}`, backgroundColor: C.bg }}>
-                                                <p style={{ margin: '0 0 4px', fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 700, color: C.secondary, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                                                    Apply to field
-                                                </p>
-                                                <select
-                                                    value={policyTargetField || fieldKeys[0]}
-                                                    onChange={e => setPolicyTargetField(e.target.value)}
-                                                    style={{
-                                                        width: '100%', padding: '5px 8px',
-                                                        fontFamily: 'DM Sans, sans-serif', fontSize: 11,
-                                                        border: `1px solid ${C.border}`, borderRadius: 6,
-                                                        backgroundColor: C.surface, color: C.body,
-                                                        cursor: 'pointer',
-                                                    }}
-                                                >
-                                                    {fieldKeys.map(k => (
-                                                        <option key={k} value={k}>{k}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                        )}
-                                        <div style={{ display: 'flex', gap: 0, borderTop: `1px solid ${C.border}` }}>
-                                            <button
-                                                onClick={applyPolicyResult}
-                                                style={{
-                                                    flex: 1, padding: '8px 0',
-                                                    fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 700,
-                                                    color: '#fff', backgroundColor: C.success,
-                                                    border: 'none', cursor: 'pointer', borderBottomLeftRadius: 8,
-                                                }}
-                                            >
-                                                ✓ Apply to block
-                                            </button>
-                                            <div style={{ width: 1, backgroundColor: C.border }} />
-                                            <button
-                                                onClick={() => { setPolicyResult(''); setPolicyTargetField('') }}
-                                                style={{
-                                                    flex: 1, padding: '8px 0',
-                                                    fontFamily: 'DM Sans, sans-serif', fontSize: 11, fontWeight: 600,
-                                                    color: C.secondary, backgroundColor: C.surface,
-                                                    border: 'none', cursor: 'pointer', borderBottomRightRadius: 8,
-                                                }}
-                                            >
-                                                Discard
-                                            </button>
-                                        </div>
-                                    </>
-                                )
-                            })()}
-                        </div>
-                    )}
-                </div>
             </Section>
 
             {/* ── Credit error card — shown when any AI tool returns 402 ── */}
