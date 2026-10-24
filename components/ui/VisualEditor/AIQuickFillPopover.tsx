@@ -441,31 +441,27 @@ export function AIQuickFillPopover({
     )
 }
 
-// ─── Floating Wand Button ────────────────────────────────────────────────────
+// ─── Canvas-level AI Button (bottom-right corner of the full canvas) ─────────
 
-export interface AIFloatingButtonProps {
-    block: Block
+export interface AICanvasButtonProps {
+    /** All blocks on canvas */
     allBlocks: Block[]
     templateCategory?: string
-    /** Optional pre-fetched credit balance — if omitted, the button fetches its own */
-    creditBalance?: number | null
     onUpdateBlocks: (updates: Array<{ id: string; props: BlockProps }>) => void
 }
 
-export function AIFloatingButton({
-    block,
+export function AICanvasButton({
     allBlocks,
     templateCategory,
-    creditBalance: creditBalanceProp,
     onUpdateBlocks,
-}: AIFloatingButtonProps) {
+}: AICanvasButtonProps) {
     const [open, setOpen] = useState(false)
-    const [creditBalance, setCreditBalance] = useState<number | null>(creditBalanceProp ?? null)
+    const [creditBalance, setCreditBalance] = useState<number | null>(null)
 
-    // Fetch balance when popover opens (if not provided by parent)
+    // Fetch balance when popover opens
     useEffect(() => {
-        if (!open || creditBalanceProp != null) return
-        const fetch = async () => {
+        if (!open) return
+        const fetchBalance = async () => {
             try {
                 const supabase = createClient()
                 const { data: { user } } = await supabase.auth.getUser()
@@ -477,20 +473,18 @@ export function AIFloatingButton({
                 if (data?.balance != null) setCreditBalance(data.balance)
             } catch { /* ignore */ }
         }
-        fetch()
-    }, [open, creditBalanceProp])
+        fetchBalance()
+    }, [open])
+
+    // Only show when there are 2+ blocks
+    if (allBlocks.length < 2) return null
+
+    // Dummy block just to satisfy AIQuickFillPopover's `block` prop (not used in canvas mode)
+    const dummyBlock = allBlocks[0]
 
     return (
-        <div
-            style={{
-                position: 'absolute',
-                bottom: 8,
-                right: 8,
-                zIndex: 30,
-            }}
-            onClick={e => e.stopPropagation()}
-        >
-            {/* Wand icon — no background, no border, just icon + shadow */}
+        <div style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
+            {/* Wand icon — no background, no border, just icon + drop shadow */}
             <button
                 onClick={e => {
                     e.stopPropagation()
@@ -505,26 +499,24 @@ export function AIFloatingButton({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    borderRadius: 6,
-                    color: open ? '#6366f1' : 'rgba(99,102,241,0.75)',
-                    filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.25))',
+                    color: open ? '#6366f1' : 'rgba(99,102,241,0.8)',
+                    filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.30))',
                     transition: 'color 0.15s, transform 0.15s',
-                    transform: open ? 'scale(1.15)' : 'scale(1)',
+                    transform: open ? 'scale(1.2)' : 'scale(1)',
                 }}
             >
-                <Wand2 size={16} strokeWidth={2.2} />
+                <Wand2 size={20} strokeWidth={2} />
             </button>
 
-            {/* Popover */}
+            {/* Popover anchors bottom-right */}
             {open && (
                 <AIQuickFillPopover
-                    block={block}
+                    block={dummyBlock}
                     allBlocks={allBlocks}
                     templateCategory={templateCategory}
                     creditBalance={creditBalance}
                     onUpdateBlocks={(updates) => {
                         onUpdateBlocks(updates)
-                        // Refresh balance after apply
                         setCreditBalance(prev => prev != null ? Math.max(0, prev - 20) : null)
                     }}
                     onClose={() => setOpen(false)}

@@ -57,7 +57,7 @@ import { renderForCanvas, extractTokens, type CategoryId, renderBannerForCanvas 
 import { getGoogleFontLinkHtml } from './fonts'
 import ColumnControls from './ColumnControls'
 import ColumnResizer from './ColumnResizer'
-import { AIFloatingButton } from './AIQuickFillPopover'
+import { AICanvasButton } from './AIQuickFillPopover'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -431,10 +431,6 @@ export default function Canvas({
                                     activeCategory={activeCategory}
                                     deviceWidth={deviceWidth}
                                     designStudioPlan={designStudioPlan}
-                                    aiAllBlocks={aiAllBlocks}
-                                    onUpdateBlocks={onUpdateBlocks}
-                                    templateCategory={templateCategory}
-                                    creditBalance={creditBalance}
                                 />
 
                                 {/* Reorder drop indicator — line below this block */}
@@ -467,6 +463,27 @@ export default function Canvas({
                     )}
                 </div>
             </div>{/* ── /zoom wrapper ── */}
+
+            {/* ── AI Canvas Button — sticky bottom-right corner of canvas ── */}
+            {aiAllBlocks && onUpdateBlocks && (
+                <div style={{
+                    position: 'sticky',
+                    bottom: 20,
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    paddingRight: 20,
+                    pointerEvents: 'none',
+                    zIndex: 50,
+                }}>
+                    <div style={{ pointerEvents: 'all' }}>
+                        <AICanvasButton
+                            allBlocks={aiAllBlocks}
+                            templateCategory={templateCategory}
+                            onUpdateBlocks={onUpdateBlocks}
+                        />
+                    </div>
+                </div>
+            )}
 
             {/* ── Image Editor Modal ── */}
             {imgEditorSrc && (
@@ -749,10 +766,6 @@ interface BlockCardProps {
     activeCategory?: CategoryId
     deviceWidth?: 'desktop' | 'tablet' | 'mobile'
     designStudioPlan?: 'free' | 'pro'
-    aiAllBlocks?: Block[]
-    onUpdateBlocks?: (updates: Array<{ id: string; props: BlockProps }>) => void
-    templateCategory?: string
-    creditBalance?: number | null
 }
 
 function BlockCard({
@@ -788,10 +801,6 @@ function BlockCard({
     activeCategory,
     deviceWidth = 'desktop',
     designStudioPlan = 'free',
-    aiAllBlocks,
-    onUpdateBlocks,
-    templateCategory,
-    creditBalance = null,
 }: BlockCardProps) {
     const [hovered, setHovered] = useState(false)
     const [deleteConfirm, setDeleteConfirm] = useState(false)
@@ -1025,17 +1034,6 @@ function BlockCard({
                     </div>
                 )
             })()}
-
-            {/* ── AI Floating Wand Button — bottom-right when selected, only with 2+ blocks ── */}
-            {isSelected && aiAllBlocks && aiAllBlocks.length > 1 && onUpdateBlocks && (
-                <AIFloatingButton
-                    block={block}
-                    allBlocks={aiAllBlocks}
-                    templateCategory={templateCategory}
-                    creditBalance={creditBalance}
-                    onUpdateBlocks={onUpdateBlocks}
-                />
-            )}
 
             {/* ── Action toolbar — horizontal, top of block ── */}
             {(hovered || isSelected) && (

@@ -8277,7 +8277,6 @@ function AITab({
     allBlocks?: Block[]
     onUpdateBlocks?: (updates: Array<{ id: string; props: BlockProps }>) => void
 }) {
-    const [fillTemplateOpen, setFillTemplateOpen] = useState(false)
     const [copyLoading, setCopyLoading] = useState(false)
     const [policyLoading, setPolicyLoading] = useState(false)
     // copyResult holds the parsed { fieldName → optimizedText } map
@@ -8631,71 +8630,6 @@ function AITab({
                         {creditBalance !== null && <span style={{ fontWeight: 400, fontSize: 10, color: C.muted, marginLeft: 3 }}>credits</span>}
                     </span>
                 </div>
-
-                {/* ── AI Fill Template — fills all blocks at once ── */}
-                {allBlocks.length > 0 && (
-                    fillTemplateOpen ? (
-                        <FillTemplatePanel
-                            blocks={allBlocks}
-                            templateCategory={templateCategory}
-                            creditBalance={creditBalance}
-                            onApplyBlock={(blockId, updatedProps) => {
-                                // Apply a single block's changes via onUpdateBlocks (or onChange if same block)
-                                if (onUpdateBlocks) {
-                                    onUpdateBlocks([{ id: blockId, props: updatedProps }])
-                                } else if (blockId === block.id) {
-                                    onChange({ ...block, props: updatedProps })
-                                }
-                                refreshBalance()
-                            }}
-                            onApplyAll={(updates) => {
-                                if (onUpdateBlocks) {
-                                    onUpdateBlocks(updates)
-                                }
-                                refreshBalance()
-                            }}
-                            onClose={() => setFillTemplateOpen(false)}
-                        />
-                    ) : (
-                        <button
-                            onClick={() => setFillTemplateOpen(true)}
-                            style={{
-                                width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                                padding: '10px 12px', border: `1.5px solid ${C.primaryBorder}`,
-                                borderRadius: 10,
-                                background: `linear-gradient(135deg, ${C.primaryLight} 0%, #faf5ff 100%)`,
-                                cursor: 'pointer',
-                                textAlign: 'left',
-                                marginBottom: 10,
-                                transition: 'opacity 0.15s',
-                            }}
-                        >
-                            <div style={{
-                                width: 34, height: 34, borderRadius: 9,
-                                backgroundColor: C.primary,
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                            }}>
-                                <Wand2 size={16} style={{ color: '#fff' }} />
-                            </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                                <p style={{ margin: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 700, color: C.primary }}>
-                                    AI Fill Template
-                                </p>
-                                <p style={{ margin: '2px 0 0', fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: C.muted, lineHeight: 1.4 }}>
-                                    Describe your product → fills all {allBlocks.length} blocks at once
-                                </p>
-                            </div>
-                            <span style={{
-                                flexShrink: 0, fontFamily: 'DM Sans, sans-serif', fontSize: 10, fontWeight: 600,
-                                color: C.primary, backgroundColor: '#ede9fe',
-                                border: `1px solid ${C.primaryBorder}`, borderRadius: 20,
-                                padding: '2px 7px', whiteSpace: 'nowrap',
-                            }}>
-                                · 20 credits
-                            </span>
-                        </button>
-                    )
-                )}
 
                 {/* ── AI Copy Optimizer — hidden when block has no editable text ── */}
                 {Object.keys(extractTextFields()).length > 0 && <div style={{ marginBottom: 10 }}>
