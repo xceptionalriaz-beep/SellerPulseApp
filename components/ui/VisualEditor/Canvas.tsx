@@ -48,6 +48,7 @@ import {
     Block,
     BlockType,
     BlockDefinition,
+    BlockProps,
     getDefinition,
     generateId,
     BLOCK_DEFINITIONS,
@@ -56,6 +57,7 @@ import { renderForCanvas, extractTokens, type CategoryId, renderBannerForCanvas 
 import { getGoogleFontLinkHtml } from './fonts'
 import ColumnControls from './ColumnControls'
 import ColumnResizer from './ColumnResizer'
+import { AIFloatingButton } from './AIQuickFillPopover'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -158,6 +160,14 @@ interface CanvasProps {
     onLoadTemplate?: (blocks: Block[], templateId: string) => void
     /** Design Studio plan — used to show Pro watermark on blocks using Pro styles */
     designStudioPlan?: 'free' | 'pro'
+    /** All blocks for AI fill context */
+    aiAllBlocks?: Block[]
+    /** Callback to batch-update block props (AI fill) */
+    onUpdateBlocks?: (updates: Array<{ id: string; props: BlockProps }>) => void
+    /** Template category for AI fill */
+    templateCategory?: string
+    /** Credit balance for AI fill display */
+    creditBalance?: number | null
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -195,6 +205,10 @@ export default function Canvas({
     onDeselect,
     onLoadTemplate,
     designStudioPlan = 'free',
+    aiAllBlocks,
+    onUpdateBlocks,
+    templateCategory,
+    creditBalance = null,
 }: CanvasProps) {
     // Drop zone state — is library block being dragged over the canvas?
     const [isDropTarget, setIsDropTarget] = useState(false)
@@ -417,6 +431,10 @@ export default function Canvas({
                                     activeCategory={activeCategory}
                                     deviceWidth={deviceWidth}
                                     designStudioPlan={designStudioPlan}
+                                    aiAllBlocks={aiAllBlocks}
+                                    onUpdateBlocks={onUpdateBlocks}
+                                    templateCategory={templateCategory}
+                                    creditBalance={creditBalance}
                                 />
 
                                 {/* Reorder drop indicator — line below this block */}
@@ -731,6 +749,10 @@ interface BlockCardProps {
     activeCategory?: CategoryId
     deviceWidth?: 'desktop' | 'tablet' | 'mobile'
     designStudioPlan?: 'free' | 'pro'
+    aiAllBlocks?: Block[]
+    onUpdateBlocks?: (updates: Array<{ id: string; props: BlockProps }>) => void
+    templateCategory?: string
+    creditBalance?: number | null
 }
 
 function BlockCard({
@@ -766,6 +788,10 @@ function BlockCard({
     activeCategory,
     deviceWidth = 'desktop',
     designStudioPlan = 'free',
+    aiAllBlocks,
+    onUpdateBlocks,
+    templateCategory,
+    creditBalance = null,
 }: BlockCardProps) {
     const [hovered, setHovered] = useState(false)
     const [deleteConfirm, setDeleteConfirm] = useState(false)
@@ -999,6 +1025,17 @@ function BlockCard({
                     </div>
                 )
             })()}
+
+            {/* ── AI Floating Wand Button — bottom-right when selected ── */}
+            {isSelected && aiAllBlocks && onUpdateBlocks && (
+                <AIFloatingButton
+                    block={block}
+                    allBlocks={aiAllBlocks}
+                    templateCategory={templateCategory}
+                    creditBalance={creditBalance}
+                    onUpdateBlocks={onUpdateBlocks}
+                />
+            )}
 
             {/* ── Action toolbar — horizontal, top of block ── */}
             {(hovered || isSelected) && (

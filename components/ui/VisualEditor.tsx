@@ -2113,6 +2113,9 @@ export default function VisualEditor({
                                     setActiveSlotEdit(null)
                                 }}
                                 designStudioPlan={designStudioPlan}
+                                aiAllBlocks={blocks}
+                                onUpdateBlocks={handleMultiBlockChange}
+                                templateCategory={templateCategory}
                             />
                         </div>
                     )}
